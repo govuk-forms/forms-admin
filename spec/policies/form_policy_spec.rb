@@ -105,6 +105,48 @@ describe FormPolicy do
     end
   end
 
+  describe "#can_make_language_live?" do
+    context "with the groups feature enabled" do
+      let(:group_role) { :editor }
+
+      before do
+        Membership.create!(user:, group:, added_by: user, role: group_role)
+      end
+
+      context "and the group status is not active" do
+        let(:group_status) { :trial }
+
+        it { is_expected.to forbid_action(:can_make_language_live) }
+      end
+
+      context "and the group status is active" do
+        let(:group_status) { :active }
+
+        context "and the user's role is super admin" do
+          let(:user) { build :super_admin_user, organisation: }
+
+          it { is_expected.to permit_action(:can_make_language_live) }
+        end
+
+        context "and the user is organisation admin for the group" do
+          let(:user) { build :organisation_admin_user, organisation: }
+
+          it { is_expected.to permit_action(:can_make_language_live) }
+        end
+
+        context "and the user's role within the group is group admin" do
+          let(:group_role) { :group_admin }
+
+          it { is_expected.to permit_action(:can_make_language_live) }
+        end
+
+        context "and the user's role within the group is editor" do
+          it { is_expected.to forbid_action(:can_make_language_live) }
+        end
+      end
+    end
+  end
+
   describe "#can_add_page_routing_conditions?" do
     let(:form) { create :form }
 
