@@ -941,6 +941,11 @@ en:
         name: What is the name of your form?
       forms_make_changes_live:
         confirm: Are you sure you want to make your draft live?
+      forms_make_language_live_input:
+        cy:
+          confirm: Are you sure you want to make your Welsh form live?
+        en:
+          confirm: Are you sure you want to make your English form live?
       forms_make_live_input:
         confirm: Are you sure you want to make your form live?
       forms_submission_attachments_input:
@@ -1170,6 +1175,19 @@ en:
       filling in the live form at the same time. They may lose any answers they
       have already provided and may need to start again.
     welsh_reminder: Remember to make sure that the English and Welsh versions of your form match.
+  make_language_live:
+    cy:
+      new:
+        body_html: |
+          <p>When you make your form live you’ll get a new URL for the Welsh version.</p>
+          <p>The form will not be indexed by search engines, so people will not be able to find it easily. Contact your GOV.UK publishing team to publish links to your form on GOV.UK so people can find it.</p>
+          <p>Completed forms will be sent to: <span class="govuk-!-text-break-word">%{submission_email}</span></p>
+    en:
+      new:
+        body_html: |
+          <p>When you make your form live you’ll get a new URL for the English version.</p>
+          <p>The form will not be indexed by search engines, so people will not be able to find it easily. Contact your GOV.UK publishing team to publish links to your form on GOV.UK so people can find it.</p>
+          <p>Completed forms will be sent to: <span class="govuk-!-text-break-word">%{submission_email}</span></p>
   make_live:
     confirmation:
       body_html: |
@@ -1464,6 +1482,9 @@ en:
     maintenance: Sorry, the service is unavailable
     make_archived_draft_live: Make your form live again
     make_changes_live: Make your changes live
+    make_language_live:
+      cy: Make your Welsh form live
+      en: Make your English form live
     make_live: Make your form live
     make_your_changes_to_english_live: Make the changes to your English form live
     missing_draft_question: There’s a problem with this page
