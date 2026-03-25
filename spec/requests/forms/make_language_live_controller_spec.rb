@@ -71,9 +71,9 @@ RSpec.describe Forms::MakeLanguageLiveController, type: :request do
         raise
       end
 
-      it "renders the confirmation page" do
+      it "redirects to the confirmation page" do
         post(make_language_live_path(form_id: form.id, language:), params: form_params)
-        expect(response).to render_template(:confirmation)
+        expect(response).to redirect_to(make_language_live_show_confirmation_path(form_id: form.id, language:))
       end
 
       it "sends an email to the organisation admins" do
@@ -82,9 +82,9 @@ RSpec.describe Forms::MakeLanguageLiveController, type: :request do
       end
 
       context "and that form has not been made live before" do
-        it "has the page title 'Your form is live'" do
+        it "redirects to the confirmation page" do
           post(make_language_live_path(form_id: form.id, language:), params: form_params)
-          expect(response.body).to include "Your form is live"
+          expect(response).to redirect_to(make_language_live_show_confirmation_path(form_id: form.id, language:))
         end
 
         it "creates a FormDocument" do

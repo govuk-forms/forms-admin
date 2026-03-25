@@ -1,0 +1,54 @@
+<% set_page_title(confirmation_page_title) %>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <%= govuk_panel(title_text: confirmation_page_title) %>
+
+    <%= confirmation_page_body %>
+
+    <% if language == "en" %>
+      <h2 class="govuk-heading-m"><%= t('make_live.confirmation.form_name_en') %></h2>
+
+      <p><%= current_form.name %></p>
+    <% end %>
+
+    <% if language == "cy" %>
+      <h2 class="govuk-heading-m"><%= t('make_live.confirmation.form_name_cy') %></h2>
+
+      <p><%= current_form.name_cy %></p>
+    <% end %>
+
+    <% if language == "en" %>
+      <%= render FormUrlComponent::View.new(
+        runner_link: link_to_runner(Settings.forms_runner.url, current_form.id, current_form.form_slug, mode: :live),
+        heading_text: t('make_live.confirmation.english_form_url'),
+        button_text: t('make_live.confirmation.copy_english_url_to_clipboard')
+      ) %>
+    <% end %>
+
+    <% if language == "cy" %>
+      <%= render FormUrlComponent::View.new(
+        runner_link: link_to_runner(Settings.forms_runner.url, current_form.id, current_form.form_slug, mode: :live, locale: "cy"),
+        heading_text: t('make_live.confirmation.welsh_form_url'),
+        button_text: t('make_live.confirmation.copy_welsh_url_to_clipboard')
+      ) %>
+    <% end %>
+
+    <p>
+      <%= govuk_link_to t("make_live.confirmation.continue_link"), live_form_path(current_form.id) %>
+    </p>
+
+    <% if language == "en" %>
+      <% if current_form.welsh_completed %>
+        <%= form_with model: @go_to_make_welsh_live_input, url: make_language_live_submit_confirmation_path(form_id: current_form.id, language:) do |f| %>
+          <%= f.govuk_collection_radio_buttons :confirm, @go_to_make_welsh_live_input.values, :itself, legend: { size: 'm', tag: 'h2' }, bold_labels: false %>
+          <%= f.govuk_submit t("save_and_continue") %>
+        <% end %>
+      <% else %>
+        <p>
+          <%= t("make_live.confirmation.back_to_draft_link_html", url: form_path(current_form.id)) %>
+        </p>
+      <% end %>
+    <% end %>
+  </div>
+</div>

@@ -1190,6 +1190,7 @@ en:
           <p>Completed forms will be sent to: <span class="govuk-!-text-break-word">%{submission_email}</span></p>
   make_live:
     confirmation:
+      back_to_draft_link_html: <a href="%{url}">Go back to your draft</a> to edit the Welsh version and make it live.
       body_html: |
         <p>
           The form will not be indexed by search engines, so people will not be able to find it easily.
@@ -1199,12 +1200,18 @@ en:
         <p>
           The form will not be indexed by search engines, so people will not be able to find it easily. Contact your GOV⁠.⁠UK publishing team to publish links to your form on GOV⁠.⁠UK so people can find it.
         </p>
-      continue_link: Continue to form details
+      body_individual_language_html: |
+        <p>
+          The form will not be indexed by search engines, so people will not be able to find it easily. Contact your GOV.UK publishing team to publish links to your form on GOV.UK so people can find it.
+        </p>
+      continue_link: Continue to the live form’s details
       copy_english_url_to_clipboard: Copy English URL to clipboard
       copy_welsh_url_to_clipboard: Copy Welsh URL to clipboard
       english_form: English form
       english_form_url: English form URL
       form_name: Form name
+      form_name_cy: Welsh form name
+      form_name_en: English form name
       welsh_form: Welsh form
       welsh_form_url: Welsh form URL
     new:
@@ -1523,7 +1530,9 @@ en:
     welsh_translation: Add a Welsh version of your form
     what_happens_next: Add information about what happens next
     your_changes_are_live: Your changes are live
+    your_english_form_is_live: Your English form is live
     your_form_is_live: Your form is live
+    your_welsh_form_is_live: Your Welsh form is live
   pages:
     answer_settings: Answer settings
     change_order:

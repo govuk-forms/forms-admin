@@ -17,7 +17,7 @@ describe "forms/make_live/confirmation.html.erb" do
   end
 
   it "contains a link to the live form details" do
-    expect(rendered).to have_link("Continue to form details", href: live_form_path(1))
+    expect(rendered).to have_link("Continue to the live form’s details", href: live_form_path(1))
   end
 
   context "when the form has a Welsh translation" do
