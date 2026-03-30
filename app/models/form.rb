@@ -218,6 +218,12 @@ class Form < ApplicationRecord
       (previous_state.to_sym == :archived && archived_with_draft?)
   end
 
+  def can_make_language_live?(language:)
+    return can_make_english_version_live? if language == "en"
+
+    can_make_welsh_version_live? if language == "cy"
+  end
+
 private
 
   def set_external_id
@@ -266,6 +272,30 @@ private
 
   def after_make_live
     FormDocumentSyncService.new(self).synchronize_live_form
+  end
+
+  def before_make_english_live
+    before_make_live
+  end
+
+  def after_make_english_live
+    FormDocumentSyncService.new(self).synchronize_live_english_form
+  end
+
+  def before_make_welsh_live
+    before_make_live
+  end
+
+  def after_make_welsh_live
+    FormDocumentSyncService.new(self).synchronize_live_welsh_form
+  end
+
+  def can_make_english_version_live?
+    draft? && ready_for_live && live_form_document.blank? && live_welsh_form_document.blank?
+  end
+
+  def can_make_welsh_version_live?
+    has_live_version && ready_for_live && live_form_document.present? && live_welsh_form_document.blank?
   end
 
   def after_archive

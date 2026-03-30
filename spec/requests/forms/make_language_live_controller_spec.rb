@@ -29,18 +29,18 @@ RSpec.describe Forms::MakeLanguageLiveController, type: :request do
     context "when editing a draft of an existing live form" do
       let(:form) { create(:form, :live) }
 
-      it "redirects to the make_changes_live view" do
-        pending "not yet implemented"
-        raise
+      it "redirects to the form task list" do
+        get make_language_live_path(form_id: form.id, language:)
+        expect(response).to redirect_to(form_path(form_id: form.id))
       end
     end
 
     context "when editing a draft of an archived form" do
       let(:form) { create(:form, :archived_with_draft) }
 
-      it "redirects to the make_changes_live view" do
-        pending "not yet implemented"
-        raise
+      it "redirects to the form task list" do
+        get make_language_live_path(form_id: form.id, language:)
+        expect(response).to redirect_to(form_path(form_id: form.id))
       end
     end
 
@@ -66,42 +66,96 @@ RSpec.describe Forms::MakeLanguageLiveController, type: :request do
     context "when making a form live" do
       let(:form_params) { { forms_make_live_input: { confirm: :yes, form: } } }
 
-      it "makes the form live" do
-        pending "not yet implemented"
-        raise
-      end
+      context "when the language being made live is English" do
+        let(:language) { "en" }
 
-      it "redirects to the confirmation page" do
-        post(make_language_live_path(form_id: form.id, language:), params: form_params)
-        expect(response).to redirect_to(make_language_live_show_confirmation_path(form_id: form.id, language:))
-      end
+        context "and the form has not been made live before" do
+          it "redirects to the confirmation page" do
+            post(make_language_live_path(form_id: form.id, language:), params: form_params)
+            expect(response).to redirect_to(make_language_live_show_confirmation_path(form_id: form.id, language:))
+          end
 
-      it "sends an email to the organisation admins" do
-        pending "not yet implemented"
-        raise
-      end
+          it "creates an English FormDocument and makes the form live" do
+            expect {
+              post(make_language_live_path(form_id: form.id, language:), params: form_params)
+            }.to change { FormDocument.where(language:).count }.by(1)
+            .and change { form.reload.state }.to("live")
+          end
 
-      context "and that form has not been made live before" do
-        it "redirects to the confirmation page" do
-          post(make_language_live_path(form_id: form.id, language:), params: form_params)
-          expect(response).to redirect_to(make_language_live_show_confirmation_path(form_id: form.id, language:))
+          it "sets the English FormDocument's live_at time to be equal to the form's updated_at time" do
+            post(make_language_live_path(form_id: form.id, language:), params: form_params)
+            expect(FormDocument.find_by(form_id: form.id, tag: "live", language:)["content"]["live_at"]).to eq form.reload.updated_at.strftime("%Y-%m-%dT%H:%M:%S.%6NZ")
+          end
+
+          it "redirects to the confirmation page" do
+            post(make_language_live_path(form_id: form.id, language:), params: form_params)
+            expect(response).to redirect_to(make_language_live_show_confirmation_path(form_id: form.id, language:))
+          end
+
+          it "sends an email to the organisation admins" do
+            pending "not yet implemented"
+            raise
+          end
         end
 
-        it "creates a FormDocument" do
-          pending "not yet implemented"
-          raise
+        context "and the form already has a live English form document" do
+          let(:form) { create(:form, :live) }
+
+          it "redirects to the form task list" do
+            get make_language_live_path(form_id: form.id, language:)
+            expect(response).to redirect_to(form_path(form_id: form.id))
+          end
         end
 
-        it "sets the FormDocument's live_at time to be equal to the form's updated_at time" do
-          pending "not yet implemented"
-          raise
+        context "and the form already has a live Welsh form document" do
+          subject(:form) { create :form, :live, :with_welsh_translation }
+
+          it "redirects to the form task list" do
+            get make_language_live_path(form_id: form.id, language:)
+            expect(response).to redirect_to(form_path(form_id: form.id))
+          end
         end
       end
 
-      context "and that form has already been made live before" do
-        it "redirects to the make_changes_live view" do
-          pending "not yet implemented"
-          raise
+      context "when the language being made live is Welsh" do
+        let(:language) { "cy" }
+
+        context "and the form has not been made live before" do
+          it "redirects to the form task list" do
+            post(make_language_live_path(form_id: form.id, language:), params: form_params)
+            expect(response).to redirect_to(form_path(form_id: form.id))
+          end
+        end
+
+        context "and the form already has a live English form document" do
+          before do
+            post(make_language_live_path(form_id: form.id, language: "en"), params: form_params)
+          end
+
+          it "redirects to the confirmation page" do
+            post(make_language_live_path(form_id: form.id, language:), params: form_params)
+            expect(response).to redirect_to(make_language_live_show_confirmation_path(form_id: form.id, language:))
+          end
+
+          it "creates an English FormDocument and makes the form live" do
+            expect {
+              post(make_language_live_path(form_id: form.id, language:), params: form_params)
+            }.to change { FormDocument.where(language:).count }.by(1)
+          end
+
+          it "sets the English FormDocument's live_at time to be equal to the form's updated_at time" do
+            post(make_language_live_path(form_id: form.id, language:), params: form_params)
+            expect(FormDocument.find_by(form_id: form.id, tag: "live", language:)["content"]["live_at"]).to eq form.reload.updated_at.strftime("%Y-%m-%dT%H:%M:%S.%6NZ")
+          end
+        end
+
+        context "and the form already has a live Welsh form document" do
+          subject(:form) { create :form, :live, :with_welsh_translation }
+
+          it "redirects to the form task list" do
+            post(make_language_live_path(form_id: form.id, language:), params: form_params)
+            expect(response).to redirect_to(form_path(form_id: form.id))
+          end
         end
       end
     end

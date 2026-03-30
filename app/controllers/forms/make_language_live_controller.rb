@@ -2,7 +2,10 @@ module Forms
   class MakeLanguageLiveController < FormsController
     def new
       authorize current_form, :can_make_language_live?
+      return redirect_to form_path(form_id: current_form.id) unless current_form.can_make_language_live?(language: params[:language])
+
       @make_language_live_input = MakeLiveInput.new(form: current_form)
+
       render_new
     end
 
@@ -11,11 +14,13 @@ module Forms
 
       @make_language_live_input = MakeLiveInput.new(**make_language_live_input_params)
 
-      return render_new(status: :unprocessable_content) unless @make_language_live_input.valid?
       return redirect_to form_path(@make_language_live_input.form.id) unless @make_language_live_input.confirmed?
+      return render_new(status: :unprocessable_content) unless @make_language_live_input.valid?
+
+      return redirect_to form_path(form_id: current_form.id) unless current_form.can_make_language_live?(language: params[:language])
 
       @make_form_live_service = MakeFormLiveService.call(current_form:, current_user:, language: params[:language])
-      # TODO: actually make the language live
+      @make_form_live_service.make_language_live
 
       @go_to_make_welsh_live_input = GoToMakeWelshLiveInput.new
 
