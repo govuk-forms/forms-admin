@@ -462,10 +462,120 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
 
   welsh_form.make_live!
 
+  multiple_branch_form = Form.create!(
+    name: "Multiple branch form",
+    pages: [
+      Page.create(
+        question_text: "Do you currently live in the UK?",
+        answer_type: "selection",
+        answer_settings: {
+          only_one_option: "true",
+          selection_options: [
+            { "name": "Yes", value: "Yes" },
+            { "name": "No", value: "No" },
+          ],
+        },
+        is_optional: false,
+      ),
+      Page.create(
+        question_text: "Where do you currently live?",
+        answer_type: "selection",
+        answer_settings: {
+          only_one_option: "true",
+          selection_options: [
+            { "name": "England", value: "England" },
+            { "name": "Scotland", value: "Scotland" },
+            { "name": "Wales", value: "Wales" },
+            { "name": "Northern Ireland", value: "Northern Ireland" },
+          ],
+        },
+        is_optional: false,
+      ),
+      Page.create(
+        question_text: "How many years have you lived in England?",
+        answer_type: "number",
+        is_optional: false,
+      ),
+      Page.create(
+        question_text: "How many years have you lived in Scotland?",
+        answer_type: "number",
+        is_optional: false,
+      ),
+      Page.create(
+        question_text: "How many years have you lived in Wales?",
+        answer_type: "number",
+        is_optional: false,
+      ),
+      Page.create(
+        question_text: "How many years have you lived in Northern Ireland?",
+        answer_type: "number",
+        is_optional: false,
+      ),
+      Page.create(
+        question_text: "How many years have you lived in the United Kingdom?",
+        answer_type: "number",
+        is_optional: false,
+      ),
+    ],
+    question_section_completed: true,
+    declaration_markdown: "",
+    declaration_section_completed: true,
+    privacy_policy_url: "https://www.gov.uk/help/privacy-notice",
+    submission_email:,
+    support_email: "your.email+fakedata84701@gmail.com.gov.uk",
+    support_phone: "08000800",
+    what_happens_next_markdown: "Test",
+    share_preview_completed: true,
+  )
+  Condition.create!(
+    check_page: multiple_branch_form.pages[0],
+    routing_page: multiple_branch_form.pages[0],
+    skip_to_end: true,
+    answer_value: "No",
+  )
+  Condition.create!(
+    check_page: nil,
+    routing_page: multiple_branch_form.pages[2],
+    goto_page: multiple_branch_form.pages.last,
+    answer_value: nil,
+  )
+  Condition.create!(
+    check_page: multiple_branch_form.pages[1],
+    routing_page: multiple_branch_form.pages[1],
+    goto_page: multiple_branch_form.pages[3],
+    answer_value: "Scotland",
+  )
+  Condition.create!(
+    check_page: nil,
+    routing_page: multiple_branch_form.pages[3],
+    goto_page: multiple_branch_form.pages.last,
+    answer_value: nil,
+  )
+  Condition.create!(
+    check_page: multiple_branch_form.pages[1],
+    routing_page: multiple_branch_form.pages[1],
+    goto_page: multiple_branch_form.pages[4],
+    answer_value: "Wales",
+  )
+  Condition.create!(
+    check_page: nil,
+    routing_page: multiple_branch_form.pages[4],
+    goto_page: multiple_branch_form.pages.last,
+    answer_value: nil,
+  )
+  Condition.create!(
+    check_page: multiple_branch_form.pages[1],
+    routing_page: multiple_branch_form.pages[1],
+    goto_page: multiple_branch_form.pages[5],
+    answer_value: "Northern Ireland",
+  )
+  multiple_branch_form.make_live!
+
   # add forms to groups
   GroupForm.create! group: end_to_end_group, form_id: all_question_types_form.id # All question types form
   GroupForm.create! group: end_to_end_group, form_id: e2e_s3_forms.id # s3 submission test form
   GroupForm.create! group: test_group, form_id: branch_route_form.id # Branch routing form
   GroupForm.create! group: test_group, form_id: none_of_the_above_form.id # None of the above form
   GroupForm.create! group: test_group, form_id: welsh_form.id # Welsh form
+  GroupForm.create! group: test_group, form_id: multiple_branch_form.id
 end
