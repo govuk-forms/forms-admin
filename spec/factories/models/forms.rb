@@ -60,6 +60,7 @@ FactoryBot.define do
 
       after(:build) do |form|
         link_pages_list(form.pages) if form.pages.present?
+        add_welsh_translations_to_pages(form.pages) if form.available_languages.include?("cy")
       end
 
       question_section_completed { true }
@@ -150,8 +151,12 @@ FactoryBot.define do
 
     trait :with_welsh_translation do
       available_languages { %w[en cy] }
+      welsh_completed { true }
 
       name_cy { name.prepend("Welsh ") }
+      privacy_policy_url_cy { "#{privacy_policy_url}/cy" }
+      support_email_cy { support_email }
+      what_happens_next_markdown_cy { "Fel arfer, rydym yn ymateb i geisiadau o fewn 10 diwrnod gwaith." }
     end
   end
 end
@@ -159,6 +164,16 @@ end
 def link_pages_list(pages)
   pages.to_enum.with_index(1).each do |page, index|
     page.position = index
+  end
+
+  pages
+end
+
+def add_welsh_translations_to_pages(pages)
+  pages.each do |page|
+    if page.question_text_cy.blank?
+      page.question_text_cy = "Welsh #{page.question_text}"
+    end
   end
 
   pages
