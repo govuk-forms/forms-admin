@@ -25,6 +25,8 @@ mailchimp:
   mou_signers_list: list-2
 
 cloudwatch_metrics_enabled: false
+total_submissions_baseline: 0
+total_submissions_baseline_cutoff_date: "2025-02-01"
 
 reports:
   forms_api_forms_per_request_page: 3

@@ -109,5 +109,9 @@ act_as_user_enabled: false
 
 cloudwatch_metrics_enabled: true
 
+# Total form submissions recorded before the cutoff date.
+total_submissions_baseline: 0
+total_submissions_baseline_cutoff_date: "2025-02-01"
+
 reports:
   forms_api_forms_per_request_page: 100
