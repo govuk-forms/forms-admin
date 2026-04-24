@@ -2,6 +2,8 @@
 features:
   exit_pages:
     enabled_by_group: true
+  multiple_branches:
+    enabled_by_group: true
 
 forms_api:
   # Authentication key to authenticate with forms-api

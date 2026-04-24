@@ -23,6 +23,7 @@ describe "Settings" do
     features = settings[:features]
 
     include_examples expected_value_test, :exit_pages, features, { "enabled_by_group" => true }
+    include_examples expected_value_test, :multiple_branches, features, { "enabled_by_group" => true }
   end
 
   describe "forms_api" do
