@@ -825,4 +825,75 @@ RSpec.describe ReportsController, type: :request do
       end
     end
   end
+
+  describe "#total_submissions" do
+    let(:path) { report_total_submissions_path }
+
+    include_examples "unauthorized user is forbidden"
+
+    context "when the user is a super admin" do
+      before { login_as_super_admin_user }
+
+      context "when CloudWatch data is available" do
+        let(:submissions_data) do
+          {
+            all_time: { total: 14_800 },
+            year: {
+              completed: { label: "2025", total: 12_000 },
+              in_progress: { label: "2026", total: 2_800 },
+            },
+            month: {
+              completed: { label: "March 2026", total: 1_200 },
+              in_progress: { label: "April 2026", total: 300 },
+            },
+            week: {
+              completed: { label: "14–20 Apr 2026", total: 310 },
+              in_progress: { label: "21–27 Apr 2026", total: 42 },
+            },
+            day: {
+              completed: { label: "22 Apr 2026", total: 85 },
+              in_progress: { label: "23 Apr 2026", total: 12 },
+            },
+            weekly_breakdown: Array.new(52) { { label: "1–7 Apr 2026", total: 10 } },
+            monthly_breakdown: Array.new(12) { { label: "March 2026", total: 100 } },
+          }
+        end
+
+        before do
+          allow(Reports::TotalSubmissionsCloudWatchService).to receive(:new).and_return(
+            instance_double(Reports::TotalSubmissionsCloudWatchService, submissions_data:),
+          )
+          get path
+        end
+
+        it "returns 200 and renders the total_submissions template" do
+          expect(response).to have_http_status(:ok)
+          expect(response).to render_template("reports/total_submissions")
+        end
+
+        it "shows the all-time total" do
+          expect(response.body).to include "14800"
+        end
+
+        it "shows the completed day label" do
+          expect(response.body).to include "22 Apr 2026"
+        end
+      end
+
+      context "when CloudWatch data is unavailable" do
+        before do
+          allow(Reports::TotalSubmissionsCloudWatchService).to receive(:new).and_return(
+            instance_double(Reports::TotalSubmissionsCloudWatchService, submissions_data: nil),
+          )
+          get path
+        end
+
+        it "returns 200 and shows an error message" do
+          expect(response).to have_http_status(:ok)
+          expect(response).to render_template("reports/total_submissions")
+          expect(response.body).to include I18n.t("reports.total_submissions.error_loading_data")
+        end
+      end
+    end
+  end
 end

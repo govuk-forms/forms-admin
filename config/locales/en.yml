@@ -1960,6 +1960,23 @@ en:
       draft: draft
       live: live
       live-or-archived: live or archived
+    total_submissions:
+      error_loading_data: Sorry, the total submissions data could not be loaded. Please try again later.
+      monthly_breakdown:
+        count: Total submissions
+        heading: Monthly breakdown
+        month: Month
+      summary:
+        all_time: All time
+        count: Total submissions
+        heading: Submission totals
+        in_progress_suffix: "(so far)"
+        period: Period
+      title: Total form submissions
+      weekly_breakdown:
+        count: Total submissions
+        heading: Weekly breakdown
+        week: Week
     users:
       heading: Number of users per organisation
       table_headings:

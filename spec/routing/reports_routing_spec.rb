@@ -130,4 +130,10 @@ RSpec.describe ReportsController, type: :routing do
       end
     end
   end
+
+  describe "total submissions report" do
+    it "routes GET /reports/total-submissions to reports#total_submissions" do
+      expect(get: "/reports/total-submissions").to route_to("reports#total_submissions")
+    end
+  end
 end

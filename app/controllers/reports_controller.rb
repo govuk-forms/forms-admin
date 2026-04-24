@@ -203,6 +203,11 @@ class ReportsController < WebController
     render locals: { data: }
   end
 
+  def total_submissions
+    data = Reports::TotalSubmissionsCloudWatchService.new.submissions_data
+    render locals: { data: }
+  end
+
 private
 
   def questions_feature_report(tag, report, questions, type: :questions)
