@@ -64,6 +64,60 @@ RSpec.describe ReportsController, type: :request do
         expect(node).to have_xpath "//dl/div[1]/dd", text: "4"
       end
     end
+
+    context "when the tag is live-or-archived and CloudWatch data is available" do
+      let(:path) { report_features_path(tag: "live-or-archived") }
+
+      before do
+        login_as_super_admin_user
+        allow(Reports::TotalSubmissionsCloudWatchService).to receive(:new).and_return(
+          instance_double(
+            Reports::TotalSubmissionsCloudWatchService,
+            submissions_data: { all_time: { total: 42_000 } },
+          ),
+        )
+        get path
+      end
+
+      it "includes a total submissions row with the all-time total" do
+        expect(response).to have_http_status(:ok)
+        node = Capybara.string(response.body)
+        expect(node).to have_text I18n.t("reports.features.features.total_submissions")
+        expect(node).to have_text "42000"
+      end
+    end
+
+    context "when the tag is live-or-archived and CloudWatch data is unavailable" do
+      let(:path) { report_features_path(tag: "live-or-archived") }
+
+      before do
+        login_as_super_admin_user
+        allow(Reports::TotalSubmissionsCloudWatchService).to receive(:new).and_return(
+          instance_double(Reports::TotalSubmissionsCloudWatchService, submissions_data: nil),
+        )
+        get path
+      end
+
+      it "shows Data unavailable in the total submissions row" do
+        node = Capybara.string(response.body)
+        expect(node).to have_text I18n.t("reports.features.features.total_submissions")
+        expect(node).to have_text I18n.t("reports.features.features.total_submissions_unavailable")
+      end
+    end
+
+    context "when the tag is live" do
+      let(:path) { report_features_path(tag: :live) }
+
+      before do
+        login_as_super_admin_user
+        get path
+      end
+
+      it "does not include a total submissions row" do
+        node = Capybara.string(response.body)
+        expect(node).not_to have_text I18n.t("reports.features.features.total_submissions")
+      end
+    end
   end
 
   describe "#questions_with_answer_type" do

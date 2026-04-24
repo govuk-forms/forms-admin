@@ -1836,6 +1836,8 @@ en:
         forms_with_welsh_translation: "%{tag} forms with Welsh translation"
         heading: Feature usage
         total_forms: Total %{tag} forms
+        total_submissions: Total submissions (all time)
+        total_submissions_unavailable: Data unavailable
       title: Feature and answer type usage in %{tag} forms
     form_or_questions_list_table:
       headings:

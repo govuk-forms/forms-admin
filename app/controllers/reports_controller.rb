@@ -8,8 +8,9 @@ class ReportsController < WebController
     tag = params[:tag]
     forms = Reports::FormDocumentsService.form_documents(tag:)
     data = Reports::FeatureReportService.new(forms).report
+    total_submissions = total_submissions_for_features(tag)
 
-    render template: "reports/features", locals: { tag:, data: }
+    render template: "reports/features", locals: { tag:, data:, total_submissions: }
   end
 
   def questions_with_answer_type
@@ -222,6 +223,16 @@ private
     else
       render template: "reports/feature_report", locals: { tag:, report:, records: forms, type: }
     end
+  end
+
+  def total_submissions_for_features(tag)
+    return nil unless tag == "live-or-archived"
+
+    submissions_data = Reports::TotalSubmissionsCloudWatchService.new.submissions_data
+    {
+      total: submissions_data&.dig(:all_time, :total),
+      available: !submissions_data.nil?,
+    }
   end
 
   def check_user_has_permission

@@ -40,11 +40,12 @@ describe "reports/features.html.erb" do
     }
   end
   let(:tag) { "live" }
+  let(:total_submissions) { nil }
 
   before do
     controller.request.path_parameters[:tag] = tag
 
-    render template: "reports/features", locals: { tag:, data: report }
+    render template: "reports/features", locals: { tag:, data: report, total_submissions: }
   end
 
   describe "page title" do

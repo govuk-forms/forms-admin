@@ -10,6 +10,12 @@
         <%= row.with_key(text: t(".features.total_forms", tag: tag_label(tag)).upcase_first) %>
         <%= row.with_value(text: data[:total_forms]) %>
       <% end %>
+      <% if total_submissions %>
+        <%= summary_list.with_row do |row| %>
+          <%= row.with_key(text: t(".features.total_submissions").upcase_first) %>
+          <%= row.with_value(text: total_submissions[:available] ? total_submissions[:total] : t(".features.total_submissions_unavailable")) %>
+        <% end %>
+      <% end %>
       <%= summary_list.with_row do |row| %>
         <%= row.with_key(text: t(".features.copied_forms", tag: tag_label(tag)).upcase_first) %>
         <%= row.with_value(text: govuk_link_to(data[:copied_forms], report_forms_that_are_copies_path, no_visited_state: true)) %>
