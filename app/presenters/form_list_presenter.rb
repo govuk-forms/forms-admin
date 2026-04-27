@@ -76,7 +76,7 @@ private
 
   def welsh_status(form)
     if form.live_welsh_form_document.present?
-      "<p class=\"govuk-!-margin-bottom-1 govuk-!-margin-top-2 govuk-hint\">With Welsh Version</p>".html_safe
+      "<p class=\"govuk-!-margin-bottom-1 govuk-!-margin-top-2 govuk-hint\">With Welsh version</p>".html_safe
     elsif form.draft_welsh_form_document.present?
       "<p class=\"govuk-!-margin-bottom-1 govuk-!-margin-top-2 govuk-hint\">With Welsh draft</p>".html_safe
     elsif form.archived_welsh_form_document.present?
