@@ -34,6 +34,13 @@ namespace :groups do
       raise ActiveRecord::Rollback
     end
   end
+
+  desc "Toggle multiple_branches_enabled for a group"
+  task :toggle_multiple_branches_enabled, %i[group_id] => :environment do |_, args|
+    usage_message = "usage: rake groups:toggle_multiple_branches_enabled[<group_external_id>]".freeze
+    abort usage_message if args[:group_id].blank?
+    toggle_multiple_branches_enabled(args[:group_id])
+  end
 end
 
 def run_task(task_name, args, rollback:)
@@ -99,4 +106,13 @@ def remove_group(task_name, group_id)
 
   group.destroy!
   Rails.logger.info "#{task_name}: removed #{fmt_group(group)}"
+end
+
+def toggle_multiple_branches_enabled(group_id)
+  group = Group.find_by!(external_id: group_id)
+
+  group.multiple_branches_enabled = !group.multiple_branches_enabled
+  group.save!
+
+  Rails.logger.info "multiple_branches_enabled for #{fmt_group(group)} is now set to #{group.reload.multiple_branches_enabled}"
 end
