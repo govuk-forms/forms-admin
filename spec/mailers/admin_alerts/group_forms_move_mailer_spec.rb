@@ -32,13 +32,15 @@ describe AdminAlerts::GroupFormsMoveMailer, type: :mailer do
         expect(mail.govuk_notify_personalisation[:org_admin_email]).to eq(current_user.email)
         expect(mail.govuk_notify_personalisation[:org_admin_name]).to eq(current_user.name)
         expect(mail.govuk_notify_personalisation[:group_active]).to eq("no")
+        expect(mail.govuk_notify_personalisation[:group_trial]).to eq("yes")
       end
 
       context "when group is active" do
         let(:group) { create :group, status: :active }
 
-        it "personalisation includes group active as yes" do
+        it "personalisation includes group active as yes instead of trial" do
           expect(mail.govuk_notify_personalisation[:group_active]).to eq("yes")
+          expect(mail.govuk_notify_personalisation[:group_trial]).to eq("no")
         end
       end
     end
@@ -67,6 +69,7 @@ describe AdminAlerts::GroupFormsMoveMailer, type: :mailer do
         expect(mail.govuk_notify_personalisation[:org_admin_email]).to eq(current_user.email)
         expect(mail.govuk_notify_personalisation[:org_admin_name]).to eq(current_user.name)
         expect(mail.govuk_notify_personalisation[:group_active]).to eq("no")
+        expect(mail.govuk_notify_personalisation[:group_trial]).to eq("yes")
       end
     end
   end

@@ -12,7 +12,13 @@ class AdminAlerts::GroupFormsMoveMailer < GovukNotifyRails::Mailer
   end
 
   def form_moved_email(to_email:, form_name:, old_group_name:, new_group_name:, org_admin_email:, org_admin_name:, group_active:)
-    group_active_text = group_active ? "yes" : "no"
+    if group_active
+      group_active_text = "yes"
+      group_trial_text = "no"
+    else
+      group_active_text = "no"
+      group_trial_text = "yes"
+    end
 
     set_personalisation(
       form_name:,
@@ -21,6 +27,7 @@ class AdminAlerts::GroupFormsMoveMailer < GovukNotifyRails::Mailer
       org_admin_email:,
       org_admin_name:,
       group_active: group_active_text,
+      group_trial: group_trial_text,
     )
 
     mail(to: to_email)
