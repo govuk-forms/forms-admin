@@ -133,7 +133,7 @@ describe FormListPresenter do
 
         it "appends the correct text" do
           rows = presenter.data[:rows]
-          expect(rows[0][0][:text]).to eq("<a class=\"govuk-link\" href=\"/forms/1/live\">form with a live Welsh Version</a><p class=\"govuk-!-margin-bottom-1 govuk-!-margin-top-2 govuk-hint\">With Welsh Version</p>")
+          expect(rows[0][0][:text]).to eq("<a class=\"govuk-link\" href=\"/forms/1/live\">form with a live Welsh Version</a><p class=\"govuk-!-margin-bottom-1 govuk-!-margin-top-2 govuk-hint\">With Welsh version</p>")
           expect(rows[1][0][:text]).to eq("<a class=\"govuk-link\" href=\"/forms/2/archived\">form with an archived and a draft Welsh version</a><p class=\"govuk-!-margin-bottom-1 govuk-!-margin-top-2 govuk-hint\">With Welsh draft</p>")
           expect(rows[2][0][:text]).to eq("<a class=\"govuk-link\" href=\"/forms/4\">form with no Welsh version</a>")
           expect(rows[3][0][:text]).to eq("<a class=\"govuk-link\" href=\"/forms/5/archived\">form with only an archived Welsh version</a><p class=\"govuk-!-margin-bottom-1 govuk-!-margin-top-2 govuk-hint\">With archived Welsh version</p>")
