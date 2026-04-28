@@ -10,7 +10,7 @@ gem "rails", "~> 8.1.3"
 gem "pg", "~> 1.6"
 
 # Use the Puma web server [https://github.com/puma/puma]
-gem "puma", "~> 7.2.0"
+gem "puma", "~> 8.0.0"
 
 # Used for handling authentication
 gem "gds-sso"
