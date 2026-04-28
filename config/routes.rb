@@ -80,6 +80,8 @@ Rails.application.routes.draw do
     post "/batch-submissions" => "forms/batch_submissions#create", as: :batch_submissions_create
     get "/metrics" => "forms/metrics#metrics_csv", as: :metrics_csv
 
+    resource :routes, only: %i[show]
+
     scope "/pages-by-external-id/:page_external_id" do
       get "/edit-question" => "forms/redirect_from_forms_runner#edit_question", as: :edit_question_by_external_id
       get "/routes" => "forms/redirect_from_forms_runner#routes", as: :show_routes_by_external_id
