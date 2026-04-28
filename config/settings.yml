@@ -4,6 +4,7 @@ features:
     enabled_by_group: true
   multiple_branches:
     enabled_by_group: true
+  send_filler_answers: true
 
 forms_api:
   # Authentication key to authenticate with forms-api
