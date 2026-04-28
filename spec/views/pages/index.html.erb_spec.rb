@@ -42,4 +42,13 @@ describe "pages/index.html.erb" do
       expect(rendered).to have_link("Change your question order", href: change_order_new_path(form.id))
     end
   end
+
+  describe "when the group has multiple branches enabled" do
+    let(:group) { create(:group, multiple_branches_enabled: true) }
+    let(:form) { create(:form, :with_group, group:) }
+
+    it "has a link to add a page routing" do
+      expect(rendered).to have_link("Edit question routes", href: routes_path(form.id))
+    end
+  end
 end

@@ -1581,6 +1581,7 @@ en:
       change_order: Change your question order
       mark_complete:
         legend: Have you finished editing your questions?
+      routes: Edit question routes
       title: Add and edit your questions
     optional: "%{question_text} (optional)"
     question: Question
