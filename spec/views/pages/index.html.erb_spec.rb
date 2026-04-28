@@ -6,35 +6,24 @@ describe "pages/index.html.erb" do
   let(:mark_complete_input) { Forms::MarkPagesSectionCompleteInput.new(form:).assign_form_values }
 
   before do
-    # mock the path helper
-    without_partial_double_verification do
-      allow(view).to receive_messages(
-        form_path: "/forms/1",
-        type_of_answer_new_path: "/forms/1/pages/new/type-of-answer",
-        edit_question_path: "/forms/1/pages/2/edit/question",
-        form_pages_path: "/forms/1/pages",
-        routing_page_path: "/forms/1/new-condition",
-        current_form: form,
-      )
-    end
     assign(:pages, pages)
     assign(:mark_complete_input, mark_complete_input)
-    render template: "pages/index"
+    render template: "pages/index", locals: { current_form: form }
   end
 
   it "has the correct title" do
     expect(view.content_for(:title)).to eq I18n.t("pages.index.title")
   end
 
+  it "allows the user to add a page" do
+    expect(rendered).to have_link(I18n.t("pages.index.add_question"), href: start_new_question_path(form.id))
+  end
+
+  it "has a link to branch routing page" do
+    expect(rendered).to have_link("Add a question route", href: routing_page_path(form.id))
+  end
+
   describe "when there are no pages to display" do
-    it "allows the user to add a page" do
-      expect(rendered).to have_link(I18n.t("pages.index.add_question"), href: start_new_question_path(form.id))
-    end
-
-    it "does not contain a link to add page routing" do
-      expect(rendered).not_to have_link("Add a question route", href: routing_page_path(form.id))
-    end
-
     it "does not contain a list of pages" do
       expect(rendered).not_to have_text I18n.t("forms.form_overview.your_questions")
       expect(rendered).not_to have_css ".govuk-summary-list"
@@ -43,10 +32,6 @@ describe "pages/index.html.erb" do
 
   describe "when there are more than one page to display" do
     let(:pages) { [(build :page, id: 1, position: 1, form_id: 1), (build :page, id: 2, position: 2, form_id: 1), (build :page, id: 3, position: 3, form_id: 1)] }
-
-    it "allows the user to add a page" do
-      expect(rendered).to have_link(I18n.t("pages.index.add_question"), href: start_new_question_path(form.id))
-    end
 
     it "does contain a summary list entry each page" do
       expect(rendered).to have_text I18n.t("forms.form_overview.your_questions")
