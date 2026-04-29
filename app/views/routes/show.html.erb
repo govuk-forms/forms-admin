@@ -1,0 +1,12 @@
+<% set_page_title(t("page_titles.routes")) %>
+<% content_for :back_link, govuk_back_link_to(form_pages_path(@current_form.id), t("back_link.form_view")) %>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-l">
+      <span class="govuk-caption-l"><%= @current_form.name %></span>
+      <span class="govuk-visually-hidden"> - </span>
+      <%= t("page_titles.routes") %>
+    </h1>
+  </div>
+</div>

@@ -1480,6 +1480,7 @@ en:
     payment_link: Add a link to a payment page on GOV.UK Pay
     privacy_policy: Provide a link to privacy information for this form
     question_text: What’s your question?
+    routes: Edit question routes
     routes_show: Question %{question_number}’s routes
     routing_page: Add a route from a question
     routing_page_caption: Question %{question_number}’s routes
@@ -1580,6 +1581,7 @@ en:
       change_order: Change your question order
       mark_complete:
         legend: Have you finished editing your questions?
+      routes: Edit question routes
       title: Add and edit your questions
     optional: "%{question_text} (optional)"
     question: Question
