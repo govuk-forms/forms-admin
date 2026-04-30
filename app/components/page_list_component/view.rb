@@ -28,6 +28,14 @@ module PageListComponent
       end
     end
 
+    def branch_condition_description(condition)
+      if condition.answer_value.present?
+        I18n.t("page_conditions.branch_condition_description", goto_page_question_text: goto_page_text_for_condition(condition), answer_value: answer_value_text_for_condition(condition))
+      else
+        I18n.t("page_conditions.unconditional_description", goto_page_question_text: goto_page_text_for_condition(condition))
+      end
+    end
+
     def condition_check_page_text(condition)
       check_page = @pages.find { |page| page.id == condition.check_page_id }
       I18n.t("page_conditions.condition_check_page_text", check_page_question_text: check_page.question_text)

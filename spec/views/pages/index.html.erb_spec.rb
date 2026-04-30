@@ -1,7 +1,7 @@
 require "rails_helper"
 
 describe "pages/index.html.erb" do
-  let(:form) { create :form, pages: }
+  let(:form) { create :form, :with_group, pages: }
   let(:pages) { [] }
   let(:mark_complete_input) { Forms::MarkPagesSectionCompleteInput.new(form:).assign_form_values }
 
