@@ -127,12 +127,12 @@ GEM
       logger
     aws-sigv4 (1.12.1)
       aws-eventstream (~> 1, >= 1.0.2)
-    axe-core-api (4.11.1)
+    axe-core-api (4.11.2)
       dumb_delegator
       ostruct
       virtus
-    axe-core-rspec (4.11.1)
-      axe-core-api (= 4.11.1)
+    axe-core-rspec (4.11.2)
+      axe-core-api (= 4.11.2)
       dumb_delegator
       ostruct
       virtus
@@ -888,8 +888,8 @@ CHECKSUMS
   aws-sdk-codepipeline (1.113.0) sha256=99b92d90508673b4421e3bb7b320f76dcc46a2259d998c9dd5be4238d09363ef
   aws-sdk-core (3.246.0) sha256=393864ec8948560e69fcccc2e4d256b40c7028eb98930608dd295279e3c4ddcc
   aws-sigv4 (1.12.1) sha256=6973ff95cb0fd0dc58ba26e90e9510a2219525d07620c8babeb70ef831826c00
-  axe-core-api (4.11.1) sha256=a6460506449a692030620a0574fee7afa6cd38cfbbf6620d20bf4d53d33a80cc
-  axe-core-rspec (4.11.1) sha256=dc6c0e166405cd3a28c4a0937f6521ee5b511c12c0ca1627144a1ee7d5014aec
+  axe-core-api (4.11.2) sha256=c05c342941e0c29f17b00268302457da9e7b644f753c8bbab274d0083319344f
+  axe-core-rspec (4.11.2) sha256=50c5a5f1b4b991da6857c5df4d6645dfac285a84c7f7f904a6ef23e53f4895eb
   axiom-types (0.1.1) sha256=c1ff113f3de516fa195b2db7e0a9a95fd1b08475a502ff660d04507a09980383
   base64 (0.3.0) sha256=27337aeabad6ffae05c265c450490628ef3ebd4b67be58257393227588f5a97b
   bigdecimal (4.1.2) sha256=53d217666027eab4280346fba98e7d5b66baaae1b9c3c1c0ffe89d48188a3fbd
