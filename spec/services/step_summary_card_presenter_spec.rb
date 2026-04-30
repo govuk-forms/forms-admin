@@ -110,12 +110,12 @@ describe StepSummaryCardPresenter do
   describe "#build_untranslated_content" do
     before do
       allow(StepSummaryTableService).to receive(:call).and_return(OpenStruct.new(
-                                                                    untranslated_content: [summary: "answer_type", text: "Some untranslated content"],
+                                                                    untranslated_content: [{ summary: "answer_type", text: "Some untranslated content" }],
                                                                   ))
     end
 
     it "includes an array of rows" do
-      expect(presenter.build_untranslated_content).to eq [summary: "answer_type", text: "Some untranslated content"]
+      expect(presenter.build_untranslated_content).to eq [{ summary: "answer_type", text: "Some untranslated content" }]
     end
   end
 
