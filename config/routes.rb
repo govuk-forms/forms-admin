@@ -54,6 +54,10 @@ Rails.application.routes.draw do
     post "/privacy-policy" => "forms/privacy_policy#create"
     get "/make-live" => "forms/make_live#new", as: :make_live
     post "/make-live" => "forms/make_live#create", as: :make_live_create
+    get "/make-live/:language" => "forms/make_language_live#new", as: :make_language_live
+    post "/make-live/:language" => "forms/make_language_live#create", as: :make_language_live_create
+    get "/make-live/:language/success" => "forms/make_language_live#show_confirmation", as: :make_language_live_show_confirmation
+    post "/make-live/:language/success" => "forms/make_language_live#submit_confirmation", as: :make_language_live_submit_confirmation
     get "/unarchive" => "forms/unarchive#new", as: :unarchive
     post "/unarchive" => "forms/unarchive#create", as: :unarchive_create
     get "/what-happens-next" => "forms/what_happens_next#new", as: :what_happens_next

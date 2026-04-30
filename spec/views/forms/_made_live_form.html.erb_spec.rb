@@ -404,7 +404,8 @@ describe "forms/_made_live_form.html.erb" do
   end
 
   context "when the form has a Welsh translation" do
-    let(:form_metadata) { create :form, :live, :with_welsh_translation, what_happens_next_markdown:, submission_type:, submission_format: }
+    let(:what_happens_next_markdown_cy) { "Os nad ydych wedi derbyn ymateb o fewn 5 diwrnod gwaith, [cysylltwch â’n tîm cymorth defnyddwyr](https://example.com)." }
+    let(:form_metadata) { create :form, :live, :with_welsh_translation, what_happens_next_markdown:, what_happens_next_markdown_cy:, submission_type:, submission_format: }
     let(:welsh_form_document) do
       form_document_content = FormDocument::Content.from_form_document(form_metadata.live_welsh_form_document)
       form_document_content.first_made_live_at = 1.week.ago
@@ -439,7 +440,7 @@ describe "forms/_made_live_form.html.erb" do
       expect(rendered).to have_css("th", text: "English content")
       expect(rendered).to include("<p class=\"govuk-body\">If you have not received a response within 5 working days, <a href=\"https://example.com\" class=\"govuk-link\" rel=\"noreferrer noopener\" target=\"_blank\">contact our user support team (opens in new tab)</a>.</p>")
       expect(rendered).to have_css("th", text: "Welsh content")
-      expect(rendered).to include("<p class=\"govuk-body\">If you have not received a response within 5 working days, <a href=\"https://example.com\" class=\"govuk-link\" rel=\"noreferrer noopener\" target=\"_blank\">contact our user support team (agor mewn tab newydd)</a>.</p>")
+      expect(rendered).to include("<p class=\"govuk-body\">Os nad ydych wedi derbyn ymateb o fewn 5 diwrnod gwaith, <a href=\"https://example.com\" class=\"govuk-link\" rel=\"noreferrer noopener\" target=\"_blank\">cysylltwch â’n tîm cymorth defnyddwyr (agor mewn tab newydd)</a>.</p>")
     end
 
     context "when the form has a declaration" do

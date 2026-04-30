@@ -52,6 +52,38 @@ class FormDocumentSyncService
     end
   end
 
+  def synchronize_live_english_form
+    FormDocument.transaction do
+      # Ensure we only make English version live if there is no existing live Welsh version
+      raise ActiveRecord::RecordNotFound, "Cannot make English version live if there is already a live Welsh version." if FormDocument.where(form:, tag: LIVE_TAG, language: "cy").exists?
+
+      content = form_content("en", live_at: form.updated_at)
+      update_or_create_form_document(LIVE_TAG, content, "en")
+
+      # Update the content of the live English version to to not include Welsh in available_languages
+      FormDocument.where(form:, tag: [LIVE_TAG], language: "en").find_each do |live_document|
+        live_document.content["available_languages"] = %w[en]
+        live_document.save!
+      end
+    end
+  end
+
+  def synchronize_live_welsh_form
+    FormDocument.transaction do
+      # Ensure we only make Welsh version live if there is already an existing live English version
+      raise ActiveRecord::RecordNotFound, "Cannot make Welsh version live unless there is already a live English version." unless FormDocument.where(form:, tag: LIVE_TAG, language: "en").exists?
+
+      content = form_content("cy", live_at: form.updated_at)
+      update_or_create_form_document(LIVE_TAG, content, "cy")
+
+      # Update the content of the live English version to show that it now supports Welsh
+      FormDocument.where(form:, tag: [LIVE_TAG], language: "en").find_each do |live_document|
+        live_document.content["available_languages"] = %w[en cy]
+        live_document.save!
+      end
+    end
+  end
+
   def update_draft_form_document
     synchronize_documents_for_tag(DRAFT_TAG)
   end
@@ -79,6 +111,7 @@ private
       language:,
     )
     form_document.content = content
+
     form_document.save!
   end
 

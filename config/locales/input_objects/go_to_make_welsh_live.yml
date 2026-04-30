@@ -1,0 +1,18 @@
+---
+en:
+  activemodel:
+    errors:
+      models:
+        forms/go_to_make_welsh_live_input:
+          attributes:
+            confirm:
+              blank: Select ‘Yes’ if you want to make your Welsh form live
+  helpers:
+    label:
+      forms_go_to_make_welsh_live_input:
+        confirm_options:
+          'no': No, I’ll do that later
+          'yes': 'Yes'
+    legend:
+      forms_go_to_make_welsh_live_input:
+        confirm: Do you want to make your Welsh form live now?

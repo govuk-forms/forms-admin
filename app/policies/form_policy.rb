@@ -30,6 +30,12 @@ class FormPolicy
     false
   end
 
+  def can_make_language_live?
+    return can_view_form? if form.group&.active? && can_administer_group?
+
+    false
+  end
+
   def can_administer_group?
     user.super_admin? || user.is_organisations_admin?(form.group&.organisation) || user.is_group_admin?(form.group)
   end
