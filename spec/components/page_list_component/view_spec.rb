@@ -1,7 +1,7 @@
 require "rails_helper"
 
 RSpec.describe PageListComponent::View, type: :component do
-  let(:form) { create :form }
+  let(:form) { create :form, :with_group }
   let(:pages) { form.reload.pages }
   let(:page_list_component) { described_class.new(pages:, form:) }
 
@@ -46,7 +46,7 @@ RSpec.describe PageListComponent::View, type: :component do
     end
 
     context "when the form has multiple pages" do
-      let(:form) { create :form, :with_pages }
+      let(:form) { create :form, :with_pages, :with_group }
       let(:first_page) { form.pages.first }
       let(:second_page) { form.pages.second }
 
@@ -79,7 +79,7 @@ RSpec.describe PageListComponent::View, type: :component do
       end
 
       context "when the form has conditions" do
-        let(:form) { create :form, :ready_for_routing }
+        let(:form) { create :form, :ready_for_routing, :with_group }
         let(:edit_condition_path) { "/forms/0/pages/1/conditions/1" }
 
         context "when the page has a single condition" do
@@ -144,7 +144,7 @@ RSpec.describe PageListComponent::View, type: :component do
       end
 
       context "when the form has a valid branch route" do
-        let(:form) { create :form, :ready_for_routing }
+        let(:form) { create :form, :ready_for_routing, :with_group }
         let!(:secondary_skip_condition) { create :condition, routing_page_id: pages.second.id, check_page_id: pages.first.id, answer_value: nil, goto_page_id: pages.fourth.id }
 
         before do
@@ -164,7 +164,7 @@ RSpec.describe PageListComponent::View, type: :component do
       end
 
       context "when the form has a branch route with an error" do
-        let(:form) { create :form, :ready_for_routing }
+        let(:form) { create :form, :ready_for_routing, :with_group }
 
         before do
           create :condition, routing_page_id: pages.first.id, check_page_id: pages.first.id, answer_value: "Option 1", goto_page_id: pages.third.id
@@ -183,7 +183,7 @@ RSpec.describe PageListComponent::View, type: :component do
   end
 
   describe "class methods" do
-    let(:form) { create :form, :with_pages }
+    let(:form) { create :form, :with_pages, :with_group }
 
     describe "show_up_button" do
       it "returns false when index is 0" do
@@ -319,6 +319,77 @@ RSpec.describe PageListComponent::View, type: :component do
         it "returns correct description" do
           expected_text = "After #{pages.second.position}, “#{pages.second.question_text}” go to #{pages.fourth.position}, “#{pages.fourth.question_text}”"
           expect(page_list_component.condition_description(condition)).to eq(expected_text)
+        end
+      end
+    end
+
+    describe "#branch_condition_description" do
+      context "when condition has all values set" do
+        let(:condition) do
+          create(
+            :condition,
+            routing_page_id: pages.first.id,
+            check_page_id: pages.first.id,
+            answer_value: "Option 1",
+            goto_page_id: pages.third.id,
+          )
+        end
+
+        it "returns complete condition description" do
+          expected_text = "“#{condition.answer_value}” go to #{pages.third.position}, “#{pages.third.question_text}”"
+          expect(page_list_component.branch_condition_description(condition)).to eq(expected_text)
+        end
+      end
+
+      context "when answer value is 'none_of_the_above'" do
+        let(:condition) do
+          create(
+            :condition,
+            routing_page_id: pages.first.id,
+            check_page_id: pages.first.id,
+            answer_value: "none_of_the_above",
+            goto_page_id: pages.third.id,
+          )
+        end
+
+        it "returns description with 'None of the above' text" do
+          expected_text = "“None of the above” go to #{pages.third.position}, “#{pages.third.question_text}”"
+          expect(page_list_component.branch_condition_description(condition)).to eq(expected_text)
+        end
+      end
+
+      context "when skip_to_end is true" do
+        let(:condition) do
+          create(
+            :condition,
+            routing_page_id: pages.first.id,
+            check_page_id: pages.first.id,
+            answer_value: "Option 1",
+            goto_page_id: nil,
+            skip_to_end: true,
+          )
+        end
+
+        it "returns description with 'Check your answers' text" do
+          expected_text = "“#{condition.answer_value}” go to end of form."
+          expect(page_list_component.branch_condition_description(condition)).to eq(expected_text)
+        end
+      end
+
+      context "when showing an unconditional route" do
+        let(:condition) do
+          create(
+            :condition,
+            routing_page_id: pages.second.id,
+            check_page_id: pages.first.id,
+            answer_value: nil,
+            goto_page_id: pages.fourth.id,
+          )
+        end
+
+        it "returns correct description" do
+          expected_text = "Go to #{pages.fourth.position}, “#{pages.fourth.question_text}”"
+          expect(page_list_component.branch_condition_description(condition)).to eq(expected_text)
         end
       end
     end

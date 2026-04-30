@@ -1367,6 +1367,9 @@ en:
     condition_compact_html_secondary_skip: Go to %{goto_page_question_number}, “%{goto_page_question_text}”
     condition_compact_html_secondary_skip_to_end_of_form: Go to end of form
     condition_description: If %{check_page_question_text} is answered as %{answer_value} go to %{goto_page_question_text}
+    branch_condition_description: "%{answer_value} go to %{goto_page_question_text}"
+    unconditional_description: Go to %{goto_page_question_text}
+    if_answer_is: "If the answer is:"
     condition_goto_exit_page: exit page, “%{exit_page_heading}”
     condition_goto_page_end_of_form: end of form.
     condition_goto_page_text: "%{goto_page_question_number}, “%{goto_page_question_text}”"
