@@ -19,6 +19,7 @@
     "autoBuild": true
   },
   "test": {
+    "host": "::1",
     "port": 3037,
     "autoBuild": true
   }
