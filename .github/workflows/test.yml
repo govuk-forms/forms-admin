@@ -56,7 +56,7 @@ jobs:
         run: bin/rails db:schema:load
       # Add or replace test runners here
       - name: Run Ruby tests
-        run: bundle exec rspec
+        run: bundle exec rspec --profile
       - name: Run JS tests
         run: npm test
       # Add or replace any other lints here
