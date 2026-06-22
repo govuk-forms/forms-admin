@@ -6,6 +6,13 @@ module Account
     skip_before_action :redirect_if_account_not_completed
 
     def edit
+      @organisations = Organisation.for_email(current_user.email).order(:name)
+
+      if @organisations.empty?
+        render :unsupported_email
+        return
+      end
+
       @organisation_input = OrganisationInput.new(user: current_user).assign_form_values
     end
 

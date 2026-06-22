@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_08_112508) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_22_151619) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -199,6 +199,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_08_112508) do
     t.index ["user_id"], name: "index_mou_signatures_on_user_id_unique_without_organisation_id", unique: true, where: "(organisation_id IS NULL)", comment: "Users can only sign a single MOU without an organisation"
   end
 
+  create_table "org_domains", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "domain", null: false
+    t.bigint "organisation_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["domain"], name: "index_org_domains_on_domain"
+    t.index ["organisation_id", "domain"], name: "index_org_domains_unique", unique: true
+    t.index ["organisation_id"], name: "index_org_domains_on_organisation_id"
+  end
+
   create_table "organisations", force: :cascade do |t|
     t.string "abbreviation"
     t.boolean "closed", default: false
@@ -297,6 +307,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_08_112508) do
   add_foreign_key "memberships", "users", column: "added_by_id"
   add_foreign_key "mou_signatures", "organisations"
   add_foreign_key "mou_signatures", "users"
+  add_foreign_key "org_domains", "organisations"
   add_foreign_key "page_translations", "pages"
   add_foreign_key "pages", "forms"
   add_foreign_key "users", "organisations"

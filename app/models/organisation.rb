@@ -4,6 +4,7 @@ class Organisation < ApplicationRecord
   has_many :groups
   has_many :users
 
+  has_many :org_domains, dependent: :destroy
   has_many :mou_signatures
 
   scope :not_closed, -> { where(closed: false) }
@@ -27,5 +28,14 @@ class Organisation < ApplicationRecord
     options[:only] ||= %i[id name]
     options[:methods] ||= %i[organisation_admin_users]
     super(options)
+  end
+
+  def self.for_email(email)
+    domain = email.split('@').last.downcase
+
+    not_closed
+      .joins(:org_domains)
+      .where(org_domains: { domain: domain })
+      .distinct
   end
 end

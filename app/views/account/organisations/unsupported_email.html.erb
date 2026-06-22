@@ -1,0 +1,9 @@
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-l">We do not recognise your email address</h1>
+    <p class="govuk-body">
+      Your email address (<%= current_user.email %>) is not associated with a supported organisation.
+    </p>
+    <%= govuk_details(summary_text: t('account.organisation_details_summary'), text: t('account.organisation_text_html', contact_link: contact_link)) %>
+  </div>
+</div>
