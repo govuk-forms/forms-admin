@@ -53,7 +53,7 @@ describe "pages/routes/show.html.erb" do
     end
 
     it "has a back to questions link" do
-      expect(rendered).to have_link(I18n.t("pages.go_to_your_questions"), href: form_pages_path(form.id))
+      expect(rendered).to have_link(I18n.t("pages.back_to_your_questions"), href: form_pages_path(form.id))
     end
 
     it "does not have a link to delete all routes" do

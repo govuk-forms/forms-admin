@@ -1746,6 +1746,7 @@ en:
     your_welsh_form_is_live: Your Welsh form is live
   pages:
     answer_settings: Answer settings
+    back_to_your_questions: Back to your questions
     change_order:
       move_question_to_label: Move question %{position} to (optional)
       preview_banner: You need to save this question order if you want to keep these changes
@@ -1842,7 +1843,6 @@ en:
       edit:
         back_link: Back to edit route 1
         delete_exit_page: Delete exit page
-    go_to_your_questions: Back to your questions
     heading: Edit question
     index:
       add_a_question_route: Add a question route
