@@ -26,7 +26,7 @@ describe "pages/routes/show.html.erb" do
 
   context "when there are no routes" do
     before do
-      render template: "pages/routes/show", locals: { current_form: form, page:, back_link_url: "/back", route_summary_card_data_presenter: route_summary_card_data_service }
+      render template: "pages/routes/show", locals: { current_form: form, page:, route_summary_card_data_presenter: route_summary_card_data_service }
     end
 
     it "has the correct title" do
@@ -34,7 +34,7 @@ describe "pages/routes/show.html.erb" do
     end
 
     it "has the correct back link" do
-      expect(view.content_for(:back_link)).to have_link(I18n.t("pages.go_to_your_questions"), href: "/back")
+      expect(view.content_for(:back_link)).to have_link(I18n.t("back_link.form_pages"), href: form_pages_path(form.id))
     end
 
     it "has the correct heading and caption" do
@@ -68,7 +68,7 @@ describe "pages/routes/show.html.erb" do
       create :condition, routing_page_id: pages.first.id, check_page_id: pages.first.id, answer_value: "Option 1", goto_page_id: pages.third.id
       pages.each(&:reload)
 
-      render template: "pages/routes/show", locals: { current_form: form, page:, back_link_url: "/back", route_summary_card_data_presenter: route_summary_card_data_service }
+      render template: "pages/routes/show", locals: { current_form: form, page:, route_summary_card_data_presenter: route_summary_card_data_service }
     end
 
     it "does not have a link to delete all routes" do
@@ -120,7 +120,7 @@ describe "pages/routes/show.html.erb" do
       create :condition, :with_exit_page, routing_page_id: page.id, check_page_id: page.id, answer_value: "Option 1"
       pages.each(&:reload)
 
-      render template: "pages/routes/show", locals: { current_form: form, page:, back_link_url: "/back", route_summary_card_data_presenter: route_summary_card_data_service }
+      render template: "pages/routes/show", locals: { current_form: form, page:, route_summary_card_data_presenter: route_summary_card_data_service }
     end
 
     it "does not show the link to set questions to skip" do
@@ -140,7 +140,7 @@ describe "pages/routes/show.html.erb" do
       create :condition, routing_page_id: pages.second.id, check_page_id: pages.first.id, goto_page_id: pages.fourth.id
       pages.each(&:reload)
 
-      render template: "pages/routes/show", locals: { current_form: form, page:, back_link_url: "/back", route_summary_card_data_presenter: route_summary_card_data_service }
+      render template: "pages/routes/show", locals: { current_form: form, page:, route_summary_card_data_presenter: route_summary_card_data_service }
     end
 
     it "has a link to delete all routes" do
@@ -157,7 +157,7 @@ describe "pages/routes/show.html.erb" do
     let(:errors) { [OpenStruct.new(link: "goto-1", message: "Error text")] }
 
     before do
-      render template: "pages/routes/show", locals: { current_form: form, page:, back_link_url: "/back", route_summary_card_data_presenter: route_summary_card_data_service }
+      render template: "pages/routes/show", locals: { current_form: form, page:, route_summary_card_data_presenter: route_summary_card_data_service }
     end
 
     it "shows the error message" do

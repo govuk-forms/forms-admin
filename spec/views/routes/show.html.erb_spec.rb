@@ -18,7 +18,7 @@ describe "routes/show.html.erb" do
 
   it "has the correct back link" do
     render_page
-    expect(view.content_for(:back_link)).to have_link("Back to your form", href: form_pages_path(form.id))
+    expect(view.content_for(:back_link)).to have_link("Back to your questions", href: form_pages_path(form.id))
   end
 
   it "has the correct heading and caption" do

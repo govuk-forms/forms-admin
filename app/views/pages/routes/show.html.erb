@@ -1,5 +1,5 @@
 <% set_page_title(title_with_error_prefix(t('page_titles.routes_show', question_number: page.position), false)) %>
-<% content_for :back_link, govuk_back_link_to(back_link_url, t('pages.go_to_your_questions')) %>
+<% content_for :back_link, govuk_back_link_to(form_pages_path(current_form.id), t('back_link.form_pages')) %>
 
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds">

@@ -233,6 +233,7 @@ en:
   back_link:
     form_create: Back to create your form
     form_edit: Back to edit your form
+    form_pages: Back to your questions
     form_view: Back to your form
     forms: Back to your forms
     group: Back to %{group_name}
@@ -1746,7 +1747,6 @@ en:
   pages:
     answer_settings: Answer settings
     change_order:
-      back_link: Back to Add and edit your questions
       move_question_to_label: Move question %{position} to (optional)
       preview_banner: You need to save this question order if you want to keep these changes
       preview_button: Preview new question order
