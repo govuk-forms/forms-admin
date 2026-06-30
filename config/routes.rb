@@ -81,6 +81,8 @@ Rails.application.routes.draw do
     delete "/welsh-translation/delete" => "forms/welsh_translation#destroy", as: :welsh_translation_destroy
     post "/welsh-translation-preview" => "forms/welsh_translation#render_preview", as: :welsh_translation_render_preview
     get "/welsh-translation-download" => "forms/welsh_translation#download", as: :welsh_translation_download
+    get "/welsh-translation-upload" => "forms/welsh_translation#show_upload", as: :welsh_translation_show_upload
+    post "/welsh-translation-upload" => "forms/welsh_translation#upload", as: :welsh_translation_upload
     get "/submission-attachments" => "forms/submission_attachments#new", as: :submission_attachments
     post "/submission-attachments" => "forms/submission_attachments#create", as: :submission_attachments_create
     get "/batch-submissions" => "forms/batch_submissions#new", as: :batch_submissions

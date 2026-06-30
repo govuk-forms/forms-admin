@@ -232,7 +232,7 @@ describe "forms/welsh_translation/new.html.erb" do
       let(:welsh_translation_input) { Forms::WelshTranslationInput.new(form:, page_translations: []).assign_form_values }
 
       it "does not render any page translation content" do
-        expect(rendered).not_to have_field(id: "forms_welsh_page_translation_input_#{page.id}_page_translations_question_text_cy", type: "text")
+        expect(rendered).not_to have_field(id: "page_#{page.id}_question_text_cy", type: "text")
       end
 
       it "renders message for no pages" do
@@ -242,8 +242,8 @@ describe "forms/welsh_translation/new.html.erb" do
 
     context "when the form has pages" do
       it "has a field for each page's Welsh question text" do
-        expect(rendered).to have_field("Enter Welsh question text for question #{page.position}", type: "text", id: "forms_welsh_page_translation_input_#{page.id}_page_translations_question_text_cy")
-        expect(rendered).to have_field("Enter Welsh question text for question #{another_page.position}", type: "text", id: "forms_welsh_page_translation_input_#{another_page.id}_page_translations_question_text_cy")
+        expect(rendered).to have_field("Enter Welsh question text for question #{page.position}", type: "text", id: "page_#{page.id}_question_text_cy")
+        expect(rendered).to have_field("Enter Welsh question text for question #{another_page.position}", type: "text", id: "page_#{another_page.id}_question_text_cy")
       end
 
       context "when a page has hint text" do
@@ -252,7 +252,7 @@ describe "forms/welsh_translation/new.html.erb" do
 
         it "shows the English text and Welsh field for pages with English hint text" do
           expect(rendered).to have_css("td", text: page.hint_text)
-          expect(rendered).to have_field("Enter Welsh hint text for question #{page.position}", type: "textarea", id: "forms_welsh_page_translation_input_#{page.id}_page_translations_hint_text_cy")
+          expect(rendered).to have_field("Enter Welsh hint text for question #{page.position}", type: "textarea", id: "page_#{page.id}_hint_text_cy")
         end
 
         it "does not show the Welsh field for pages without English hint text" do
@@ -266,9 +266,9 @@ describe "forms/welsh_translation/new.html.erb" do
 
         it "shows the English text and Welsh fields for pages with English page heading and guidance markdown" do
           expect(rendered).to have_css("td", text: another_page.page_heading)
-          expect(rendered).to have_field("Enter Welsh page heading for question #{another_page.position}", id: "forms_welsh_page_translation_input_#{another_page.id}_page_translations_page_heading_cy")
+          expect(rendered).to have_field("Enter Welsh page heading for question #{another_page.position}", id: "page_#{another_page.id}_page_heading_cy")
           expect(rendered).to have_css("td", text: another_page.guidance_markdown)
-          expect(rendered).to have_field("Enter Welsh guidance text for question #{another_page.position}", id: "forms_welsh_page_translation_input_#{another_page.id}_page_translations_guidance_markdown_cy")
+          expect(rendered).to have_field("Enter Welsh guidance text for question #{another_page.position}", id: "page_#{another_page.id}_guidance_markdown_cy")
         end
 
         it "does not show the Welsh field for pages without English page heading and guidance markdown" do
@@ -368,7 +368,7 @@ describe "forms/welsh_translation/new.html.erb" do
 
     it "links the error summary to the invalid field" do
       error_message = I18n.t("activemodel.errors.models.forms/welsh_page_translation_input.attributes.question_text_cy.blank", question_number: page.position)
-      expect(rendered).to have_link(error_message, href: "#forms_welsh_page_translation_input_#{page.id}_page_translations_question_text_cy")
+      expect(rendered).to have_link(error_message, href: "#page_#{page.id}_question_text_cy")
     end
 
     it "adds an inline error message to the invalid field" do
@@ -396,7 +396,7 @@ describe "forms/welsh_translation/new.html.erb" do
 
     it "links the error summary to the invalid field" do
       error_message = I18n.t("activemodel.errors.models.forms/welsh_condition_translation_input.attributes.exit_page_heading_cy.blank", question_number: page.position)
-      expect(rendered).to have_link(error_message, href: "#forms_welsh_condition_translation_input_#{condition.id}_condition_translations_exit_page_heading_cy")
+      expect(rendered).to have_link(error_message, href: "#condition_#{condition.id}_exit_page_heading_cy")
     end
 
     it "adds an inline error message to the invalid field" do

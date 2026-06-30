@@ -1,0 +1,14 @@
+---
+en:
+  activemodel:
+    errors:
+      models:
+        forms/welsh_translation_upload_input:
+          attributes:
+            file:
+              blank: Choose a file
+              invalid_csv: Invalid CSV file. Download the content as a CSV file, fill in the translations, and upload it again.
+  helpers:
+    label:
+      forms_welsh_translation_upload_input:
+        file: Upload a CSV file with your Welsh translations

@@ -122,6 +122,19 @@ class Forms::WelshTranslationInput < Forms::MarkCompleteInput
     self
   end
 
+  def assign_from_csv_values(csv_values)
+    WelshCsvImportService::FORM_FIELD_IDS.each do |field_id|
+      attr = :"#{field_id}_cy"
+      send(:"#{attr}=", csv_values[field_id]) if csv_values.key?(field_id)
+    end
+
+    page_translations.each do |page_translation|
+      page_translation.assign_from_csv_values(csv_values)
+    end
+
+    self
+  end
+
   def blanked?
     all_fields_empty? && page_translations.all?(&:blanked?)
   end

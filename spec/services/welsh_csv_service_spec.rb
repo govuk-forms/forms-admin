@@ -5,15 +5,12 @@ RSpec.describe "WelshCsvService" do
     let(:form) { build :form }
 
     it "contains the header row" do
-      expect(csv_rows(form)[0]).to contain_exactly(
-        "",
-        "English content",
-        "Welsh content",
-      )
+      expect(csv_rows(form)[0]).to eq(["Identifier (do not change)", "Content", "English content", "Welsh content"])
     end
 
     it "contains the form name" do
       expect(csv_rows(form)).to include([
+        "name",
         "Form name",
         form.name,
         form.name_cy,
@@ -25,6 +22,7 @@ RSpec.describe "WelshCsvService" do
 
       it "contains the declaration" do
         expect(csv_rows(form)).to include([
+          "declaration_markdown",
           "Declaration",
           "Declaration text",
           "Welsh Declaration text",
@@ -37,6 +35,7 @@ RSpec.describe "WelshCsvService" do
 
       it "contains the what happens next" do
         expect(csv_rows(form)).to include([
+          "what_happens_next_markdown",
           "Information about what happens next",
           "What happens next text",
           "Welsh What happens next text",
@@ -49,7 +48,8 @@ RSpec.describe "WelshCsvService" do
 
       it "contains the payment URL" do
         expect(csv_rows(form)).to include([
-          "GOV⁠.⁠UK Pay payment link",
+          "payment_url",
+          "GOV\u2060.\u2060UK Pay payment link",
           "https://www.gov.uk/payment",
           "https://www.gov.uk/payment_cy",
         ])
@@ -62,6 +62,7 @@ RSpec.describe "WelshCsvService" do
 
         it "contains the support email" do
           expect(csv_rows(form)).to include([
+            "support_email",
             "Contact details for support - email address",
             "support@example.gov.uk",
             "support@example.gov.uk",
@@ -74,6 +75,7 @@ RSpec.describe "WelshCsvService" do
 
         it "contains the support phone" do
           expect(csv_rows(form)).to include([
+            "support_phone",
             "Contact details for support - phone number and opening times",
             "English support phone",
             "Welsh support phone",
@@ -86,6 +88,7 @@ RSpec.describe "WelshCsvService" do
 
         it "contains the support URL" do
           expect(csv_rows(form)).to include([
+            "support_url",
             "Contact details for support - online contact link",
             "https://www.gov.uk/support",
             "https://www.gov.uk/support_cy",
@@ -94,6 +97,7 @@ RSpec.describe "WelshCsvService" do
 
         it "contains the support URL text" do
           expect(csv_rows(form)).to include([
+            "support_url_text",
             "Contact details for support - online contact link text",
             "Text to describe the contact link",
             "Welsh Text to describe the contact link",
@@ -116,6 +120,7 @@ RSpec.describe "WelshCsvService" do
 
       it "contains the question text" do
         expect(csv_rows(form)).to include([
+          "page_#{page.id}_question_text",
           "Question 1 - question text",
           "Question text",
           "Welsh question text",
@@ -129,6 +134,7 @@ RSpec.describe "WelshCsvService" do
 
       it "contains the hint text" do
         expect(csv_rows(form)).to include([
+          "page_#{page.id}_hint_text",
           "Question 1 - hint text",
           "Hint text",
           "Welsh hint text",
@@ -154,10 +160,12 @@ RSpec.describe "WelshCsvService" do
 
       it "contains the options" do
         expect(csv_rows(form)).to include([
+          "page_#{page.id}_option_0",
           "Question 1 - option 1",
           "Yes",
           "Ydy",
         ], [
+          "page_#{page.id}_option_1",
           "Question 1 - option 2",
           "No",
           "Nac ydy",
@@ -177,10 +185,12 @@ RSpec.describe "WelshCsvService" do
 
       it "contains the guidance" do
         expect(csv_rows(form)).to include([
+          "page_#{page.id}_guidance_markdown",
           "Question 1 - guidance text",
           "Markdown",
           "Welsh markdown",
         ], [
+          "page_#{page.id}_page_heading",
           "Question 1 - page heading",
           "Page heading",
           "Welsh page heading",
@@ -201,7 +211,8 @@ RSpec.describe "WelshCsvService" do
 
       it "contains the none of the above question" do
         expect(csv_rows(form)).to include([
-          "Question 1 - question or label if ‘None of the above’ is selected",
+          "page_#{page.id}_none_of_the_above_question",
+          "Question 1 - question or label if 'None of the above' is selected",
           "None of the above question?",
           "Welsh None of the above question?",
         ])
@@ -215,6 +226,7 @@ RSpec.describe "WelshCsvService" do
 
       it "contains the exit page heading" do
         expect(csv_rows(form)).to include([
+          "condition_#{condition.id}_exit_page_heading",
           "Question 1 - exit page heading",
           "Exit page heading",
           "Welsh exit page heading",
@@ -261,25 +273,27 @@ RSpec.describe "WelshCsvService" do
       it "returns a CSV with a header row and the expected rows" do
         csv = csv_rows(form)
 
-        expected_csv = [["", "English content", "Welsh content"],
-                        ["Form name", "A form", "Welsh A form"],
-                        ["Question 1 - question text", "None of the above question?", "Welsh None of the above question?"],
-                        ["Question 1 - option 1", "Option 1", "Option 1"],
-                        ["Question 1 - option 2", "Option 2", "Option 2"],
-                        ["Question 1 - question or label if ‘None of the above’ is selected", "None of the above question?", "Welsh None of the above question?"],
-                        ["Question 1 - exit page heading", "Exit page heading", "Welsh exit page heading"],
-                        ["Question 1 - exit page content", "Exit page markdown", "Welsh exit page markdown"],
-                        ["Question 2 - page heading", "Page heading", "Welsh Page heading"],
-                        ["Question 2 - guidance text", "This is the guidance.", "Welsh This is the guidance."],
-                        ["Question 2 - question text", "What?", "Welsh What?"],
-                        ["Declaration", "Declaration text", ""],
-                        ["Information about what happens next", "English what happens next", "Welsh what happens next"],
-                        ["GOV⁠.⁠UK Pay payment link", "https://www.gov.uk/payment", "https://www.gov.uk/payment_cy"],
-                        ["Link to privacy information for this form", "https://www.gov.uk/privacy", ""],
-                        ["Contact details for support - email address", "support@example.gov.uk", "support@example.gov.uk"],
-                        ["Contact details for support - phone number and opening times", "English support phone", "Welsh support phone"],
-                        ["Contact details for support - online contact link", "https://www.gov.uk/support", "https://www.gov.uk/support_cy"],
-                        ["Contact details for support - online contact link text", "Support URL text", "Welsh Support URL text"]]
+        expected_csv = [
+          ["Identifier (do not change)", "Content", "English content", "Welsh content"],
+          ["name", "Form name", "A form", "Welsh A form"],
+          ["page_#{page.id}_question_text", "Question 1 - question text", "None of the above question?", "Welsh None of the above question?"],
+          ["page_#{page.id}_option_0", "Question 1 - option 1", "Option 1", "Option 1"],
+          ["page_#{page.id}_option_1", "Question 1 - option 2", "Option 2", "Option 2"],
+          ["page_#{page.id}_none_of_the_above_question", "Question 1 - question or label if 'None of the above' is selected", "None of the above question?", "Welsh None of the above question?"],
+          ["condition_#{condition.id}_exit_page_heading", "Question 1 - exit page heading", "Exit page heading", "Welsh exit page heading"],
+          ["condition_#{condition.id}_exit_page_markdown", "Question 1 - exit page content", "Exit page markdown", "Welsh exit page markdown"],
+          ["page_#{another_page.id}_page_heading", "Question 2 - page heading", "Page heading", "Welsh Page heading"],
+          ["page_#{another_page.id}_guidance_markdown", "Question 2 - guidance text", "This is the guidance.", "Welsh This is the guidance."],
+          ["page_#{another_page.id}_question_text", "Question 2 - question text", "What?", "Welsh What?"],
+          ["declaration_markdown", "Declaration", "Declaration text", ""],
+          ["what_happens_next_markdown", "Information about what happens next", "English what happens next", "Welsh what happens next"],
+          ["payment_url", "GOV\u2060.\u2060UK Pay payment link", "https://www.gov.uk/payment", "https://www.gov.uk/payment_cy"],
+          ["privacy_policy_url", "Link to privacy information for this form", "https://www.gov.uk/privacy", ""],
+          ["support_email", "Contact details for support - email address", "support@example.gov.uk", "support@example.gov.uk"],
+          ["support_phone", "Contact details for support - phone number and opening times", "English support phone", "Welsh support phone"],
+          ["support_url", "Contact details for support - online contact link", "https://www.gov.uk/support", "https://www.gov.uk/support_cy"],
+          ["support_url_text", "Contact details for support - online contact link text", "Support URL text", "Welsh Support URL text"],
+        ]
         expect(csv).to eq(expected_csv)
       end
     end

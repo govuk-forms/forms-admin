@@ -15,6 +15,7 @@
 
       <div class="govuk-button-group">
         <%= govuk_button_link_to t(".csv_download"), welsh_translation_download_path(@welsh_translation_input.form, format: :csv), secondary: true, data: { "track-link": true }  %>
+        <%= govuk_link_to t(".csv_upload"), welsh_translation_show_upload_path(@welsh_translation_input.form), secondary: true %>
         <%= render PreviewLinkComponent::View.new(@welsh_translation_input.form.pages, preview_link(@welsh_translation_input.form, locale: :cy), t(".preview_link_text")) %>
       </div>
     </div>

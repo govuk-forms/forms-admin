@@ -660,6 +660,7 @@ en:
         condition:
           heading: Question %{question_number}’s exit page
         csv_download: Download content as CSV
+        csv_upload: Upload translations
         delete_welsh_version: Delete Welsh version
         english_header: English content
         exit_page_heading: Exit page heading
@@ -692,6 +693,9 @@ en:
         support_url: Online contact link
         support_url_text: Text to describe the contact link
         welsh_header: Welsh content
+      show_upload:
+        submit: Upload translations
+        title: Upload Welsh translations from CSV
   group_forms:
     edit:
       body_html: "<p> We’ll send an email to members of the current group to let them know the form has moved and they may no longer have access to it. </p>\n"

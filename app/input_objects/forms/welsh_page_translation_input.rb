@@ -2,6 +2,7 @@ class Forms::WelshPageTranslationInput < BaseInput
   include TextInputHelper
   include ActionView::Helpers::FormTagHelper
   include ActiveModel::Attributes
+  include WelshTranslationContentId
 
   attr_accessor :condition_translations, :selection_options_cy
   attr_reader :page
@@ -82,6 +83,24 @@ class Forms::WelshPageTranslationInput < BaseInput
     self
   end
 
+  def assign_from_csv_values(csv_values)
+    %i[question_text hint_text page_heading guidance_markdown none_of_the_above_question].each do |attr|
+      csv_id = page_content_id(page.id, attr)
+      send(:"#{attr}_cy=", csv_values[csv_id]) if csv_values.key?(csv_id)
+    end
+
+    selection_options_cy&.each_with_index do |option, index|
+      csv_id = page_content_id(page.id, "option_#{index}")
+      option.name_cy = csv_values[csv_id] if csv_values.key?(csv_id)
+    end
+
+    condition_translations.each do |condition_translation|
+      condition_translation.assign_from_csv_values(csv_values)
+    end
+
+    self
+  end
+
   def condition_translations_attributes=(attributes)
     submitted_condition_ids = attributes.values.map { |attrs| attrs["id"] }.compact
 
@@ -112,7 +131,7 @@ class Forms::WelshPageTranslationInput < BaseInput
   end
 
   def form_field_id(attribute)
-    field_id(:forms_welsh_page_translation_input, page.id, :page_translations, attribute)
+    page_content_id(page.id, attribute)
   end
 
   def page_has_hint_text?

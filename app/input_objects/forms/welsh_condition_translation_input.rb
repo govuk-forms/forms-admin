@@ -1,6 +1,7 @@
 class Forms::WelshConditionTranslationInput < BaseInput
   include ActionView::Helpers::FormTagHelper
   include ActiveModel::Attributes
+  include WelshTranslationContentId
 
   attr_accessor :condition
 
@@ -39,8 +40,17 @@ class Forms::WelshConditionTranslationInput < BaseInput
     self
   end
 
+  def assign_from_csv_values(csv_values)
+    %i[exit_page_heading exit_page_markdown].each do |attr|
+      csv_id = condition_content_id(condition.id, attr)
+      send(:"#{attr}_cy=", csv_values[csv_id]) if csv_values.key?(csv_id)
+    end
+
+    self
+  end
+
   def form_field_id(attribute)
-    field_id(:forms_welsh_condition_translation_input, condition.id, :condition_translations, attribute)
+    condition_content_id(condition.id, attribute)
   end
 
   def condition_has_exit_page?

@@ -218,8 +218,8 @@ RSpec.describe Forms::WelshConditionTranslationInput, type: :model do
     end
 
     it "returns the custom ID for each attribute" do
-      expect(welsh_condition_translation_input.form_field_id(:exit_page_markdown_cy)).to eq "forms_welsh_condition_translation_input_#{condition.id}_condition_translations_exit_page_markdown_cy"
-      expect(welsh_condition_translation_input.form_field_id(:exit_page_heading_cy)).to eq "forms_welsh_condition_translation_input_#{condition.id}_condition_translations_exit_page_heading_cy"
+      expect(welsh_condition_translation_input.form_field_id(:exit_page_markdown_cy)).to eq "condition_#{condition.id}_exit_page_markdown_cy"
+      expect(welsh_condition_translation_input.form_field_id(:exit_page_heading_cy)).to eq "condition_#{condition.id}_exit_page_heading_cy"
     end
   end
 

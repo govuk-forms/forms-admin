@@ -26,6 +26,14 @@ class Forms::WelshSelectionOptionTranslationInput < BaseInput
     self
   end
 
+  def assign_selection_option_values_from_csv_values(csv_values)
+    return self unless selection_option
+
+    csv_id = page_content_id(page.id, "option_#{index}")
+    self.name_cy = csv_values[csv_id] if csv_values.key?(csv_id)
+    self
+  end
+
   def as_selection_option
     { name: name_cy, value: selection_option.value }
   end

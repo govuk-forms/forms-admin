@@ -293,8 +293,66 @@ RSpec.describe Forms::WelshTranslationController, type: :request do
     it "returns a CSV with a header row and and content" do
       csv = CSV.parse(response.body)
 
-      expect(csv.first).to eq(["", "English content", "Welsh content"])
-      expect(csv.second).to eq(["Form name", "A form with Welsh", "Welsh A form with Welsh"])
+      expect(csv.first).to eq(["Identifier (do not change)", "Content", "English content", "Welsh content"])
+      expect(csv.second).to eq(["name", "Form name", "A form with Welsh", "Welsh A form with Welsh"])
+    end
+  end
+
+  describe "#upload" do
+    let(:form) { create(:form, :ready_for_routing, welsh_completed: false) }
+
+    let(:csv_data) do
+      CSV.generate do |csv|
+        csv << [WelshCsvImportService::ID_COLUMN, "Content", "English content", "Welsh content"]
+        csv << ["name", "Form name", form.name, "Fy Ffurflen"]
+      end
+    end
+
+    let(:file) do
+      file = Tempfile.new(["translations", ".csv"])
+      file.write(csv_data)
+      file.rewind
+      Rack::Test::UploadedFile.new(file.path, "text/csv", original_filename: "translations.csv")
+    end
+
+    context "when a valid CSV is uploaded" do
+      before do
+        post welsh_translation_upload_path(id), params: { forms_welsh_translation_upload_input: { file: } }
+      end
+
+      it "renders the new template" do
+        expect(response).to have_http_status(:ok)
+        expect(response).to render_template(:new)
+      end
+
+      it "pre-populates form name from CSV" do
+        expect(response.body).to include("Fy Ffurflen")
+      end
+    end
+
+    context "when no file is provided" do
+      before do
+        post welsh_translation_upload_path(id), params: { forms_welsh_translation_upload_input: { file: nil } }
+      end
+
+      it "renders the upload file page with an error" do
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(response).to render_template(:show_upload)
+        expect(response.body).to include(I18n.t("activemodel.errors.models.forms/welsh_translation_upload_input.attributes.file.blank"))
+        expect(flash).to be_empty
+      end
+    end
+
+    context "when the user is not authorized" do
+      let(:current_user) { build :user }
+
+      before do
+        post welsh_translation_upload_path(id), params: { file: }
+      end
+
+      it "returns 403" do
+        expect(response).to have_http_status(:forbidden)
+      end
     end
   end
 end
