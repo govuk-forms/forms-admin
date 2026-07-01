@@ -80,13 +80,13 @@ module Forms
 
       welsh_translation_upload_input = WelshTranslationUploadInput.new(**welsh_translation_upload_params)
 
-      csv_data = welsh_translation_upload_input.read_file
-      unless csv_data
+      data = welsh_translation_upload_input.read_file
+      unless data
         return render :show_upload, status: :unprocessable_entity, locals: { current_form:, welsh_translation_upload_input: }
       end
 
       @welsh_translation_input = WelshTranslationInput.new(form: form_with_pages_and_conditions).assign_form_values
-      @welsh_translation_input.assign_from_csv_values(csv_data)
+      @welsh_translation_input.assign_from_spreadsheet(data)
       @table_presenter = Forms::TranslationTablePresenter.new
 
       render :new

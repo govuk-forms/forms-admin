@@ -31,7 +31,7 @@ class WelshCsvService
 private
 
   def add_header(csv)
-    csv << [WelshCsvImportService::ID_COLUMN, "Content", "English content", "Welsh content"]
+    csv << [WelshSpreadsheetImportService::ID_COLUMN, "Content", "English content", "Welsh content"]
   end
 
   def add_form_name(csv)

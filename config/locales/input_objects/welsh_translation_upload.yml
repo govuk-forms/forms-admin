@@ -7,8 +7,12 @@ en:
           attributes:
             file:
               blank: Choose a file
-              invalid_csv: Invalid CSV file. Download the content as a CSV file, fill in the translations, and upload it again.
+              disallowed_type: The selected file must be a CSV, XLSX, or ODS
+              invalid_csv: The spreadsheet is not in the correct format. Download the content as a CSV file, fill in the translations, and upload it again.
   helpers:
+    hint:
+      forms_welsh_translation_upload_input:
+        file: Supported file types are CSV, XLSX, and ODS
     label:
       forms_welsh_translation_upload_input:
-        file: Upload a CSV file with your Welsh translations
+        file: Upload a spreadsheet with your Welsh translations

@@ -303,7 +303,7 @@ RSpec.describe Forms::WelshTranslationController, type: :request do
 
     let(:csv_data) do
       CSV.generate do |csv|
-        csv << [WelshCsvImportService::ID_COLUMN, "Content", "English content", "Welsh content"]
+        csv << [WelshSpreadsheetImportService::ID_COLUMN, "Content", "English content", "Welsh content"]
         csv << ["name", "Form name", form.name, "Fy Ffurflen"]
       end
     end

@@ -83,19 +83,19 @@ class Forms::WelshPageTranslationInput < BaseInput
     self
   end
 
-  def assign_from_csv_values(csv_values)
+  def assign_from_spreadsheet(data)
     %i[question_text hint_text page_heading guidance_markdown none_of_the_above_question].each do |attr|
-      csv_id = page_content_id(page.id, attr)
-      send(:"#{attr}_cy=", csv_values[csv_id]) if csv_values.key?(csv_id)
+      spreadsheet_id = page_content_id(page.id, attr)
+      send(:"#{attr}_cy=", data[spreadsheet_id]) if data.key?(spreadsheet_id)
     end
 
     selection_options_cy&.each_with_index do |option, index|
-      csv_id = page_content_id(page.id, "option_#{index}")
-      option.name_cy = csv_values[csv_id] if csv_values.key?(csv_id)
+      spreadsheet_id = page_content_id(page.id, "option_#{index}")
+      option.name_cy = data[spreadsheet_id] if data.key?(spreadsheet_id)
     end
 
     condition_translations.each do |condition_translation|
-      condition_translation.assign_from_csv_values(csv_values)
+      condition_translation.assign_from_spreadsheet(data)
     end
 
     self

@@ -40,10 +40,10 @@ class Forms::WelshConditionTranslationInput < BaseInput
     self
   end
 
-  def assign_from_csv_values(csv_values)
+  def assign_from_spreadsheet(data)
     %i[exit_page_heading exit_page_markdown].each do |attr|
-      csv_id = condition_content_id(condition.id, attr)
-      send(:"#{attr}_cy=", csv_values[csv_id]) if csv_values.key?(csv_id)
+      spreadsheet_id = condition_content_id(condition.id, attr)
+      send(:"#{attr}_cy=", data[spreadsheet_id]) if data.key?(spreadsheet_id)
     end
 
     self

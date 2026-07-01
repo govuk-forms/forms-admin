@@ -10,7 +10,7 @@
 
       <%= f.govuk_file_field :file,
         label: { tag: 'h1', size: 'l' },
-        accept: "text/csv",
+        accept: Forms::WelshTranslationUploadInput::FILE_TYPES.join(", "),
         javascript: true
       %>
 
