@@ -120,7 +120,7 @@ module Forms
     end
 
     def welsh_translation_upload_params
-      params.require(:forms_welsh_translation_upload_input).permit(:file)
+      params.fetch(:forms_welsh_translation_upload_input, ActionController::Parameters.new).permit(:file)
     end
   end
 end
