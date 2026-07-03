@@ -1,6 +1,6 @@
 class Pages::ExitPageController < PagesController
   before_action :can_add_page_routing, only: %i[new create delete destroy]
-  before_action :ensure_answer_value_present, only: %i[new create]
+  before_action :ensure_answer_value_present, only: %i[new create], unless: -> { current_form&.group.present? && FeatureService.new(group: current_form.group).enabled?(:multiple_branches) }
 
   def new
     exit_page_input = Pages::ExitPageInput.new(form: current_form, page:, answer_value: params[:answer_value])
@@ -81,7 +81,11 @@ class Pages::ExitPageController < PagesController
 private
 
   def can_add_page_routing
-    authorize current_form, :can_add_page_routing_conditions?
+    if current_form&.group.present? && FeatureService.new(group: current_form.group).enabled?(:multiple_branches)
+      authorize current_form, :can_edit_form?
+    else
+      authorize current_form, :can_add_page_routing_conditions?
+    end
   end
 
   def exit_page_input_params

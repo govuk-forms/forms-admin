@@ -44,6 +44,12 @@ RSpec.describe Pages::ExitPageController, type: :request do
         expect(response.status).to eq(403)
         expect(response).to render_template("errors/forbidden")
       end
+
+      context "when mutlple branches is enabled", :multiple_branches do
+        it "renders the new exit page template" do
+          expect(response).to render_template("pages/exit_page/new")
+        end
+      end
     end
 
     context "when there is no answer value param" do
@@ -92,6 +98,13 @@ RSpec.describe Pages::ExitPageController, type: :request do
       it "Renders the forbidden page" do
         expect(response.status).to eq(403)
         expect(response).to render_template("errors/forbidden")
+      end
+
+      context "when mutlple branches is enabled", :multiple_branches do
+        it "Renders the forbidden page" do
+          expect(response.status).to eq(403)
+          expect(response).to render_template("errors/forbidden")
+        end
       end
     end
   end
