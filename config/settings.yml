@@ -8,6 +8,7 @@ features:
     enabled_by_group: true
   send_filler_answers:
     enabled_by_group: true
+  show_relevant_organisations: false
 
 forms_api:
   # Authentication key to authenticate with forms-api
