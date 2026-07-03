@@ -1,9 +1,9 @@
 require "rails_helper"
 
 describe "account/organisations/edit.html.erb" do
-  let(:organisation_input) { Account::OrganisationInput.new }
+  let(:organisation_input) { Account::OrganisationInput.new(allowed_organisations: organisations) }
   let(:contact_href) { "https://example.com/contact" }
-  let!(:organisations) do
+  let(:organisations) do
     [
       create(:organisation, slug: "test-org"),
       create(:organisation, slug: "department-for-testing", name: "Department for Testing"),
@@ -60,25 +60,6 @@ describe "account/organisations/edit.html.erb" do
 
     it "sets the page title with error prefix" do
       expect(view.content_for(:title)).to eq(title_with_error_prefix(t("page_titles.account_organisation"), true))
-    end
-  end
-
-  context "when there are closed organisations" do
-    before do
-      create(:organisation, slug: "closed-org", closed: true)
-
-      render
-    end
-
-    it "only shows the organisations that are not closed" do
-      expect(rendered).to have_select(
-        "Select your organisation",
-        options: [
-          "Select an organisation",
-          "Department for Testing (DfT)",
-          "Test Org (TO)",
-        ],
-      )
     end
   end
 end

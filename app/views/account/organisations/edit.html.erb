@@ -10,7 +10,7 @@
         f,
         attribute_name: :organisation_id,
         form_field: f.govuk_collection_select(:organisation_id,
-                                              Organisation.not_closed.order(:name),
+                                              @organisation_input.allowed_organisations,
                                               :id,
                                               :name_with_abbreviation,
                                               class: ['govuk-!-width-three-quarters'],

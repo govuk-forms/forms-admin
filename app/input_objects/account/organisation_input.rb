@@ -1,7 +1,7 @@
 class Account::OrganisationInput < BaseInput
-  attr_accessor :user, :organisation_id
+  attr_accessor :user, :allowed_organisations, :organisation_id
 
-  validates :organisation_id, presence: true
+  validates :organisation_id, presence: true, inclusion: { in: ->(record) { record.allowed_organisations.pluck(:id).map(&:to_s) } }
 
   def submit
     return false if invalid?

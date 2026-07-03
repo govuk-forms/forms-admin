@@ -5,6 +5,7 @@ FactoryBot.define do
     name { slug.titleize }
     abbreviation { name.split.collect(&:chr).join }
     internal { false }
+    closed { false }
 
     trait :with_signed_mou do
       after(:build) do |organisation|
