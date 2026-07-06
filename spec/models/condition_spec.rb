@@ -720,4 +720,28 @@ RSpec.describe Condition, type: :model do
       end
     end
   end
+
+  describe "using the new ExitPage model" do
+    describe "#exit_page_heading" do
+      let(:condition) { create :condition, exit_page_heading: "English heading", exit_page_heading_cy: "Welsh heading" }
+
+      it "returns the heading" do
+        expect(condition.exit_page_heading).to eq("English heading")
+      end
+
+      context "when the condition has an ExitPage" do
+        before do
+          condition.exit_page = create :exit_page, question_page: condition.routing_page, heading: "Exit page english heading", heading_cy: "Exit page welsh heading"
+        end
+
+        it "returns the heading from the ExitPage" do
+          expect(condition.exit_page_heading).to eq("Exit page english heading")
+        end
+
+        it "returns the welsh heading if the condition an ExitPage" do
+          expect(condition.exit_page_heading_cy).to eq("Exit page welsh heading")
+        end
+      end
+    end
+  end
 end

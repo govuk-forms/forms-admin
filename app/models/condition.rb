@@ -16,19 +16,44 @@ class Condition < ApplicationRecord
   translates :exit_page_heading
   translates :exit_page_markdown, presence: false # Without presence here, the value is nil if set to ""
 
-  def self.create_and_update_form!(...)
-    condition = Condition.new(...)
+  def self.create_and_update_form!(**args)
+    exit_page_attributes = args.slice(:exit_page_heading, :exit_page_markdown)
+
+    condition = Condition.new(**args)
+
+    if exit_page_attributes.present?
+      heading = exit_page_attributes.fetch(:exit_page_heading, "")
+      markdown = exit_page_attributes.fetch(:exit_page_markdown, "")
+      condition.exit_page = ExitPage.create(heading:, markdown:, question_page: condition.routing_page)
+    end
+
     condition.save_and_update_form
     condition
   end
 
-  def save_and_update_form
+  def save_and_update_form(**args)
+    exit_page_attributes = args.slice(:exit_page_heading, :exit_page_markdown)
+
+    if exit_page_attributes.present?
+      heading = exit_page_attributes.fetch(:exit_page_heading, "")
+      markdown = exit_page_attributes.fetch(:exit_page_markdown, "")
+
+      if exit_page.present?
+        exit_page.update!(heading:, markdown:)
+      else
+        ExitPage.create!(heading:, markdown:, question_page: routing_page)
+      end
+    end
+
     save!
     form.save_question_changes!
   end
 
   def destroy_and_update_form!
+    exit_page_to_delete = exit_page
     destroy! && form.save_question_changes!
+
+    exit_page_to_delete.presence&.destroy! unless FeatureService.new(group: form.group).enabled?(:multiple_branches)
   end
 
   def validation_errors
@@ -38,6 +63,38 @@ class Condition < ApplicationRecord
       warning_routing_to_next_page,
       warning_goto_page_before_routing_page,
     ].compact
+  end
+
+  def exit_page_heading(**args)
+    return exit_page&.heading(**args) if exit_page.present?
+
+    super(**args)
+  end
+
+  def exit_page_markdown(**args)
+    return exit_page&.markdown(**args) if exit_page.present?
+
+    super(**args)
+  end
+
+  def exit_page_heading=(value, **args)
+    if exit_page.present?
+      exit_page.update!(heading: value, **args)
+    else
+      attributes[:exit_page] = ExitPage.new(heading: value, question_page: routing_page, **args)
+    end
+
+    super(value, **args)
+  end
+
+  def exit_page_markdown=(value, **args)
+    if exit_page.present?
+      exit_page.update!(markdown: value, **args)
+    else
+      attributes[:exit_page] = ExitPage.new(markdown: value, question_page: routing_page, **args)
+    end
+
+    super(value, **args)
   end
 
   def warning_goto_page_doesnt_exist

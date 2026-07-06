@@ -32,6 +32,9 @@ class Pages::ConditionsInput < BaseInput
 
       record.skip_to_end = skip_to_end
       record.goto_page_id = goto_page_id
+      exit_page_to_delete = record&.exit_page
+      record.exit_page_id = nil
+      exit_page_to_delete.destroy! if exit_page_to_delete
       record.exit_page_heading = nil
       record.exit_page_markdown = nil
     end
