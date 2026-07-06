@@ -11,6 +11,9 @@ class Condition < ApplicationRecord
   has_one :form, through: :routing_page
   belongs_to :exit_page, optional: true
 
+  accepts_nested_attributes_for :exit_page, update_only: true
+  validates_associated :exit_page
+
   before_destroy :destroy_postconditions
 
   translates :exit_page_heading
