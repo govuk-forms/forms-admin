@@ -79,7 +79,7 @@ class Condition < ApplicationRecord
 
   def exit_page_heading=(value, **args)
     if exit_page.present?
-      exit_page.update!(heading: value, **args)
+      exit_page.send(:heading=, value, **args)
     else
       attributes[:exit_page] = ExitPage.new(heading: value, question_page: routing_page, **args)
     end
@@ -89,7 +89,7 @@ class Condition < ApplicationRecord
 
   def exit_page_markdown=(value, **args)
     if exit_page.present?
-      exit_page.update!(markdown: value, **args)
+      exit_page.send(:markdown=, value, **args)
     else
       attributes[:exit_page] = ExitPage.new(markdown: value, question_page: routing_page, **args)
     end
