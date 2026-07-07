@@ -15,6 +15,6 @@ permissions:
 jobs:
   update-review-app:
     name: Update review app
-    uses: govuk-forms/forms-deploy/.github/workflows/reusable-review_apps_on_pr_change.yml@main
+    uses: govuk-forms/forms-deploy/.github/workflows/reusable-review_apps_on_pr_change.yml@fix-review-app-comment
     with:
       app-name: forms-admin
