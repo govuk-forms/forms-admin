@@ -156,12 +156,10 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
         answer_settings: {
           input_type: "single_line",
         },
-        is_optional: false,
       ),
       Page.create(
         question_text: "Number",
         answer_type: "number",
-        is_optional: false,
       ),
       Page.create(
         question_text: "Address",
@@ -172,12 +170,10 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
             uk_address: true,
           },
         },
-        is_optional: false,
       ),
       Page.create(
         question_text: "Email address",
         answer_type: "email",
-        is_optional: false,
       ),
       Page.create(
         question_text: "Todays Date",
@@ -185,17 +181,14 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
         answer_settings: {
           input_type: "other_date",
         },
-        is_optional: false,
       ),
       Page.create(
         question_text: "National Insurance number",
         answer_type: "national_insurance_number",
-        is_optional: false,
       ),
       Page.create(
         question_text: "Phone number",
         answer_type: "phone_number",
-        is_optional: false,
       ),
       Page.create(
         question_text: "Selection from a list of options",
@@ -248,7 +241,6 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
         answer_settings: {
           input_type: "single_line",
         },
-        is_optional: false,
       ),
     ],
     question_section_completed: true,
@@ -289,7 +281,6 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
             { "name": "No", value: "No" },
           ],
         },
-        is_optional: false,
       ),
       Page.create(
         question_text: "How many times have you filled out this form?",
@@ -301,7 +292,6 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
             { "name": "More than once", value: "More than once" },
           ],
         },
-        is_optional: false,
       ),
       Page.create(
         question_text: "What’s your name?",
@@ -310,14 +300,10 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
           input_type: "full_name",
           title_needed: false,
         },
-        is_optional: false,
-        is_repeatable: false,
       ),
       Page.create(
         question_text: "What’s your email address?",
         answer_type: "email",
-        is_optional: false,
-        is_repeatable: false,
       ),
       Page.create(
         question_text: "What was the reference of your previous submission?",
@@ -325,8 +311,6 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
         answer_settings: {
           input_type: "single_line",
         },
-        is_optional: false,
-        is_repeatable: false,
       ),
       Page.create(
         question_text: "What’s your answer?",
@@ -334,8 +318,6 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
         answer_settings: {
           input_type: "single_line",
         },
-        is_optional: false,
-        is_repeatable: false,
       ),
     ],
     question_section_completed: true,
@@ -452,15 +434,11 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
           input_type: "full_name",
           title_needed: false,
         },
-        is_optional: false,
-        is_repeatable: false,
       ),
       Page.create(
         question_text: "What’s your email address?",
         question_text_cy: "Beth yw eich cyfeiriad e-bost?",
         answer_type: "email",
-        is_optional: false,
-        is_repeatable: false,
         page_heading: "Email",
         page_heading_cy: "E-bost",
         guidance_markdown: "We'll use your email to:\n\n- contact you if there are any issues with your submission\n\n- send you your digital licence",
@@ -473,8 +451,6 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
         answer_settings: {
           input_type: "single_line",
         },
-        is_optional: false,
-        is_repeatable: false,
       ),
       Page.create(
         question_text: "What’s your answer?",
@@ -483,8 +459,6 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
         answer_settings: {
           input_type: "single_line",
         },
-        is_optional: false,
-        is_repeatable: false,
       ),
     ],
     question_section_completed: true,
@@ -528,7 +502,6 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
             { "name": "No", value: "No" },
           ],
         },
-        is_optional: false,
       ),
       Page.create(
         question_text: "Where do you currently live?",
@@ -542,32 +515,26 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
             { "name": "Northern Ireland", value: "Northern Ireland" },
           ],
         },
-        is_optional: false,
       ),
       Page.create(
         question_text: "How many years have you lived in England?",
         answer_type: "number",
-        is_optional: false,
       ),
       Page.create(
         question_text: "How many years have you lived in Scotland?",
         answer_type: "number",
-        is_optional: false,
       ),
       Page.create(
         question_text: "How many years have you lived in Wales?",
         answer_type: "number",
-        is_optional: false,
       ),
       Page.create(
         question_text: "How many years have you lived in Northern Ireland?",
         answer_type: "number",
-        is_optional: false,
       ),
       Page.create(
         question_text: "How many years have you lived in the United Kingdom?",
         answer_type: "number",
-        is_optional: false,
       ),
     ],
     question_section_completed: true,
@@ -642,7 +609,6 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
           input_type: "full_name",
           title_needed: false,
         },
-        is_optional: false,
       ),
     ],
     question_section_completed: true,
