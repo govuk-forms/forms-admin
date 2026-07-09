@@ -6,6 +6,11 @@
 #   movies = Movie.create([{ name: "Star Wars" }, { name: "Lord of the Rings" }])
 #   Character.create(name: "Luke", movie: movies.first)
 
+if (HostingEnvironment.local_development? || HostingEnvironment.review?) && Brand.none?
+  Brand.create!(slug: "cheshire-east", name: "Cheshire East Council")
+  Brand.create!(slug: "south-gloucestershire", name: "South Gloucestershire Council")
+end
+
 if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User.none?
 
   gds = Organisation.find_or_create_by!(
