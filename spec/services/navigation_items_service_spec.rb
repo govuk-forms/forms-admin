@@ -22,12 +22,14 @@ describe NavigationItemsService do
       let(:can_manage_mous) { false }
       let(:can_view_reports) { false }
       let(:can_view_organisations) { false }
+      let(:can_view_brands) { false }
 
       before do
         allow(Pundit).to receive(:policy).with(user, :user).and_return(instance_double(UserPolicy, can_manage_user?: can_manage_user))
         allow(Pundit).to receive(:policy).with(user, :mou_signature).and_return(instance_double(MouSignaturePolicy, can_manage_mous?: can_manage_mous))
         allow(Pundit).to receive(:policy).with(user, :report).and_return(instance_double(ReportPolicy, can_view_reports?: can_view_reports))
         allow(Pundit).to receive(:policy).with(user, :organisation).and_return(instance_double(OrganisationPolicy, can_view_organisations?: can_view_organisations))
+        allow(Pundit).to receive(:policy).with(user, :brand).and_return(instance_double(BrandPolicy, can_view_brands?: can_view_brands))
         allow(Settings.forms_product_page).to receive(:support_url).and_return(support_url)
       end
 
@@ -61,6 +63,21 @@ describe NavigationItemsService do
       context "when user cannot view organisations" do
         it "does not include organisations in navigation items" do
           expect(service.navigation_items).not_to(be_any { |item| item.text == I18n.t("header.organisations") })
+        end
+      end
+
+      context "when user can view brands" do
+        let(:can_view_brands) { true }
+
+        it "includes brands in navigation items" do
+          brands_item = NavigationItemsService::NavigationItem.new(text: I18n.t("header.brands"), href: brands_path, active: false)
+          expect(service.navigation_items).to include(brands_item)
+        end
+      end
+
+      context "when user cannot view brands" do
+        it "does not include brands in navigation items" do
+          expect(service.navigation_items).not_to(be_any { |item| item.text == I18n.t("header.brands") })
         end
       end
 

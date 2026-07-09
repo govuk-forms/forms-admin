@@ -25,6 +25,7 @@ class NavigationItemsService
       mou_navigation_item,
       users_navigation_item,
       organisations_navigation_item,
+      brands_navigation_item,
       reports_navigation_item,
       support_navigation_item,
       profile_navigation_item,
@@ -58,6 +59,12 @@ private
     return nil unless should_show_organisations_link?
 
     NavigationItem.new(text: I18n.t("header.organisations"), href: organisations_path, active: false)
+  end
+
+  def brands_navigation_item
+    return nil unless should_show_brands_link?
+
+    NavigationItem.new(text: I18n.t("header.brands"), href: brands_path, active: false)
   end
 
   def reports_navigation_item
@@ -102,6 +109,10 @@ private
 
   def should_show_organisations_link?
     Pundit.policy(user, :organisation).can_view_organisations?
+  end
+
+  def should_show_brands_link?
+    Pundit.policy(user, :brand).can_view_brands?
   end
 
   def should_show_reports_link?
