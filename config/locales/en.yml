@@ -281,6 +281,18 @@ en:
 
       <p>If you do not choose a brand, your form will use the default GOV.UK brand.</p>
     heading: Choose a brand for your form
+  brands:
+    index:
+      no_results: No brands found.
+      table_caption: Brands
+      table_headings:
+        name: Name
+        slug: Slug
+    show:
+      summary:
+        created_at: Created
+        name: Name
+        slug: Slug
   bulk_options:
     hint: Enter each option on a new line
     label: Enter the options for your list
@@ -928,6 +940,7 @@ en:
         Guidance will be displayed at the top of the page, above your question.
       </p>
   header:
+    brands: Brands
     mous: MOUs
     organisations: Organisations
     product_name: Forms
@@ -1616,6 +1629,7 @@ en:
     archive_form_confirmation: Your form has been archived
     archive_welsh_confirm: Archive the Welsh version of this form
     brand: Choose a brand for your form
+    brands: Brands
     bulk_options: Enter your list’s options into a text box
     change_name: Name your form
     change_order_pages_added_error: Sorry, we could not save the new question order
