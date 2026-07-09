@@ -5,6 +5,9 @@ RSpec.describe Forms::BrandInput, type: :model do
     create(:form, :live)
   end
 
+  let!(:brand) { create(:brand, slug: "cheshire-east", name: "Cheshire East Council") }
+  let!(:other_brand) { create(:brand, slug: "south-gloucestershire", name: "South Gloucestershire Council") }
+
   describe "validations" do
     context "when given a blank brand_id" do
       it "validates successfully" do
@@ -16,7 +19,7 @@ RSpec.describe Forms::BrandInput, type: :model do
 
     context "when given a brand_id from the configured list" do
       it "validates successfully" do
-        brand_input = described_class.new(form:, brand_id: Settings.branding.available_brands.first.id)
+        brand_input = described_class.new(form:, brand_id: brand.slug)
 
         expect(brand_input).to be_valid
       end
@@ -36,11 +39,11 @@ RSpec.describe Forms::BrandInput, type: :model do
   end
 
   describe "#brand_options" do
-    it "starts with the GOV.UK default option followed by the configured brands" do
+    it "starts with the GOV.UK default option followed by the configured brands ordered by name" do
       brand_input = described_class.new(form:)
 
       expect(brand_input.brand_options.first).to have_attributes(id: "", name: "GOV.UK (default)")
-      expect(brand_input.brand_options.drop(1).map(&:id)).to eq(Settings.branding.available_brands.map(&:id))
+      expect(brand_input.brand_options.drop(1).map(&:id)).to eq([brand.slug, other_brand.slug])
     end
   end
 
