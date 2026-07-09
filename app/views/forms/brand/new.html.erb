@@ -4,7 +4,7 @@
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds">
 
-    <%= form_with(model: @brand_input, url: brand_path) do |f| %>
+    <%= form_with(model: @brand_input, url: form_brand_path) do |f| %>
       <% if @brand_input&.errors.any? %>
         <%= f.govuk_error_summary %>
       <% end %>
