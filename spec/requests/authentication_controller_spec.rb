@@ -83,7 +83,7 @@ RSpec.describe AuthenticationController, type: :request do
         GDS::SSO::Config.auth_valid_for = Settings.auth_valid_for
       end
 
-      it "re-authenticates after the configured time" do
+      it "re-authenticates after the configured time", :slow do
         login_as_standard_user
 
         get root_path
