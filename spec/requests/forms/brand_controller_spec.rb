@@ -19,7 +19,7 @@ RSpec.describe Forms::BrandController, type: :request do
 
   describe "#new" do
     it "renders the brand page" do
-      get(brand_path(form_id: form.id))
+      get(form_brand_path(form_id: form.id))
       expect(response).to have_http_status(:ok)
       expect(response.body).to include(I18n.t("brand_input.heading"))
     end
@@ -28,7 +28,7 @@ RSpec.describe Forms::BrandController, type: :request do
       let(:custom_branding_enabled) { false }
 
       it "returns 404" do
-        get(brand_path(form_id: form.id))
+        get(form_brand_path(form_id: form.id))
         expect(response).to have_http_status(:not_found)
       end
     end
@@ -42,7 +42,7 @@ RSpec.describe Forms::BrandController, type: :request do
 
       it "returns 404 and does not update the form" do
         expect {
-          post(brand_path(form_id: form.id), params:)
+          post(form_brand_path(form_id: form.id), params:)
         }.not_to(change { form.reload.brand_id })
 
         expect(response).to have_http_status(:not_found)
@@ -52,17 +52,17 @@ RSpec.describe Forms::BrandController, type: :request do
     context "when the brand is changed" do
       it "updates the form" do
         expect {
-          post(brand_path(form_id: form.id), params:)
+          post(form_brand_path(form_id: form.id), params:)
         }.to change { form.reload.brand_id }.to(brand_id)
       end
 
       it "redirects you to the form overview page" do
-        post(brand_path(form_id: form.id), params:)
+        post(form_brand_path(form_id: form.id), params:)
         expect(response).to redirect_to(form_path(form.id))
       end
 
       it "displays a flash message that the brand has been saved" do
-        post(brand_path(form_id: form.id), params:)
+        post(form_brand_path(form_id: form.id), params:)
         expect(flash[:success]).to eq(I18n.t("banner.success.form.brand_saved"))
       end
     end
@@ -71,7 +71,7 @@ RSpec.describe Forms::BrandController, type: :request do
       let(:form) { create(:form, :live, brand_id: nil) }
 
       before do
-        post(brand_path(form_id: form.id), params:)
+        post(form_brand_path(form_id: form.id), params:)
       end
 
       it "displays a flash message that the brand has been saved" do
@@ -84,12 +84,12 @@ RSpec.describe Forms::BrandController, type: :request do
 
       it "clears the brand_id on the form" do
         expect {
-          post(brand_path(form_id: form.id), params:)
+          post(form_brand_path(form_id: form.id), params:)
         }.to change { form.reload.brand_id }.to(nil)
       end
 
       it "displays a flash message that the form will use the GOV.UK branding" do
-        post(brand_path(form_id: form.id), params:)
+        post(form_brand_path(form_id: form.id), params:)
         expect(flash[:success]).to eq(I18n.t("banner.success.form.brand_removed"))
       end
     end
@@ -98,7 +98,7 @@ RSpec.describe Forms::BrandController, type: :request do
       let(:form) { create(:form, :live, brand_id:) }
 
       before do
-        post(brand_path(form_id: form.id), params:)
+        post(form_brand_path(form_id: form.id), params:)
       end
 
       it "does not display a flash message" do
@@ -111,7 +111,7 @@ RSpec.describe Forms::BrandController, type: :request do
       let(:brand_id) { "" }
 
       before do
-        post(brand_path(form_id: form.id), params:)
+        post(form_brand_path(form_id: form.id), params:)
       end
 
       it "does not display a flash message" do
@@ -124,7 +124,7 @@ RSpec.describe Forms::BrandController, type: :request do
 
       it "does not update the form and re-renders the page with an error" do
         expect {
-          post(brand_path(form_id: form.id), params:)
+          post(form_brand_path(form_id: form.id), params:)
         }.not_to(change { form.reload.brand_id })
 
         expect(response).to have_http_status(:unprocessable_content)
