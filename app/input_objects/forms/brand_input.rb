@@ -7,17 +7,17 @@ class Forms::BrandInput < BaseInput
 
   class << self
     def brands
-      Settings.branding.available_brands
+      Brand.order(:name)
     end
 
     def allowed_brand_ids
-      brands.map(&:id)
+      brands.pluck(:slug)
     end
   end
 
   def brand_options
     default_option = BrandOption.new("", I18n.t("helpers.label.forms_brand_input.brand_id.options.default"))
-    [default_option] + self.class.brands.map { |brand| BrandOption.new(brand.id, brand.name) }
+    [default_option] + self.class.brands.map { |brand| BrandOption.new(brand.slug, brand.name) }
   end
 
   def submit

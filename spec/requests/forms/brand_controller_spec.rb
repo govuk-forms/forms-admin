@@ -8,6 +8,9 @@ RSpec.describe Forms::BrandController, type: :request do
   let(:custom_branding_enabled) { true }
 
   before do
+    create(:brand, slug: "cheshire-east", name: "Cheshire East Council")
+    create(:brand, slug: "south-gloucestershire", name: "South Gloucestershire Council")
+
     Membership.create!(group_id: group.id, user: standard_user, added_by: standard_user)
     GroupForm.create!(form_id: form.id, group_id: group.id)
 

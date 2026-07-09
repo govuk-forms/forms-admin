@@ -24,7 +24,7 @@ FactoryBot.define do
     brand_id { nil }
 
     trait :with_brand do
-      brand_id { Settings.branding.available_brands.first.id }
+      brand_id { create(:brand).slug }
     end
 
     trait :with_group do
