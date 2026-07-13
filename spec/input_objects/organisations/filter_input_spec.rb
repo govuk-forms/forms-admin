@@ -43,8 +43,8 @@ RSpec.describe Organisations::FilterInput, type: :model do
     it "returns the correct options" do
       expect(described_class.new.agreement_type_options).to eq([
         OpenStruct.new(label: I18n.t("organisations.index.filter.agreement_type.any")),
-        OpenStruct.new(label: I18n.t("mou_signatures.index.agreement_type.crown"), value: "crown"),
-        OpenStruct.new(label: I18n.t("mou_signatures.index.agreement_type.non_crown"), value: "non_crown"),
+        OpenStruct.new(label: I18n.t("mou_signatures.agreement_type.crown"), value: "crown"),
+        OpenStruct.new(label: I18n.t("mou_signatures.agreement_type.non_crown"), value: "non_crown"),
         OpenStruct.new(label: I18n.t("organisations.index.filter.agreement_type.signed"), value: "signed"),
         OpenStruct.new(label: I18n.t("organisations.index.filter.agreement_type.none"), value: "none"),
       ])

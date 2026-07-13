@@ -75,7 +75,7 @@
             row.with_cell(text: @draft_form_counts.fetch(organisation.id, 0).to_s, numeric: true)
             agreement_types = @agreement_types.fetch(organisation.id, [])
             if agreement_types.any?
-              row.with_cell(text: agreement_types.map { |agreement_type| t("mou_signatures.index.agreement_type.#{agreement_type}") }.join(", "))
+              row.with_cell(text: agreement_types.map { |agreement_type| t("mou_signatures.agreement_type.#{agreement_type}") }.join(", "))
             else
               row.with_cell(text: t("organisations.index.agreement_type_none"))
             end

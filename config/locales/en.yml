@@ -1445,6 +1445,9 @@ en:
     heading_without_dates: Form metrics
     percentage: "%{number}%"
   mou_signatures:
+    agreement_type:
+      crown: Crown MOU
+      non_crown: Non-crown agreement
     confirmation:
       crown:
         body_html: |
@@ -1454,18 +1457,6 @@ en:
         body_html: |
           <h2 class="govuk-heading-m">What happens next</h2>
           <p>We’ll email you with any updates to the agreement that are made in the future.</p>
-    index:
-      agreement_type:
-        crown: Crown MOU
-        non_crown: Non-crown agreement
-      preamble_html: "<p>Someone from each organisation needs to agree to one of the GOV.UK Forms agreements before an organisation admin can be assigned or any groups upgraded to ‘active’.</p>\n"
-      share_mou_link_html: "<p>For Crown organisations, like government departments and executive agencies, share the Memorandum of Understanding:<br />%{mou_link}</p>\n"
-      share_non_crown_agreement_link_html: "<p>For non-crown organisations, like local authorities, share the GOV.UK Forms agreement:<br />%{agreement_link}</p>\n"
-      table_headings:
-        agreed_at: Agreed on
-        agreement_type: Agreement type
-        email: Email address
-        name: Name
     show:
       crown:
         banner:
@@ -1555,6 +1546,14 @@ en:
       mou_signatures:
         heading: MOUs and agreements
         none: No one has agreed an MOU or agreement for this organisation.
+        preamble_html: "<p>Someone from each organisation needs to agree to one of the GOV.UK Forms agreements before an organisation admin can be assigned or any groups upgraded to ‘active’.</p>\n"
+        share_mou_link_html: "<p>For Crown organisations, like government departments and executive agencies, share the Memorandum of Understanding:<br />%{mou_link}</p>\n"
+        share_non_crown_agreement_link_html: "<p>For non-crown organisations, like local authorities, share the GOV.UK Forms agreement:<br />%{agreement_link}</p>\n"
+        table_headings:
+          agreed_at: Agreed on
+          agreement_type: Agreement type
+          email: Email address
+          name: Name
       not_set: Not set
       summary:
         closed: Closed

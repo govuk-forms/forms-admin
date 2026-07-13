@@ -35,8 +35,8 @@ describe "organisations/index.html.erb" do
     expect(rendered).to have_field("filter[name]")
     expect(rendered).to have_select("filter[agreement_type]", options: [
       I18n.t("organisations.index.filter.agreement_type.any"),
-      I18n.t("mou_signatures.index.agreement_type.crown"),
-      I18n.t("mou_signatures.index.agreement_type.non_crown"),
+      I18n.t("mou_signatures.agreement_type.crown"),
+      I18n.t("mou_signatures.agreement_type.non_crown"),
       I18n.t("organisations.index.filter.agreement_type.signed"),
       I18n.t("organisations.index.filter.agreement_type.none"),
     ])
@@ -87,7 +87,7 @@ describe "organisations/index.html.erb" do
   end
 
   it "shows the agreement type for each organisation" do
-    expect(rendered).to have_xpath "//tbody/tr[1]/td[5]", text: I18n.t("mou_signatures.index.agreement_type.crown")
+    expect(rendered).to have_xpath "//tbody/tr[1]/td[5]", text: I18n.t("mou_signatures.agreement_type.crown")
     expect(rendered).to have_xpath "//tbody/tr[2]/td[5]", text: I18n.t("organisations.index.agreement_type_none")
   end
 

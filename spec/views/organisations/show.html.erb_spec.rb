@@ -52,7 +52,7 @@ describe "organisations/show.html.erb" do
 
   it "lists the MOU signatures" do
     mou_signature = organisation.mou_signatures.first
-    expect(rendered).to have_text(I18n.t("mou_signatures.index.agreement_type.#{mou_signature.agreement_type}"))
+    expect(rendered).to have_text(I18n.t("mou_signatures.agreement_type.#{mou_signature.agreement_type}"))
     expect(rendered).to have_link(mou_signature.user.email, href: edit_user_path(mou_signature.user))
     expect(rendered).to have_text(I18n.l(mou_signature.created_at.to_date, format: :long))
   end
