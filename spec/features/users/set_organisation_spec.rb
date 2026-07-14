@@ -2,11 +2,11 @@ require "rails_helper"
 
 feature "Set or change a user's organisation", type: :feature do
   let!(:test_org) do
-    create(:organisation, id: 1, slug: "test-org")
+    create(:organisation, slug: "test-org")
   end
 
   before do
-    create(:organisation, id: 2, slug: "government-digital-service")
+    create(:organisation, slug: "government-digital-service")
     create_list :user, 6, organisation: test_org
     login_as_super_admin_user
   end

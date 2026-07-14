@@ -1,20 +1,20 @@
 require "rails_helper"
 
 describe "users/edit.html.erb" do
+  let(:organisation) { create :organisation, slug: "test-org" }
   let(:user) do
     build(
       :user,
       id: 1,
-      organisation_id: 1,
+      organisation:,
       created_at: Time.zone.local(2023, 10, 16, 13, 24),
       last_signed_in_at: Time.zone.now,
     )
   end
 
   before do
-    create :organisation, id: 1, slug: "test-org"
-    create :organisation, id: 2, slug: "ministry-of-testing"
-    create :organisation, id: 3, slug: "department-for-tests", name: "Department for Tests", abbreviation: "DfT"
+    create :organisation, slug: "ministry-of-testing"
+    create :organisation, slug: "department-for-tests", name: "Department for Tests", abbreviation: "DfT"
 
     travel_to(Time.zone.local(2024, 8, 26, 11, 50)) do
       assign(:user, user)
