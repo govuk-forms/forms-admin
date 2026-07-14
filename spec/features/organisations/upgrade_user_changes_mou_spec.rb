@@ -5,11 +5,11 @@ describe "Assign an organisation to a user with a signed MOU", type: :feature do
   let!(:mou_signature) { create(:mou_signature, user:, organisation: nil, created_at: Time.zone.parse("September 1, 2023")) }
   let!(:organisation) { create :organisation, slug: "department-for-testing" }
 
-  it "assigning an organisation to a user adds it to their MOU" do
+  it "assigning an organisation to a user shows their MOU on the organisation's page" do
     login_as_super_admin_user
     when_i_update_the_user_organisation
-    then_i_visit_the_organisation_page
-    then_i_see_the_mou_with_organisation
+    and_i_visit_the_organisation_page
+    then_i_can_see_the_mou_for_the_user
   end
 
 private
@@ -26,11 +26,11 @@ private
     expect(page).to have_current_path(users_path)
   end
 
-  def then_i_visit_the_organisation_page
+  def and_i_visit_the_organisation_page
     visit organisation_path(organisation)
   end
 
-  def then_i_see_the_mou_with_organisation
+  def then_i_can_see_the_mou_for_the_user
     expect(page).to have_text "MOUs and agreements"
     expect(page).to have_text mou_signature.user.name
     expect(page).to have_link mou_signature.user.email
