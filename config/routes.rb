@@ -299,6 +299,8 @@ Rails.application.routes.draw do
       get "/:tag", to: "api/form_documents#show", as: :form_document, constraints: { tag: /draft|live|archived/ }
       get "/group", to: "api/form_documents#group", as: :form_group
     end
+
+    get "brands/:brand_id", to: "api/brands#show", as: :brand
   end
 
   get "/maintenance" => "errors#maintenance", as: :maintenance_page
