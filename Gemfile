@@ -135,6 +135,9 @@ group :test do
   # Enable running the specs in parallel (and optionally with Spring)
   gem "parallel_rspec"
   gem "spring-prspec"
+
+  # Profiling tools for finding slow tests and factories
+  gem "test-prof", "~> 1.6"
 end
 
 gem "mobility", "~> 1.3"
