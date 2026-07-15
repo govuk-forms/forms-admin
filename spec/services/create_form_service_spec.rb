@@ -24,6 +24,43 @@ RSpec.describe CreateFormService do
       expect(GroupForm.last).to have_attributes(form_id: Form.last.id, group_id: 1000)
     end
 
+    context "when the group's organisation has a default brand" do
+      let(:organisation) { create :organisation }
+      let(:brand) { create :brand }
+      let(:group) { build :group, id: 1000, organisation:, custom_branding_enabled: true }
+
+      before do
+        create(:organisation_brand, organisation:, brand:)
+        organisation.update!(default_brand: brand)
+      end
+
+      it "creates the form with the default brand" do
+        create_form_service.create!(creator:, group:, name:)
+
+        expect(Form.last.brand_id).to eq brand.slug
+      end
+
+      context "when the group does not have custom branding enabled" do
+        let(:group) { build :group, id: 1000, organisation:, custom_branding_enabled: false }
+
+        it "creates the form without a brand" do
+          create_form_service.create!(creator:, group:, name:)
+
+          expect(Form.last.brand_id).to be_nil
+        end
+      end
+    end
+
+    context "when the group's organisation has no default brand" do
+      let(:group) { build :group, id: 1000, organisation: creator.organisation, custom_branding_enabled: true }
+
+      it "creates the form without a brand" do
+        create_form_service.create!(creator:, group:, name:)
+
+        expect(Form.last.brand_id).to be_nil
+      end
+    end
+
     context "when a form with that name was already created in that group" do
       before do
         allow(Form).to receive(:create!).and_call_original
