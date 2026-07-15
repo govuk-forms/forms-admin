@@ -87,7 +87,7 @@ RSpec.describe AuthenticationController, type: :request do
         expect(controller_spy).not_to have_received(:redirect_to_sign_in)
 
         # wait for the auth_valid_for time to pass
-        sleep(1)
+        travel 2.seconds
 
         get root_path
 
