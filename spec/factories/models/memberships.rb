@@ -1,8 +1,8 @@
 FactoryBot.define do
   factory :membership do
-    user { build :user }
-    group { build :group, organisation: user&.organisation }
-    added_by { build :user, organisation: user&.organisation }
+    user { association :user }
+    group { association :group, organisation: user&.organisation, creator: user }
+    added_by { association :user, organisation: user&.organisation }
     role { :editor }
   end
 end
