@@ -192,6 +192,25 @@ RSpec.describe OrganisationBrandsController, type: :request do
           expect(response).to have_http_status(:not_found)
         end
       end
+
+      context "when the brand is the organisation's default brand" do
+        before do
+          organisation.update!(default_brand: brand)
+        end
+
+        it "does not remove the brand from the organisation" do
+          expect {
+            delete path
+          }.not_to(change { organisation.brands.count })
+        end
+
+        it "redirects to the organisation page without a success message" do
+          delete path
+
+          expect(response).to redirect_to(organisation_path(organisation))
+          expect(flash[:success]).to be_nil
+        end
+      end
     end
   end
 

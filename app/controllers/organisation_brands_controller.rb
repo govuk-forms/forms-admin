@@ -23,6 +23,11 @@ class OrganisationBrandsController < WebController
     authorize organisation, :can_manage_organisation_brands?
 
     organisation_brand = organisation.organisation_brands.find_by!(brand_id: params[:id])
+
+    if organisation.default_brand_id == organisation_brand.brand_id
+      return redirect_to organisation_path(organisation), status: :see_other
+    end
+
     organisation_brand.destroy!
 
     redirect_to organisation_path(organisation), success: t(".success", brand_name: organisation_brand.brand.name)
