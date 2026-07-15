@@ -266,11 +266,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_16_171610) do
     t.string "abbreviation"
     t.boolean "closed", default: false
     t.datetime "created_at", null: false
+    t.bigint "default_brand_id"
     t.string "govuk_content_id"
     t.boolean "internal", default: false
     t.string "name", null: false
     t.string "slug", null: false
     t.datetime "updated_at", null: false
+    t.index ["default_brand_id"], name: "index_organisations_on_default_brand_id"
     t.index ["govuk_content_id"], name: "index_organisations_on_govuk_content_id", unique: true
     t.index ["slug"], name: "index_organisations_on_slug", unique: true
   end
@@ -367,6 +369,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_16_171610) do
   add_foreign_key "organisation_brands", "brands"
   add_foreign_key "organisation_brands", "organisations"
   add_foreign_key "organisation_domains", "organisations"
+  add_foreign_key "organisations", "brands", column: "default_brand_id"
   add_foreign_key "page_translations", "pages"
   add_foreign_key "pages", "forms"
   add_foreign_key "users", "organisations"

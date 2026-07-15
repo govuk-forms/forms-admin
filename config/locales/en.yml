@@ -172,6 +172,10 @@ en:
             agreed:
               crown: You must agree to the memorandum of understanding
               non_crown: You must agree to the agreement to continue
+        organisation:
+          attributes:
+            default_brand:
+              not_available: The default brand must be one of the organisation’s available brands
         organisation_domain:
           attributes:
             domain:

@@ -11,6 +11,10 @@ class Organisation < ApplicationRecord
   has_many :organisation_brands, dependent: :destroy
   has_many :brands, -> { order(:name) }, through: :organisation_brands
 
+  belongs_to :default_brand, class_name: "Brand", optional: true
+
+  validate :default_brand_is_available, if: :default_brand_id_changed?
+
   scope :not_closed, -> { where(closed: false) }
   scope :with_users, -> { joins(:users).distinct.order(:name) }
 
@@ -72,5 +76,14 @@ class Organisation < ApplicationRecord
     options[:only] ||= %i[id name]
     options[:methods] ||= %i[organisation_admin_users]
     super(options)
+  end
+
+private
+
+  def default_brand_is_available
+    return if default_brand_id.nil?
+    return if organisation_brands.exists?(brand_id: default_brand_id)
+
+    errors.add(:default_brand, :not_available)
   end
 end
