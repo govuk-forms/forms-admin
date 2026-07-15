@@ -219,6 +219,7 @@ Rails.application.routes.draw do
 
   resources :organisations, only: %i[index show] do
     resources :brands, controller: :organisation_brands, only: %i[new create destroy]
+    patch "default-brand", to: "organisation_brands#update_default", as: :default_brand
   end
 
   resources :brands, only: %i[index show new create edit update]

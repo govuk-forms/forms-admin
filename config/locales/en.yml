@@ -1496,6 +1496,9 @@ en:
       prompt: Select a brand
       submit: Add brand
       title: Add a brand
+    update_default:
+      success: "%{brand_name} is now the default brand for new forms in this organisation"
+      success_govuk: New forms in this organisation will use GOV.UK branding
   organisations:
     boolean:
       'false': 'No'

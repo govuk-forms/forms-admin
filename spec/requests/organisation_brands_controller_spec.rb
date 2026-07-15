@@ -194,4 +194,82 @@ RSpec.describe OrganisationBrandsController, type: :request do
       end
     end
   end
+
+  describe "#update_default" do
+    let(:path) { organisation_default_brand_path(organisation) }
+    let(:params) { { brand_id: brand.id } }
+
+    before do
+      create :organisation_brand, organisation:, brand:
+    end
+
+    context "when the user is not a super admin" do
+      before do
+        login_as_standard_user
+
+        patch(path, params:)
+      end
+
+      it "returns http code 403 and renders forbidden" do
+        expect(response).to have_http_status(:forbidden)
+        expect(response).to render_template("errors/forbidden")
+      end
+
+      it "does not change the organisation's default brand" do
+        expect(organisation.reload.default_brand).to be_nil
+      end
+    end
+
+    context "when the user is a super admin" do
+      before do
+        login_as_super_admin_user
+      end
+
+      it "sets the organisation's default brand" do
+        patch(path, params:)
+
+        expect(organisation.reload.default_brand).to eq(brand)
+      end
+
+      it "redirects to the organisation page with a success message" do
+        patch(path, params:)
+
+        expect(response).to redirect_to(organisation_path(organisation))
+        expect(flash[:success]).to eq(I18n.t("organisation_brands.update_default.success", brand_name: brand.name))
+      end
+
+      context "when no brand is given" do
+        let(:params) { {} }
+
+        before do
+          organisation.update!(default_brand: brand)
+        end
+
+        it "clears the organisation's default brand" do
+          patch(path, params:)
+
+          expect(organisation.reload.default_brand).to be_nil
+        end
+
+        it "redirects to the organisation page with a success message" do
+          patch(path, params:)
+
+          expect(response).to redirect_to(organisation_path(organisation))
+          expect(flash[:success]).to eq(I18n.t("organisation_brands.update_default.success_govuk"))
+        end
+      end
+
+      context "when the brand is not one of the organisation's brands" do
+        let(:other_brand) { create :brand }
+        let(:params) { { brand_id: other_brand.id } }
+
+        it "returns http code 404 and does not change the default brand" do
+          patch(path, params:)
+
+          expect(response).to have_http_status(:not_found)
+          expect(organisation.reload.default_brand).to be_nil
+        end
+      end
+    end
+  end
 end
