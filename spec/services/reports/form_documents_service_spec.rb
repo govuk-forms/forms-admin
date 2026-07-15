@@ -1,15 +1,15 @@
 require "rails_helper"
 
 RSpec.describe Reports::FormDocumentsService do
-  let(:form_with_no_routes) { create(:form, :live) }
-  let(:draft_form) { create(:form) }
-  let(:archived_form) { create(:form, :archived) }
-  let(:live_with_draft_form) { create(:form, :live_with_draft) }
-  let(:archived_with_draft_form) { create(:form, :archived_with_draft) }
-  let(:draft_internal_organisation_form) { create :form }
-  let(:live_internal_organisation_form) { create :form }
-  let(:form_with_welsh_translation) { create :form, welsh_completed: true }
-  let(:branch_route_form) do
+  let_it_be(:form_with_no_routes) { create(:form, :live) }
+  let_it_be(:draft_form) { create(:form) }
+  let_it_be(:archived_form) { create(:form, :archived) }
+  let_it_be(:live_with_draft_form) { create(:form, :live_with_draft) }
+  let_it_be(:archived_with_draft_form) { create(:form, :archived_with_draft) }
+  let_it_be(:draft_internal_organisation_form) { create :form }
+  let_it_be(:live_internal_organisation_form) { create :form }
+  let_it_be(:form_with_welsh_translation) { create :form, welsh_completed: true }
+  let_it_be(:branch_route_form) do
     form = create(:form, :live, :ready_for_routing)
     create(:condition, :with_exit_page, routing_page_id: form.pages[0].id, check_page_id: form.pages[0].id, answer_value: "Option 1")
     create(:condition, routing_page_id: form.pages[1].id, check_page_id: form.pages[1].id, answer_value: "Option 1", goto_page_id: form.pages[3].id)
@@ -18,14 +18,14 @@ RSpec.describe Reports::FormDocumentsService do
     form
   end
 
-  let(:basic_route_form) do
+  let_it_be(:basic_route_form) do
     form = create(:form, :live, :ready_for_routing)
     create(:condition, routing_page_id: form.pages.first.id, check_page_id: form.pages.first.id, answer_value: "Option 1", skip_to_end: true)
     form.live_form_document.update!(content: form.reload.as_form_document(live_at: form.updated_at))
     form
   end
 
-  let(:form_with_2_branch_routes) do
+  let_it_be(:form_with_2_branch_routes) do
     form = create(:form, :live, :ready_for_routing, pages_count: 10)
     create(:condition, routing_page_id: form.pages[1].id, check_page_id: form.pages[1].id, answer_value: "Option 1", goto_page_id: form.pages[3].id)
     create(:condition, routing_page_id: form.pages[2].id, check_page_id: form.pages[1].id, answer_value: "Option 2", goto_page_id: form.pages[4].id)
@@ -36,10 +36,10 @@ RSpec.describe Reports::FormDocumentsService do
   end
 
   describe "#form_documents" do
-    let(:organisation) { create :organisation, internal: false, slug: "hm-revenue-customs" }
-    let(:internal_organisation) { create :organisation, internal: true, slug: "internal-org" }
-    let(:group) { create :group, organisation: }
-    let(:internal_group) { create :group, organisation: internal_organisation }
+    let_it_be(:organisation) { create :organisation, internal: false, slug: "hm-revenue-customs" }
+    let_it_be(:internal_organisation) { create :organisation, internal: true, slug: "internal-org" }
+    let_it_be(:group) { create :group, organisation: }
+    let_it_be(:internal_group) { create :group, organisation: internal_organisation }
 
     before do
       group.group_forms.create!(form: form_with_no_routes)

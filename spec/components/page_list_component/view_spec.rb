@@ -46,7 +46,7 @@ RSpec.describe PageListComponent::View, type: :component do
     end
 
     context "when the form has multiple pages" do
-      let(:form) { create :form, :with_pages }
+      let_it_be(:form) { create :form, :with_pages }
       let(:first_page) { form.pages.first }
       let(:second_page) { form.pages.second }
 
@@ -79,7 +79,7 @@ RSpec.describe PageListComponent::View, type: :component do
       end
 
       context "when the form has conditions" do
-        let(:form) { create :form, :ready_for_routing }
+        let_it_be(:form) { create :form, :ready_for_routing }
         let(:edit_condition_path) { "/forms/0/pages/1/conditions/1" }
 
         context "when the page has a single condition" do
@@ -144,7 +144,7 @@ RSpec.describe PageListComponent::View, type: :component do
       end
 
       context "when the form has a valid branch route" do
-        let(:form) { create :form, :ready_for_routing }
+        let_it_be(:form) { create :form, :ready_for_routing }
         let!(:secondary_skip_condition) { create :condition, routing_page_id: pages.second.id, check_page_id: pages.first.id, answer_value: nil, goto_page_id: pages.fourth.id }
 
         before do
@@ -164,7 +164,7 @@ RSpec.describe PageListComponent::View, type: :component do
       end
 
       context "when the form has a branch route with an error" do
-        let(:form) { create :form, :ready_for_routing }
+        let_it_be(:form) { create :form, :ready_for_routing }
 
         before do
           create :condition, routing_page_id: pages.first.id, check_page_id: pages.first.id, answer_value: "Option 1", goto_page_id: pages.third.id
@@ -183,7 +183,7 @@ RSpec.describe PageListComponent::View, type: :component do
   end
 
   describe "rendering component with multiple branches feature", :feature_multiple_branches do
-    let(:form) { create :form, :ready_for_routing }
+    let_it_be(:form) { create :form, :ready_for_routing }
     let(:first_page) { form.pages.first }
     let(:third_page) { form.pages.third }
     let(:fourth_page) { form.pages.fourth }
@@ -288,7 +288,7 @@ RSpec.describe PageListComponent::View, type: :component do
   end
 
   describe "class methods", feature_multiple_branches: false do
-    let(:form) { create :form, :with_pages }
+    let_it_be(:form) { create :form, :with_pages }
 
     describe "show_up_button" do
       it "returns false when index is 0" do
