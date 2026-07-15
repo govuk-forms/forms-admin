@@ -20,9 +20,9 @@ RSpec.describe Reports::FeatureReportService do
           })
     end
   end
-  let(:group) { create(:group) }
+  let_it_be(:group) { create(:group) }
 
-  let(:form_with_all_answer_types) do
+  let_it_be(:form_with_all_answer_types) do
     create(:form, :live,
            :with_support,
            submission_type: "email",
@@ -41,7 +41,7 @@ RSpec.describe Reports::FeatureReportService do
              create(:page, :with_single_line_text_settings, is_repeatable: true),
            ])
   end
-  let(:form_with_a_few_answer_types) do
+  let_it_be(:form_with_a_few_answer_types) do
     create(:form,
            :live,
            submission_type: "email",
@@ -53,7 +53,7 @@ RSpec.describe Reports::FeatureReportService do
              *create_list(:page, 3, answer_type: "name"),
            ])
   end
-  let(:branch_route_form) do
+  let_it_be(:branch_route_form) do
     form = create(:form, :live, :ready_for_routing, submission_type: "s3", submission_format: %w[csv])
     create(:condition, :with_exit_page, routing_page_id: form.pages[0].id, check_page_id: form.pages[0].id, answer_value: "Option 1")
     create(:condition, routing_page_id: form.pages[1].id, check_page_id: form.pages[1].id, answer_value: "Option 1", goto_page_id: form.pages[3].id)
@@ -61,18 +61,18 @@ RSpec.describe Reports::FeatureReportService do
     form.live_form_document.update!(content: form.reload.as_form_document(live_at: form.updated_at))
     form
   end
-  let(:basic_route_form) do
+  let_it_be(:basic_route_form) do
     form = create(:form, :live, :ready_for_routing)
     create(:condition, routing_page_id: form.pages.first.id, check_page_id: form.pages.first.id, answer_value: "Option 1", skip_to_end: true)
     form.live_form_document.update!(content: form.reload.as_form_document(live_at: form.updated_at))
     form
   end
-  let(:copied_form) do
+  let_it_be(:copied_form) do
     original_form = create(:form, :live, pages: [])
     form = create(:form, :live, copied_from_id: original_form.id, pages: [])
     form
   end
-  let(:form_with_a_welsh_translation) do
+  let_it_be(:form_with_a_welsh_translation) do
     form = create(:form, :live, welsh_completed: true, pages: [])
     form
   end

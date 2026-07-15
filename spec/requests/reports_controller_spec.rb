@@ -11,6 +11,9 @@ RSpec.describe ReportsController, type: :request do
 
   shared_examples "unauthorized user is forbidden" do
     context "when the user is not a super admin" do
+      # the request is forbidden before any report data is read
+      let(:forms) { [] }
+
       before do
         login_as_standard_user
 
@@ -26,6 +29,7 @@ RSpec.describe ReportsController, type: :request do
 
   describe "#index" do
     let(:path) { reports_path }
+    let(:forms) { [] }
 
     include_examples "unauthorized user is forbidden"
 
@@ -430,6 +434,7 @@ RSpec.describe ReportsController, type: :request do
 
   describe "#add_another_answer" do
     let(:path) { report_add_another_answer_path }
+    let(:forms) { [] }
     let(:report_data) do
       OpenStruct.new(
         count: 3,
@@ -796,6 +801,7 @@ RSpec.describe ReportsController, type: :request do
 
   describe "#contact_for_research" do
     let(:path) { report_contact_for_research_path }
+    let(:forms) { [] }
 
     include_examples "unauthorized user is forbidden"
 
@@ -815,6 +821,7 @@ RSpec.describe ReportsController, type: :request do
 
   describe "#users_per_organisation" do
     let(:path) { report_users_per_organisation_path }
+    let(:forms) { [] }
 
     include_examples "unauthorized user is forbidden"
 
@@ -835,6 +842,7 @@ RSpec.describe ReportsController, type: :request do
 
   describe "#organisation_domains" do
     let(:path) { report_organisation_domains_path }
+    let(:forms) { [] }
 
     include_examples "unauthorized user is forbidden"
 
