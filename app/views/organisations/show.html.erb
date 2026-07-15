@@ -132,7 +132,7 @@
             <% end %>
             <%= row.with_cell do %>
               <% if @organisation.default_brand_id.present? %>
-                <%= govuk_button_to(t("organisations.show.brands.make_default"), organisation_default_brand_path(@organisation), method: :patch, secondary: true, visually_hidden_suffix: t("organisations.show.brands.govuk_brand_name")) %>
+                <%= govuk_button_to(t("organisations.show.brands.make_default"), organisation_default_brand_path(@organisation), method: :patch, secondary: true, visually_hidden_suffix: t("organisations.show.brands.govuk_brand_name"), class: "govuk-!-margin-bottom-0") %>
               <% end %>
             <% end %>
           <% end %>
@@ -146,10 +146,12 @@
               <% end %>
               <%= row.with_cell do %>
                 <% if brand.id == @organisation.default_brand_id %>
-                  <%= govuk_button_to(t("organisations.show.brands.remove"), organisation_brand_path(@organisation, brand), method: :delete, secondary: true, disabled: true, visually_hidden_suffix: brand.name) %>
+                  <%= govuk_button_to(t("organisations.show.brands.remove"), organisation_brand_path(@organisation, brand), method: :delete, secondary: true, disabled: true, visually_hidden_suffix: brand.name, class: "govuk-!-margin-bottom-0") %>
                 <% else %>
-                  <%= govuk_button_to(t("organisations.show.brands.make_default"), organisation_default_brand_path(@organisation), method: :patch, params: { brand_id: brand.id }, secondary: true, visually_hidden_suffix: brand.name) %>
-                  <%= govuk_button_to(t("organisations.show.brands.remove"), organisation_brand_path(@organisation, brand), method: :delete, secondary: true, visually_hidden_suffix: brand.name) %>
+                  <div class="govuk-button-group govuk-!-margin-bottom-0">
+                    <%= govuk_button_to(t("organisations.show.brands.make_default"), organisation_default_brand_path(@organisation), method: :patch, params: { brand_id: brand.id }, secondary: true, visually_hidden_suffix: brand.name, class: "govuk-!-margin-bottom-0") %>
+                    <%= govuk_button_to(t("organisations.show.brands.remove"), organisation_brand_path(@organisation, brand), method: :delete, secondary: true, visually_hidden_suffix: brand.name, class: "govuk-!-margin-bottom-0") %>
+                  </div>
                 <% end %>
               <% end %>
             <% end %>
