@@ -244,6 +244,10 @@ class Form < ApplicationRecord
     true
   end
 
+  def only_s3_delivery_enabled?
+    delivery_configurations.immediate.one? && delivery_configurations.immediate.first.delivery_method == "s3"
+  end
+
 private
 
   def set_external_id

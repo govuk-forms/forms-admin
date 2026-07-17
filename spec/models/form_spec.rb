@@ -1015,7 +1015,7 @@ RSpec.describe Form, type: :model do
         payment_link_status: :optional,
         brand_status: :optional,
         copy_of_answers_status: :optional,
-        submission_attachments_status: :optional,
+        submission_attachments_status: :cannot_start,
         batch_submissions_status: :optional,
         support_contact_details_status: :completed,
         welsh_language_status: :optional,

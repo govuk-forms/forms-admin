@@ -97,7 +97,7 @@ private
 
   def how_you_get_completed_forms_optional_subsection
     rows = []
-    rows << submission_attachments_task if @form.email?
+    rows << submission_attachments_task unless @form.only_s3_delivery_enabled?
     rows << batch_submissions_task
 
     return nil if rows.empty?
@@ -115,6 +115,7 @@ private
       task_name: I18n.t("forms.task_list_#{create_or_edit}.how_you_get_completed_forms_section.optional_subsection.submission_attachments"),
       path: submission_attachments_path(@form.id),
       status: @task_statuses[:submission_attachments_status],
+      active: @task_statuses[:submission_attachments_status] != :cannot_start,
     }
   end
 

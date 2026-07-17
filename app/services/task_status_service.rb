@@ -123,13 +123,15 @@ private
   end
 
   def submission_attachments_status
-    return :completed if @form.email? && @form.submission_format.any?
+    email_delivery_configuration = @form.immediate_email_delivery_configuration
+    return :cannot_start if email_delivery_configuration.nil?
+    return :completed if email_delivery_configuration.formats.any?
 
     :optional
   end
 
   def batch_submissions_status
-    return :completed if @form.send_daily_submission_batch || @form.send_weekly_submission_batch
+    return :completed if @form.delivery_configurations.daily.any? || @form.delivery_configurations.weekly.any?
 
     :optional
   end
