@@ -19,6 +19,7 @@ class Form < ApplicationRecord
   has_many :conditions, through: :pages, source: :routing_conditions
   has_many :delivery_configurations, dependent: :destroy
   has_one :immediate_email_delivery_configuration, -> { where delivery_method: "email", delivery_schedule: "immediate" }, class_name: "DeliveryConfiguration"
+  has_one :s3_delivery_configuration, -> { where delivery_method: "s3", delivery_schedule: "immediate" }, class_name: "DeliveryConfiguration"
 
   translates :name,
              :privacy_policy_url,
