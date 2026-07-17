@@ -271,4 +271,3 @@ We welcome contributions - please read [CONTRIBUTING.md](CONTRIBUTING.md) and th
 ## License
 
 We use the [MIT License](https://opensource.org/licenses/MIT).
-Just for test
