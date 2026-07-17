@@ -5,8 +5,7 @@ describe "forms/_made_live_form.html.erb" do
   let(:past_week_metrics_data) { { weekly_submissions: 125, weekly_starts: 256 } }
   let(:what_happens_next_markdown) { "If you have not received a response within 5 working days, [contact our user support team](https://example.com)." }
   let(:form_metadata) do
-    create(:form, :live, declaration_markdown:, what_happens_next_markdown:, submission_type:, submission_format:,
-                         send_daily_submission_batch:, send_weekly_submission_batch:, send_copy_of_answers:)
+    create(:form, :live, declaration_markdown:, what_happens_next_markdown:, send_copy_of_answers:)
   end
   let(:form_document) do
     form_document_content = FormDocument::Content.from_form_document(form_metadata.live_form_document)
@@ -18,10 +17,6 @@ describe "forms/_made_live_form.html.erb" do
   let(:status) { :live }
   let(:preview_mode) { :preview_live }
   let(:questions_path) { Faker::Internet.url }
-  let(:submission_type) { "email" }
-  let(:submission_format) { [] }
-  let(:send_daily_submission_batch) { false }
-  let(:send_weekly_submission_batch) { false }
   let(:send_copy_of_answers) { "disabled" }
   let(:cloudwatch_service) { instance_double(CloudWatchService, past_week_metrics_data:) }
 
@@ -147,7 +142,9 @@ describe "forms/_made_live_form.html.erb" do
 
   context "when the submission type is 'email'" do
     context "when CSV submission is enabled" do
-      let(:submission_format) { %w[csv] }
+      let(:form_metadata) do
+        create(:form, :live, delivery_configurations: [create(:delivery_configuration, :immediate_email, formats: %w[csv])])
+      end
 
       it "tells the user they have CSVs enabled" do
         expect(rendered).to have_css("h4", text: I18n.t("forms.made_live_form.how_you_get_completed_forms.csv_and_json"))
@@ -156,7 +153,9 @@ describe "forms/_made_live_form.html.erb" do
     end
 
     context "when JSON submission is enabled" do
-      let(:submission_format) { %w[json] }
+      let(:form_metadata) do
+        create(:form, :live, delivery_configurations: [create(:delivery_configuration, :immediate_email, formats: %w[json])])
+      end
 
       it "tells the user they have JSON submissions enabled" do
         expect(rendered).to have_css("h4", text: I18n.t("forms.made_live_form.how_you_get_completed_forms.csv_and_json"))
@@ -165,7 +164,9 @@ describe "forms/_made_live_form.html.erb" do
     end
 
     context "when both CSV and JSON submissions are enabled" do
-      let(:submission_format) { %w[csv json] }
+      let(:form_metadata) do
+        create(:form, :live, delivery_configurations: [create(:delivery_configuration, :immediate_email, formats: %w[csv json])])
+      end
 
       it "tells the user they have CSV and JSON submissions enabled" do
         expect(rendered).to have_css("h4", text: I18n.t("forms.made_live_form.how_you_get_completed_forms.csv_and_json"))
@@ -174,7 +175,9 @@ describe "forms/_made_live_form.html.erb" do
     end
 
     context "when CSV submission is not enabled" do
-      let(:submission_format) { %w[] }
+      let(:form_metadata) do
+        create(:form, :live, delivery_configurations: [create(:delivery_configuration, :immediate_email, formats: [])])
+      end
 
       it "tells the user they do not have CSVs enabled" do
         expect(rendered).to have_css("h4", text: I18n.t("forms.made_live_form.how_you_get_completed_forms.csv_and_json"))
@@ -184,7 +187,9 @@ describe "forms/_made_live_form.html.erb" do
   end
 
   context "when the submission type is 's3'" do
-    let(:submission_type) { "s3" }
+    let(:form_metadata) do
+      create(:form, :live, delivery_configurations: [create(:delivery_configuration, :s3)])
+    end
 
     it "does not include the CSV and JSON section" do
       expect(rendered).not_to have_css("h4", text: I18n.t("forms.made_live_form.how_you_get_completed_forms.csv_and_json"))
@@ -196,7 +201,7 @@ describe "forms/_made_live_form.html.erb" do
   end
 
   context "when only daily batches are enabled" do
-    let(:send_daily_submission_batch) { true }
+    let(:form_metadata) { create(:form, :live, delivery_configurations: [create(:delivery_configuration, :daily_email)]) }
 
     it "tells the user they getting a daily CSV" do
       expect(rendered).to include(I18n.t("forms.made_live_form.how_you_get_completed_forms.batch_submissions.daily_enabled"))
@@ -204,7 +209,7 @@ describe "forms/_made_live_form.html.erb" do
   end
 
   context "when only weekly batches are enabled" do
-    let(:send_weekly_submission_batch) { true }
+    let(:form_metadata) { create(:form, :live, delivery_configurations: [create(:delivery_configuration, :weekly_email)]) }
 
     it "tells the user they getting a weekly CSV" do
       expect(rendered).to include(I18n.t("forms.made_live_form.how_you_get_completed_forms.batch_submissions.weekly_enabled"))
@@ -212,8 +217,12 @@ describe "forms/_made_live_form.html.erb" do
   end
 
   context "when both daily and weekly batches are enabled" do
-    let(:send_daily_submission_batch) { true }
-    let(:send_weekly_submission_batch) { true }
+    let(:form_metadata) do
+      create(:form, :live, delivery_configurations: [
+        create(:delivery_configuration, :daily_email),
+        create(:delivery_configuration, :weekly_email),
+      ])
+    end
 
     it "tells the user they getting a daily and weekly CSV" do
       expect(rendered).to include(I18n.t("forms.made_live_form.how_you_get_completed_forms.batch_submissions.daily_and_weekly_enabled"))
@@ -221,9 +230,6 @@ describe "forms/_made_live_form.html.erb" do
   end
 
   context "when neither daily or weekly batches are enabled" do
-    let(:send_daily_submission_batch) { false }
-    let(:send_weekly_submission_batch) { false }
-
     it "tells the user they have not opted to get a daily or weekly CSV" do
       expect(rendered).to include(I18n.t("forms.made_live_form.how_you_get_completed_forms.batch_submissions.disabled"))
     end
@@ -423,7 +429,7 @@ describe "forms/_made_live_form.html.erb" do
 
   context "when the form has a Welsh translation" do
     let(:what_happens_next_markdown_cy) { "Os nad ydych wedi derbyn ymateb o fewn 5 diwrnod gwaith, [cysylltwch â’n tîm cymorth defnyddwyr](https://example.com)." }
-    let(:form_metadata) { create :form, :live, :with_welsh_translation, what_happens_next_markdown:, what_happens_next_markdown_cy:, submission_type:, submission_format: }
+    let(:form_metadata) { create :form, :live, :with_welsh_translation, what_happens_next_markdown:, what_happens_next_markdown_cy: }
     let(:welsh_form_document) do
       form_document_content = FormDocument::Content.from_form_document(form_metadata.live_welsh_form_document)
       form_document_content.first_made_live_at = 1.week.ago
@@ -462,7 +468,7 @@ describe "forms/_made_live_form.html.erb" do
     end
 
     context "when the form has a declaration" do
-      let(:form_metadata) { create :form, :live, :with_welsh_translation, declaration_markdown:, what_happens_next_markdown:, submission_type:, submission_format: }
+      let(:form_metadata) { create :form, :live, :with_welsh_translation, declaration_markdown:, what_happens_next_markdown: }
 
       it "contains a table displaying the declaration text in each language" do
         expect(rendered).to have_css(".govuk-summary-card__title", text: "Declaration")
@@ -475,7 +481,7 @@ describe "forms/_made_live_form.html.erb" do
 
     context "when the form has a GOV.UK Pay payment link" do
       let(:payment_url) { "https://www.gov.uk/payments/your-payment-link" }
-      let(:form_metadata) { create :form, :live, :with_welsh_translation, declaration_markdown:, what_happens_next_markdown:, submission_type:, submission_format:, payment_url: }
+      let(:form_metadata) { create :form, :live, :with_welsh_translation, declaration_markdown:, what_happens_next_markdown:, payment_url: }
 
       it "contains a table displaying the payment link in each language" do
         expect(rendered).to have_css(".govuk-summary-card__title", text: "GOV.UK Pay payment link")
@@ -495,7 +501,7 @@ describe "forms/_made_live_form.html.erb" do
     end
 
     context "with support details" do
-      let(:form_metadata) { create :form, :live, :with_welsh_translation, what_happens_next_markdown:, submission_type:, submission_format:, support_email: "support@example.gov.uk", support_phone: "phone details", support_url_text: "website", support_url: "www.example.gov.uk" }
+      let(:form_metadata) { create :form, :live, :with_welsh_translation, what_happens_next_markdown:, support_email: "support@example.gov.uk", support_phone: "phone details", support_url_text: "website", support_url: "www.example.gov.uk" }
 
       it "contains a table displaying the support details in each language" do
         expect(rendered).to have_css(".govuk-summary-card__title", text: "Your form’s contact details for support")

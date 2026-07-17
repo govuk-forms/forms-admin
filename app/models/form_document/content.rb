@@ -34,6 +34,7 @@ class FormDocument::Content
   attribute :send_daily_submission_batch, :boolean
   attribute :send_weekly_submission_batch, :boolean
   attribute :send_copy_of_answers, :string
+  attribute :delivery_configurations, array: true
 
   alias_attribute :id, :form_id
 
@@ -53,5 +54,27 @@ class FormDocument::Content
 
   def has_welsh_translation?
     available_languages.present? && available_languages.include?("cy")
+  end
+
+  def has_email_delivery?
+    email_delivery_configuration.present?
+  end
+
+  def email_delivery_configuration
+    delivery_configurations.find do |delivery_configuration|
+      delivery_configuration["delivery_method"] == "email" && delivery_configuration["delivery_schedule"] == "immediate"
+    end
+  end
+
+  def daily_submission_batch_enabled?
+    delivery_configurations.any? do |delivery_configuration|
+      delivery_configuration["delivery_schedule"] == "daily"
+    end
+  end
+
+  def weekly_submission_batch_enabled?
+    delivery_configurations.any? do |delivery_configuration|
+      delivery_configuration["delivery_schedule"] == "weekly"
+    end
   end
 end
