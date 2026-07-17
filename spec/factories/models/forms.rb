@@ -2,8 +2,6 @@ FactoryBot.define do
   factory :form, class: "Form" do
     sequence(:name) { |n| "Form #{n}" }
     submission_email { Faker::Internet.email(domain: "example.gov.uk") }
-    submission_type { "email" }
-    submission_format { [] }
     privacy_policy_url { Faker::Internet.url(host: "gov.uk") }
     support_email { nil }
     support_phone { nil }
@@ -18,8 +16,6 @@ FactoryBot.define do
     state { :draft }
     payment_url { nil }
     external_id { nil }
-    send_daily_submission_batch { false }
-    send_weekly_submission_batch { false }
     send_copy_of_answers { "disabled" }
     brand_id { nil }
     s3_bucket_aws_account_id { nil }

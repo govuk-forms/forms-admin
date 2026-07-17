@@ -2,7 +2,7 @@ class Form < ApplicationRecord
   include FormStateMachine
   extend Mobility
 
-  self.ignored_columns += [:language]
+  self.ignored_columns += %i[language submission_type submission_format send_daily_submission_batch send_weekly_submission_batch]
 
   SUPPORTED_LANGUAGES = %w[en cy].freeze
 
@@ -32,26 +32,14 @@ class Form < ApplicationRecord
              :what_happens_next_markdown,
              :payment_url
 
-  enum :submission_type, {
-    email: "email",
-    s3: "s3",
-  }
-
   enum :send_copy_of_answers, {
     disabled: "disabled",
     enabled: "enabled",
   }, prefix: :send_copy_of_answers
 
-  # ActiveRecord doesn't support enums with arrays
-  # enum :submission_format, {
-  #   csv: "csv",
-  #   json: "json",
-  # }
-
   validates :name, presence: true
   validates :payment_url, url: true, allow_blank: true
   validate :marking_complete_with_errors
-  validates :submission_type, presence: true
   validates :send_copy_of_answers, presence: true
   validates :available_languages, presence: true, inclusion: { in: SUPPORTED_LANGUAGES }
   validates :submission_email, email_address: { message: :invalid_email }, allow_blank: true

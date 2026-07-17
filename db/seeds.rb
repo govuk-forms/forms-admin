@@ -300,8 +300,6 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
     support_phone: "08000800",
     what_happens_next_markdown: "Test",
     share_preview_completed: true,
-    submission_type: "s3",
-    submission_format: %w[csv],
     s3_bucket_region: "eu-west-2",
     s3_bucket_name: "govuk-forms-submissions-to-s3-test",
     s3_bucket_aws_account_id: "711966560482",

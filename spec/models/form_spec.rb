@@ -234,13 +234,6 @@ RSpec.describe Form, type: :model do
           expect(form).to be_valid
         end
       end
-
-      context "when there is no submission type" do
-        it "returns invalid" do
-          form.submission_type = nil
-          expect(form).to be_invalid
-        end
-      end
     end
   end
 
@@ -900,15 +893,6 @@ RSpec.describe Form, type: :model do
     end
   end
 
-  describe "submission type" do
-    describe "enum" do
-      it "returns a list of submission types" do
-        expect(described_class.submission_types.keys).to eq(%w[email s3])
-        expect(described_class.submission_types.values).to eq(%w[email s3])
-      end
-    end
-  end
-
   describe "answer email copy" do
     describe "enum" do
       it "returns a list of email copy answers values" do
@@ -922,30 +906,6 @@ RSpec.describe Form, type: :model do
       expect(form.send_copy_of_answers).to eq("disabled")
       expect(form.send_copy_of_answers_disabled?).to be true
     end
-  end
-
-  describe "submission format" do
-    let(:form) { create :form }
-
-    it "can be empty" do
-      form.update!(submission_format: [])
-      expect(form.submission_format).to be_empty
-    end
-
-    it "stores an array of strings" do
-      form.update!(submission_format: %w[csv json])
-      expect(form.submission_format).to include "csv"
-      expect(form.submission_format).to include "json"
-    end
-
-    # ActiveRecord doesn't support enums with arrays
-    # describe "enum" do
-    #   it "returns a list of submission formats" do
-    #     formats = %w[csv json]
-    #     expect(described_class.submission_formats.keys).to eq formats
-    #     expect(described_class.submission_formats.values).to eq formats
-    #   end
-    # end
   end
 
   describe "#destroy" do
