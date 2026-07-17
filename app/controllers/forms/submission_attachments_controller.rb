@@ -1,6 +1,6 @@
 module Forms
   class SubmissionAttachmentsController < FormsController
-    before_action :submission_type_email?
+    before_action :has_email_delivery_configuration?
 
     def new
       authorize current_form, :can_view_form?
@@ -24,14 +24,14 @@ module Forms
       params.require(:forms_submission_attachments_input).permit(submission_format: []).merge(form: current_form)
     end
 
-    def submission_type_email?
-      redirect_to error_404_path unless current_form.email?
+    def has_email_delivery_configuration?
+      redirect_to error_404_path if current_form.immediate_email_delivery_configuration.blank?
     end
 
     def success_message(form)
-      return nil unless form.submission_format_previously_changed?
+      return nil unless form.immediate_email_delivery_configuration.formats_previously_changed?
 
-      case form.submission_format
+      case form.immediate_email_delivery_configuration.formats
       when []
         t("banner.success.form.receive_no_attachments")
       when %w[csv]
