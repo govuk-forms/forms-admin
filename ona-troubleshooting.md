@@ -34,7 +34,7 @@ Once registered, Port 3000 will pop up in that panel list. Simply click the prev
 
 ## Authenticating with a Personal Access Token (PAT)
 
-### Step 1: Generate Your Token on GitHub**
+### Step 1: Generate Your Token on GitHub
 
 Before authenticating in the terminal, you must ensure your Personal Access Token has the correct permissions required by the repository and the CLI.
 
@@ -46,13 +46,13 @@ Before authenticating in the terminal, you must ensure your Personal Access Toke
     - `read:org` (Mandatory scope for organizational CLI access validation)
 4. Set an expiration date, scroll to the bottom, click Generate token, and copy the token string (ghp_...). Keep this secure.
 
-### Step 2: Run the Login Command**
+### Step 2: Run the Login Command
 
 In your workspace terminal, execute the interactive authentication process:
 ```bash
 gh auth login
 ```
-### Step 3: Follow the Interactive Prompts**
+### Step 3: Follow the Interactive Prompts
 Configure your answers exactly as follows:
 
 - **What account do you want to log into?** Choose GitHub.com
@@ -63,10 +63,10 @@ Configure your answers exactly as follows:
 
 ❌ **Common Error:** If you see error validating token: missing required scope 'read:org', go back to Step 1, modify your token settings to enable the read:org scope, click save, and re-run `gh auth login`.
 
-## Pushing Your Changes
+### Step 4: Pushing Your Changes
 Once successfully authenticated, Git configuration is updated globally inside the workspace. You can now use standard Git commands to commit and push changes directly from your branch.
 
-## Session Security: Logging Out
+### Step 5: Session Security: Logging Out
 Because Ona workspaces reside in a shared cloud infrastructure, it is an essential security practice to log out and invalidate your containerized session tokens when you finish working for the day.
 
 Before stopping your workspace or shutting down your browser tab, run:
