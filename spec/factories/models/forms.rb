@@ -179,6 +179,16 @@ FactoryBot.define do
       s3_bucket_aws_account_id { "123456789012" }
       s3_bucket_region { "eu-west-1" }
     end
+
+    trait :with_email_delivery do
+      after(:create) do |form|
+        form.delivery_configurations.create!(
+          delivery_method: "email",
+          delivery_schedule: "immediate",
+          formats: [],
+        )
+      end
+    end
   end
 end
 

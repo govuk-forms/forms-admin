@@ -76,9 +76,9 @@ private
       form["content"]["support_phone"],
       form["content"]["privacy_policy_url"],
       form["content"]["what_happens_next_markdown"],
-      form["content"]["send_daily_submission_batch"],
-      form["content"]["send_weekly_submission_batch"],
       format_delivery_methods(form),
+      Reports::FormDocumentsService.has_daily_submission_csv(form),
+      Reports::FormDocumentsService.has_weekly_submission_csv(form),
       Reports::FormDocumentsService.has_welsh_translation(form),
       Reports::FormDocumentsService.copy_of_answers_enabled?(form),
     ]

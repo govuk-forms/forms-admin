@@ -25,8 +25,6 @@ RSpec.describe Reports::FeatureReportService do
   let(:form_with_all_answer_types) do
     create(:form, :live,
            :with_support,
-           submission_type: "email",
-           submission_format: %w[csv],
            payment_url: "https://www.gov.uk/payments/organisation/service",
            send_copy_of_answers: "enabled",
            pages: [
@@ -39,22 +37,28 @@ RSpec.describe Reports::FeatureReportService do
              create(:page, answer_type: "phone_number"),
              create(:page, :with_selection_settings, is_optional: true),
              create(:page, :with_single_line_text_settings, is_repeatable: true),
+           ],
+           delivery_configurations: [
+             create(:delivery_configuration, :immediate_email, formats: %w[csv]),
            ])
   end
   let(:form_with_a_few_answer_types) do
     create(:form,
            :live,
-           submission_type: "email",
-           submission_format: %w[csv json],
-           send_daily_submission_batch: true,
-           send_weekly_submission_batch: true,
            pages: [
              create(:page, answer_type: "email"),
              *create_list(:page, 3, answer_type: "name"),
+           ],
+           delivery_configurations: [
+             create(:delivery_configuration, :immediate_email, formats: %w[csv json]),
+             create(:delivery_configuration, :daily_email),
+             create(:delivery_configuration, :weekly_email),
            ])
   end
   let(:branch_route_form) do
-    form = create(:form, :live, :ready_for_routing, submission_type: "s3", submission_format: %w[csv])
+    form = create(:form, :live, :ready_for_routing, delivery_configurations: [
+      create(:delivery_configuration, :s3, formats: %w[csv]),
+    ])
     create(:condition, :with_exit_page, routing_page_id: form.pages[0].id, check_page_id: form.pages[0].id, answer_value: "Option 1")
     create(:condition, routing_page_id: form.pages[1].id, check_page_id: form.pages[1].id, answer_value: "Option 1", goto_page_id: form.pages[3].id)
     create(:condition, routing_page_id: form.pages[2].id, check_page_id: form.pages[1].id, goto_page_id: form.pages[4].id)
@@ -475,7 +479,7 @@ RSpec.describe Reports::FeatureReportService do
   end
 
   describe "#forms_with_s3_submissions" do
-    it "returns live forms with json enabled" do
+    it "returns live forms with s3 submissions" do
       forms = described_class.new(form_documents).forms_with_s3_submissions
       expect(forms.length).to eq 1
       expect(forms).to match [

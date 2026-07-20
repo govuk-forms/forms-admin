@@ -27,8 +27,6 @@ RSpec.describe Reports::FormsCsvReportService do
            :with_support,
            :with_welsh_translation,
            payment_url: "https://www.gov.uk/payments/organisation/service",
-           send_daily_submission_batch: true,
-           send_weekly_submission_batch: true,
            pages: [
              create(:page, :with_address_settings, is_repeatable: true),
              create(:page, :with_date_settings),
@@ -43,6 +41,8 @@ RSpec.describe Reports::FormsCsvReportService do
            delivery_configurations: [
              create(:delivery_configuration, :immediate_email, formats: %w[csv json]),
              create(:delivery_configuration, :s3, formats: %w[csv]),
+             create(:delivery_configuration, :daily_email),
+             create(:delivery_configuration, :weekly_email),
            ])
   end
   let(:forms) { [form, create(:form, :live)] }
