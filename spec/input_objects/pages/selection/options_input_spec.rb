@@ -228,4 +228,46 @@ RSpec.describe Pages::Selection::OptionsInput do
   end
 
   it_behaves_like "base selection options input"
+
+  describe "#can_add_more_options?" do
+    context "when only_one_option is true for the draft_question" do
+      let(:only_one_option) { "true" }
+
+      context "and there are 3000 options" do
+        let(:selection_options) { (1..3000).to_a.map { |i| OpenStruct.new(name: i.to_s) } }
+
+        it "returns false" do
+          expect(input.can_add_more_options?).to be false
+        end
+      end
+
+      context "and there are fewer than 3000 options" do
+        let(:selection_options) { (1..2999).to_a.map { |i| OpenStruct.new(name: i.to_s) } }
+
+        it "returns true" do
+          expect(input.can_add_more_options?).to be true
+        end
+      end
+    end
+
+    context "when only_one_option is false for the draft_question" do
+      let(:only_one_option) { "false" }
+
+      context "and there are 30 options" do
+        let(:selection_options) { (1..30).to_a.map { |i| OpenStruct.new(name: i.to_s) } }
+
+        it "returns false" do
+          expect(input.can_add_more_options?).to be false
+        end
+      end
+
+      context "and there are fewer than 30 options" do
+        let(:selection_options) { (1..29).to_a.map { |i| OpenStruct.new(name: i.to_s) } }
+
+        it "returns true" do
+          expect(input.can_add_more_options?).to be true
+        end
+      end
+    end
+  end
 end

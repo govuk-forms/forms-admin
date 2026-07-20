@@ -155,12 +155,12 @@ RSpec.describe Api::FormDocumentsController, type: :request do
     context "when the form exists" do
       let(:form) { create(:form) }
       let(:group) { create(:group, organisation: test_org) }
-      let(:group_admin) { create(:user) }
+      let(:group_admin) { create(:user, organisation: test_org) }
 
       before do
         organisation_admin_user
         create(:membership, user: group_admin, group:, role: :group_admin)
-        create(:membership, user: create(:user), group:, role: :editor)
+        create(:membership, user: create(:user, organisation: test_org), group:, role: :editor)
 
         group.group_forms.create!(form_id: form.id)
       end

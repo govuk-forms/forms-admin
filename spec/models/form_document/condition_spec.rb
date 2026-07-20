@@ -11,7 +11,7 @@ RSpec.describe FormDocument::Condition, type: :model do
   end
 
   it "has all the attributes the original condition has" do
-    expect(form_document_condition.attributes.except("routing_page_id")).to include(condition.attributes.except("routing_page_id"))
+    expect(form_document_condition.attributes.except("routing_page_id")).to include(condition.attributes.except("routing_page_id", "exit_page_id"))
     expect(form_document_condition.routing_page_id).to eq(condition.routing_page.external_id)
   end
 

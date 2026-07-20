@@ -19,6 +19,10 @@ class GroupPolicy < ApplicationPolicy
     user.super_admin?
   end
 
+  def manage_feature_flags?
+    user.super_admin?
+  end
+
   def delete?
     organisation_admin_or_super_admin?
   end

@@ -64,6 +64,42 @@ RSpec.describe Group, type: :model do
     end
   end
 
+  describe ".feature_flag_attributes" do
+    let(:features) do
+      Config::Options.new(
+        some_group_feature: Config::Options.new(enabled_by_group: true),
+        feature_without_column: Config::Options.new(enabled_by_group: true),
+        global_feature: Config::Options.new(enabled: true),
+      )
+    end
+
+    before do
+      allow(Settings).to receive(:features).and_return(features)
+      allow(described_class).to receive(:has_attribute?).and_call_original
+      allow(described_class).to receive(:has_attribute?).with("some_group_feature_enabled").and_return(true)
+    end
+
+    it "includes the column for each enabled_by_group feature with a matching column" do
+      expect(described_class.feature_flag_attributes).to include("some_group_feature_enabled")
+    end
+
+    it "excludes enabled_by_group features that have no matching column" do
+      expect(described_class.feature_flag_attributes).not_to include("feature_without_column_enabled")
+    end
+
+    it "excludes features that are not enabled_by_group" do
+      expect(described_class.feature_flag_attributes).not_to include("global_feature_enabled")
+    end
+
+    context "when no features are configured" do
+      let(:features) { nil }
+
+      it "returns an empty array" do
+        expect(described_class.feature_flag_attributes).to eq([])
+      end
+    end
+  end
+
   describe "before_create" do
     it "sets the external_id" do
       group = create :group
@@ -90,9 +126,10 @@ RSpec.describe Group, type: :model do
 
   describe "associations" do
     it "destroys associated memberships" do
-      group = create :group
-      user = create :user
-      added_by = create :user
+      organisation = create :organisation
+      group = create :group, organisation: organisation
+      user = create :user, organisation: organisation
+      added_by = create :user, organisation: organisation
       create(:membership, group:, user:, added_by:)
 
       expect { group.destroy }.to change(Membership, :count).by(-1)
@@ -115,11 +152,12 @@ RSpec.describe Group, type: :model do
     describe "#memberships" do
       describe "#ordered" do
         it "orders the membership records by name of the associated user" do
-          group = create :group
+          organisation = create :organisation
+          group = create :group, organisation: organisation
           users = [
-            create(:user, name: "Barbara User"),
-            create(:user, name: "Alfred User"),
-            create(:user, name: "Charlie User"),
+            create(:user, name: "Barbara User", organisation: organisation),
+            create(:user, name: "Alfred User", organisation: organisation),
+            create(:user, name: "Charlie User", organisation: organisation),
           ]
 
           users.each do |user|
@@ -149,7 +187,7 @@ RSpec.describe Group, type: :model do
             Membership.create!(group:, user:, role: :editor, added_by: group.creator)
           end
 
-          expect(group.users.group_admins).to eq group_admin_users
+          expect(group.users.group_admins).to match_array(group_admin_users)
         end
       end
     end
@@ -182,11 +220,7 @@ RSpec.describe Group, type: :model do
       group.group_forms.build(form: forms.third)
       group.save!
 
-      expect(described_class.find(1).group_forms).to eq [
-        GroupForm.build(form: forms.first, group_id: 1),
-        GroupForm.build(form: forms.second, group_id: 1),
-        GroupForm.build(form: forms.third, group_id: 1),
-      ]
+      expect(described_class.find(1).group_forms).to contain_exactly(GroupForm.build(form: forms.first, group_id: 1), GroupForm.build(form: forms.second, group_id: 1), GroupForm.build(form: forms.third, group_id: 1))
     end
 
     it "is associated with a form through the form ID" do
@@ -228,9 +262,10 @@ RSpec.describe Group, type: :model do
   describe "scopes" do
     describe ".for_user" do
       it "returns groups that the user is a member of" do
-        user = create :user
-        group1 = create :group
-        group2 = create :group
+        organisation = create :organisation
+        user = create :user, organisation: organisation
+        group1 = create :group, organisation: organisation
+        group2 = create :group, organisation: organisation
         create :group
         create :membership, user:, group: group1
         create :membership, user:, group: group2
@@ -246,8 +281,9 @@ RSpec.describe Group, type: :model do
       end
 
       it "does not return groups that the user is not a member of" do
-        user = create :user
-        group1 = create :group
+        organisation = create :organisation
+        user = create :user, organisation: organisation
+        group1 = create :group, organisation: organisation
         create :group
         create :group
         create :membership, user:, group: group1

@@ -96,6 +96,44 @@ RSpec.describe "/groups/:group_id/forms", type: :request do
           expect(response).to have_http_status :unprocessable_content
         end
       end
+
+      context "when the target group belongs to another organisation" do
+        let(:other_organisation) { create(:organisation, slug: "other-org") }
+        let(:other_org_group) { create(:group, organisation: other_organisation) }
+
+        it "does not move the form" do
+          expect {
+            patch group_form_url(group, id: form.id), params: { forms_group_select: { group: other_org_group.external_id } }
+          }.not_to(change { GroupForm.find_by(form_id: form.id).group })
+        end
+
+        it "renders a response with 422 status" do
+          patch group_form_url(group, id: form.id), params: { forms_group_select: { group: other_org_group.external_id } }
+
+          expect(response).to have_http_status :unprocessable_content
+        end
+      end
+
+      context "when the form is live and the target group is not active" do
+        let(:live_form) { create :form, :live, id: 2 }
+        let(:trial_group) { create(:group, organisation: organisation_admin_user.organisation, status: :trial) }
+
+        before do
+          group.group_forms.create!(form_id: live_form.id)
+        end
+
+        it "does not move the form" do
+          expect {
+            patch group_form_url(group, id: live_form.id), params: { forms_group_select: { group: trial_group.external_id } }
+          }.not_to(change { GroupForm.find_by(form_id: live_form.id).group })
+        end
+
+        it "renders a response with 422 status" do
+          patch group_form_url(group, id: live_form.id), params: { forms_group_select: { group: trial_group.external_id } }
+
+          expect(response).to have_http_status :unprocessable_content
+        end
+      end
     end
   end
 

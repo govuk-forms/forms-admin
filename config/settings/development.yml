@@ -5,8 +5,8 @@ forms_api:
   auth_key: changeme
 
 # Use mock authentication
-# in development use 'mock_gds_sso' to always be logged in or 'developer' to use a
+# in development use 'mock_user' to always be logged in or 'developer' to use a
 # mock flow through omniauth
-auth_provider: mock_gds_sso
+auth_provider: mock_user
 
 act_as_user_enabled: true

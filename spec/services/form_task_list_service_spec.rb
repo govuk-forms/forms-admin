@@ -6,9 +6,10 @@ describe FormTaskListService do
   let(:organisation) { build :organisation, :with_signed_mou, id: 1 }
   let(:form) { create(:form, :new_form, pages:) }
   let(:pages) { [] }
-  let(:group) { create(:group, name: "Group 1", organisation:, status: group_status, send_filler_answers_enabled:) }
+  let(:group) { create(:group, name: "Group 1", organisation:, status: group_status, send_filler_answers_enabled:, custom_branding_enabled:) }
   let(:group_status) { :trial }
   let(:send_filler_answers_enabled) { true }
+  let(:custom_branding_enabled) { true }
 
   let(:can_view_form) { true }
   let(:can_make_form_live) { false }
@@ -156,10 +157,25 @@ describe FormTaskListService do
         expect(section_rows.first[:path]).to eq "/forms/#{form.id}/payment-link"
       end
 
+      context "when the custom_branding feature is enabled" do
+        it "has link to brand settings" do
+          expect(section_rows[1][:task_name]).to eq "Choose a brand for your form"
+          expect(section_rows[1][:path]).to eq "/forms/#{form.id}/brand"
+        end
+      end
+
+      context "when the custom_branding feature is disabled" do
+        let(:custom_branding_enabled) { false }
+
+        it "does not have link to brand settings" do
+          expect(section_rows.map { |row| row[:path] }).not_to include("/forms/#{form.id}/brand")
+        end
+      end
+
       context "when the send_filler_answers feature is enabled" do
         it "has link to copy of answers settings" do
-          expect(section_rows[1][:task_name]).to eq "Give people the option to ask for a copy of their answers"
-          expect(section_rows[1][:path]).to eq "/forms/#{form.id}/copy-of-answers"
+          expect(section_rows[2][:task_name]).to eq "Give people the option to ask for a copy of their answers"
+          expect(section_rows[2][:path]).to eq "/forms/#{form.id}/copy-of-answers"
         end
       end
 
@@ -167,7 +183,7 @@ describe FormTaskListService do
         let(:send_filler_answers_enabled) { false }
 
         it "does not have link to copy of answers settings" do
-          expect(section_rows.count).to eq 1
+          expect(section_rows.count).to eq 2
         end
       end
     end
@@ -634,6 +650,7 @@ describe FormTaskListService do
           I18n.t("forms.task_list_edit.create_form_section.declaration"),
           I18n.t("forms.task_list_edit.create_form_section.what_happens_next"),
           I18n.t("forms.task_list_edit.create_form_optional_subsection.payment_link"),
+          I18n.t("forms.task_list_edit.create_form_optional_subsection.brand"),
           I18n.t("forms.task_list_edit.create_form_optional_subsection.copy_of_answers"),
           I18n.t("forms.task_list_edit.how_you_get_completed_forms_section.email"),
           I18n.t("forms.task_list_edit.how_you_get_completed_forms_section.confirm_email"),

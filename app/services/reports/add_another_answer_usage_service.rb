@@ -14,7 +14,7 @@ private
       form_id: form.id,
       name: form.name,
       state: form.state,
-      repeatable_pages: form.pages.map { |page| OpenStruct.new(page_id: page.id, question_text: page.question_text) if page.is_repeatable },
+      repeatable_pages: form.pages.order(:position).map { |page| OpenStruct.new(page_id: page.id, question_text: page.question_text) if page.is_repeatable }.compact,
     )
   end
 end

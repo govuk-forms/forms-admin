@@ -22,8 +22,11 @@ RSpec.describe Mailchimp::ListSyncService do
     let(:mou_signer_and_organisation_admin_with_access) { users_with_access.third }
 
     before do
+      signed_mou_org = create(:organisation)
+      signed_mou_org_user = create(:user, organisation: signed_mou_org, has_access: false)
+      create(:mou_signature, organisation: signed_mou_org, user: signed_mou_org_user)
       users_with_access.each do |email|
-        create :user, email:, has_access: true
+        create :user, email:, has_access: true, organisation: signed_mou_org
       end
 
       users_without_access.each do |email|
@@ -69,17 +72,19 @@ RSpec.describe Mailchimp::ListSyncService do
   end
 
   describe "#mou_signers" do
-    let(:user_with_access_and_mou) { create(:user, email: "mou_user@example.com") }
-    let(:user_with_access_admin) { create(:user, email: "admin_user@example.com") }
-    let(:user_without_access) { create(:user, email: "inactive_user@example.com", has_access: false) }
-    let(:user_access_and_admin_with_mou) { create(:user, email: "admin_mou_user@example.com") }
-
-    let(:non_crown_org) { create(:organisation, id: 2, slug: "non-crown-org") }
+    let(:signed_mou_org) { create(:organisation) }
+    let(:user_with_access_and_mou) { create(:user, email: "mou_user@example.com", organisation: signed_mou_org) }
+    let(:user_with_access_admin) { create(:user, email: "admin_user@example.com", organisation: signed_mou_org) }
+    let(:user_without_access) { create(:user, email: "inactive_user@example.com", has_access: false, organisation: signed_mou_org) }
+    let(:user_access_and_admin_with_mou) { create(:user, email: "admin_mou_user@example.com", organisation: signed_mou_org) }
+    let(:non_crown_org) { create(:organisation, slug: "non-crown-org") }
     let(:user_that_signed_non_crown_agreement) { create(:user, organisation: non_crown_org) }
     let(:not_org_admin_that_signed_non_crown_agreement) { create(:user, organisation: non_crown_org) }
     let(:org_admin_for_non_crown_org) { create(:user, organisation: non_crown_org) }
+    let!(:signed_mou_org_user) { create(:user, organisation: signed_mou_org, has_access: false) }
 
     before do
+      create(:mou_signature, organisation: signed_mou_org, user: signed_mou_org_user)
       create(:mou_signature, user: user_with_access_and_mou)
       create(:mou_signature, user: user_access_and_admin_with_mou)
       create(:mou_signature, agreement_type: :non_crown, user: user_that_signed_non_crown_agreement)

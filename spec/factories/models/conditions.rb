@@ -12,6 +12,10 @@ FactoryBot.define do
     exit_page_heading { nil }
     exit_page_markdown { nil }
 
+    # Define the association but we want to set it to nil by default
+    association :exit_page
+    exit_page_id { nil }
+
     trait :with_exit_page do
       goto_page { nil }
       exit_page_heading { "Exit page heading" }

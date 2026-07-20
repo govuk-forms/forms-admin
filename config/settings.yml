@@ -1,5 +1,7 @@
 # Used to add feature flags in the app to control access to certain features.
 features:
+  custom_branding:
+    enabled_by_group: true
   exit_pages:
     enabled_by_group: true
   multiple_branches:

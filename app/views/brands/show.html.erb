@@ -1,0 +1,26 @@
+<% set_page_title(@brand.name) %>
+<% content_for :back_link, govuk_back_link_to(brands_path) %>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-l"><%= @brand.name %></h1>
+
+    <%= govuk_summary_list(actions: false) do |summary_list|
+      summary_list.with_row do |row|
+        row.with_key { t('brands.show.summary.slug') }
+        row.with_value { @brand.slug }
+      end
+
+      summary_list.with_row do |row|
+        row.with_key { t('brands.show.summary.created_at') }
+        row.with_value { l(@brand.created_at.to_date, format: :long) }
+      end
+    end %>
+
+    <% if policy(Brand).can_edit_brands? %>
+      <p class="govuk-body">
+        <%= govuk_link_to t("brands.show.edit_brand"), edit_brand_path(@brand) %>
+      </p>
+    <% end %>
+  </div>
+</div>

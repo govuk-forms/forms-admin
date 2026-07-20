@@ -22,23 +22,23 @@
   },
   "devDependencies": {
     "@testing-library/dom": "^10.4.1",
-    "autoprefixer": "^10.5.0",
+    "autoprefixer": "^10.5.2",
     "esbuild": "0.28.1",
     "jsdom": "^29.1.1",
     "postcss": "^8.5.15",
     "regenerator-runtime": "^0.14.1",
-    "sass": "^1.100.0",
+    "sass": "^1.101.0",
     "snazzy": "^9.0.0",
     "standard": "^17.1.2",
     "stylelint": "^17.4.0",
     "stylelint-config-gds": "^3.0.0",
-    "vite": "^8.0.16",
+    "vite": "^8.1.3",
     "vite-plugin-ruby": "^5.2.2",
-    "vitest": "^4.1.9"
+    "vitest": "^4.1.10"
   },
   "dependencies": {
     "dfe-autocomplete": "github:DFE-Digital/dfe-autocomplete#1d4cc65039e11cc3ba9e7217a719b8128d0e4d53",
-    "govuk-frontend": "^6.2.0",
+    "govuk-frontend": "^6.3.0",
     "turndown": "^7.2.4"
   },
   "standard": {

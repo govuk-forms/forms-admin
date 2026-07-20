@@ -20,8 +20,8 @@ describe UserPolicy do
     subject(:policy_scope) { described_class.new(user, User) }
 
     context "with super admin role" do
-      it "returns a list of users", :flaky do
-        expect(policy_scope.resolve).to eq(records)
+      it "returns a list of users" do
+        expect(policy_scope.resolve).to match_array(records)
       end
     end
 

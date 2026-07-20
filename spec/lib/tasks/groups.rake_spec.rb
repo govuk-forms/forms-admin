@@ -73,4 +73,30 @@ RSpec.describe "groups.rake", type: :task do
       }.to raise_error(ActiveRecord::RecordNotFound)
     end
   end
+
+  describe "groups:toggle_custom_branding_enabled" do
+    subject(:task) { Rake::Task["groups:toggle_custom_branding_enabled"] }
+
+    it "with correct arguments toggles custom_branding_enabled for the group" do
+      group = create(:group, custom_branding_enabled: false)
+
+      expect {
+        task.invoke(group.external_id)
+      }.to change { group.reload.custom_branding_enabled }.from(false).to(true)
+    end
+
+    it "with no arguments raises an error" do
+      expect {
+        task.invoke
+      }.to raise_error(SystemExit)
+      .and output(/usage/).to_stderr
+    end
+
+    it "with invalid group id raises an error" do
+      invalid_args = %w[some_id_that_does_not_exist]
+      expect {
+        task.invoke(*invalid_args)
+      }.to raise_error(ActiveRecord::RecordNotFound)
+    end
+  end
 end

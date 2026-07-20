@@ -1,0 +1,31 @@
+<% set_page_title(title_with_error_prefix(t(".title"), @brand_input.errors.any?)) %>
+<% content_for :back_link, govuk_back_link_to(organisation_path(@brand_input.organisation)) %>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <%= form_with(model: @brand_input, url: organisation_brands_path(@brand_input.organisation)) do |f| %>
+      <% if @brand_input.errors.any? %>
+        <%= f.govuk_error_summary %>
+      <% end %>
+
+      <h1 id="heading" class="govuk-heading-l">
+        <span class="govuk-caption-l"><%= @brand_input.organisation.name_with_abbreviation %></span>
+        <span class="govuk-visually-hidden"> - </span>
+        <%= t(".title") %>
+      </h1>
+
+      <%= render DfE::Autocomplete::View.new(
+        f,
+        attribute_name: :brand_id,
+        form_field: f.govuk_collection_select(:brand_id, @brand_input.available_brands, :id, :name,
+                                              class: ['govuk-!-width-three-quarters'],
+                                              options: { prompt: t('.prompt') },
+                                              label: { text: t('.label'), size: 'm' })
+      ) %>
+
+      <%= f.govuk_submit t(".submit") %>
+    <% end %>
+  </div>
+</div>
+
+<%= init_autocomplete_script(show_all_values: false, raw_attribute: true, source: false) %>

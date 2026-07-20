@@ -2,7 +2,7 @@ require "rails_helper"
 
 RSpec.describe FormCopyService do
   let(:group) { create(:group) }
-  let(:source_form) { create(:form, :live_with_draft) }
+  let(:source_form) { create(:form, :live_with_draft, :with_s3_configuration) }
   let(:source_form_document) { FormDocument.find_by(form_id: source_form.id) }
   let(:logged_in_user) { create(:user) }
   let(:tag) { "live" }
@@ -58,6 +58,9 @@ RSpec.describe FormCopyService do
     it "does not copy attributes that we exclude from copying" do
       expect(copied_form.first_made_live_at).to be_nil
       expect(copied_form.submission_email).to be_nil
+      expect(copied_form.s3_bucket_aws_account_id).to be_nil
+      expect(copied_form.s3_bucket_name).to be_nil
+      expect(copied_form.s3_bucket_region).to be_nil
     end
 
     context "when source form has completed tasks" do

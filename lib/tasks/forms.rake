@@ -85,7 +85,32 @@ namespace :forms do
       supported_formats = %w[csv json]
       abort "submission_format must be one of #{supported_formats.join(', ')}" unless submission_format.all? { supported_formats.include? it }
 
-      set_submission_type(args[:form_id], "email", submission_format)
+      form_id = args[:form_id]
+      Rails.logger.info("Setting submission_type to email with submission_format #{submission_format} for form: #{form_id}")
+
+      form = Form.find(form_id)
+      form.submission_type = "email"
+      form.submission_format = submission_format
+
+      delivery_configuration = form.delivery_configurations.find_or_initialize_by(delivery_method: :email, delivery_schedule: :immediate)
+      delivery_configuration.formats = submission_format
+      delivery_configuration.save!
+
+      form.delivery_configurations.where(delivery_method: :s3).destroy_all
+      form.save!
+
+      if form.is_live?
+        form_document = form.live_form_document
+        content = form_document.content
+
+        content[:submission_type] = "email"
+        content[:submission_format] = submission_format
+        content[:delivery_configurations] = form.delivery_configurations.map(&:as_json)
+
+        form_document.save!
+      end
+
+      Rails.logger.info("Set submission_type to email with submission_format #{submission_format} for form: #{form_id}")
     end
 
     desc "Set submission_type to s3"
@@ -109,140 +134,34 @@ namespace :forms do
       form.s3_bucket_name = args[:s3_bucket_name]
       form.s3_bucket_aws_account_id = args[:s3_bucket_aws_account_id]
       form.s3_bucket_region = args[:s3_bucket_region]
+
+      delivery_configuration = form.delivery_configurations.find_or_initialize_by(delivery_method: :s3, delivery_schedule: :immediate)
+      delivery_configuration.formats = submission_format
+      delivery_configuration.save!
+
+      # For now, disable email delivery per submission. After we've migrated to using the DeliveryConfigurations in
+      # forms-runner we can allow enabling both email and s3.
+      form.delivery_configurations.where(delivery_method: :email, delivery_schedule: :immediate).destroy_all
+
       form.save!
 
       if form.is_live?
-        form_document = form.live_form_document
-        content = form_document.content
+        form.form_documents.where(tag: "live").find_each do |form_document|
+          content = form_document.content
 
-        content[:submission_type] = submission_type
-        content[:submission_format] = submission_format
-        content[:s3_bucket_name] = args[:s3_bucket_name]
-        content[:s3_bucket_aws_account_id] = args[:s3_bucket_aws_account_id]
-        content[:s3_bucket_region] = args[:s3_bucket_region]
+          content[:submission_type] = submission_type
+          content[:submission_format] = submission_format
+          content[:s3_bucket_name] = args[:s3_bucket_name]
+          content[:s3_bucket_aws_account_id] = args[:s3_bucket_aws_account_id]
+          content[:s3_bucket_region] = args[:s3_bucket_region]
+          content[:delivery_configurations] = form.delivery_configurations.map(&:as_json)
 
-        form_document.save!
+          form_document.save!
+        end
       end
 
       Rails.logger.info("Set submission_type to #{submission_type} and s3_bucket_name to #{args[:s3_bucket_name]} for form: #{args[:form_id]}")
     end
-  end
-
-  desc "Updates form documents to add value to all selection options"
-  task add_value_to_selection_options: :environment do
-    # find all form documents where any of the steps have an answer_type of selection
-    form_documents_with_selection_steps = FormDocument.where("jsonb_path_exists(content, '$.steps[*] ? (@.data.answer_type == \"selection\")')")
-    Rails.logger.info "data_migrations:add_value_to_selection_options will update #{form_documents_with_selection_steps.count} form_documents"
-
-    form_documents_with_selection_steps.find_each do |form_document|
-      form_document.content["steps"].each do |step|
-        next unless step["data"]["answer_type"] == "selection"
-
-        step["data"]["answer_settings"]["selection_options"].each do |option|
-          option["value"] = option["name"]
-        end
-      end
-
-      begin
-        form_document.save!
-      rescue StandardError => e
-        Rails.logger.info "data_migrations:add_value_to_selection_options Failed to update form #{form_document.id}: #{e.message}"
-      end
-    end
-
-    Page.where(answer_type: "selection").find_each do |page|
-      page.answer_settings["selection_options"].each do |option|
-        option["value"] = option["name"]
-      end
-
-      begin
-        page.save!
-      rescue StandardError => e
-        Rails.logger.info "data_migrations:add_value_to_selection_options Failed to update page #{page.id}: #{e.message}"
-      end
-    end
-
-    DraftQuestion.where(answer_type: "selection").find_each do |question|
-      new_selection_options = question.answer_settings[:selection_options].each do |option|
-        option[:value] = option[:name]
-      end
-
-      question.answer_settings = question.answer_settings.merge(selection_options: new_selection_options)
-
-      begin
-        question.save!
-      rescue StandardError => e
-        Rails.logger.info "data_migrations:add_value_to_selection_options Failed to update question #{question.id}: #{e.message}"
-      end
-    end
-
-    Rails.logger.info "data_migrations:add_value_to_selection_options finished"
-  end
-
-  desc "Check selection options in Page DraftQuestion and FormDocument"
-  task check_selection_options: :environment do
-    pages_with_selection_options_with_no_value = Page.where(answer_type: "selection")
-                                                     .where("jsonb_path_exists(answer_settings, '$.selection_options[*] ? (!exists(@.value))')")
-                                                     .count
-
-    draft_questions_with_selection_options_with_no_value = DraftQuestion.where(answer_type: "selection")
-                                                                        .where("jsonb_path_exists(answer_settings, '$.selection_options[*] ? (!exists(@.value))')")
-                                                                        .count
-
-    Rails.logger.info "Pages with selection options with no value: #{pages_with_selection_options_with_no_value}"
-    Rails.logger.info "DraftQuestions with selection options with no value: #{draft_questions_with_selection_options_with_no_value}"
-    Rails.logger.info "data_migrations:check_selection_options finished"
-  end
-
-  desc "Updates form documents to add send_weekly_submission_batch attribute"
-  task add_send_weekly_submission_batch_to_form_documents: :environment do
-    # find all form documents that don't have a batch_submissions attribute
-    form_documents_without_send_weekly_submission_batch = FormDocument.where("NOT jsonb_path_exists(content, '$.send_weekly_submission_batch')")
-    Rails.logger.info "data_migrations:add_send_weekly_submission_batch_to_form_documents will update #{form_documents_without_send_weekly_submission_batch.count} form documents"
-
-    form_documents_without_send_weekly_submission_batch.find_each do |form_document|
-      form_document.content["send_weekly_submission_batch"] = false
-
-      begin
-        form_document.save!
-      rescue StandardError => e
-        Rails.logger.info "data_migrations:add_send_weekly_submission_batch_to_form_documents Failed to update form #{form_document.id}: #{e.message}"
-      end
-    end
-
-    Rails.logger.info "data_migrations:add_send_weekly_submission_batch_to_form_documents finished"
-  end
-
-  desc "Add declation_markdown based on declation_text"
-  task convert_declaration_text_to_markdown: :environment do
-    Rails.logger.info "convert_declaration_text_to_markdown: started"
-
-    Form.find_each do |form|
-      next if form.declaration_text.blank?
-
-      atttibutes_to_update = {}
-
-      markdown = MarkdownConversionService.new(form.declaration_text).to_markdown
-
-      atttibutes_to_update[:declaration_markdown] = markdown
-
-      if form.declaration_text_cy.present?
-        markdown_cy = MarkdownConversionService.new(form.declaration_text_cy).to_markdown
-        atttibutes_to_update[:declaration_markdown_cy] = markdown_cy
-      end
-
-      form.update!(atttibutes_to_update)
-    end
-
-    FormDocument.find_each do |form_document|
-      next if form_document.content["declaration_markdown"].present?
-
-      markdown = MarkdownConversionService.new(form_document.content["declaration_text"]).to_markdown
-
-      form_document.update!(content: form_document.content.merge({ "declaration_markdown": markdown }))
-    end
-
-    Rails.logger.info "convert_declaration_text_to_markdown: finished"
   end
 
   desc "List all forms that are not in a group"
@@ -254,6 +173,24 @@ namespace :forms do
       creator = User.find(form.creator_id) if form.creator_id.present?
       Rails.logger.info "Form #{form.id} (\"#{form.name}\") created by #{creator&.name || 'No creator'} with organisation #{creator&.organisation&.name || 'N/A'}"
     end
+  end
+
+  desc "Show a form's form_document as JSON"
+  task :show_form_document, %i[form_id tag language] => :environment do |_, args|
+    usage_message = "usage: rake forms:show_form_document[<form_id>, <tag>, <language>]".freeze
+
+    abort usage_message if args[:form_id].blank? || args[:tag].blank?
+    language = args[:language].presence || "en"
+
+    abort "tag must be one of draft, live or archived" unless %w[draft live archived].include?(args[:tag])
+    abort "language must be en or cy" unless %w[en cy].include?(language)
+
+    form = Form.find(args[:form_id])
+
+    form_document = form.form_documents.find_by(tag: args[:tag], language:)
+    abort "#{fmt_form(form)} does not have a #{args[:tag]} #{language} form document" if form_document.blank?
+
+    puts JSON.pretty_generate(form_document.as_json)
   end
 end
 
@@ -283,27 +220,6 @@ end
 
 def fmt_group(group)
   "group #{group.external_id} (\"#{group.name}\", #{group.organisation.name}, #{group.creator&.name || 'GOV.UK Forms Team'})"
-end
-
-def set_submission_type(form_id, submission_type, submission_format)
-  Rails.logger.info("Setting submission_type to #{submission_type} with submission_format #{submission_format} for form: #{form_id}")
-
-  form = Form.find(form_id)
-  form.submission_type = submission_type
-  form.submission_format = submission_format
-  form.save!
-
-  if form.is_live?
-    form_document = form.live_form_document
-    content = form_document.content
-
-    content[:submission_type] = submission_type
-    content[:submission_format] = submission_format
-
-    form_document.save!
-  end
-
-  Rails.logger.info("Set submission_type to #{submission_type} with submission_format #{submission_format} for form: #{form_id}")
 end
 
 def validate_email(email)

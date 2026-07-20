@@ -19,6 +19,10 @@ RSpec.describe GroupPolicy do
       expect(GroupPolicy::Scope.new(user, Group).resolve).to eq(Group.all)
     end
 
+    it "permits manage_feature_flags" do
+      expect(policy).to permit_action(:manage_feature_flags)
+    end
+
     context "when the group has status upgrade_requested" do
       let(:group) { build :group, status: :upgrade_requested }
 
@@ -41,8 +45,8 @@ RSpec.describe GroupPolicy do
     let(:organisation) { group.organisation }
 
     context "and in the same organisation as the group" do
-      it "forbids only request_upgrade, review_upgrade and move" do
-        expect(policy).to forbid_only_actions(%i[request_upgrade review_upgrade move])
+      it "forbids only request_upgrade, review_upgrade, move and manage_feature_flags" do
+        expect(policy).to forbid_only_actions(%i[request_upgrade review_upgrade move manage_feature_flags])
       end
     end
 
@@ -92,7 +96,7 @@ RSpec.describe GroupPolicy do
       end
 
       it "forbids upgrade, add_group_admin, review_upgrade, delete and destroy" do
-        expect(policy).to forbid_only_actions(%i[upgrade add_group_admin review_upgrade delete destroy move])
+        expect(policy).to forbid_only_actions(%i[upgrade add_group_admin review_upgrade delete destroy move manage_feature_flags])
       end
 
       context "when the group status is active" do

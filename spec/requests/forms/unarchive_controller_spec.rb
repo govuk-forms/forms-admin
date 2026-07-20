@@ -27,7 +27,7 @@ RSpec.describe Forms::UnarchiveController, type: :request do
     end
 
     context "when current user does not belong to the forms group" do
-      let(:user) { build :user }
+      let(:user) { build :user, organisation: standard_user.organisation }
 
       it "is forbidden" do
         expect(response).to have_http_status(:forbidden)
@@ -119,7 +119,7 @@ RSpec.describe Forms::UnarchiveController, type: :request do
     end
 
     context "when current user does not belong to the forms group" do
-      let(:user) { build :user }
+      let(:user) { build :user, organisation: standard_user.organisation }
 
       it "is forbidden" do
         post(unarchive_create_path(form_id: form.id), params: form_params)

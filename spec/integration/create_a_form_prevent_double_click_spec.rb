@@ -5,7 +5,7 @@ RSpec.describe "Create a form", type: :feature do
   let(:unwanted_form) { create :form, name: "Test form", created_at: form.created_at + 0.1 }
 
   let(:group) do
-    group = create :group, name: "Test group", creator: user
+    group = create :group, name: "Test group", creator: user, organisation: user.organisation
     create :membership, group:, user:, added_by: user
     group
   end

@@ -74,13 +74,9 @@ RSpec.describe AuthenticationController, type: :request do
         allow(controller_spy).to receive(:redirect_to_sign_in).and_call_original
 
         # shorten the auth_valid_for time for testing
-        GDS::SSO::Config.auth_valid_for = 1
+        allow(Settings).to receive(:auth_valid_for).and_return(1)
 
         logout
-      end
-
-      after do
-        GDS::SSO::Config.auth_valid_for = Settings.auth_valid_for
       end
 
       it "re-authenticates after the configured time" do
@@ -91,7 +87,7 @@ RSpec.describe AuthenticationController, type: :request do
         expect(controller_spy).not_to have_received(:redirect_to_sign_in)
 
         # wait for the auth_valid_for time to pass
-        sleep(1)
+        travel 2.seconds
 
         get root_path
 
@@ -102,13 +98,15 @@ RSpec.describe AuthenticationController, type: :request do
 
   describe "#callback_from_omniauth" do
     it "is called by OmniAuth provider" do
-      post "/auth/gds"
+      allow(Settings).to receive(:auth_provider).and_return("auth0")
 
-      expect(response).to redirect_to("/auth/gds/callback")
+      post "/auth/auth0"
+
+      expect(response).to redirect_to("/auth/auth0/callback")
 
       allow(controller_spy).to receive(:callback_from_omniauth).and_call_original
 
-      get "/auth/gds/callback"
+      get "/auth/auth0/callback"
 
       expect(controller_spy).to have_received :callback_from_omniauth
     end

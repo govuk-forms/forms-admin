@@ -9,7 +9,14 @@ class Forms::SubmissionAttachmentsInput < BaseInput
   def submit
     return false if invalid?
 
-    form.submission_format = submission_format.compact_blank
+    formats = submission_format.compact_blank
+    form.submission_format = formats
+
+    delivery_configuration = form.delivery_configurations.where(delivery_method: "email", delivery_schedule: "immediate").first_or_initialize
+    delivery_configuration.formats = formats
+    delivery_configuration.save!
+    form.delivery_configurations.reload
+
     form.save_draft!
   end
 

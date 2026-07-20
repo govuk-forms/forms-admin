@@ -1,0 +1,33 @@
+<% set_page_title(t("page_titles.brands")) %>
+
+<h1 class="govuk-heading-l"><%= t("page_titles.brands") %></h1>
+
+<% if @brands.any? %>
+  <%= render ScrollingWrapperComponent::View.new(aria_label: t("brands.index.table_caption")) do %>
+    <%= govuk_table do |table| %>
+      <%= table.with_head do |head|
+        head.with_row do |row|
+          row.with_cell(header: true, text: t("brands.index.table_headings.name"))
+          row.with_cell(header: true, text: t("brands.index.table_headings.slug"))
+        end
+      end %>
+
+      <%= table.with_body do |body|
+        @brands.each do |brand|
+          body.with_row do |row|
+            row.with_cell do
+              govuk_link_to(brand.name, brand_path(brand))
+            end
+            row.with_cell(text: brand.slug)
+          end
+        end
+      end %>
+    <% end %>
+  <% end %>
+<% else %>
+  <p class="govuk-body"><%= t("brands.index.no_results") %></p>
+<% end %>
+
+<% if policy(Brand).can_edit_brands? %>
+  <%= govuk_button_link_to t("brands.index.create_brand"), new_brand_path, class: "govuk-!-margin-top-3" %>
+<% end %>

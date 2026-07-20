@@ -31,17 +31,12 @@ RSpec.describe Forms::GroupSelect, type: :model do
       end
 
       context "when the organisation admin user is logged in" do
-        let(:org_admin) { build(:organisation_admin_user) }
-
-        it "returns only groups in the user's organisation" do
-          create_list(:group, 3) do |g|
-            g.organisation = group.organisation
-            g.save!
-          end
-          create(:group, organisation: build(:organisation)) # Group 5
+        it "returns only groups in the current group's organisation" do
+          create_list(:group, 3, organisation: group.organisation)
+          create(:group, organisation: build(:organisation)) # Group in a different organisation
 
           expect(group_select.groups).not_to include(group)
-          expect(group_select.groups.count).to eq(4)
+          expect(group_select.groups.count).to eq(3)
         end
       end
 

@@ -65,9 +65,7 @@ describe "account/organisations/edit.html.erb" do
 
   context "when there are closed organisations" do
     before do
-      create(:organisation, slug: "test-org")
       create(:organisation, slug: "closed-org", closed: true)
-      create(:organisation, slug: "department-for-testing", name: "Department for Testing")
 
       render
     end

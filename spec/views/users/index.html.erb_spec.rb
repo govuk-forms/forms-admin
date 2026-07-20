@@ -9,6 +9,7 @@ describe "users/index.html.erb" do
   end
   let(:filter_input) { Users::FilterInput.new }
   let(:filtered_download_path) { Faker::Internet.url }
+  let(:pagy) { Pagy.new(count: users.size, page: 1, limit: 50) }
 
   before do
     allow(Settings).to receive(:act_as_user_enabled).and_return(act_as_user_enabled)
@@ -20,6 +21,7 @@ describe "users/index.html.erb" do
     assign(:users, users)
     assign(:filter_input, filter_input)
     assign(:filtered_download_path, filtered_download_path)
+    assign(:pagy, pagy)
     render template: "users/index"
   end
 
@@ -29,6 +31,18 @@ describe "users/index.html.erb" do
 
   it "contains a scrollable wrapper with a table in it" do
     expect(rendered).to have_css(".app-scrolling-wrapper > table")
+  end
+
+  it "contains the total number of users" do
+    expect(rendered).to have_css("p", text: "Showing 3 users")
+  end
+
+  context "when the users span multiple pages" do
+    let(:pagy) { Pagy.new(count: 120, page: 1, limit: 50) }
+
+    it "shows how many users are on this page out of the total" do
+      expect(rendered).to have_css("p", text: "Showing 1 to 50 of 120 users")
+    end
   end
 
   it "contains the user's name" do

@@ -35,16 +35,18 @@ RSpec.describe Membership, type: :model do
   end
 
   it "is invalid if the user is already a member of the group" do
-    user = create :user
-    group = create :group
+    organisation = create :organisation
+    user = create :user, organisation: organisation
+    group = create :group, organisation: organisation
     create(:membership, user:, group:)
     membership = build(:membership, user:, group:)
     expect(membership).not_to be_valid
   end
 
   it "raises a DB error if the user is already a member of the group" do
-    user = create :user
-    group = create :group
+    organisation = create :organisation
+    user = create :user, organisation: organisation
+    group = create :group, organisation: organisation
     create(:membership, user:, group:)
     membership = build(:membership, user:, group:)
     expect { membership.save(validate: false) }.to raise_error(ActiveRecord::RecordNotUnique)

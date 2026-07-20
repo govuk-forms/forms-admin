@@ -262,4 +262,131 @@ RSpec.describe "organisations.rake", type: :task do
         .and raise_error(SystemExit) { |e| expect(e).not_to be_success }
     end
   end
+
+  describe "organisations:domains:add" do
+    subject(:task) do
+      Rake::Task["organisations:domains:add"]
+    end
+
+    let!(:organisation) { create :organisation, slug: "test-org" }
+
+    it "adds domains to an organisation" do
+      expect(Rails.logger).to receive(:info).with("Adding domain: example.gov.uk")
+      expect(Rails.logger).to receive(:info).with("Adding domain: example.org")
+
+      expect {
+        task.invoke("test-org", "example.gov.uk", "example.org")
+      }.to change { organisation.reload.organisation_domains.pluck(:domain) }
+        .from([])
+        .to(match_array(%w[example.gov.uk example.org]))
+    end
+
+    it "raises an error when a domain is invalid" do
+      expect {
+        task.invoke("test-org", "not a domain")
+      }.to raise_error(ActiveRecord::RecordInvalid, /Enter a domain name in the correct format, like subdomain\.gov\.uk/)
+
+      expect(organisation.reload.organisation_domains).to be_empty
+    end
+
+    it "aborts when the organisation slug does not exist" do
+      expect { task.invoke("missing-org", "example.gov.uk") }
+        .to output(/Organisation with slug missing-org does not exist/).to_stderr
+        .and raise_error(SystemExit) { |e| expect(e).not_to be_success }
+    end
+  end
+
+  describe "organisations:domains:remove" do
+    subject(:task) do
+      Rake::Task["organisations:domains:remove"]
+    end
+
+    let!(:organisation) { create :organisation, slug: "test-org" }
+
+    before do
+      create :organisation_domain, organisation:, domain: "example.gov.uk"
+      create :organisation_domain, organisation:, domain: "example.org"
+    end
+
+    it "removes domains from an organisation" do
+      expect(Rails.logger).to receive(:info).with("Removed domain: example.gov.uk")
+
+      expect {
+        task.invoke("test-org", "example.gov.uk")
+      }.to change { organisation.reload.organisation_domains.pluck(:domain).sort }
+        .from(%w[example.gov.uk example.org])
+        .to(%w[example.org])
+    end
+
+    it "logs and continues when a domain does not exist" do
+      expect(Rails.logger).to receive(:info).with("Domain missing.gov.uk not found for organisation with slug test-org").ordered
+      expect(Rails.logger).to receive(:info).with("Removed domain: example.gov.uk").ordered
+
+      expect {
+        task.invoke("test-org", "missing.gov.uk", "example.gov.uk")
+      }.to change { organisation.reload.organisation_domains.pluck(:domain).sort }
+        .from(%w[example.gov.uk example.org])
+        .to(%w[example.org])
+    end
+
+    it "aborts when the organisation slug does not exist" do
+      expect { task.invoke("missing-org", "example.gov.uk") }
+        .to output(/Organisation with slug missing-org does not exist/).to_stderr
+        .and raise_error(SystemExit) { |e| expect(e).not_to be_success }
+    end
+  end
+
+  describe "organisations:domains:list" do
+    subject(:task) do
+      Rake::Task["organisations:domains:list"]
+    end
+
+    let!(:organisation) { create :organisation, slug: "test-org" }
+
+    it "logs the organisation domains" do
+      create :organisation_domain, organisation:, domain: "example.gov.uk"
+      create :organisation_domain, organisation:, domain: "example.org"
+
+      expect(Rails.logger).to receive(:info).with("Domains for organisation with slug 'test-org': example.gov.uk, example.org")
+
+      task.invoke("test-org")
+    end
+
+    it "logs when the organisation has no domains" do
+      expect(Rails.logger).to receive(:info).with("Organisation with slug 'test-org' has no domains")
+
+      task.invoke("test-org")
+    end
+
+    it "aborts when the organisation slug does not exist" do
+      expect { task.invoke("missing-org") }
+        .to output(/Organisation with slug missing-org does not exist/).to_stderr
+        .and raise_error(SystemExit) { |e| expect(e).not_to be_success }
+    end
+  end
+
+  describe "organisations:domains:populate_from_users" do
+    subject(:task) do
+      Rake::Task["organisations:domains:populate_from_users"]
+    end
+
+    it "creates one domain per unique user email domain for each organisation" do
+      first_organisation = create :organisation, name: "Department for Testing", slug: "dft"
+      second_organisation = create :organisation, name: "Department for Experiments", slug: "dfe"
+
+      create :user, organisation: first_organisation, email: "alice@example.gov.uk"
+      create :user, organisation: first_organisation, email: "bob@example.gov.uk"
+      create :user, organisation: first_organisation, email: "carol@example.org"
+
+      create :user, organisation: second_organisation, email: "dana@service.gov.uk"
+
+      expect(Rails.logger).to receive(:info).with("Added domains for Department for Testing: example.gov.uk, example.org")
+      expect(Rails.logger).to receive(:info).with("Added domains for Department for Experiments: service.gov.uk")
+
+      task.invoke
+
+      expect(first_organisation.reload.organisation_domains.pluck(:domain)).to match_array(%w[example.gov.uk example.org])
+      expect(second_organisation.reload.organisation_domains.pluck(:domain)).to match_array(%w[service.gov.uk])
+    end
+  end
 end

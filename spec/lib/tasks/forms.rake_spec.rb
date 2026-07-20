@@ -201,7 +201,7 @@ RSpec.describe "forms.rake", type: :task do
         task.invoke(form.id, "draft")
 
         expect(Rails.logger).to have_received(:info)
-          .with(/forms:set_state: form #{form.id} \(".*"\) is already in state 'draft'/)
+                                  .with(/forms:set_state: form #{form.id} \(".*"\) is already in state 'draft'/)
       end
     end
 
@@ -352,8 +352,17 @@ RSpec.describe "forms.rake", type: :task do
       Rake::Task["forms:submission_type:set_to_email"]
     end
 
-    let(:form) { create :form, :live, submission_type: "s3", submission_format: [] }
-    let!(:other_form) { create :form, :live, submission_type: "s3", submission_format: [] }
+    let(:form) do
+      create(:form, :live, submission_type: "s3", submission_format: [], delivery_configurations: [
+        create(:delivery_configuration, :s3),
+        create(:delivery_configuration, :daily_email),
+      ])
+    end
+    let!(:other_form) do
+      create(:form, :live, submission_type: "s3", submission_format: [], delivery_configurations: [
+        create(:delivery_configuration, :s3),
+      ])
+    end
 
     context "when the form is live" do
       it "sets a form's submission_type to email" do
@@ -361,16 +370,50 @@ RSpec.describe "forms.rake", type: :task do
           .to change { form.reload.submission_type }.to("email")
       end
 
+      it "creates a DeliveryConfiguration for immediate email deliveries and removes the DeliveryConfiguration for s3" do
+        task.invoke(form.id)
+        expect(form.reload.delivery_configurations.pluck(:delivery_method, :delivery_schedule, :formats)).to contain_exactly(
+          ["email", "immediate", []],
+          ["email", "daily", %w[csv]],
+        )
+      end
+
       it "updates a form's live form document" do
         task.invoke(form.id)
-        expect(form.live_form_document.reload.content["submission_type"]).to eq("email")
-        expect(form.live_form_document.reload.content["submission_format"]).to eq([])
+        content = form.live_form_document.reload.content
+        expect(content["submission_type"]).to eq("email")
+        expect(content["submission_format"]).to eq([])
+        expect(content["delivery_configurations"]).to contain_exactly(
+          {
+            "delivery_method" => "email",
+            "delivery_schedule" => "immediate",
+            "formats" => [],
+          },
+          {
+            "delivery_method" => "email",
+            "delivery_schedule" => "daily",
+            "formats" => %w[csv],
+          },
+        )
       end
 
       it "updates the form's draft form document" do
         task.invoke(form.id)
-        expect(form.draft_form_document.reload.content["submission_type"]).to eq("email")
-        expect(form.live_form_document.reload.content["submission_format"]).to eq([])
+        content = form.draft_form_document.reload.content
+        expect(content["submission_type"]).to eq("email")
+        expect(content["submission_format"]).to eq([])
+        expect(content["delivery_configurations"]).to contain_exactly(
+          {
+            "delivery_method" => "email",
+            "delivery_schedule" => "immediate",
+            "formats" => [],
+          },
+          {
+            "delivery_method" => "email",
+            "delivery_schedule" => "daily",
+            "formats" => %w[csv],
+          },
+        )
       end
 
       it "does not update a different form" do
@@ -420,6 +463,13 @@ RSpec.describe "forms.rake", type: :task do
         expect { task.invoke(form.id, "email") }
           .to change { form.reload.submission_type }.to("email")
       end
+
+      it "creates a DeliveryConfiguration with blank format" do
+        task.invoke(form.id, "email")
+        expect(form.reload.delivery_configurations.pluck(:delivery_method, :delivery_schedule, :formats)).to include(
+          ["email", "immediate", []],
+        )
+      end
     end
 
     context "when the provided submission format is csv" do
@@ -431,6 +481,13 @@ RSpec.describe "forms.rake", type: :task do
       it "sets a form's submission_type to email" do
         expect { task.invoke(form.id, "csv") }
           .to change { form.reload.submission_type }.to("email")
+      end
+
+      it "creates a DeliveryConfiguration with csv format" do
+        task.invoke(form.id, "csv")
+        expect(form.reload.delivery_configurations.pluck(:delivery_method, :delivery_schedule, :formats)).to include(
+          ["email", "immediate", %w[csv]],
+        )
       end
     end
 
@@ -444,6 +501,13 @@ RSpec.describe "forms.rake", type: :task do
         expect { task.invoke(form.id, "json") }
           .to change { form.reload.submission_type }.to("email")
       end
+
+      it "creates a DeliveryConfiguration with json format" do
+        task.invoke(form.id, "json")
+        expect(form.reload.delivery_configurations.pluck(:delivery_method, :delivery_schedule, :formats)).to include(
+          ["email", "immediate", %w[json]],
+        )
+      end
     end
 
     context "when the provided submission format is csv, json" do
@@ -455,6 +519,13 @@ RSpec.describe "forms.rake", type: :task do
       it "sets a form's submission_type to email" do
         expect { task.invoke(form.id, "csv", "json") }
           .to change { form.reload.submission_type }.to("email")
+      end
+
+      it "creates a DeliveryConfiguration with the provided formats" do
+        task.invoke(form.id, "csv", "json")
+        expect(form.reload.delivery_configurations.pluck(:delivery_method, :delivery_schedule, :formats)).to include(
+          ["email", "immediate", %w[csv json]],
+        )
       end
     end
 
@@ -481,7 +552,12 @@ RSpec.describe "forms.rake", type: :task do
       Rake::Task["forms:submission_type:set_to_s3"]
     end
 
-    let(:form) { create :form, :live }
+    let(:form) do
+      create(:form, :with_welsh_translation, :live, delivery_configurations: [
+        create(:delivery_configuration, :immediate_email),
+        create(:delivery_configuration, :daily_email),
+      ])
+    end
     let!(:other_form) { create :form, :live }
     let(:s3_bucket_name) { "a-bucket" }
     let(:s3_bucket_aws_account_id) { "an-aws-account-id" }
@@ -501,6 +577,14 @@ RSpec.describe "forms.rake", type: :task do
             .to change { form.reload.submission_format }.to(%w[csv])
         end
 
+        it "replaces the immediate email DeliveryConfiguration with an s3 configuration" do
+          task.invoke(*valid_args)
+          expect(form.reload.delivery_configurations.pluck(:delivery_method, :delivery_schedule, :formats)).to contain_exactly(
+            ["s3", "immediate", %w[csv]],
+            ["email", "daily", %w[csv]],
+          )
+        end
+
         it "updates the live form document" do
           task.invoke(*valid_args)
           form_document = form.live_form_document.reload
@@ -509,6 +593,40 @@ RSpec.describe "forms.rake", type: :task do
           expect(form_document.content["s3_bucket_name"]).to eq(s3_bucket_name)
           expect(form_document.content["s3_bucket_aws_account_id"]).to eq(s3_bucket_aws_account_id)
           expect(form_document.content["s3_bucket_region"]).to eq(s3_bucket_region)
+          expect(form_document.content["delivery_configurations"]).to contain_exactly(
+            {
+              "delivery_method" => "s3",
+              "delivery_schedule" => "immediate",
+              "formats" => %w[csv],
+            },
+            {
+              "delivery_method" => "email",
+              "delivery_schedule" => "daily",
+              "formats" => %w[csv],
+            },
+          )
+        end
+
+        it "updates the live Welsh form document" do
+          task.invoke(*valid_args)
+          welsh_form_document = form.live_welsh_form_document.reload
+          expect(welsh_form_document.content["submission_type"]).to eq("s3")
+          expect(welsh_form_document.content["submission_format"]).to eq(%w[csv])
+          expect(welsh_form_document.content["s3_bucket_name"]).to eq(s3_bucket_name)
+          expect(welsh_form_document.content["s3_bucket_aws_account_id"]).to eq(s3_bucket_aws_account_id)
+          expect(welsh_form_document.content["s3_bucket_region"]).to eq(s3_bucket_region)
+          expect(welsh_form_document.content["delivery_configurations"]).to contain_exactly(
+            {
+              "delivery_method" => "s3",
+              "delivery_schedule" => "immediate",
+              "formats" => %w[csv],
+            },
+            {
+              "delivery_method" => "email",
+              "delivery_schedule" => "daily",
+              "formats" => %w[csv],
+            },
+          )
         end
 
         it "updates the draft form document" do
@@ -519,6 +637,18 @@ RSpec.describe "forms.rake", type: :task do
           expect(form_document.content["s3_bucket_name"]).to eq(s3_bucket_name)
           expect(form_document.content["s3_bucket_aws_account_id"]).to eq(s3_bucket_aws_account_id)
           expect(form_document.content["s3_bucket_region"]).to eq(s3_bucket_region)
+          expect(form_document.content["delivery_configurations"]).to contain_exactly(
+            {
+              "delivery_method" => "s3",
+              "delivery_schedule" => "immediate",
+              "formats" => %w[csv],
+            },
+            {
+              "delivery_method" => "email",
+              "delivery_schedule" => "daily",
+              "formats" => %w[csv],
+            },
+          )
         end
       end
 
@@ -535,11 +665,26 @@ RSpec.describe "forms.rake", type: :task do
             .to change { form.reload.submission_format }.to(%w[json])
         end
 
+        it "replaces the immediate email DeliveryConfiguration with an s3 configuration with json format" do
+          task.invoke(*valid_args)
+          expect(form.reload.delivery_configurations.pluck(:delivery_method, :delivery_schedule, :formats)).to contain_exactly(
+            ["s3", "immediate", %w[json]],
+            ["email", "daily", %w[csv]],
+          )
+        end
+
         it "updates the live form document" do
           task.invoke(*valid_args)
           form_document = form.live_form_document.reload
           expect(form_document.content["submission_type"]).to eq("s3")
           expect(form_document.content["submission_format"]).to eq(%w[json])
+          expect(form_document.content["delivery_configurations"]).to include(
+            {
+              "delivery_method" => "s3",
+              "delivery_schedule" => "immediate",
+              "formats" => %w[json],
+            },
+          )
         end
 
         it "updates the draft form document" do
@@ -547,6 +692,13 @@ RSpec.describe "forms.rake", type: :task do
           form_document = form.draft_form_document.reload
           expect(form_document.content["submission_type"]).to eq("s3")
           expect(form_document.content["submission_format"]).to eq(%w[json])
+          expect(form_document.content["delivery_configurations"]).to include(
+            {
+              "delivery_method" => "s3",
+              "delivery_schedule" => "immediate",
+              "formats" => %w[json],
+            },
+          )
         end
       end
 
@@ -574,16 +726,6 @@ RSpec.describe "forms.rake", type: :task do
     context "when the form is draft" do
       let(:form) { create :form }
 
-      it "sets a form's submission_type to s3" do
-        expect { task.invoke(*valid_args) }
-          .to change { form.reload.submission_type }.to("s3")
-      end
-
-      it "sets a form's submission_format" do
-        expect { task.invoke(*valid_args) }
-          .to change { form.reload.submission_format }.to([format])
-      end
-
       it "updates the draft form document" do
         task.invoke(*valid_args)
         form_document = form.draft_form_document.reload
@@ -592,6 +734,13 @@ RSpec.describe "forms.rake", type: :task do
         expect(form_document.content["s3_bucket_name"]).to eq(s3_bucket_name)
         expect(form_document.content["s3_bucket_aws_account_id"]).to eq(s3_bucket_aws_account_id)
         expect(form_document.content["s3_bucket_region"]).to eq(s3_bucket_region)
+        expect(form_document.content["delivery_configurations"]).to include(
+          {
+            "delivery_method" => "s3",
+            "delivery_schedule" => "immediate",
+            "formats" => %w[csv],
+          },
+        )
       end
     end
 
@@ -654,135 +803,62 @@ RSpec.describe "forms.rake", type: :task do
         expect {
           task.invoke(1, s3_bucket_name, s3_bucket_aws_account_id, "eu-west-2", "xml")
         }.to raise_error(SystemExit)
-                       .and output("format must be one of csv or json\n").to_stderr
+               .and output("format must be one of csv or json\n").to_stderr
       end
     end
   end
 
-  describe "add_value_to_selection_options" do
+  describe "forms:show_form_document" do
     subject(:task) do
-      Rake::Task["forms:add_value_to_selection_options"]
+      Rake::Task["forms:show_form_document"]
     end
 
-    let(:form) { create :form, pages: }
-    let(:form_without_selection_options) { create :form, :with_pages }
-    let(:pages) do
-      [
-        create(:page,
-               :with_selection_settings,
-               answer_settings: DataStruct.new(
-                 only_one_option: "true",
-                 selection_options: [{ name: "option 1" }, { name: "option 2" }],
-               )),
-        create(:page, :with_single_line_text_settings),
-      ]
-    end
-    let(:draft_question) { create :selection_draft_question, selection_options: [{ name: "option 1" }, { name: "option 2" }] }
+    let(:form) { create(:form) }
 
-    it "adds value to the step with selection options" do
+    it "prints the requested form document as JSON" do
+      expect { task.invoke(form.id, "draft", "en") }
+        .to output(/"id": #{form.draft_form_document.id}/).to_stdout
+    end
+
+    it "prints the requested English form document when no language is given" do
+      expect { task.invoke(form.id, "draft") }
+        .to output(/"id": #{form.draft_form_document.id}/).to_stdout
+    end
+
+    it "aborts with a usage message when arguments are missing" do
       expect {
-        task.invoke
-      }.to change { form.draft_form_document.reload.content.dig("steps", 0, "data", "answer_settings") }.to(
-        { "only_one_option" => "true", # only_one_option doesn't change
-          "selection_options" => [{ "name" => "option 1", "value" => "option 1" },
-                                  { "name" => "option 2", "value" => "option 2" }] },
-      )
+        task.invoke(form.id)
+      }.to raise_error(SystemExit)
+         .and output(/usage: rake forms:show_form_document\[<form_id>, <tag>, <language>\]/).to_stderr
     end
 
-    it "does not add value to the step without selection options" do
+    it "aborts when the tag is invalid" do
       expect {
-        task.invoke
-      }.not_to(change { form.draft_form_document.reload.content.dig("steps", 1, "data", "answer_settings") })
+        task.invoke(form.id, "invalid", "en")
+      }.to raise_error(SystemExit)
+         .and output(/tag must be one of draft, live or archived/).to_stderr
     end
 
-    it "does not change form documents without selection options" do
+    it "aborts when the language is invalid" do
       expect {
-        task.invoke
-      }.not_to(change { form_without_selection_options.draft_form_document.reload.content["steps"] })
+        task.invoke(form.id, "draft", "invalid")
+      }.to raise_error(SystemExit)
+         .and output(/language must be en or cy/).to_stderr
     end
 
-    it "updates the pages with selection options" do
+    it "aborts when the requested form document is missing" do
       expect {
-        task.invoke
-      }.to change { pages.first.reload.answer_settings.as_json }.to(
-        { "only_one_option" => "true",
-          "selection_options" => [{ "name" => "option 1", "value" => "option 1" },
-                                  { "name" => "option 2", "value" => "option 2" }] },
-      )
+        task.invoke(form.id, "draft", "cy")
+      }.to raise_error(SystemExit)
+         .and output(/form #{form.id} \("#{form.name}"\) does not have a draft cy form document/).to_stderr
     end
 
-    it "updates the draft questions with selection options" do
-      expect {
-        task.invoke
-      }.to change { draft_question.reload.answer_settings.as_json }.to(
-        { "only_one_option" => "true",
-          "selection_options" => [{ "name" => "option 1", "value" => "option 1" },
-                                  { "name" => "option 2", "value" => "option 2" }] },
-      )
-    end
-  end
+    context "when a form has a Welsh translation" do
+      let(:form) { create(:form, :with_welsh_translation) }
 
-  describe "add_send_weekly_submission_batch_to_form_documents" do
-    subject(:task) do
-      Rake::Task["forms:add_send_weekly_submission_batch_to_form_documents"]
-    end
-
-    let!(:form_with_send_weekly_submission_batch) { create :form, send_weekly_submission_batch: true }
-    let(:form_without_send_weekly_submission_batch) { create :form }
-
-    before do
-      form_without_send_weekly_submission_batch.draft_form_document.update(content: form_without_send_weekly_submission_batch.draft_form_document.content.except("send_weekly_submission_batch"))
-    end
-
-    it "does not change forms that already have send_weekly_submission_batch set" do
-      expect {
-        task.invoke
-      }.not_to(change { form_with_send_weekly_submission_batch.reload.draft_form_document.content["send_weekly_submission_batch"] })
-    end
-
-    it "sets send_weekly_submission_batch to false for forms that do not have it set" do
-      expect {
-        task.invoke
-      }.to change { form_without_send_weekly_submission_batch.reload.draft_form_document.content["send_weekly_submission_batch"] }.from(nil).to(false)
-    end
-  end
-
-  describe "convert_declaration_text_to_markdown" do
-    subject(:task) do
-      Rake::Task["forms:convert_declaration_text_to_markdown"]
-    end
-
-    let(:form) { create :form, declaration_text: "<p>This is a declaration</p>" }
-    let(:form_document) { form.draft_form_document }
-
-    it "converts declaration_text to markdown" do
-      expect {
-        task.invoke
-      }.to change { form.reload.declaration_markdown }.from(nil).to("This is a declaration\n\n")
-    end
-
-    it "does not set declaration_markdown if markdown_text is empty" do
-      form.update!(declaration_text: "")
-
-      expect {
-        task.invoke
-      }.not_to(change { form.reload.declaration_markdown })
-    end
-
-    it "converts form documents" do
-      expect {
-        task.invoke
-      }.to change { form_document.reload.content["declaration_markdown"] }.from(nil).to("This is a declaration\n\n")
-    end
-
-    context "when a form has a Welsh version" do
-      let(:form) { create :form, :with_welsh_translation, declaration_text: "<p>This is a declaration</p>", declaration_text_cy: "<p>This is the Welsh declaration</p>" }
-      let(:form_document) { form.draft_form_document }
-
-      it "converts declaration_text to markdown" do
-        expect {
-          task.invoke
-        }.to change { form.reload.declaration_markdown_cy }.from(nil).to("This is the Welsh declaration\n\n")
+      it "prints the requested form document as JSON" do
+        expect { task.invoke(form.id, "draft", "cy") }
+          .to output(/"id": #{form.draft_welsh_form_document.id}/).to_stdout
       end
     end
   end

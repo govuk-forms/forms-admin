@@ -1,0 +1,10 @@
+---
+en:
+  activemodel:
+    errors:
+      models:
+        organisations/brand_input:
+          attributes:
+            brand_id:
+              blank: Select a brand
+              inclusion: Select a brand from the list of available brands

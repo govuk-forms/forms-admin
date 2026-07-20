@@ -1,0 +1,25 @@
+<% set_page_title(title_with_error_prefix(t('page_titles.brand'), @brand_input.errors.any?)) %>
+<% content_for :back_link, govuk_back_link_to(form_path, t("back_link.form_create")) %>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+
+    <%= form_with(model: @brand_input, url: form_brand_path) do |f| %>
+      <% if @brand_input&.errors.any? %>
+        <%= f.govuk_error_summary %>
+      <% end %>
+
+      <span class="govuk-caption-l"><%= @brand_input.form.name %></span>
+      <h1 class="govuk-heading-l">
+        <%= t('brand_input.heading') %>
+      </h1>
+
+      <%= t('brand_input.body_html') %>
+
+      <%= f.govuk_collection_radio_buttons :brand_id,
+                                           @brand_input.brand_options, :id, :name,
+                                           legend: { text: t('brand_input.heading'), hidden: true } %>
+      <%= f.govuk_submit t('save_and_continue') %>
+    <% end %>
+  </div>
+</div>

@@ -60,16 +60,19 @@ RUN apk update
 RUN apk upgrade --available
 RUN apk add libc6-compat openssl-dev libpq
 
+
 RUN adduser -D ruby
 RUN chown ruby:ruby -R /app
 
 USER ruby
-
 COPY --chown=ruby:ruby bin/ ./bin
 RUN chmod 0755 bin/*
 
 COPY --chown=ruby:ruby --from=build /usr/local/bundle /usr/local/bundle
 COPY --chown=ruby:ruby --from=build /app /app
+
+# Add the RDS CA certificate to the container so that we can verify the RDS server's identity when connecting to it.
+COPY --chown=ruby:ruby ./docker/eu-west-2-bundle.pem /home/ruby/.postgresql/root.crt
 
 RUN mkdir -p "/app/tmp/" && chown ruby:ruby "/app/tmp/" && chown ruby:ruby "/app/db/"
 VOLUME "/tmp/"

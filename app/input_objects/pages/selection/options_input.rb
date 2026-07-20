@@ -23,6 +23,10 @@ class Pages::Selection::OptionsInput < Pages::Selection::BaseOptionsInput
     selection_options.map { |option| OpenStruct.new(name: option[:name]) }
   end
 
+  def can_add_more_options?
+    selection_options.count < maximum_options
+  end
+
 private
 
   def validate_selection_options

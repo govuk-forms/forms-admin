@@ -5,16 +5,17 @@ RSpec.describe GroupService do
     described_class.new(group:, current_user:, host:)
   end
 
-  let(:group) { create :group }
-  let(:current_user) { create :user }
+  let(:organisation) { create :organisation }
+  let(:group) { create :group, organisation: }
+  let(:current_user) { create :user, organisation: }
   let(:host) { "example.net" }
 
   describe "#upgrade_group" do
-    let(:first_group_admin_user) { create :user }
-    let(:second_group_admin_user) { create :user }
-    let(:editor_user) { create :user }
+    let(:first_group_admin_user) { create :user, organisation: }
+    let(:second_group_admin_user) { create :user, organisation: }
+    let(:editor_user) { create :user, organisation: }
     let(:group) do
-      create(:group).tap do |group|
+      create(:group, organisation:).tap do |group|
         create(:membership, user: first_group_admin_user, group:, role: :group_admin)
         create(:membership, user: second_group_admin_user, group:, role: :group_admin)
         create(:membership, user: editor_user, group:, role: :editor)
@@ -63,11 +64,11 @@ RSpec.describe GroupService do
   end
 
   describe "#reject_upgrade" do
-    let(:first_group_admin_user) { create :user }
-    let(:second_group_admin_user) { create :user }
-    let(:editor_user) { create :user }
+    let(:first_group_admin_user) { create :user, organisation: }
+    let(:second_group_admin_user) { create :user, organisation: }
+    let(:editor_user) { create :user, organisation: }
     let(:group) do
-      create(:group, status: :upgrade_requested).tap do |group|
+      create(:group, status: :upgrade_requested, organisation:).tap do |group|
         create(:membership, user: first_group_admin_user, group:, role: :group_admin)
         create(:membership, user: second_group_admin_user, group:, role: :group_admin)
         create(:membership, user: editor_user, group:, role: :editor)
@@ -119,11 +120,12 @@ RSpec.describe GroupService do
   end
 
   describe "#request_upgrade" do
-    let!(:first_organisation_admin_user) { create :organisation_admin_user }
-    let!(:second_organisation_admin_user) { create :organisation_admin_user }
-    let(:editor_user) { create :user }
+    let(:organisation) { create :organisation, :with_signed_mou }
+    let!(:first_organisation_admin_user) { create :organisation_admin_user, organisation: }
+    let!(:second_organisation_admin_user) { create :organisation_admin_user, organisation: }
+    let(:editor_user) { create :user, organisation: }
     let(:group) do
-      create(:group).tap do |group|
+      create(:group, organisation:).tap do |group|
         create(:membership, user: editor_user, group:, role: :editor)
         create(:membership, user: current_user, group:, role: :group_admin)
       end

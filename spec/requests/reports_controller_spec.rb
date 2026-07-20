@@ -428,26 +428,6 @@ RSpec.describe ReportsController, type: :request do
     end
   end
 
-  describe "#users" do
-    let(:path) { report_users_path }
-
-    include_examples "unauthorized user is forbidden"
-
-    context "when the user is a super admin" do
-      before do
-        login_as_super_admin_user
-
-        get path
-      end
-
-      it "returns http code 200 and renders the users report template" do
-        expect(response).to have_http_status(:ok)
-
-        expect(response).to render_template("reports/users")
-      end
-    end
-  end
-
   describe "#add_another_answer" do
     let(:path) { report_add_another_answer_path }
     let(:report_data) do
@@ -829,6 +809,45 @@ RSpec.describe ReportsController, type: :request do
       it "returns http code 200 and renders the template" do
         expect(response).to have_http_status(:ok)
         expect(response).to render_template("reports/contact_for_research")
+      end
+    end
+  end
+
+  describe "#users_per_organisation" do
+    let(:path) { report_users_per_organisation_path }
+
+    include_examples "unauthorized user is forbidden"
+
+    context "when the user is a super admin" do
+      before do
+        login_as_super_admin_user
+
+        get path
+      end
+
+      it "returns http code 200 and renders the users report template" do
+        expect(response).to have_http_status(:ok)
+
+        expect(response).to render_template("reports/users_per_organisation")
+      end
+    end
+  end
+
+  describe "#organisation_domains" do
+    let(:path) { report_organisation_domains_path }
+
+    include_examples "unauthorized user is forbidden"
+
+    context "when the user is a super admin" do
+      before do
+        login_as_super_admin_user
+
+        get path
+      end
+
+      it "returns http code 200 and renders the template" do
+        expect(response).to have_http_status(:ok)
+        expect(response).to render_template("reports/organisation_domains")
       end
     end
   end

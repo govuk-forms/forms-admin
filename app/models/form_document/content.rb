@@ -16,6 +16,7 @@ class FormDocument::Content
   attribute :start_page, :integer
   attribute :updated_at, :datetime
   attribute :payment_url, :string
+  attribute :brand_id, :string
   attribute :support_url, :string
   attribute :support_email, :string
   attribute :support_phone, :string

@@ -148,6 +148,11 @@ en:
   activerecord:
     errors:
       models:
+        brand:
+          attributes:
+            slug:
+              invalid: Slug must only include lowercase letters a to z, numbers and hyphens
+              taken: There is already a brand with this slug
         draft_question:
           attributes:
             hint_text:
@@ -171,6 +176,12 @@ en:
             agreed:
               crown: You must agree to the memorandum of understanding
               non_crown: You must agree to the agreement to continue
+        organisation_domain:
+          attributes:
+            domain:
+              blank: Enter a domain name
+              invalid_domain: Enter a domain name in the correct format, like subdomain.gov.uk
+              taken: This domain name is already in use
         page:
           attributes:
             hint_text:
@@ -239,6 +250,8 @@ en:
           daily_enabled: You’ll get a daily batch of form submissions
           disabled: You will not get a daily or weekly batch of form submissions
           weekly_enabled: You’ll get a weekly batch of form submissions
+        brand_removed: Your form will use the default GOV.UK brand
+        brand_saved: Your form’s brand has been saved
         change_name: Your form name has been saved
         copied: Your form has been copied
         copy_of_answers_disabled: People will not have the option to ask for a copy of their answers
@@ -267,6 +280,30 @@ en:
       route_updated: Question %{question_number}’s route has been updated
       secondary_skip_created: Route for any other answer has been added
       title: Success
+  brand_input:
+    body_html: |
+      <p>You can choose a brand to change how your form looks to people filling it in, for example, the logo and colours.</p>
+
+      <p>If you do not choose a brand, your form will use the default GOV.UK brand.</p>
+    heading: Choose a brand for your form
+  brands:
+    edit:
+      title: Edit brand
+    index:
+      create_brand: Create a brand
+      no_results: No brands found.
+      table_caption: Brands
+      table_headings:
+        name: Name
+        slug: Slug
+    show:
+      edit_brand: Edit this brand
+      summary:
+        created_at: Created
+        slug: Slug
+    success_messages:
+      create: The brand has been created
+      update: The brand has been updated
   bulk_options:
     hint: Enter each option on a new line
     label: Enter the options for your list
@@ -525,6 +562,7 @@ en:
         other: Optional tasks
     task_list_create:
       create_form_optional_subsection:
+        brand: Choose a brand for your form
         copy_of_answers: Give people the option to ask for a copy of their answers
         payment_link: Add a link to a payment page on GOV.UK Pay
       create_form_section:
@@ -573,6 +611,7 @@ en:
         title: Create a Welsh version of your form (optional)
     task_list_edit:
       create_form_optional_subsection:
+        brand: Choose a brand for your form
         copy_of_answers: Give people the option to ask for a copy of their answers
         payment_link: Add a link to a payment page on GOV.UK Pay
       create_form_section:
@@ -727,6 +766,13 @@ en:
       success: The group, ‘%{group_name}’, has been deleted
     edit:
       title: Change the name of this group
+    feature_flags:
+      flags:
+        custom_branding_enabled: Custom branding
+        multiple_branches_enabled: Multiple branches
+        send_filler_answers_enabled: Send a copy of completed answers to form fillers
+      hint: You can turn a feature flag on, but not off. A feature can change how a form or group works, which might take extra steps to reverse. Ask a developer if you need to switch a feature off.
+      title: Feature flags
     form_table_caption: Forms in ‘%{group_name}’
     group_list:
       created_by: Created by
@@ -840,6 +886,7 @@ en:
         title: Managing this group
       edit_group_members: Edit members of this group
       edit_group_name: Change the name of this group
+      feature_flags: Manage feature flags for this group
       move: Move this group to another organisation
       review_group_members: View members of this group
       trial_banner:
@@ -870,6 +917,7 @@ en:
       trial: Trial group
       upgrade_requested: Trial group
     success_messages:
+      feature_flags: This group’s feature flags have been updated
       move: Group’s organisation has changed to %{org_name}
       update: The name of this group has been changed
       upgrade: This group is now active
@@ -903,7 +951,9 @@ en:
         Guidance will be displayed at the top of the page, above your question.
       </p>
   header:
+    brands: Brands
     mous: MOUs
+    organisations: Organisations
     product_name: Forms
     reports: Reports
     sign_out: Sign out
@@ -1441,6 +1491,84 @@ en:
 
       If you pasted the web address, check you copied the entire address.
     title: Page not found
+  organisation_brands:
+    create:
+      success: "%{brand_name} has been added to this organisation’s brands"
+    destroy:
+      success: "%{brand_name} has been removed from this organisation’s brands"
+    new:
+      label: Brand
+      prompt: Select a brand
+      submit: Add brand
+      title: Add a brand
+  organisations:
+    boolean:
+      'false': 'No'
+      'true': 'Yes'
+    index:
+      agreement_type_none: None
+      filter:
+        agreement_type:
+          any: All organisations
+          hint: Select MOU or agreement status
+          label: Agreement type
+          none: No agreement signed
+          signed: Any agreement signed
+        clear_filter: Clear filter
+        name:
+          hint: Enter name or abbreviation
+          label: Name
+        sort:
+          agreement_date: Date first agreement signed (newest first)
+          draft_forms: Draft forms (most first)
+          hint: Choose how to order the list
+          label: Sort by
+          live_forms: Live forms (most first)
+          name: Name (A to Z)
+          users: Users (most first)
+        submit: Filter
+      no_results: No organisations found.
+      organisation_count:
+        one: 1 organisation
+        other: "%{count} organisations"
+      showing_count: Showing %{from} to %{to} of %{count} organisations
+      table_caption: All organisations
+      table_headings:
+        agreement_type: Agreement type
+        draft_forms: Draft forms
+        live_forms: Live forms
+        name: Name
+        users: Users
+    show:
+      admin_users:
+        heading: Organisation admins
+        none: This organisation does not have any organisation admins.
+      brands:
+        add: Add a brand
+        guidance: Add brands to make them available for forms in this organisation to use. Forms that already use a brand will continue to use it, even if you remove the brand from this organisation.
+        heading: Available brands
+        none: This organisation does not have any available brands. Forms use the default GOV.UK branding.
+        remove: Remove
+        table_headings:
+          actions: Actions
+          name: Name
+      domains:
+        heading: Email domains
+        none: This organisation does not have any email domains.
+      mou_signatures:
+        heading: MOUs and agreements
+        none: No one has agreed an MOU or agreement for this organisation.
+      not_set: Not set
+      summary:
+        closed: Closed
+        created_at: Created
+        draft_forms: Number of draft forms
+        govuk_content_id: GOV.UK content ID
+        groups: Number of groups
+        internal: Internal
+        live_forms: Number of live forms
+        slug: Slug
+        users: Number of users
   page_conditions:
     condition_answer_value_text: "“%{answer_value}”"
     condition_answer_value_text2: "‘%{answer_value}’"
@@ -1537,6 +1665,9 @@ en:
     archive_form_confirm: Archive this form
     archive_form_confirmation: Your form has been archived
     archive_welsh_confirm: Archive the Welsh version of this form
+    brand: Choose a brand for your form
+    brand_new: Create a brand
+    brands: Brands
     bulk_options: Enter your list’s options into a text box
     change_name: Name your form
     change_order_pages_added_error: Sorry, we could not save the new question order
@@ -1582,6 +1713,7 @@ en:
     non_crown_agreement_confirmation: You’ve agreed to the GOV.UK Forms agreement
     non_crown_agreement_new: GOV.UK Forms agreement
     not_found: Page not found
+    organisations: Organisations
     payment_link: Add a link to a payment page on GOV.UK Pay
     privacy_policy: Provide a link to privacy information for this form
     question_text: What’s your question?
@@ -1947,6 +2079,7 @@ en:
     index:
       download_form_data_as_a_csv_file: Download form data as a CSV file
       feature_and_answer_type_usage: Feature and answer type usage
+      organisation_reports: Organisation reports
       title: Reports
       user_reports: User reports
     last_signed_in_at:
@@ -1955,6 +2088,13 @@ en:
       not_since_auth0_enabled: People who last signed in before 3 November 2023
       not_since_last_signed_in_at_added: People who last signed in sometime between 3 November 2023 and 4 November 2024
       title: When users last signed in
+    organisation_domains:
+      heading: Organisations
+      table_headings:
+        domains: Email domains
+        organisation: Organisation
+        slug: Slug
+      title: Email domains used by organisations
     questions_with_add_another_answer:
       download_csv: Download all questions with add another answer in %{tag} forms as a CSV file
       empty: There are no questions with add another answer in %{tag} forms
@@ -2010,7 +2150,7 @@ en:
       draft: draft
       live: live
       live-or-archived: live or archived
-    users:
+    users_per_organisation:
       heading: Number of users per organisation
       table_headings:
         organisation_name: Organisation
@@ -2230,6 +2370,7 @@ en:
         submit: Filter
       name_blank: No name set
       organisation_blank: No organisation set
+      showing_count: Showing %{from} to %{to} of %{count} users
       table_headings:
         access: Access
         act_as_user: Act as user
@@ -2239,6 +2380,9 @@ en:
         role: Role
         signon_organisation: Signon organisation slug
       title: Users
+      user_count:
+        one: Showing 1 user
+        other: Showing %{count} users
       wrapper_aria_label: Users
     roles:
       all: All roles

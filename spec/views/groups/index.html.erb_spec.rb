@@ -108,7 +108,7 @@ RSpec.describe "groups/index", type: :view do
   end
 
   context "when the user is a super admin" do
-    let(:current_user) { build :super_admin_user }
+    let(:current_user) { create :super_admin_user }
     let(:search_input) { OrganisationSearchInput.new({ organisation_id: current_user.organisation_id }) }
     let(:organisation) { current_user.organisation }
 

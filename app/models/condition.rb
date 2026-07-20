@@ -9,6 +9,7 @@ class Condition < ApplicationRecord
   belongs_to :goto_page, class_name: "Page", optional: true
 
   has_one :form, through: :routing_page
+  belongs_to :exit_page, optional: true
 
   before_destroy :destroy_postconditions
 

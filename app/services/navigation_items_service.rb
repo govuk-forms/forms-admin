@@ -24,6 +24,8 @@ class NavigationItemsService
       your_groups_navigation_item,
       mou_navigation_item,
       users_navigation_item,
+      organisations_navigation_item,
+      brands_navigation_item,
       reports_navigation_item,
       support_navigation_item,
       profile_navigation_item,
@@ -53,6 +55,18 @@ private
     NavigationItem.new(text: I18n.t("header.users"), href: users_path, active: false)
   end
 
+  def organisations_navigation_item
+    return nil unless should_show_organisations_link?
+
+    NavigationItem.new(text: I18n.t("header.organisations"), href: organisations_path, active: false)
+  end
+
+  def brands_navigation_item
+    return nil unless should_show_brands_link?
+
+    NavigationItem.new(text: I18n.t("header.brands"), href: brands_path, active: false)
+  end
+
   def reports_navigation_item
     return nil unless should_show_reports_link?
 
@@ -68,7 +82,7 @@ private
   def profile_navigation_item
     return nil if user.name.blank?
 
-    NavigationItem.new(text: user.name, href: user_profile_url, active: false, classes: ["app-service-navigation__item--featured"])
+    NavigationItem.new(text: user.name, href: nil, active: false, classes: ["app-service-navigation__item--featured"])
   end
 
   def signout_navigation_item
@@ -82,17 +96,7 @@ private
   end
 
   def signout_url
-    if user_provider == :gds
-      gds_sign_out_path
-    elsif %i[auth0 developer mock_gds_sso user_research].include? user_provider
-      sign_out_path
-    end
-  end
-
-  def user_profile_url
-    if user_provider == :gds
-      GDS::SSO::Config.oauth_root_url
-    end
+    sign_out_path if %i[auth0 developer mock_user user_research].include? user_provider
   end
 
   def should_show_user_profile_link?
@@ -101,6 +105,14 @@ private
 
   def should_show_mous_link?
     Pundit.policy(user, :mou_signature).can_manage_mous?
+  end
+
+  def should_show_organisations_link?
+    Pundit.policy(user, :organisation).can_view_organisations?
+  end
+
+  def should_show_brands_link?
+    Pundit.policy(user, :brand).can_view_brands?
   end
 
   def should_show_reports_link?

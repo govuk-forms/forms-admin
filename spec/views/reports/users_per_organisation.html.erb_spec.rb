@@ -1,6 +1,6 @@
 require "rails_helper"
 
-describe "reports/users.html.erb" do
+describe "reports/users_per_organisation.html.erb" do
   let(:data) do
     {
       caption: "table caption",
@@ -16,7 +16,7 @@ describe "reports/users.html.erb" do
   end
 
   before do
-    render template: "reports/users", locals: { data: }
+    render template: "reports/users_per_organisation", locals: { data: }
   end
 
   describe "page title" do

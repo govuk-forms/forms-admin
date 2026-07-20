@@ -12,10 +12,13 @@ describe "pages/selection/options.html.erb", type: :view do
   let(:only_one_option) { "true" }
   let(:draft_question) { build :draft_question, answer_type: "selection", answer_settings: { only_one_option: } }
   let(:banner_content) { nil }
+  let(:can_add_more_options) { true }
+  let(:selection_options_input) { Pages::Selection::OptionsInput.new(selection_options:, include_none_of_the_above:, draft_question:) }
 
   before do
     # # mock the form.page_number method
     allow(form).to receive(:page_number).and_return(page_number)
+    allow(selection_options_input).to receive(:can_add_more_options?).and_return(can_add_more_options)
 
     # # mock the path helper
     without_partial_double_verification do
@@ -28,7 +31,7 @@ describe "pages/selection/options.html.erb", type: :view do
     assign(:selection_options_path, selection_options_path)
     assign(:back_link_url, back_link_url)
     assign(:bulk_options_url, bulk_options_url)
-    assign(:selection_options_input, Pages::Selection::OptionsInput.new(selection_options:, include_none_of_the_above:, draft_question:))
+    assign(:selection_options_input, selection_options_input)
 
     render(template: "pages/selection/options")
   end
@@ -62,9 +65,7 @@ describe "pages/selection/options.html.erb", type: :view do
         expect(rendered).not_to have_text("You can add up to")
       end
 
-      context "when there are fewer than 3000 options" do
-        let(:selection_options) { (1..2999).to_a.map { |i| OpenStruct.new(name: i.to_s) } }
-
+      context "when can add more options" do
         it "has an add another button" do
           expect(rendered).to have_button(I18n.t("selection_options.add_another"))
         end
@@ -74,8 +75,8 @@ describe "pages/selection/options.html.erb", type: :view do
         end
       end
 
-      context "when there are 3000 options" do
-        let(:selection_options) { (1..3000).to_a.map { |i| OpenStruct.new(name: i.to_s) } }
+      context "when cannot add more options" do
+        let(:can_add_more_options) { false }
 
         it "does not have an add another button" do
           expect(rendered).not_to have_button(I18n.t("selection_options.add_another"))
@@ -98,20 +99,18 @@ describe "pages/selection/options.html.erb", type: :view do
         expect(rendered).to have_link("enter all the options into one text box", href: bulk_options_url)
       end
 
-      context "when there are fewer than 30 options" do
-        let(:selection_options) { (1..29).to_a.map { |i| OpenStruct.new(name: i.to_s) } }
-
+      context "when can add more options" do
         it "has an add another button" do
           expect(rendered).to have_button(I18n.t("selection_options.add_another"))
         end
 
-        it "has inset text stating you cannot add more options" do
+        it "does not have inset text stating you cannot add more options" do
           expect(rendered).not_to have_css(".govuk-inset-text", text: "You cannot add any more options as you have reached the maximum of 30 options.")
         end
       end
 
-      context "when there are 30 options" do
-        let(:selection_options) { (1..30).to_a.map { |i| OpenStruct.new(name: i.to_s) } }
+      context "when cannot add more options" do
+        let(:can_add_more_options) { false }
 
         it "does not have an add another button" do
           expect(rendered).not_to have_button(I18n.t("selection_options.add_another"))

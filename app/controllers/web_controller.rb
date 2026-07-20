@@ -46,7 +46,7 @@ class WebController < ApplicationController
   end
 
   def user_signed_in
-    warden && warden.authenticated? && !warden.user.remotely_signed_out?
+    warden && warden.authenticated?
   end
 
   def current_user
@@ -74,6 +74,16 @@ class WebController < ApplicationController
 
 private
 
+  # We have to take steps to detect when the autocomplete component is empty.
+  # We use the value of rawAttribute, which is the text input when JS is
+  # enabled. When it's empty, the user has cleared it, so any previously
+  # selected value is stale and should be discarded. This isn't needed when
+  # the no JS select is used but we have to allow the attribute to be nil
+  # still.
+  def clear_param_if_autocomplete_empty(permitted_params, attribute, raw_value)
+    permitted_params[attribute] = nil if permitted_params.key?(attribute) && raw_value && raw_value.empty?
+  end
+
   def authenticate_and_check_access
     authenticate_user!
 
@@ -99,7 +109,7 @@ private
   end
 
   def auth_strategy_permitted?
-    return true if %w[mock_gds_sso developer].include? Settings.auth_provider
+    return true if %w[mock_user developer].include? Settings.auth_provider
 
     @current_user.super_admin? ? PRIVILEGED_AUTH0_CONNECTION_STRATEGIES.include?(warden.session["auth0_connection_strategy"]) : true
   end

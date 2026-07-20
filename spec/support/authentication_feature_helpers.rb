@@ -1,9 +1,5 @@
-require "warden"
-
 module AuthenticationFeatureHelpers
   include Warden::Test::Helpers
-
-  @cached_gds_sso_mock_invalid = ENV["GDS_SSO_MOCK_INVALID"]
 
   @run_callbacks = false
 
@@ -12,30 +8,12 @@ module AuthenticationFeatureHelpers
   end
 
   def login_as(user, opts = {})
-    if %i[gds_sso mock_gds_sso].include? Settings.auth_provider.to_sym
-      ENV["GDS_SSO_MOCK_INVALID"] = @cached_gds_sso_mock_invalid
-      GDS::SSO.test_user = user
-    else
-      opts[:run_callbacks] = @run_callbacks # Callbacks are from gds-sso gem
-    end
-
+    opts[:run_callbacks] = @run_callbacks
     super user, opts
   end
 
-  def logout
-    if %i[gds_sso mock_gds_sso].include? Settings.auth_provider.to_sym
-      # If GDS_SSO_MOCK_INVALID is not present the gds-sso mock strategy will get
-      # the first user from the database when authenticate! is called
-      ENV["GDS_SSO_MOCK_INVALID"] = "true"
-
-      GDS::SSO.test_user = nil
-    end
-
-    super
-  end
-
   def test_org
-    @test_org ||= FactoryBot.create(:organisation, :with_signed_mou, id: 1, slug: "test-org")
+    @test_org ||= FactoryBot.create(:organisation, :with_signed_mou, slug: "test-org")
   end
 
   def super_admin_user

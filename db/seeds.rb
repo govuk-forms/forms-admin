@@ -6,6 +6,11 @@
 #   movies = Movie.create([{ name: "Star Wars" }, { name: "Lord of the Rings" }])
 #   Character.create(name: "Luke", movie: movies.first)
 
+if (HostingEnvironment.local_development? || HostingEnvironment.review?) && Brand.none?
+  Brand.create!(slug: "cheshire-east", name: "Cheshire East Council")
+  Brand.create!(slug: "south-gloucestershire", name: "South Gloucestershire Council")
+end
+
 if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User.none?
 
   gds = Organisation.find_or_create_by!(
@@ -14,6 +19,9 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
     name: "Government Digital Service",
     abbreviation: "GDS",
   )
+  gds.organisation_domains.create! domain: "digital.cabinet-office.gov.uk"
+  gds.organisation_domains.create! domain: "dsit.gov.uk"
+  gds.brands = Brand.all
 
   # Create default super-admin
   default_user = User.create!({ email: "example@example.com",
@@ -23,7 +31,7 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
                                 name: "A User",
                                 role: :super_admin,
                                 uid: "123456",
-                                provider: :mock_gds_sso,
+                                provider: :mock_user,
                                 terms_agreed_at: Time.zone.now,
                                 research_contact_status: :consented,
                                 user_research_opted_in_at: Time.zone.now })
@@ -32,6 +40,8 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
 
   # create extra organisations
   test_org = Organisation.create! slug: "test-org", name: "Test Org", abbreviation: "TO"
+  test_org.organisation_domains.create! domain: "digital.cabinet-office.gov.uk"
+  test_org.organisation_domains.create! domain: "dsit.gov.uk"
   mot_org = Organisation.create! slug: "ministry-of-tests", name: "Ministry of Tests", abbreviation: "MOT"
   Organisation.create! slug: "department-for-testing", name: "Department for Testing", abbreviation: "DfT"
   Organisation.create! slug: "closed-org", name: "Closed Org", abbreviation: "CO", closed: true
@@ -218,6 +228,13 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
     support_phone: "08000800",
     what_happens_next_markdown: "Test",
     share_preview_completed: true,
+    delivery_configurations: [
+      DeliveryConfiguration.create(
+        delivery_method: :email,
+        delivery_schedule: :immediate,
+        formats: [],
+      ),
+    ],
   )
   all_question_types_form.set_task_status_service(TaskStatusService.new(form: all_question_types_form, current_user: craig))
   all_question_types_form.make_live!
@@ -248,6 +265,13 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
     s3_bucket_region: "eu-west-2",
     s3_bucket_name: "govuk-forms-submissions-to-s3-test",
     s3_bucket_aws_account_id: "711966560482",
+    delivery_configurations: [
+      DeliveryConfiguration.create(
+        delivery_method: :s3,
+        delivery_schedule: :immediate,
+        formats: [],
+      ),
+    ],
   )
   e2e_s3_forms.set_task_status_service(TaskStatusService.new(form: e2e_s3_forms, current_user: craig))
   e2e_s3_forms.make_live!
@@ -323,6 +347,13 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
     support_phone: "08000800",
     what_happens_next_markdown: "Test",
     share_preview_completed: true,
+    delivery_configurations: [
+      DeliveryConfiguration.create(
+        delivery_method: :email,
+        delivery_schedule: :immediate,
+        formats: [],
+      ),
+    ],
   )
   Condition.create!(
     check_page: branch_route_form.pages.second,
@@ -396,6 +427,13 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
     support_phone: "08000800",
     what_happens_next_markdown: "Test",
     share_preview_completed: true,
+    delivery_configurations: [
+      DeliveryConfiguration.create(
+        delivery_method: :email,
+        delivery_schedule: :immediate,
+        formats: [],
+      ),
+    ],
   )
   none_of_the_above_form.set_task_status_service(TaskStatusService.new(form: none_of_the_above_form, current_user: craig))
   none_of_the_above_form.make_live!
@@ -465,6 +503,13 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
     share_preview_completed: true,
     available_languages: %w[en cy],
     welsh_completed: true,
+    delivery_configurations: [
+      DeliveryConfiguration.create(
+        delivery_method: :email,
+        delivery_schedule: :immediate,
+        formats: [],
+      ),
+    ],
   )
 
   welsh_form.set_task_status_service(TaskStatusService.new(form: welsh_form, current_user: craig))
@@ -534,6 +579,13 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
     support_phone: "08000800",
     what_happens_next_markdown: "Test",
     share_preview_completed: true,
+    delivery_configurations: [
+      DeliveryConfiguration.create(
+        delivery_method: :email,
+        delivery_schedule: :immediate,
+        formats: [],
+      ),
+    ],
   )
   Condition.create!(
     check_page: multiple_branch_form.pages[0],
@@ -603,6 +655,13 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
     what_happens_next_markdown: "Test",
     share_preview_completed: true,
     send_copy_of_answers: "enabled",
+    delivery_configurations: [
+      DeliveryConfiguration.create(
+        delivery_method: :email,
+        delivery_schedule: :immediate,
+        formats: [],
+      ),
+    ],
   )
   copy_of_answers_form.set_task_status_service(TaskStatusService.new(form: multiple_branch_form, current_user: craig))
   copy_of_answers_form.make_live!

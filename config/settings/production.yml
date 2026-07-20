@@ -1,5 +1,5 @@
 # Use real authentication
-auth_provider: gds_sso
+auth_provider: auth0
 
 mailchimp:
   api_prefix: "us12"

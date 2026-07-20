@@ -24,6 +24,7 @@ class RevertDraftFormService
     ActiveRecord::Base.transaction do
       revert_form_attributes(form_document_content)
       revert_pages_and_nested_associations(form_document_content["steps"])
+      revert_delivery_configurations(form_document_content)
       if welsh_form_document_exists?(tag)
         revert_welsh_translations(tag)
       else
@@ -187,5 +188,14 @@ private
     form.translations.where(locale: :cy).delete_all
     Page::Translation.where(locale: :cy, page_id: form.page_ids).delete_all
     Condition::Translation.where(locale: :cy, condition_id: form.condition_ids).delete_all
+  end
+
+  def revert_delivery_configurations(form_document_content)
+    delivery_configurations_data = form_document_content["delivery_configurations"] || []
+
+    form.delivery_configurations.destroy_all
+    delivery_configurations_data.each do |delivery_configuration|
+      form.delivery_configurations.create!(delivery_configuration.slice("delivery_method", "formats", "delivery_schedule"))
+    end
   end
 end

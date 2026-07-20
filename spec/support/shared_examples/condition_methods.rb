@@ -2,11 +2,19 @@ RSpec.shared_examples "implements condition methods" do
   describe "#is_exit_page?" do
     it "returns false when exit_page_markdown is nil" do
       subject.exit_page_markdown = nil
+      subject.exit_page_id = nil
       expect(subject.is_exit_page?).to be false
     end
 
     it "returns true when exit_page_markdown is not nil" do
       subject.exit_page_markdown = ""
+      subject.exit_page_id = nil
+      expect(subject.is_exit_page?).to be true
+    end
+
+    it "returns true when exit_page_id is present" do
+      subject.exit_page_markdown = nil
+      subject.exit_page_id = 1
       expect(subject.is_exit_page?).to be true
     end
   end

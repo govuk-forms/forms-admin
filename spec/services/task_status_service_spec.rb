@@ -118,6 +118,24 @@ describe TaskStatusService do
       end
     end
 
+    describe "brand status" do
+      context "with a new form" do
+        let(:form) { build(:form, :new_form, :with_group, group:) }
+
+        it "returns the correct default value" do
+          expect(task_status_service.all_task_statuses[:brand_status]).to eq :optional
+        end
+      end
+
+      context "with a form with a brand" do
+        let(:form) { build(:form, :new_form, :with_group, :with_brand, group:) }
+
+        it "returns the completed status" do
+          expect(task_status_service.all_task_statuses[:brand_status]).to eq :completed
+        end
+      end
+    end
+
     describe "copy of answers status" do
       context "with a new form" do
         let(:form) { build(:form, :new_form, :with_group, group:) }
@@ -668,6 +686,7 @@ describe TaskStatusService do
         declaration_status: :completed,
         what_happens_next_status: :completed,
         payment_link_status: :optional,
+        brand_status: :optional,
         copy_of_answers_status: :optional,
         privacy_policy_status: :completed,
         support_contact_details_status: :completed,

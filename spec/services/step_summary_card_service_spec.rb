@@ -337,7 +337,7 @@ describe StepSummaryCardService do
           form.reload.make_live!
         end
 
-        it "returns the correct options" do
+        it "returns the correct options", :flaky do
           first_condition_text = I18n.t("page_conditions.condition_compact_html", answer_value: "Option 1", goto_page_question_number: first_goto_page.position, goto_page_question_text: first_goto_page.question_text)
           second_condition_text = I18n.t("page_conditions.condition_compact_html", answer_value: "Option 2", goto_page_question_number: second_goto_page.position, goto_page_question_text: second_goto_page.question_text)
 

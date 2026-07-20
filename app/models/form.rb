@@ -17,6 +17,7 @@ class Form < ApplicationRecord
   has_one :draft_welsh_form_document, -> { where tag: "draft", language: :cy }, class_name: "FormDocument"
   has_one :draft_form_document, -> { where tag: "draft", language: :en }, class_name: "FormDocument"
   has_many :conditions, through: :pages, source: :routing_conditions
+  has_many :delivery_configurations, dependent: :destroy
 
   translates :name,
              :privacy_policy_url,
@@ -179,7 +180,7 @@ class Form < ApplicationRecord
   def as_form_document(live_at: nil, language: :en)
     content = as_json(
       except: ATTRIBUTES_NOT_IN_FORM_DOCUMENT,
-      methods: %i[start_page steps],
+      methods: %i[start_page steps delivery_configurations],
     )
     content["form_id"] = content.delete("id").to_s
     content["live_at"] = live_at if live_at.present?

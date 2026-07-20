@@ -87,6 +87,78 @@ namespace :organisations do
       change_organisation_internal_status(**args, status: false, task:, dry_run: true)
     end
   end
+
+  namespace :domains do
+    desc "Add domains to an organisation"
+    task :add, %i[organisation_slug domains] => :environment do |_task, args|
+      organisation_slug = args[:organisation_slug]
+      domains = args.to_a[1..]
+
+      usage_message = "usage: rake organisations:domains:add[<organisation_slug>, <domain1>, <domain2>, ...]".freeze
+      abort usage_message if organisation_slug.blank? || domains.blank?
+
+      organisation = Organisation.find_by(slug: organisation_slug)
+      abort "Organisation with slug #{organisation_slug} does not exist" if organisation.nil?
+
+      domains.each do |domain|
+        Rails.logger.info("Adding domain: #{domain}")
+        organisation.organisation_domains.create!(domain: domain)
+      end
+    end
+
+    desc "Remove domains from an organisation"
+    task :remove, %i[organisation_slug domains] => :environment do |_task, args|
+      organisation_slug = args[:organisation_slug]
+      domains = args.to_a[1..]
+
+      usage_message = "usage: rake organisations:domains:remove[<organisation_slug>, <domain1>, <domain2>, ...]".freeze
+      abort usage_message if organisation_slug.blank? || domains.blank?
+
+      organisation = Organisation.find_by(slug: organisation_slug)
+      abort "Organisation with slug #{organisation_slug} does not exist" if organisation.nil?
+
+      domains.each do |domain|
+        organisation.organisation_domains.find_by!(domain: domain).destroy!
+        Rails.logger.info("Removed domain: #{domain}")
+      rescue ActiveRecord::RecordNotFound
+        Rails.logger.info("Domain #{domain} not found for organisation with slug #{organisation_slug}")
+      end
+    end
+
+    desc "List domains associated with an organisation"
+    task :list, %i[organisation_slug] => :environment do |_task, args|
+      organisation_slug = args[:organisation_slug]
+
+      usage_message = "usage: rake organisations:domains:list[<organisation_slug>]".freeze
+      abort usage_message if organisation_slug.blank?
+
+      organisation = Organisation.find_by(slug: organisation_slug)
+      abort "Organisation with slug #{organisation_slug} does not exist" if organisation.nil?
+
+      domains = organisation.organisation_domains.pluck(:domain).sort.join(", ")
+      if domains.present?
+        Rails.logger.info "Domains for organisation with slug '#{organisation_slug}': #{domains}"
+      else
+        Rails.logger.info "Organisation with slug '#{organisation_slug}' has no domains"
+      end
+    end
+
+    desc "Populate organisation domains using the email addresses of existing users"
+    task populate_from_users: :environment do
+      Organisation.includes(:users, :organisation_domains).find_each do |organisation|
+        next if organisation.users.empty?
+
+        users = organisation.users.to_a
+        domains = domains_for_users(users).uniq
+
+        domains.each do |domain|
+          organisation.organisation_domains.find_or_create_by!(domain: domain)
+        end
+
+        Rails.logger.info("Added domains for #{organisation.name}: #{domains.join(', ')}")
+      end
+    end
+  end
 end
 
 def run_organisation_fetch(dry_run:)
@@ -158,5 +230,16 @@ def change_organisation_internal_status(task:, organisation_slug: nil, status: n
     organisation.save!
 
     Rails.logger.info("#{task.name}: Made organisation '#{organisation.name}' #{status_string}")
+  end
+end
+
+def domains_for_users(users)
+  users.filter_map do |user|
+    next if user.email.blank?
+
+    email_domain = user.email.split("@").last&.downcase&.strip
+    next if email_domain.blank? || !user.email.include?("@")
+
+    email_domain
   end
 end

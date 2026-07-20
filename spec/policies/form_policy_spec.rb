@@ -184,13 +184,13 @@ describe FormPolicy do
     end
 
     context "when the user is a super admin" do
-      let(:user) { build :super_admin_user }
+      let(:user) { build :super_admin_user, organisation: }
 
       it { is_expected.to permit_action(:can_administer_group) }
     end
 
     context "when the user is an organisation admin" do
-      let(:user) { build :organisation_admin_user }
+      let(:user) { build :organisation_admin_user, organisation: }
 
       it { is_expected.to permit_action(:can_administer_group) }
     end

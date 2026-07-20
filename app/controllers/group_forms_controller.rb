@@ -42,9 +42,10 @@ class GroupFormsController < WebController
     @group_select = Forms::GroupSelect.new(group_select_params.merge(form: @form))
 
     if @group_select.valid?
-      receiving_group = Group.find_by(external_id: @group_select.group)
+      # The receiving group must be one the user could have selected: in the
+      # same organisation as the current group, and active if the form is live
+      receiving_group = Forms::GroupSelect.new(group: @group, form: @form).groups.find_by(external_id: @group_select.group)
 
-      # In case the receiving group is deleted since the form was loaded
       if receiving_group
         GroupFormsService.new(group: receiving_group, form: @form, current_user: @current_user, old_group: @group).move_form_to(receiving_group)
         success_message = t(".success", form_name: @form.name, receiving_group_name: receiving_group.name)

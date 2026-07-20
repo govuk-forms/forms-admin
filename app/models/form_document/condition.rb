@@ -15,6 +15,7 @@ class FormDocument::Condition
   attribute :exit_page_heading, :string
   attribute :validation_errors, DataStructType.new
   attribute :exit_page_markdown, :string
+  attribute :exit_page_id, :integer
 
   def initialize(attributes = {})
     attributes.slice!(*self.class.attribute_names)

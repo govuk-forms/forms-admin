@@ -48,11 +48,11 @@ RSpec.describe Forms::SubmissionAttachmentsInput, type: :model do
   end
 
   describe "#submit" do
+    subject(:submission_attachments_input) { described_class.new(form:, submission_format: updated_submission_format) }
+
     let(:form) { create(:form, submission_format: []) }
 
     context "when valid" do
-      subject(:submission_attachments_input) { described_class.new(form:, submission_format: updated_submission_format) }
-
       let(:updated_submission_format) { %w[csv] }
 
       it "updates the form's submission_format" do
@@ -63,14 +63,79 @@ RSpec.describe Forms::SubmissionAttachmentsInput, type: :model do
     end
 
     context "when invalid" do
-      subject(:submission_attachments_input) { described_class.new(form:, submission_format: updated_submission_format) }
-
       let(:updated_submission_format) { %w[banana] }
 
       it "does not update the form's submission_format" do
         expect {
           submission_attachments_input.submit
         }.not_to change(form, :submission_format)
+      end
+    end
+
+    context "when an immediate email DeliveryConfiguration exists" do
+      let(:immediate_delivery_configuration) { create(:delivery_configuration, form:, formats: %w[csv]) }
+      let(:daily_delivery_configuration) { create(:delivery_configuration, :daily_email, form:, formats: %w[csv]) }
+      let(:updated_submission_format) { %w[csv json] }
+
+      before do
+        immediate_delivery_configuration
+        daily_delivery_configuration
+      end
+
+      it "updates the immediate DeliveryConfiguration formats" do
+        expect {
+          submission_attachments_input.submit
+        }.to change { immediate_delivery_configuration.reload.formats }.from(%w[csv]).to(updated_submission_format)
+
+        expect(form.draft_form_document.reload.content["delivery_configurations"]).to contain_exactly(
+          {
+            "delivery_method" => "email",
+            "delivery_schedule" => "immediate",
+            "formats" => updated_submission_format,
+          },
+          {
+            "delivery_method" => "email",
+            "delivery_schedule" => "daily",
+            "formats" => %w[csv],
+          },
+        )
+      end
+
+      it "does not change the daily DeliveryConfiguration formats" do
+        expect {
+          submission_attachments_input.submit
+        }.not_to(change { daily_delivery_configuration.reload.formats })
+      end
+    end
+
+    context "when an immediate email DeliveryConfiguration does not exist" do
+      let(:s3_delivery_configuration) { create(:delivery_configuration, :s3, form:, formats: %w[csv]) }
+      let(:daily_delivery_configuration) { create(:delivery_configuration, :daily_email, form:, formats: %w[csv]) }
+      let(:updated_submission_format) { %w[csv json] }
+
+      before do
+        s3_delivery_configuration
+        daily_delivery_configuration
+      end
+
+      it "creates an immediate email DeliveryConfiguration" do
+        expect {
+          submission_attachments_input.submit
+        }.to change(DeliveryConfiguration, :count).by(1)
+
+        expect(form.delivery_configurations.pluck(:delivery_method, :delivery_schedule, :formats)).to contain_exactly(
+          ["email", "immediate", updated_submission_format],
+          ["email", "daily", %w[csv]],
+          ["s3", "immediate", %w[csv]],
+        )
+
+        expect(form.draft_form_document.reload.content["delivery_configurations"]).to include(
+          {
+            "delivery_method" => "email",
+            "delivery_schedule" => "immediate",
+            "formats" => updated_submission_format,
+          },
+        )
       end
     end
   end

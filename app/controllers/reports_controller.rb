@@ -131,12 +131,6 @@ class ReportsController < WebController
     forms_feature_report(tag, params[:action], forms)
   end
 
-  def users
-    data = Reports::UsersReportService.new.user_data
-
-    render locals: { data: }
-  end
-
   def add_another_answer
     data = Reports::AddAnotherAnswerUsageService.new.add_another_answer_forms
 
@@ -204,6 +198,18 @@ class ReportsController < WebController
 
   def contact_for_research
     data = Reports::ContactForResearchService.new.contact_for_research_data
+
+    render locals: { data: }
+  end
+
+  def users_per_organisation
+    data = Reports::OrganisationsReportService.new.users_per_organisation_report
+
+    render locals: { data: }
+  end
+
+  def organisation_domains
+    data = Reports::OrganisationsReportService.new.organisation_domains_report
 
     render locals: { data: }
   end

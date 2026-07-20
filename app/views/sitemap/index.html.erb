@@ -39,9 +39,10 @@
     <li><%= govuk_link_to t("reports.features.title", tag: tag_label("live-or-archived")), report_features_path(tag: 'live-or-archived') %></li>
     <li><%= govuk_link_to t("reports.features.title", tag: tag_label("draft")), report_features_path(tag: :draft) %></li>
     <li><%= govuk_link_to t("reports.selection_questions_summary.title", tag: tag_label("live")), report_selection_questions_summary_path(tag: :live) %></li>
-    <li><%= govuk_link_to t("reports.users.title"), report_users_path %></li>
+    <li><%= govuk_link_to t("reports.users_per_organisation.title"), report_users_per_organisation_path %></li>
     <li><%= govuk_link_to t("reports.last_signed_in_at.title"), report_last_signed_in_at_path %></li>
     <li><%= govuk_link_to t("reports.contact_for_research.title"), report_contact_for_research_path %></li>
+    <li><%= govuk_link_to t("reports.organisation_domains.title"), report_organisation_domains_path %></li>
   </ul>
 <% end %>
 

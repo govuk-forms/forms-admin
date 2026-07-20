@@ -1,0 +1,15 @@
+---
+en:
+  activemodel:
+    errors:
+      models:
+        forms/brand_input:
+          attributes:
+            brand_id:
+              inclusion: Select a brand
+  helpers:
+    label:
+      forms_brand_input:
+        brand_id:
+          options:
+            default: GOV.UK (default)

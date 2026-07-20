@@ -6,6 +6,8 @@ class Page < ApplicationRecord
   has_many :routing_conditions, class_name: "Condition", foreign_key: "routing_page_id", dependent: :destroy
   has_many :check_conditions, class_name: "Condition", foreign_key: "check_page_id", dependent: :destroy
   has_many :goto_conditions, class_name: "Condition", foreign_key: "goto_page_id", dependent: :destroy
+  has_many :exit_pages, foreign_key: :question_page_id, dependent: :destroy
+
   acts_as_list scope: :form
 
   translates :question_text,
@@ -52,10 +54,15 @@ class Page < ApplicationRecord
   def save_and_update_form
     return true unless has_changes_to_save?
 
-    save!
-    form.save_question_changes!
-    check_conditions.destroy_all if answer_type_changed_from_selection_only_one_option
-    check_conditions.destroy_all if answer_settings_changed_from_only_one_option
+    ActiveRecord::Base.transaction do
+      save!
+      form.save_question_changes!
+
+      if answer_type_changed_from_selection_only_one_option || answer_settings_changed_from_only_one_option
+        exit_pages.destroy_all
+        check_conditions.destroy_all
+      end
+    end
 
     true
   end
@@ -110,6 +117,7 @@ class Page < ApplicationRecord
       "type" => "question",
       "data" => slice(*%w[question_text hint_text answer_type is_optional answer_settings page_heading guidance_markdown is_repeatable]),
       "routing_conditions" => routing_conditions.map(&:as_form_document_condition),
+      "exit_pages" => exit_pages.map(&:as_form_document_exit_page),
     }
   end
 

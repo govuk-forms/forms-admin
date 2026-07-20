@@ -50,7 +50,7 @@
       <% end %>
 
       <div class="govuk-!-margin-bottom-8">
-        <% if @selection_options_input.selection_options_form_objects.length < @selection_options_input.maximum_options %>
+        <% if @selection_options_input.can_add_more_options? %>
           <div class="govuk-button-group">
             <%= f.govuk_submit t("selection_options.add_another"), name: :add_another, secondary: true %>
             <%= govuk_link_to t("selection_options.enter_all_options_into_textbox"), @bulk_options_url %>

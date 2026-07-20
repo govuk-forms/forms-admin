@@ -142,7 +142,7 @@ RSpec.describe "users.rake", type: :task do
       let(:user_in_group) { users.fifth }
 
       before do
-        group = create :group, creator: users.first
+        group = create :group, creator: users.first, organisation: user_in_group.organisation
         create :membership, group:, user: user_in_group, added_by: users.first
       end
 
@@ -181,7 +181,7 @@ RSpec.describe "users.rake", type: :task do
       end
 
       let(:user_in_group) { users.fifth }
-      let(:group_with_user) { create :group, creator: users.first }
+      let(:group_with_user) { create :group, creator: users.first, organisation: user_in_group.organisation }
 
       before do
         create :membership, group: group_with_user, user: user_in_group, added_by: users.first

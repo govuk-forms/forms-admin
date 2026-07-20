@@ -21,14 +21,22 @@ FactoryBot.define do
     send_daily_submission_batch { false }
     send_weekly_submission_batch { false }
     send_copy_of_answers { "disabled" }
+    brand_id { nil }
+    s3_bucket_aws_account_id { nil }
+    s3_bucket_name { nil }
+    s3_bucket_region { nil }
+
+    trait :with_brand do
+      brand_id { "test-brand" }
+    end
 
     trait :with_group do
       transient do
-        group { nil }
+        group { association :group }
       end
 
       after(:build) do |form, evaluator|
-        g = evaluator.group || FactoryBot.create(:group)
+        g = evaluator.group
         form.instance_variable_set(:@associated_group, g)
         form.define_singleton_method(:group) { g }
       end
@@ -56,7 +64,7 @@ FactoryBot.define do
       end
 
       pages do
-        Array.new(pages_count) { association(:page) }
+        Array.new(pages_count) { build(:page, form: nil) }
       end
 
       after(:build) do |form|
@@ -75,7 +83,7 @@ FactoryBot.define do
 
     trait :with_text_page do
       pages do
-        Array.new(1) { association(:page, answer_type: "text", answer_settings: { input_type: %w[single_line long_text].sample }) }
+        Array.new(1) { build(:page, answer_type: "text", answer_settings: { input_type: %w[single_line long_text].sample }, form: nil) }
       end
 
       question_section_completed { true }
@@ -143,7 +151,7 @@ FactoryBot.define do
       end
 
       pages do
-        Array.new(pages_count) { association(:page, :with_selection_settings) }
+        Array.new(pages_count) { build(:page, :with_selection_settings, form: nil) }
       end
 
       after(:build) do |form|
@@ -164,6 +172,12 @@ FactoryBot.define do
       privacy_policy_url_cy { "#{privacy_policy_url}/cy" }
       support_email_cy { support_email }
       what_happens_next_markdown_cy { "Fel arfer, rydym yn ymateb i geisiadau o fewn 10 diwrnod gwaith." }
+    end
+
+    trait :with_s3_configuration do
+      s3_bucket_name { "test-bucket" }
+      s3_bucket_aws_account_id { "123456789012" }
+      s3_bucket_region { "eu-west-1" }
     end
   end
 end

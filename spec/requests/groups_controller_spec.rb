@@ -66,7 +66,7 @@ RSpec.describe "/groups", type: :request do
       end
     end
 
-    let(:other_org) { create :organisation, id: 2, slug: "other-org" }
+    let(:other_org) { create :organisation, slug: "other-org" }
     let!(:other_org_trial_groups) { create_list :group, 3, organisation: other_org, status: :trial }
 
     context "when the user is not a super-admin" do
@@ -128,7 +128,7 @@ RSpec.describe "/groups", type: :request do
         let!(:other_org_active_groups) { create_list :group, 3, :active, organisation: other_org }
         let!(:other_org_upgrade_requested_groups) { create_list :group, 3, :upgrade_requested, organisation: other_org }
 
-        it "shows groups for organisation in query", :flaky do
+        it "shows groups for organisation in query" do
           get groups_url, params: { search: { organisation_id: other_org.id } }
           expect(assigns(:trial_groups)).to match_array(other_org_trial_groups)
           expect(assigns(:active_groups)).to match_array(other_org_active_groups)
@@ -377,6 +377,51 @@ RSpec.describe "/groups", type: :request do
         expect(response).to have_http_status :not_found
       end
     end
+
+    context "when the parameters include a different organisation_id" do
+      let(:other_organisation) { create :organisation, slug: "other-org" }
+
+      context "when user is a group admin of the group" do
+        let(:role) { :group_admin }
+
+        it "is forbidden" do
+          patch group_url(member_group), params: { group: { organisation_id: other_organisation.id } }
+          expect(response).to have_http_status(:forbidden)
+        end
+
+        it "does not change the group's organisation" do
+          expect {
+            patch group_url(member_group), params: { group: { organisation_id: other_organisation.id } }
+          }.not_to(change { member_group.reload.organisation_id })
+        end
+      end
+
+      context "when user is an organisation admin for the group's organisation" do
+        let(:current_user) { organisation_admin_user }
+
+        it "is forbidden" do
+          patch group_url(member_group), params: { group: { organisation_id: other_organisation.id } }
+          expect(response).to have_http_status(:forbidden)
+        end
+
+        it "does not change the group's organisation" do
+          expect {
+            patch group_url(member_group), params: { group: { organisation_id: other_organisation.id } }
+          }.not_to(change { member_group.reload.organisation_id })
+        end
+      end
+
+      context "when user is a super admin" do
+        before do
+          login_as_super_admin_user
+        end
+
+        it "moves the group to the other organisation" do
+          patch group_url(member_group), params: { group: { organisation_id: other_organisation.id } }
+          expect(member_group.reload.organisation_id).to eq(other_organisation.id)
+        end
+      end
+    end
   end
 
   describe "GET /move" do
@@ -403,8 +448,103 @@ RSpec.describe "/groups", type: :request do
     end
   end
 
+  describe "GET /feature-flags" do
+    let(:group) { create(:group) }
+
+    context "when user is not a super admin" do
+      it "is forbidden" do
+        get feature_flags_group_path(group)
+
+        expect(response).to have_http_status(:forbidden)
+      end
+    end
+
+    context "when user is a super admin" do
+      before do
+        login_as_super_admin_user
+      end
+
+      it "is allowed" do
+        get feature_flags_group_path(group)
+
+        expect(response).to have_http_status(:ok)
+        expect(response).to render_template(:feature_flags)
+      end
+    end
+  end
+
+  describe "POST /feature-flags" do
+    let(:feature_flag) { Group.feature_flag_attributes.first }
+    let(:feature_name) { feature_flag.delete_suffix("_enabled") }
+    let(:group) { create(:group, feature_flag => false) }
+
+    before do
+      skip "no group feature flags are configured" if Group.feature_flag_attributes.empty?
+    end
+
+    context "when user is not a super admin" do
+      it "is forbidden and does not change the flag" do
+        post feature_flags_group_path(group), params: { groups_feature_flags_input: { feature_flag => "true" } }
+
+        expect(response).to have_http_status(:forbidden)
+        expect(group.reload[feature_flag]).to be(false)
+      end
+    end
+
+    context "when user is a super admin" do
+      before do
+        login_as_super_admin_user
+      end
+
+      it "enables a feature flag and redirects to the group" do
+        post feature_flags_group_path(group), params: { groups_feature_flags_input: { feature_flag => "true" } }
+
+        expect(group.reload[feature_flag]).to be(true)
+        expect(FeatureService.new(group:).enabled?(feature_name)).to be(true)
+        expect(response).to redirect_to(group_path(group))
+        expect(flash[:success]).to eq(I18n.t("groups.success_messages.feature_flags"))
+      end
+
+      it "does not turn an enabled feature flag off" do
+        group.update!(feature_flag => true)
+
+        post feature_flags_group_path(group), params: { groups_feature_flags_input: { feature_flag => "false" } }
+
+        expect(group.reload[feature_flag]).to be(true)
+        expect(FeatureService.new(group:).enabled?(feature_name)).to be(true)
+      end
+
+      it "does not show a success message when no flags have changed" do
+        post feature_flags_group_path(group), params: { groups_feature_flags_input: { feature_flag => "false" } }
+
+        expect(response).to redirect_to(group_path(group))
+        expect(flash[:success]).to be_nil
+      end
+
+      it "redirects without error when no params are submitted" do
+        post feature_flags_group_path(group)
+
+        expect(response).to redirect_to(group_path(group))
+        expect(flash[:success]).to be_nil
+      end
+
+      it "leaves an enabled flag on while enabling another" do
+        skip "fewer than two group feature flags are configured" if Group.feature_flag_attributes.size < 2
+
+        other_feature_flag = Group.feature_flag_attributes.second
+        group.update!(feature_flag => true)
+
+        post feature_flags_group_path(group), params: { groups_feature_flags_input: { feature_flag => "false", other_feature_flag => "true" } }
+
+        group.reload
+        expect(group[feature_flag]).to be(true)
+        expect(group[other_feature_flag]).to be(true)
+      end
+    end
+  end
+
   describe "GET /delete" do
-    let!(:group) { create :group }
+    let!(:group) { create :group, organisation: test_org }
 
     context "when user is a super admin" do
       before do
@@ -458,7 +598,7 @@ RSpec.describe "/groups", type: :request do
   end
 
   describe "DELETE /destroy" do
-    let!(:group) { create :group, name: "Test Group" }
+    let!(:group) { create :group, name: "Test Group", organisation: test_org }
 
     context "when user is a super admin" do
       before do

@@ -480,14 +480,21 @@ RSpec.describe Page, type: :model do
       end
     end
 
-    context "when page has routing conditions" do
-      let(:routing_conditions) { [create(:condition)] }
+    context "when page has routing conditions and ExitPages" do
+      let(:routing_conditions) { [create(:condition, exit_page:)] }
       let(:check_conditions) { routing_conditions }
+      let(:exit_page) { create :exit_page }
 
-      it "does not delete existing conditions" do
+      before do
+        exit_page.question_page = page
+        exit_page.save!
+      end
+
+      it "does not delete existing conditions or ExitPages" do
         page.save_and_update_form
         expect(page.reload.routing_conditions.to_a).to eq(routing_conditions)
         expect(page.reload.check_conditions.to_a).to eq(check_conditions)
+        expect(page.reload.exit_pages.to_a).to eq([exit_page])
       end
 
       context "when answer type is updated to one doesn't support routing" do
@@ -496,13 +503,20 @@ RSpec.describe Page, type: :model do
           page.save_and_update_form
           expect(page.reload.check_conditions).to be_empty
         end
+
+        it "deletes any ExitPages" do
+          page.answer_type = "number"
+          page.save_and_update_form
+          expect(page.reload.exit_pages).to be_empty
+        end
       end
 
       context "when the page is saved without changing the answer type" do
-        it "does not delete the conditions" do
+        it "does not delete the conditions or ExitPages" do
           page.question_text = "test"
           page.save_and_update_form
           expect(page.reload.check_conditions).not_to be_empty
+          expect(page.reload.exit_pages).not_to be_empty
         end
       end
 
@@ -512,13 +526,20 @@ RSpec.describe Page, type: :model do
           page.save_and_update_form
           expect(page.reload.check_conditions).to be_empty
         end
+
+        it "deletes any ExitPages" do
+          page.answer_settings["only_one_option"] = "0"
+          page.save_and_update_form
+          expect(page.reload.exit_pages).to be_empty
+        end
       end
 
       context "when the answer settings change while still restricting to only one option" do
-        it "does not delete any conditions" do
+        it "does not delete any conditions or ExitPages" do
           page.answer_settings["selection_options"].first["name"] = "New option name"
           page.save_and_update_form
           expect(page.reload.check_conditions).not_to be_empty
+          expect(page.reload.exit_pages).not_to be_empty
         end
       end
 
@@ -752,6 +773,10 @@ RSpec.describe Page, type: :model do
       expect(page.as_form_document_step(second_page)["data"]).to match a_hash_including(*page_attributes)
     end
 
+    it "includes exit_pages as an array" do
+      expect(page.as_form_document_step(second_page)["exit_pages"]).to be_a(Array)
+    end
+
     context "when there are conditions associated with the page" do
       let!(:condition) { create :condition, routing_page_id: page.id, check_page_id: page.id }
 
@@ -763,6 +788,18 @@ RSpec.describe Page, type: :model do
     context "when the provided next_page is nil" do
       it "has nil next_step_id" do
         expect(page.as_form_document_step(nil)["next_step_id"]).to be_nil
+      end
+    end
+
+    context "when the page has an ExitPage" do
+      let!(:exit_page) { create :exit_page, question_page: page }
+
+      before do
+        create(:condition, routing_page_id: page.id, check_page_id: page.id, exit_page:)
+      end
+
+      it "includes the exit page" do
+        expect(page.reload.as_form_document_step(second_page)["exit_pages"].first).to match a_hash_including("id" => exit_page.id, "markdown" => exit_page.markdown, "heading" => exit_page.heading)
       end
     end
   end

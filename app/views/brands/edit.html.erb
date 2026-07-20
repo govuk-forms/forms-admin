@@ -1,0 +1,21 @@
+<% set_page_title(title_with_error_prefix(t(".title"), @brand.errors.any?)) %>
+<% content_for :back_link, govuk_back_link_to(brand_path(@brand)) %>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <%= form_with(model: @brand) do |f| %>
+      <% if @brand.errors.any? %>
+        <%= f.govuk_error_summary %>
+      <% end %>
+
+      <h1 class="govuk-heading-l">
+        <span class="govuk-caption-l"><%= @brand.name %></span>
+        <%= t(".title") %>
+      </h1>
+
+      <%= f.govuk_text_field :name, label: { size: 'm' } %>
+
+      <%= f.govuk_submit t("save_and_continue") %>
+    <% end %>
+  </div>
+</div>

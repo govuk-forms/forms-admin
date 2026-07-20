@@ -15,9 +15,13 @@
     </ul>
     <p><%= t(".user_reports") %></p>
     <ul class="govuk-list govuk-list--bullet">
-      <li><%= govuk_link_to t("reports.users.title"), report_users_path %></li>
       <li><%= govuk_link_to t("reports.last_signed_in_at.title"), report_last_signed_in_at_path %></li>
       <li><%= govuk_link_to t("reports.contact_for_research.title"), report_contact_for_research_path %></li>
+    </ul>
+    <p><%= t(".organisation_reports") %></p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li><%= govuk_link_to t("reports.users_per_organisation.title"), report_users_per_organisation_path %></li>
+      <li><%= govuk_link_to t("reports.organisation_domains.title"), report_organisation_domains_path %></li>
     </ul>
   </div>
 </div>

@@ -34,4 +34,10 @@ Warden::Strategies.add(:basic_auth) do
       custom! [@status, headers, [@message]]
     end
   end
+
+private
+
+  def logger
+    Rails.logger || env["rack.logger"]
+  end
 end

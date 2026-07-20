@@ -30,6 +30,18 @@ class Group < ApplicationRecord
 
   enum :status, { trial: "trial", active: "active", upgrade_requested: "upgrade_requested" }, validate: true
 
+  # Feature flag columns that super admins can toggle per group. Derived from the
+  # features in settings.yml marked `enabled_by_group: true` that also have a matching
+  # `*_enabled` column (features without a column, e.g. exit_pages, are skipped).
+  def self.feature_flag_attributes
+    return [] if Settings.features.blank?
+
+    Settings.features.filter_map do |name, config|
+      column = "#{name}_enabled"
+      column if config.respond_to?(:enabled_by_group) && config.enabled_by_group && has_attribute?(column)
+    end
+  end
+
   def to_param
     external_id
   end

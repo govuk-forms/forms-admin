@@ -13,7 +13,6 @@ gem "pg", "~> 1.6"
 gem "puma", "~> 8.0.2"
 
 # Used for handling authentication
-gem "gds-sso"
 gem "omniauth-auth0"
 gem "omniauth-rails_csrf_protection"
 gem "warden"
@@ -49,7 +48,7 @@ gem "govuk_design_system_formbuilder", "~> 6"
 gem "dfe-autocomplete", require: "dfe/autocomplete", github: "DFE-Digital/dfe-autocomplete", ref: "1d4cc65039e11cc3ba9e7217a719b8128d0e4d53"
 
 # Our own custom markdown renderer
-gem "govuk-forms-markdown", require: "govuk_forms_markdown", github: "govuk-forms/govuk-forms-markdown", tag: "0.9.0"
+gem "govuk-forms-markdown", require: "govuk_forms_markdown", github: "govuk-forms/govuk-forms-markdown", tag: "0.12.0"
 
 # For structured logging
 gem "lograge"
@@ -70,7 +69,7 @@ gem "validate_url"
 gem "paper_trail"
 
 # For AWS interactions
-gem "aws-sdk-cloudwatch", "~> 1.140"
+gem "aws-sdk-cloudwatch", "~> 1.142"
 gem "aws-sdk-codepipeline", "~> 1.117"
 
 # For Mailchimp audience integration
@@ -83,7 +82,7 @@ gem "csv"
 gem "acts_as_list"
 
 # Add state machine for forms
-gem "aasm", "~> 5.5"
+gem "aasm", "~> 6.0"
 # Used by AASM to autocommit state changes when even method is used with bang eg. make_live!
 gem "after_commit_everywhere", "~> 1.6"
 

@@ -3,7 +3,7 @@ require "rails_helper"
 RSpec.describe RoutesController, type: :request do
   let(:form) { create(:form, :with_group, group:) }
   let(:membership) { create :membership, group:, user: standard_user }
-  let(:group) { create(:group, multiple_branches_enabled: true) }
+  let(:group) { create(:group, multiple_branches_enabled: true, organisation: standard_user.organisation) }
 
   before do
     membership
@@ -31,7 +31,7 @@ RSpec.describe RoutesController, type: :request do
     end
 
     context "when the multiple_branches feature is not enabled" do
-      let(:group) { create(:group, multiple_branches_enabled: false) }
+      let(:group) { create(:group, multiple_branches_enabled: false, organisation: standard_user.organisation) }
 
       it "returns a 404" do
         get routes_path(form.id)
@@ -89,7 +89,7 @@ RSpec.describe RoutesController, type: :request do
     end
 
     context "when the multiple_branches feature is not enabled" do
-      let(:group) { create(:group, multiple_branches_enabled: false) }
+      let(:group) { create(:group, multiple_branches_enabled: false, organisation: standard_user.organisation) }
 
       it "returns a 404" do
         post routes_path(form.id), params: valid_params

@@ -1013,6 +1013,7 @@ RSpec.describe Form, type: :model do
         confirm_submission_email_status: :completed,
         privacy_policy_status: :completed,
         payment_link_status: :optional,
+        brand_status: :optional,
         copy_of_answers_status: :optional,
         submission_attachments_status: :optional,
         batch_submissions_status: :optional,
@@ -1225,7 +1226,12 @@ RSpec.describe Form, type: :model do
   end
 
   describe "#as_form_document" do
-    let(:form) { create :form, :ready_for_live }
+    let(:form) do
+      create(:form, :ready_for_live, delivery_configurations: [
+        create(:delivery_configuration),
+        create(:delivery_configuration, :daily_email),
+      ])
+    end
 
     it "includes all attributes for the form" do
       form_attributes = described_class.attribute_names - %w[id state external_id pages question_section_completed declaration_section_completed share_preview_completed welsh_completed]
@@ -1251,6 +1257,21 @@ RSpec.describe Form, type: :model do
       expect(form.as_form_document["steps"].last).to match a_hash_including(
         "type" => "question",
         "next_step_id" => nil,
+      )
+    end
+
+    it "includes the delivery configurations" do
+      expect(form.as_form_document["delivery_configurations"]).to match a_hash_including(
+        {
+          "delivery_method" => "email",
+          "delivery_schedule" => "immediate",
+          "formats" => [],
+        },
+        {
+          "delivery_method" => "email",
+          "delivery_schedule" => "daily",
+          "formats" => %w[csv],
+        },
       )
     end
 

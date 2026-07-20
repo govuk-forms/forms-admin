@@ -3,8 +3,8 @@ require "rails_helper"
 describe "mou_signatures/index.html.erb" do
   let(:mou_signatures) do
     [
-      build(:mou_signature, agreement_type: :crown, created_at: Time.zone.parse("October 12, 2023")),
-      build(:mou_signature, agreement_type: :non_crown, created_at: Time.zone.parse("October 13, 2023")),
+      build(:mou_signature, user: build_stubbed(:user), agreement_type: :crown, created_at: Time.zone.parse("October 12, 2023")),
+      build(:mou_signature, user: build_stubbed(:user), agreement_type: :non_crown, created_at: Time.zone.parse("October 13, 2023")),
     ]
   end
 

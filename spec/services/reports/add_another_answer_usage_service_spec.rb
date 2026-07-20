@@ -18,7 +18,7 @@ describe Reports::AddAnotherAnswerUsageService do
       ]
     end
 
-    it "obtains all forms in the add another answer report", :flaky do
+    it "obtains all forms in the add another answer report" do
       report = features_report_service.add_another_answer_forms
 
       expect(report[:forms]).to contain_exactly(

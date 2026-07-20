@@ -137,6 +137,32 @@ describe RevertDraftFormService do
       end
     end
 
+    context "when the delivery configurations are changed in the draft" do
+      let(:live_form) do
+        create(:form, :live, delivery_configurations: [
+          create(:delivery_configuration, :s3, formats: %w[json]),
+          create(:delivery_configuration, :weekly_email),
+        ])
+      end
+
+      before do
+        live_form.delivery_configurations.destroy_all
+        create(:delivery_configuration, :immediate_email)
+        create(:delivery_configuration, :daily_email)
+        live_form.delivery_configurations.reload
+        live_form.save!
+      end
+
+      it "restores the delivery configurations" do
+        revert_draft(live_tag)
+
+        expect(live_form.reload.delivery_configurations.pluck(:delivery_method, :delivery_schedule, :formats)).to contain_exactly(
+          ["s3", "immediate", %w[json]],
+          ["email", "weekly", %w[csv]],
+        )
+      end
+    end
+
     context "when form has Welsh content" do
       let(:live_form) do
         form = create(:form, :live, :with_pages, pages_count: 2, available_languages: %w[en cy], support_phone: "01234 567890", support_url: "https://example.gov.uk/support", support_url_text: "Our English support site", declaration_markdown: "English declaration", payment_url: "https://www.pay.gov.uk")

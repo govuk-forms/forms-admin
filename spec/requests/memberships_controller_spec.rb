@@ -1,8 +1,8 @@
 require "rails_helper"
 
 describe "/memberships", type: :request do
-  let(:user) { create(:user) }
-  let(:group) { create(:group) }
+  let(:user) { create(:user, organisation: standard_user.organisation) }
+  let(:group) { create(:group, organisation: standard_user.organisation) }
   let(:logged_in_user_role) { :group_admin }
 
   before do

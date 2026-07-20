@@ -10,9 +10,17 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_08_112508) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_16_171610) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "brands", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.string "slug", null: false
+    t.datetime "updated_at", null: false
+    t.index ["slug"], name: "index_brands_on_slug", unique: true
+  end
 
   create_table "condition_translations", force: :cascade do |t|
     t.bigint "condition_id", null: false
@@ -30,12 +38,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_08_112508) do
     t.bigint "check_page_id", comment: "The question page this condition looks at to compare answers"
     t.datetime "created_at", null: false
     t.text "exit_page_heading", comment: "Text for the heading of the exit page"
+    t.bigint "exit_page_id"
     t.text "exit_page_markdown", comment: "When not nil this condition should be treated as an exit page. When set it contains the markdown for the body of the exit page"
     t.bigint "goto_page_id", comment: "The question page which this conditions will skip forwards to"
     t.bigint "routing_page_id", comment: "The question page at which this conditional route takes place"
     t.boolean "skip_to_end", default: false
     t.datetime "updated_at", null: false
     t.index ["check_page_id"], name: "index_conditions_on_check_page_id"
+    t.index ["exit_page_id"], name: "index_conditions_on_exit_page_id"
     t.index ["goto_page_id"], name: "index_conditions_on_goto_page_id"
     t.index ["routing_page_id"], name: "index_conditions_on_routing_page_id"
   end
@@ -51,6 +61,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_08_112508) do
     t.index ["group_id", "form_name", "dedup_version"], name: "idx_on_group_id_form_name_dedup_version_9b12b4ae60", unique: true
     t.index ["group_id"], name: "index_create_form_events_on_group_id"
     t.index ["user_id"], name: "index_create_form_events_on_user_id"
+  end
+
+  create_table "delivery_configurations", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "delivery_method", null: false
+    t.string "delivery_schedule", null: false
+    t.bigint "form_id", null: false
+    t.string "formats", default: [], null: false, array: true
+    t.datetime "updated_at", null: false
+    t.index ["form_id", "delivery_method", "delivery_schedule"], name: "idx_on_form_id_delivery_method_delivery_schedule_be17307eef", unique: true
+    t.index ["form_id"], name: "index_delivery_configurations_on_form_id"
   end
 
   create_table "draft_questions", force: :cascade do |t|
@@ -69,6 +90,26 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_08_112508) do
     t.bigint "user_id", null: false
     t.index ["form_id"], name: "index_draft_questions_on_form_id"
     t.index ["user_id"], name: "index_draft_questions_on_user_id"
+  end
+
+  create_table "exit_page_translations", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "exit_page_id", null: false
+    t.text "heading"
+    t.string "locale", null: false
+    t.text "markdown"
+    t.datetime "updated_at", null: false
+    t.index ["exit_page_id", "locale"], name: "index_exit_page_translations_on_exit_page_id_and_locale", unique: true
+    t.index ["locale"], name: "index_exit_page_translations_on_locale"
+  end
+
+  create_table "exit_pages", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.text "heading", comment: "The title used for the exit page "
+    t.text "markdown", comment: "The body content in markdown format"
+    t.bigint "question_page_id", null: false, comment: "The page that the exit page belongs to"
+    t.datetime "updated_at", null: false
+    t.index ["question_page_id"], name: "index_exit_pages_on_question_page_id"
   end
 
   create_table "form_documents", force: :cascade do |t|
@@ -116,6 +157,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_08_112508) do
 
   create_table "forms", force: :cascade do |t|
     t.text "available_languages", default: ["en"], null: false, array: true
+    t.string "brand_id"
     t.integer "copied_from_id"
     t.datetime "created_at", null: false
     t.bigint "creator_id"
@@ -154,6 +196,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_08_112508) do
   create_table "groups", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.bigint "creator_id"
+    t.boolean "custom_branding_enabled", default: false
     t.text "external_id", null: false
     t.boolean "multiple_branches_enabled", default: false
     t.string "name"
@@ -197,6 +240,26 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_08_112508) do
     t.index ["user_id", "organisation_id"], name: "index_mou_signatures_on_user_id_and_organisation_id", unique: true, comment: "Users can only sign an MOU for an Organisation once"
     t.index ["user_id"], name: "index_mou_signatures_on_user_id"
     t.index ["user_id"], name: "index_mou_signatures_on_user_id_unique_without_organisation_id", unique: true, where: "(organisation_id IS NULL)", comment: "Users can only sign a single MOU without an organisation"
+  end
+
+  create_table "organisation_brands", force: :cascade do |t|
+    t.bigint "brand_id", null: false
+    t.datetime "created_at", null: false
+    t.bigint "organisation_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["brand_id"], name: "index_organisation_brands_on_brand_id"
+    t.index ["organisation_id", "brand_id"], name: "index_organisation_brands_unique", unique: true
+    t.index ["organisation_id"], name: "index_organisation_brands_on_organisation_id"
+  end
+
+  create_table "organisation_domains", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "domain", null: false
+    t.bigint "organisation_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["domain"], name: "index_organisation_domains_on_domain"
+    t.index ["organisation_id", "domain"], name: "index_organisation_domains_unique", unique: true
+    t.index ["organisation_id"], name: "index_organisation_domains_on_organisation_id"
   end
 
   create_table "organisations", force: :cascade do |t|
@@ -285,9 +348,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_08_112508) do
   end
 
   add_foreign_key "condition_translations", "conditions"
+  add_foreign_key "conditions", "exit_pages"
   add_foreign_key "create_form_events", "groups", on_delete: :cascade
   add_foreign_key "create_form_events", "users", on_delete: :cascade
+  add_foreign_key "delivery_configurations", "forms", on_delete: :cascade
   add_foreign_key "draft_questions", "users"
+  add_foreign_key "exit_page_translations", "exit_pages"
+  add_foreign_key "exit_pages", "pages", column: "question_page_id", on_delete: :cascade
   add_foreign_key "form_documents", "forms"
   add_foreign_key "form_translations", "forms"
   add_foreign_key "groups", "users", column: "creator_id"
@@ -297,6 +364,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_08_112508) do
   add_foreign_key "memberships", "users", column: "added_by_id"
   add_foreign_key "mou_signatures", "organisations"
   add_foreign_key "mou_signatures", "users"
+  add_foreign_key "organisation_brands", "brands"
+  add_foreign_key "organisation_brands", "organisations"
+  add_foreign_key "organisation_domains", "organisations"
   add_foreign_key "page_translations", "pages"
   add_foreign_key "pages", "forms"
   add_foreign_key "users", "organisations"
