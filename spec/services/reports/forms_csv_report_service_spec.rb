@@ -26,8 +26,6 @@ RSpec.describe Reports::FormsCsvReportService do
     create(:form, :live,
            :with_support,
            :with_welsh_translation,
-           submission_type: "email",
-           submission_format: %w[csv json],
            payment_url: "https://www.gov.uk/payments/organisation/service",
            send_daily_submission_batch: true,
            send_weekly_submission_batch: true,
@@ -41,6 +39,10 @@ RSpec.describe Reports::FormsCsvReportService do
              create(:page, answer_type: "phone_number"),
              create(:page, :with_selection_settings, is_optional: true),
              create(:page, :with_single_line_text_settings, is_repeatable: true),
+           ],
+           delivery_configurations: [
+             create(:delivery_configuration, :immediate_email, formats: %w[csv json]),
+             create(:delivery_configuration, :s3, formats: %w[csv]),
            ])
   end
   let(:forms) { [form, create(:form, :live)] }
@@ -79,8 +81,7 @@ RSpec.describe Reports::FormsCsvReportService do
         form.support_phone,
         form.privacy_policy_url,
         form.what_happens_next_markdown,
-        "email",
-        "csv json",
+        "email: csv, json\ns3: csv",
         "true",
         "true",
         "true",

@@ -25,8 +25,7 @@ class Reports::FormsCsvReportService
     "Support phone",
     "Privacy policy URL",
     "What happens next markdown",
-    "Submission type",
-    "Submission formats",
+    "Delivery methods",
     "Daily submissions CSV enabled",
     "Weekly submissions CSV enabled",
     "Has Welsh translation",
@@ -77,12 +76,19 @@ private
       form["content"]["support_phone"],
       form["content"]["privacy_policy_url"],
       form["content"]["what_happens_next_markdown"],
-      form["content"]["submission_type"],
-      form["content"]["submission_format"]&.sort&.join(" "),
       form["content"]["send_daily_submission_batch"],
       form["content"]["send_weekly_submission_batch"],
+      format_delivery_methods(form),
       Reports::FormDocumentsService.has_welsh_translation(form),
       Reports::FormDocumentsService.copy_of_answers_enabled?(form),
     ]
+  end
+
+  def format_delivery_methods(form)
+    form["content"]["delivery_configurations"].map { |delivery_configuration|
+      next unless delivery_configuration["delivery_schedule"] == "immediate"
+
+      "#{delivery_configuration['delivery_method']}: #{delivery_configuration['formats'].join(', ')}"
+    }.compact.join("\n")
   end
 end
