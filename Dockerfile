@@ -35,8 +35,7 @@ ARG RAILS_ENV NODE_ENV
 ENV RAILS_ENV="${RAILS_ENV:-production}" \
     NODE_ENV="${NODE_ENV:-production}" \
     PATH="${PATH}:/home/ruby/.local/bin:/node_modules/.bin" \
-    USER="ruby" \
-    GOVUK_APP_DOMAIN="https://not-set"
+    USER="ruby"
 
 COPY --chown=ruby:ruby . .
 
