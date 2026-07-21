@@ -150,18 +150,18 @@
     <h4 class="govuk-heading-s"><%= t('.how_you_get_completed_forms.submission_email') %></h4>
     <p class="govuk-!-text-break-word"><%= form_document.submission_email %></p>
 
-    <% if form_document.submission_type == "email" %>
-      <% submission_format = ["email", *form_document.submission_format].join("_") %>
+    <% if form_document.has_email_delivery? %>
+      <% formats = ["email", *form_document.email_delivery_configuration["formats"]].join("_") %>
       <h4 class="govuk-heading-s"><%= t(".how_you_get_completed_forms.csv_and_json") %></h4>
-      <p><%= t(".how_you_get_completed_forms.submission_format.email.#{submission_format}_html") %></p>
+      <p><%= t(".how_you_get_completed_forms.submission_format.email.#{formats}_html") %></p>
     <% end %>
 
     <h4 class="govuk-heading-s"><%= t(".how_you_get_completed_forms.batch_submissions.title") %></h4>
-    <% if form_document.send_daily_submission_batch && form_document.send_weekly_submission_batch %>
+    <% if form_document.daily_submission_batch_enabled? && form_document.weekly_submission_batch_enabled? %>
       <p><%= t(".how_you_get_completed_forms.batch_submissions.daily_and_weekly_enabled") %></p>
-    <% elsif form_document.send_daily_submission_batch %>
+    <% elsif form_document.daily_submission_batch_enabled? %>
       <p><%= t(".how_you_get_completed_forms.batch_submissions.daily_enabled") %></p>
-    <% elsif form_document.send_weekly_submission_batch %>
+    <% elsif form_document.weekly_submission_batch_enabled? %>
       <p><%= t(".how_you_get_completed_forms.batch_submissions.weekly_enabled") %></p>
     <% else %>
       <p><%= t(".how_you_get_completed_forms.batch_submissions.disabled") %></p>

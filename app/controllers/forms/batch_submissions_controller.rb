@@ -10,7 +10,8 @@ module Forms
       @batch_submissions_input = Forms::BatchSubmissionsInput.new(batch_submissions_input_params)
 
       if @batch_submissions_input.submit
-        redirect_to form_path(current_form.id), success: success_message(current_form)
+        success_message = success_message(@batch_submissions_input.batch_frequencies, @batch_submissions_input.delivery_configurations_changed?)
+        redirect_to form_path(current_form.id), success: success_message
       else
         render :new, status: :unprocessable_content
       end
@@ -22,14 +23,16 @@ module Forms
       params.require(:forms_batch_submissions_input).permit(batch_frequencies: []).merge(form: current_form)
     end
 
-    def success_message(form)
-      return nil unless form.send_daily_submission_batch_previously_changed? || form.send_weekly_submission_batch_previously_changed?
+    def success_message(batch_frequencies, delivery_configurations_changed)
+      return nil unless delivery_configurations_changed
 
-      if form.send_daily_submission_batch && form.send_weekly_submission_batch
+      batch_frequencies = Array(batch_frequencies)
+
+      if batch_frequencies.include?("daily") && batch_frequencies.include?("weekly")
         t("banner.success.form.batch_submissions.daily_and_weekly_enabled")
-      elsif form.send_daily_submission_batch
+      elsif batch_frequencies.include?("daily")
         t("banner.success.form.batch_submissions.daily_enabled")
-      elsif form.send_weekly_submission_batch
+      elsif batch_frequencies.include?("weekly")
         t("banner.success.form.batch_submissions.weekly_enabled")
       else
         t("banner.success.form.batch_submissions.disabled")

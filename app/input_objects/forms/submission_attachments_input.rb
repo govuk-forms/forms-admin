@@ -9,11 +9,10 @@ class Forms::SubmissionAttachmentsInput < BaseInput
   def submit
     return false if invalid?
 
-    formats = submission_format.compact_blank
-    form.submission_format = formats
+    delivery_configuration = form.immediate_email_delivery_configuration
+    raise NotFoundError if delivery_configuration.nil?
 
-    delivery_configuration = form.delivery_configurations.where(delivery_method: "email", delivery_schedule: "immediate").first_or_initialize
-    delivery_configuration.formats = formats
+    delivery_configuration.formats = submission_format.compact_blank
     delivery_configuration.save!
     form.delivery_configurations.reload
 
@@ -21,7 +20,7 @@ class Forms::SubmissionAttachmentsInput < BaseInput
   end
 
   def assign_form_values
-    self.submission_format = form.submission_format
+    self.submission_format = form.immediate_email_delivery_configuration&.formats || []
     self
   end
 

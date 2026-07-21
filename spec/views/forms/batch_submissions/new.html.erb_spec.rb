@@ -1,9 +1,7 @@
 require "rails_helper"
 
 describe "forms/batch_submissions/new.html.erb" do
-  let(:send_daily_submission_batch) { true }
-  let(:send_weekly_submission_batch) { true }
-  let(:form) { build(:form, id: 1, send_daily_submission_batch:, send_weekly_submission_batch:) }
+  let(:form) { create(:form) }
   let(:batch_submissions_input) { Forms::BatchSubmissionsInput.new(form:).assign_form_values }
 
   before do
@@ -39,25 +37,36 @@ describe "forms/batch_submissions/new.html.erb" do
     expect(rendered).to have_css(".govuk-label[for='forms-batch-submissions-input-batch-frequencies-daily-field']", text: "Get a daily CSV of submissions")
   end
 
-  context "when the form has send_daily_submission_batch set to true" do
-    let(:send_daily_submission_batch) { true }
+  context "when the form has daily batches enabled" do
+    let(:form) do
+      create(:form, delivery_configurations: [
+        create(:delivery_configuration, :daily_email),
+      ])
+    end
 
     it "renders the checkbox as checked" do
       expect(rendered).to have_checked_field("forms-batch-submissions-input-batch-frequencies-daily-field")
     end
   end
 
-  context "when the form has send_weekly_submission_batch set to true" do
-    let(:send_weekly_submission_batch) { true }
+  context "when the form has weekly batches enabled" do
+    let(:form) do
+      create(:form, delivery_configurations: [
+        create(:delivery_configuration, :weekly_email),
+      ])
+    end
 
-    it "renders the checkboxes as unchecked" do
+    it "renders the checkbox as checked" do
       expect(rendered).to have_checked_field("forms-batch-submissions-input-batch-frequencies-weekly-field")
     end
   end
 
   context "when the form has batch submissions disabled" do
-    let(:send_daily_submission_batch) { false }
-    let(:send_weekly_submission_batch) { false }
+    let(:form) do
+      create(:form, delivery_configurations: [
+        create(:delivery_configuration, :immediate_email),
+      ])
+    end
 
     it "renders the checkboxes as unchecked" do
       expect(rendered).to have_unchecked_field("forms-batch-submissions-input-batch-frequencies-daily-field")

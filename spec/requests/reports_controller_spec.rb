@@ -2,7 +2,7 @@ require "rails_helper"
 
 RSpec.describe ReportsController, type: :request do
   let(:question_text) { "Question text" }
-  let(:forms) { create_list(:form, 4, :live) }
+  let(:forms) { create_list(:form, 4, :live, :with_email_delivery) }
 
   before do
     group = create :group
@@ -255,7 +255,7 @@ RSpec.describe ReportsController, type: :request do
 
   describe "#forms_with_csv_submission_email_attachments" do
     let(:path) { report_forms_with_csv_submission_email_attachments_path(tag: :live) }
-    let(:form) { create(:form, :live, submission_type: "email", submission_format: %w[csv]) }
+    let(:form) { create(:form, :live, delivery_configurations: [create(:delivery_configuration, :immediate_email, formats: %w[csv])]) }
     let(:forms) { [form] }
 
     include_examples "unauthorized user is forbidden"
@@ -280,7 +280,7 @@ RSpec.describe ReportsController, type: :request do
 
   describe "#forms_with_json_submission_email_attachments" do
     let(:path) { report_forms_with_json_submission_email_attachments_path(tag: :live) }
-    let(:form) { create(:form, :live, submission_type: "email", submission_format: %w[json]) }
+    let(:form) { create(:form, :live, delivery_configurations: [create(:delivery_configuration, :immediate_email, formats: %w[json])]) }
     let(:forms) { [form] }
 
     include_examples "unauthorized user is forbidden"
@@ -305,7 +305,7 @@ RSpec.describe ReportsController, type: :request do
 
   describe "#forms_with_daily_submission_csv" do
     let(:path) { report_forms_with_daily_submission_csv_path(tag: :live) }
-    let(:form) { create(:form, :live, submission_type: "email", send_daily_submission_batch: true) }
+    let(:form) { create(:form, :live, delivery_configurations: [create(:delivery_configuration, :daily_email)]) }
     let(:forms) { [form] }
 
     include_examples "unauthorized user is forbidden"
@@ -330,7 +330,7 @@ RSpec.describe ReportsController, type: :request do
 
   describe "#forms_with_weekly_submission_csv" do
     let(:path) { report_forms_with_weekly_submission_csv_path(tag: :live) }
-    let(:form) { create(:form, :live, submission_type: "email", send_weekly_submission_batch: true) }
+    let(:form) { create(:form, :live, delivery_configurations: [create(:delivery_configuration, :weekly_email)]) }
     let(:forms) { [form] }
 
     include_examples "unauthorized user is forbidden"
@@ -355,7 +355,7 @@ RSpec.describe ReportsController, type: :request do
 
   describe "#forms_with_s3_submissions" do
     let(:path) { report_forms_with_s3_submissions_path(tag: :live) }
-    let(:form) { create(:form, :live, submission_type: "s3", submission_format: %w[json]) }
+    let(:form) { create(:form, :live, delivery_configurations: [create(:delivery_configuration, :s3, formats: %w[json])]) }
     let(:forms) { [form] }
 
     include_examples "unauthorized user is forbidden"
@@ -667,7 +667,7 @@ RSpec.describe ReportsController, type: :request do
     end
 
     describe "#forms_with_csv_submission_enabled as csv" do
-      let(:form) { create(:form, :live, submission_type: "email", submission_format: %w[csv]) }
+      let(:form) { create(:form, :live, delivery_configurations: [create(:delivery_configuration, :immediate_email, formats: %w[csv])]) }
       let(:forms) { [form, *create_list(:form, 2, :live)] }
       let(:expected_csv_filename) { "live_forms_with_csv_submission_email_attachments_report-2025-05-15 15:31:57 UTC.csv" }
 

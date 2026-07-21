@@ -242,37 +242,51 @@ RSpec.describe Reports::FormDocumentsService do
   end
 
   describe ".has_daily_submission_csv" do
-    context "when the form has send_daily_submission_batch enabled" do
-      let(:form_document) { create(:form, :live, send_daily_submission_batch: true).live_form_document }
+    subject(:daily_submission_batch_enabled) do
+      described_class.has_daily_submission_csv(form_document)
+    end
+
+    context "when form has a daily delivery_configuration" do
+      let(:form_document) do
+        create(:form, :live, delivery_configurations: [create(:delivery_configuration, :daily_email)])
+          .live_form_document
+      end
 
       it "returns true" do
-        expect(described_class.has_daily_submission_csv(form_document)).to be true
+        expect(daily_submission_batch_enabled).to be true
       end
     end
 
-    context "when the form has send_daily_submission_batch disabled" do
-      let(:form_document) { create(:form, :live, send_daily_submission_batch: false).live_form_document }
+    context "when form does not have a daily delivery_configuration" do
+      let(:form_document) { create(:form, :live).live_form_document }
 
       it "returns false" do
-        expect(described_class.has_daily_submission_csv(form_document)).to be false
+        expect(daily_submission_batch_enabled).to be false
       end
     end
   end
 
   describe ".has_weekly_submission_csv" do
-    context "when the form has send_weekly_submission_batch enabled" do
-      let(:form_document) { create(:form, :live, send_weekly_submission_batch: true).live_form_document }
+    subject(:weekly_submission_batch_enabled) do
+      described_class.has_weekly_submission_csv(form_document)
+    end
+
+    context "when form has weekly delivery_configuration" do
+      let(:form_document) do
+        create(:form, :live, delivery_configurations: [create(:delivery_configuration, :weekly_email)])
+          .live_form_document
+      end
 
       it "returns true" do
-        expect(described_class.has_weekly_submission_csv(form_document)).to be true
+        expect(weekly_submission_batch_enabled).to be true
       end
     end
 
-    context "when the form has send_weekly_submission_batch disabled" do
-      let(:form_document) { create(:form, :live, send_weekly_submission_batch: false).live_form_document }
+    context "when form does not have a weekly delivery_configuration" do
+      let(:form_document) { create(:form, :live).live_form_document }
 
       it "returns false" do
-        expect(described_class.has_weekly_submission_csv(form_document)).to be false
+        expect(weekly_submission_batch_enabled).to be false
       end
     end
   end

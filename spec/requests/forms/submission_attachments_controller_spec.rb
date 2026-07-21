@@ -1,7 +1,11 @@
 require "rails_helper"
 
 RSpec.describe Forms::SubmissionAttachmentsController, type: :request do
-  let(:form) { create(:form, :live, submission_format: original_submission_format) }
+  let(:form) do
+    create(:form, :live, delivery_configurations: [
+      create(:delivery_configuration, :immediate_email, formats: original_submission_format),
+    ])
+  end
   let(:user) { standard_user }
   let(:original_submission_format) { [] }
   let(:group) { create(:group, organisation: user.organisation) }
@@ -25,8 +29,13 @@ RSpec.describe Forms::SubmissionAttachmentsController, type: :request do
       expect(assigns).to include submission_attachments_input: an_instance_of(Forms::SubmissionAttachmentsInput)
     end
 
-    context "when the submission_type is s3" do
-      let(:form) { create(:form, submission_type: "s3") }
+    context "when the form does not have an immediate email delivery configuration" do
+      let(:form) do
+        create(:form, delivery_configurations: [
+          create(:delivery_configuration, :s3),
+          create(:delivery_configuration, :daily_email),
+        ])
+      end
 
       it "returns a 404 page" do
         expect(response).to redirect_to :error_404
@@ -40,10 +49,10 @@ RSpec.describe Forms::SubmissionAttachmentsController, type: :request do
     context "when params are valid" do
       let(:submission_format) { %w[csv json] }
 
-      it "updates the form submission format" do
+      it "updates the submission format for the email delivery method" do
         expect {
           post(submission_attachments_path(form_id: form.id), params:)
-        }.to change { form.reload.submission_format }.to(submission_format)
+        }.to change { form.reload.delivery_configurations.first.formats }.to(submission_format)
       end
 
       it "redirects you to the form overview page" do
@@ -109,7 +118,7 @@ RSpec.describe Forms::SubmissionAttachmentsController, type: :request do
       it "does not update the form" do
         expect {
           post(submission_attachments_path(form_id: form.id), params:)
-        }.not_to(change { form.reload.submission_format })
+        }.not_to(change { form.reload.delivery_configurations.first.formats })
       end
 
       it "re-renders the page with an error" do
@@ -119,8 +128,13 @@ RSpec.describe Forms::SubmissionAttachmentsController, type: :request do
       end
     end
 
-    context "when the submission_type is s3" do
-      let(:form) { create(:form, submission_type: "s3") }
+    context "when the form does not have an immediate email delivery configuration" do
+      let(:form) do
+        create(:form, delivery_configurations: [
+          create(:delivery_configuration, :s3),
+          create(:delivery_configuration, :daily_email),
+        ])
+      end
       let(:submission_format) { %w[csv] }
 
       it "returns a 404 page" do

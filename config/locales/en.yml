@@ -84,10 +84,6 @@ en:
             submission_format:
               blank: Sorry, there was a problem. Please try again.
           invalid_submission_format: Sorry, there was a problem. Please try again.
-        forms/submission_type_input:
-          attributes:
-            submission_type:
-              blank: Choose if you want to get completed forms as CSV files
         group_member_input:
           attributes:
             member_email_address:
@@ -1055,9 +1051,6 @@ en:
         submission_format_options:
           csv: Get a CSV file of each completed form
           json: Get a JSON file of each completed form
-      forms_submission_type_input:
-        submission_type_options:
-          email_with_csv: Get CSV files
       group:
         name: Enter a name for your new group
       group_member_input:
@@ -1214,8 +1207,6 @@ en:
         send_copy_of_answers: Do you want to give people the option to get a copy of their answers by email?
       forms_submission_attachments_input:
         submission_format: Do you want to get a CSV or JSON file of each completed form?
-      forms_submission_type_input:
-        submission_type: Do you want to get completed forms as CSV files?
       mou_signature:
         crown_agreed: Do you agree to the MOU?
         non_crown_agreed: Do you agree to the GOV.UK Forms agreement?

@@ -41,23 +41,31 @@ class Reports::FormDocumentsService
     end
 
     def has_csv_submission_email_attachments(form_document)
-      form_document["content"]["submission_type"] == "email" && form_document["content"]["submission_format"].include?("csv")
+      form_document["content"]["delivery_configurations"].any? do |delivery_configuration|
+        delivery_configuration["delivery_method"] == "email" &&
+          delivery_configuration["delivery_schedule"] == "immediate" &&
+          delivery_configuration["formats"].include?("csv")
+      end
     end
 
     def has_json_submission_email_attachments(form_document)
-      form_document["content"]["submission_type"] == "email" && form_document["content"]["submission_format"].include?("json")
+      form_document["content"]["delivery_configurations"].any? do |delivery_configuration|
+        delivery_configuration["delivery_method"] == "email" &&
+          delivery_configuration["delivery_schedule"] == "immediate" &&
+          delivery_configuration["formats"].include?("json")
+      end
     end
 
     def has_daily_submission_csv(form_document)
-      form_document["content"]["send_daily_submission_batch"]
+      form_document["content"]["delivery_configurations"].any? { |c| c["delivery_schedule"] == "daily" }
     end
 
     def has_weekly_submission_csv(form_document)
-      form_document["content"]["send_weekly_submission_batch"]
+      form_document["content"]["delivery_configurations"].any? { |c| c["delivery_schedule"] == "weekly" }
     end
 
     def has_s3_submissions(form_document)
-      form_document["content"]["submission_type"] == "s3"
+      form_document["content"]["delivery_configurations"].any? { |c| c["delivery_method"] == "s3" }
     end
 
     def has_exit_pages?(form_document)

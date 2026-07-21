@@ -1,9 +1,7 @@
 require "rails_helper"
 
 RSpec.describe Forms::BatchSubmissionsController, type: :request do
-  let(:form) { create(:form, :live, send_daily_submission_batch:, send_weekly_submission_batch:) }
-  let(:send_daily_submission_batch) { false }
-  let(:send_weekly_submission_batch) { false }
+  let(:form) { create(:form, :live) }
   let(:current_user) { standard_user }
   let(:group) { create(:group, organisation: standard_user.organisation) }
 
@@ -45,8 +43,10 @@ RSpec.describe Forms::BatchSubmissionsController, type: :request do
     end
 
     it "updates the form" do
-      expect(form.reload.send_daily_submission_batch).to be true
-      expect(form.reload.send_weekly_submission_batch).to be true
+      expect(form.reload.delivery_configurations.pluck(:delivery_method, :delivery_schedule, :formats)).to contain_exactly(
+        ["email", "daily", %w[csv]],
+        ["email", "weekly", %w[csv]],
+      )
     end
 
     it "redirects to the form overview page" do
@@ -78,8 +78,12 @@ RSpec.describe Forms::BatchSubmissionsController, type: :request do
     end
 
     context "when daily and weekly batch checkboxes are unchecked" do
-      let(:send_daily_submission_batch) { true }
-      let(:send_weekly_submission_batch) { true }
+      let(:form) do
+        create(:form, :live, delivery_configurations: [
+          create(:delivery_configuration, :daily_email),
+          create(:delivery_configuration, :weekly_email),
+        ])
+      end
       let(:batch_frequencies) { [] }
 
       it "displays a success flash message indicating that batch emails are disabled" do
@@ -87,8 +91,12 @@ RSpec.describe Forms::BatchSubmissionsController, type: :request do
       end
     end
 
-    context "when the setting is unchanged" do
-      let(:send_daily_submission_batch) { true }
+    context "when the delivery configurations are unchanged" do
+      let(:form) do
+        create(:form, :live, delivery_configurations: [
+          create(:delivery_configuration, :daily_email),
+        ])
+      end
       let(:batch_frequencies) { %w[daily] }
 
       it "does not display a flash message" do

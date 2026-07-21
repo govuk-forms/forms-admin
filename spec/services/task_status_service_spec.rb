@@ -192,34 +192,38 @@ describe TaskStatusService do
 
     describe "submission_attachments_status" do
       context "with a new form" do
-        let(:form) { build(:form, :new_form, :with_group, group:) }
+        let(:form) { create(:form, :new_form, :with_group, group:) }
 
-        it "returns optional" do
-          expect(task_status_service.all_task_statuses[:submission_attachments_status]).to eq :optional
+        it "returns cannot start" do
+          expect(task_status_service.all_task_statuses[:submission_attachments_status]).to eq :cannot_start
         end
       end
 
-      context "with submission_type set to 'email'" do
-        let(:form) { build(:form, :new_form, :with_group, submission_type: "email", submission_format:, group:) }
+      context "when email delivery is enabled" do
+        let(:form) do
+          create(:form, :new_form, :with_group, group:, delivery_configurations: [
+            create(:delivery_configuration, :immediate_email, formats:),
+          ])
+        end
 
-        context "with submission format empty" do
-          let(:submission_format) { [] }
+        context "with no submission formats enabled" do
+          let(:formats) { [] }
 
           it "returns optional" do
             expect(task_status_service.all_task_statuses[:submission_attachments_status]).to eq :optional
           end
         end
 
-        context "with submission format csv" do
-          let(:submission_format) { %w[csv] }
+        context "with CSV attachments enabled" do
+          let(:formats) { %w[csv] }
 
           it "returns completed" do
             expect(task_status_service.all_task_statuses[:submission_attachments_status]).to eq :completed
           end
         end
 
-        context "with submission format has multiple values" do
-          let(:submission_format) { %w[csv json] }
+        context "with multiple submission formats enabled" do
+          let(:formats) { %w[csv json] }
 
           it "returns completed" do
             expect(task_status_service.all_task_statuses[:submission_attachments_status]).to eq :completed
@@ -227,8 +231,25 @@ describe TaskStatusService do
         end
       end
 
-      context "with submission_type set s3" do
-        let(:form) { build(:form, :new_form, :with_group, submission_type: "s3", submission_format: "csv", group:) }
+      context "with only S3 delivery is enabled" do
+        let(:form) do
+          create(:form, :new_form, :with_group, group:, delivery_configurations: [
+            create(:delivery_configuration, :s3),
+          ])
+        end
+
+        it "returns cannot start" do
+          expect(task_status_service.all_task_statuses[:submission_attachments_status]).to eq :cannot_start
+        end
+      end
+
+      context "with both email and S3 delivery are enabled" do
+        let(:form) do
+          create(:form, :new_form, :with_group, group:, delivery_configurations: [
+            create(:delivery_configuration, :immediate_email),
+            create(:delivery_configuration, :s3),
+          ])
+        end
 
         it "returns optional" do
           expect(task_status_service.all_task_statuses[:submission_attachments_status]).to eq :optional
@@ -237,29 +258,26 @@ describe TaskStatusService do
     end
 
     describe "batch_submissions_status" do
-      let(:form) { build(:form, :new_form, :with_group, group:, send_daily_submission_batch:, send_weekly_submission_batch:) }
+      let(:form) { create(:form, :new_form, :with_group, group:, delivery_configurations:) }
 
-      context "with send_daily_submission_batch set to true" do
-        let(:send_daily_submission_batch) { true }
-        let(:send_weekly_submission_batch) { false }
-
-        it "returns completed" do
-          expect(task_status_service.all_task_statuses[:batch_submissions_status]).to eq :completed
-        end
-      end
-
-      context "with send_weekly_submission_batch set to true" do
-        let(:send_daily_submission_batch) { false }
-        let(:send_weekly_submission_batch) { true }
+      context "with daily emails configured" do
+        let(:delivery_configurations) { [create(:delivery_configuration, :daily_email)] }
 
         it "returns completed" do
           expect(task_status_service.all_task_statuses[:batch_submissions_status]).to eq :completed
         end
       end
 
-      context "with send daily and weekly batches set to false" do
-        let(:send_daily_submission_batch) { false }
-        let(:send_weekly_submission_batch) { false }
+      context "with weekly emails configured" do
+        let(:delivery_configurations) { [create(:delivery_configuration, :weekly_email)] }
+
+        it "returns completed" do
+          expect(task_status_service.all_task_statuses[:batch_submissions_status]).to eq :completed
+        end
+      end
+
+      context "with no batch emails configured" do
+        let(:delivery_configurations) { [create(:delivery_configuration, :immediate_email)] }
 
         it "returns optional" do
           expect(task_status_service.all_task_statuses[:batch_submissions_status]).to eq :optional
@@ -692,7 +710,7 @@ describe TaskStatusService do
         support_contact_details_status: :completed,
         welsh_language_status: :optional,
         make_live_status: :completed,
-        submission_attachments_status: :optional,
+        submission_attachments_status: :cannot_start,
         batch_submissions_status: :optional,
         share_preview_status: :completed,
         submission_email_status: :completed,

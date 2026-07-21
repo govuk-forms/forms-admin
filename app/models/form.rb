@@ -18,6 +18,7 @@ class Form < ApplicationRecord
   has_one :draft_form_document, -> { where tag: "draft", language: :en }, class_name: "FormDocument"
   has_many :conditions, through: :pages, source: :routing_conditions
   has_many :delivery_configurations, dependent: :destroy
+  has_one :immediate_email_delivery_configuration, -> { where delivery_method: "email", delivery_schedule: "immediate" }, class_name: "DeliveryConfiguration"
 
   translates :name,
              :privacy_policy_url,
@@ -241,6 +242,10 @@ class Form < ApplicationRecord
     return false if live_document.content.except(*ignored_keys) == as_form_document(language:).except(*ignored_keys)
 
     true
+  end
+
+  def only_s3_delivery_enabled?
+    delivery_configurations.immediate.one? && delivery_configurations.immediate.first.delivery_method == "s3"
   end
 
 private

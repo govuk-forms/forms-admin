@@ -15,11 +15,6 @@ RSpec.describe Forms::BatchSubmissionsInput, type: :model do
 
       before { input.submit }
 
-      it "updates the form flags" do
-        expect(form.reload.send_daily_submission_batch).to be(true)
-        expect(form.reload.send_weekly_submission_batch).to be(true)
-      end
-
       it "creates delivery configurations for both frequencies" do
         expect(form.delivery_configurations.pluck(:delivery_method, :delivery_schedule, :formats)).to contain_exactly(
           ["email", "daily", %w[csv]], ["email", "weekly", %w[csv]]
@@ -40,22 +35,23 @@ RSpec.describe Forms::BatchSubmissionsInput, type: :model do
           },
         )
       end
+
+      it "reports that the delivery configurations changed" do
+        expect(input.delivery_configurations_changed?).to be(true)
+      end
     end
 
     context "when only daily is selected and both delivery configurations already exist" do
-      let(:form) { create(:form, send_daily_submission_batch: true, send_weekly_submission_batch: true) }
+      let(:form) do
+        create(:form, delivery_configurations: [
+          create(:delivery_configuration, :daily_email),
+          create(:delivery_configuration, :weekly_email),
+        ])
+      end
       let(:batch_frequencies) { %w[daily] }
 
       before do
-        create(:delivery_configuration, :daily_email, form:)
-        create(:delivery_configuration, :weekly_email, form:)
-
         input.submit
-      end
-
-      it "updates the form flags" do
-        expect(form.reload.send_daily_submission_batch).to be(true)
-        expect(form.reload.send_weekly_submission_batch).to be(false)
       end
 
       it "keeps daily and removes weekly delivery configurations" do
@@ -73,22 +69,23 @@ RSpec.describe Forms::BatchSubmissionsInput, type: :model do
           },
         )
       end
+
+      it "reports that the delivery configurations changed" do
+        expect(input.delivery_configurations_changed?).to be(true)
+      end
     end
 
     context "when neither daily or weekly are selected" do
-      let(:form) { create(:form, send_daily_submission_batch: true, send_weekly_submission_batch: true) }
+      let(:form) do
+        create(:form, delivery_configurations: [
+          create(:delivery_configuration, :daily_email),
+          create(:delivery_configuration, :weekly_email),
+        ])
+      end
       let(:batch_frequencies) { [] }
 
       before do
-        create(:delivery_configuration, :daily_email, form:)
-        create(:delivery_configuration, :weekly_email, form:)
-
         input.submit
-      end
-
-      it "clears the form flags" do
-        expect(form.reload.send_daily_submission_batch).to be(false)
-        expect(form.reload.send_weekly_submission_batch).to be(false)
       end
 
       it "removes all batch delivery configurations" do
@@ -98,26 +95,81 @@ RSpec.describe Forms::BatchSubmissionsInput, type: :model do
       it "updates the draft form document" do
         expect(form.draft_form_document.reload.content["delivery_configurations"]).to be_empty
       end
+
+      it "reports that the delivery configurations changed" do
+        expect(input.delivery_configurations_changed?).to be(true)
+      end
+    end
+
+    context "when the selected batch frequencies match the existing delivery configurations" do
+      let(:form) do
+        create(:form, delivery_configurations: [
+          create(:delivery_configuration, :daily_email),
+        ])
+      end
+      let(:batch_frequencies) { %w[daily] }
+
+      before do
+        input.submit
+      end
+
+      it "keeps the batch delivery configurations unchanged" do
+        expect(form.delivery_configurations.pluck(:delivery_method, :delivery_schedule, :formats)).to contain_exactly(
+          ["email", "daily", %w[csv]],
+        )
+      end
+
+      it "reports that the delivery configurations did not change" do
+        expect(input.delivery_configurations_changed?).to be(false)
+      end
     end
   end
 
   describe "#assign_form_values" do
     subject(:input) { described_class.new(form:) }
 
-    [
-      [true, false, %w[daily]],
-      [false, true, %w[weekly]],
-      [true, true, %w[daily weekly]],
-      [false, false, []],
-    ].each do |send_daily_submission_batch, send_weekly_submission_batch, expected|
-      context "when send_daily_submission_batch is #{send_daily_submission_batch} and send_weekly_submission_batch is #{send_weekly_submission_batch}" do
-        let(:form) { create(:form, send_daily_submission_batch:, send_weekly_submission_batch:) }
+    context "when the form has a daily batch delivery configuration" do
+      let(:form) { create(:form, delivery_configurations: [create(:delivery_configuration, :daily_email)]) }
 
-        it "sets batch_frequencies to #{expected.inspect}" do
-          input.assign_form_values
+      it "sets batch_frequencies to daily" do
+        input.assign_form_values
 
-          expect(input.batch_frequencies).to match_array(expected)
-        end
+        expect(input.batch_frequencies).to match_array(%w[daily])
+      end
+    end
+
+    context "when the form has a weekly batch delivery configuration" do
+      let(:form) { create(:form, delivery_configurations: [create(:delivery_configuration, :weekly_email)]) }
+
+      it "sets batch_frequencies to weekly" do
+        input.assign_form_values
+
+        expect(input.batch_frequencies).to match_array(%w[weekly])
+      end
+    end
+
+    context "when the form has daily and weekly batch delivery configurations" do
+      let(:form) do
+        create(:form, delivery_configurations: [
+          create(:delivery_configuration, :daily_email),
+          create(:delivery_configuration, :weekly_email),
+        ])
+      end
+
+      it "sets batch_frequencies to daily and weekly" do
+        input.assign_form_values
+
+        expect(input.batch_frequencies).to match_array(%w[daily weekly])
+      end
+    end
+
+    context "when the form has no batch delivery configurations" do
+      let(:form) { create(:form) }
+
+      it "sets batch_frequencies to an empty array" do
+        input.assign_form_values
+
+        expect(input.batch_frequencies).to be_empty
       end
     end
   end
