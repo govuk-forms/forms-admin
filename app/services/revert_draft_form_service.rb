@@ -117,6 +117,8 @@ private
     condition.routing_page = Page.find_by!(external_id: condition_data["routing_page_id"]) if condition_data["routing_page_id"]
     condition.check_page = Page.find_by!(external_id: condition_data["check_page_id"]) if condition_data["check_page_id"]
     condition.goto_page = Page.find_by!(external_id: condition_data["goto_page_id"]) if condition_data["goto_page_id"]
+    condition.exit_page_heading = condition_data["exit_page_heading"]
+    condition.exit_page_markdown = condition_data["exit_page_markdown"]
   end
 
   def welsh_form_document_exists?(tag)
