@@ -299,7 +299,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_16_171610) do
     t.bigint "form_id"
     t.text "guidance_markdown"
     t.text "hint_text"
-    t.boolean "is_optional", null: false
+    t.boolean "is_optional", default: false, null: false
     t.boolean "is_repeatable", default: false, null: false
     t.text "page_heading"
     t.integer "position"

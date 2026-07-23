@@ -137,6 +137,7 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
 
   # create some test groups
   end_to_end_group = Group.create! name: "End to end tests", organisation: gds, status: :active
+  smoke_test_group = Group.create! name: "Smoke tests", organisation: gds, status: :active
   test_group = Group.create! name: "Test Group", organisation: gds, creator: default_user, status: :active, send_filler_answers_enabled: true
   multiple_branches_test_group = Group.create! name: "Test Group with multiple branches", organisation: gds, creator: default_user, status: :active, multiple_branches_enabled: true
   Group.create! name: "Ministry of Tests forms", organisation: mot_org
@@ -145,6 +146,53 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
   Membership.create! user: default_user, group: end_to_end_group, added_by: default_user, role: :group_admin
 
   submission_email = ENV["EMAIL"].presence || `git config --get user.email`.strip.presence || "example@example.com"
+
+  smoke_test_form = Form.create!(
+    name: "Scheduled smoke test",
+    creator_id: nil,
+    pages: [
+      Page.create(
+        question_text: "A text question",
+        hint_text: "No specific answer is required for the tests to pass",
+        answer_type: "text",
+        answer_settings: {
+          input_type: "single_line",
+        },
+      ),
+      Page.create(
+        question_text: "A number question",
+        hint_text: "No specific answer is required for the tests to pass",
+        answer_type: "number",
+      ),
+      Page.create(
+        question_text: "A full name question",
+        hint_text: "No specific answer is required for the tests to pass",
+        answer_type: "name",
+        answer_settings: {
+          input_type: "full_name",
+          title_needed: false,
+        },
+      ),
+    ],
+    question_section_completed: true,
+    declaration_markdown: "",
+    declaration_section_completed: true,
+    privacy_policy_url: "https://www.gov.uk/help/privacy-notice",
+    submission_email: "govuk-forms-automation-tests@digital.cabinet-office.gov.uk",
+    support_url: "https://www.forms.service.gov.uk",
+    support_url_text: "This form is for internal scheduled testing. Find out more about GOV.UK Forms.",
+    what_happens_next_markdown: "This form is for the scheduled smoke tests only",
+    share_preview_completed: true,
+    delivery_configurations: [
+      DeliveryConfiguration.create(
+        delivery_method: :email,
+        delivery_schedule: :immediate,
+        formats: [],
+      ),
+    ],
+  )
+  smoke_test_form.set_task_status_service(TaskStatusService.new(form: smoke_test_form, current_user: nil))
+  smoke_test_form.make_live!
 
   all_question_types_form = Form.create!(
     name: "All question types form",
@@ -156,12 +204,10 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
         answer_settings: {
           input_type: "single_line",
         },
-        is_optional: false,
       ),
       Page.create(
         question_text: "Number",
         answer_type: "number",
-        is_optional: false,
       ),
       Page.create(
         question_text: "Address",
@@ -172,12 +218,10 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
             uk_address: true,
           },
         },
-        is_optional: false,
       ),
       Page.create(
         question_text: "Email address",
         answer_type: "email",
-        is_optional: false,
       ),
       Page.create(
         question_text: "Todays Date",
@@ -185,17 +229,14 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
         answer_settings: {
           input_type: "other_date",
         },
-        is_optional: false,
       ),
       Page.create(
         question_text: "National Insurance number",
         answer_type: "national_insurance_number",
-        is_optional: false,
       ),
       Page.create(
         question_text: "Phone number",
         answer_type: "phone_number",
-        is_optional: false,
       ),
       Page.create(
         question_text: "Selection from a list of options",
@@ -248,7 +289,6 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
         answer_settings: {
           input_type: "single_line",
         },
-        is_optional: false,
       ),
     ],
     question_section_completed: true,
@@ -289,7 +329,6 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
             { "name": "No", value: "No" },
           ],
         },
-        is_optional: false,
       ),
       Page.create(
         question_text: "How many times have you filled out this form?",
@@ -301,7 +340,6 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
             { "name": "More than once", value: "More than once" },
           ],
         },
-        is_optional: false,
       ),
       Page.create(
         question_text: "What’s your name?",
@@ -310,14 +348,10 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
           input_type: "full_name",
           title_needed: false,
         },
-        is_optional: false,
-        is_repeatable: false,
       ),
       Page.create(
         question_text: "What’s your email address?",
         answer_type: "email",
-        is_optional: false,
-        is_repeatable: false,
       ),
       Page.create(
         question_text: "What was the reference of your previous submission?",
@@ -325,8 +359,6 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
         answer_settings: {
           input_type: "single_line",
         },
-        is_optional: false,
-        is_repeatable: false,
       ),
       Page.create(
         question_text: "What’s your answer?",
@@ -334,8 +366,6 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
         answer_settings: {
           input_type: "single_line",
         },
-        is_optional: false,
-        is_repeatable: false,
       ),
     ],
     question_section_completed: true,
@@ -452,15 +482,11 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
           input_type: "full_name",
           title_needed: false,
         },
-        is_optional: false,
-        is_repeatable: false,
       ),
       Page.create(
         question_text: "What’s your email address?",
         question_text_cy: "Beth yw eich cyfeiriad e-bost?",
         answer_type: "email",
-        is_optional: false,
-        is_repeatable: false,
         page_heading: "Email",
         page_heading_cy: "E-bost",
         guidance_markdown: "We'll use your email to:\n\n- contact you if there are any issues with your submission\n\n- send you your digital licence",
@@ -473,8 +499,6 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
         answer_settings: {
           input_type: "single_line",
         },
-        is_optional: false,
-        is_repeatable: false,
       ),
       Page.create(
         question_text: "What’s your answer?",
@@ -483,8 +507,6 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
         answer_settings: {
           input_type: "single_line",
         },
-        is_optional: false,
-        is_repeatable: false,
       ),
     ],
     question_section_completed: true,
@@ -528,7 +550,6 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
             { "name": "No", value: "No" },
           ],
         },
-        is_optional: false,
       ),
       Page.create(
         question_text: "Where do you currently live?",
@@ -542,32 +563,26 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
             { "name": "Northern Ireland", value: "Northern Ireland" },
           ],
         },
-        is_optional: false,
       ),
       Page.create(
         question_text: "How many years have you lived in England?",
         answer_type: "number",
-        is_optional: false,
       ),
       Page.create(
         question_text: "How many years have you lived in Scotland?",
         answer_type: "number",
-        is_optional: false,
       ),
       Page.create(
         question_text: "How many years have you lived in Wales?",
         answer_type: "number",
-        is_optional: false,
       ),
       Page.create(
         question_text: "How many years have you lived in Northern Ireland?",
         answer_type: "number",
-        is_optional: false,
       ),
       Page.create(
         question_text: "How many years have you lived in the United Kingdom?",
         answer_type: "number",
-        is_optional: false,
       ),
     ],
     question_section_completed: true,
@@ -642,7 +657,6 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
           input_type: "full_name",
           title_needed: false,
         },
-        is_optional: false,
       ),
     ],
     question_section_completed: true,
@@ -667,11 +681,12 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
   copy_of_answers_form.make_live!
 
   # add forms to groups
-  GroupForm.create! group: end_to_end_group, form_id: all_question_types_form.id # All question types form
-  GroupForm.create! group: end_to_end_group, form_id: e2e_s3_forms.id # s3 submission test form
-  GroupForm.create! group: test_group, form_id: branch_route_form.id # Branch routing form
-  GroupForm.create! group: test_group, form_id: none_of_the_above_form.id # None of the above form
-  GroupForm.create! group: test_group, form_id: welsh_form.id # Welsh form
+  GroupForm.create! group: smoke_test_group, form_id: smoke_test_form.id
+  GroupForm.create! group: smoke_test_group, form_id: e2e_s3_forms.id
+  GroupForm.create! group: test_group, form_id: all_question_types_form.id
+  GroupForm.create! group: test_group, form_id: branch_route_form.id
+  GroupForm.create! group: test_group, form_id: none_of_the_above_form.id
+  GroupForm.create! group: test_group, form_id: welsh_form.id
   GroupForm.create! group: multiple_branches_test_group, form_id: multiple_branch_form.id
   GroupForm.create! group: test_group, form_id: copy_of_answers_form.id
 end
