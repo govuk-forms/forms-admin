@@ -20,43 +20,34 @@ class Condition < ApplicationRecord
   translates :exit_page_markdown, presence: false # Without presence here, the value is nil if set to ""
 
   def self.create_and_update_form!(**args)
-    exit_page_attributes = args.slice(:exit_page_heading, :exit_page_markdown)
-
     condition = Condition.new(**args)
-
-    if exit_page_attributes.present?
-      heading = exit_page_attributes.fetch(:exit_page_heading, "")
-      markdown = exit_page_attributes.fetch(:exit_page_markdown, "")
-      condition.exit_page = ExitPage.create(heading:, markdown:, question_page: condition.routing_page)
-    end
 
     condition.save_and_update_form
     condition
   end
 
-  def save_and_update_form(**args)
-    exit_page_attributes = args.slice(:exit_page_heading, :exit_page_markdown)
-
-    if exit_page_attributes.present?
-      heading = exit_page_attributes.fetch(:exit_page_heading, "")
-      markdown = exit_page_attributes.fetch(:exit_page_markdown, "")
-
+  def sync_exit_pages
+    if exit_page_markdown.present?
       if exit_page.present?
-        exit_page.update!(heading:, markdown:)
+        exit_page.update!(heading: exit_page_heading, markdown: exit_page_markdown, question_page: routing_page)
       else
-        ExitPage.create!(heading:, markdown:, question_page: routing_page)
+        ExitPage.create!(heading: exit_page_heading, markdown: exit_page_markdown, question_page: routing_page)
       end
+    elsif exit_page.present?
+      exit_page.destroy!
     end
+  end
 
+  def save_and_update_form(**args)
     save!
+    sync_exit_pages
     form.save_question_changes!
   end
 
   def destroy_and_update_form!
     exit_page_to_delete = exit_page
     destroy! && form.save_question_changes!
-
-    exit_page_to_delete.presence&.destroy! unless FeatureService.new(group: form.group).enabled?(:multiple_branches)
+    exit_page_to_delete.presence&.destroy! # unless FeatureService.new(group: form.group).enabled?(:multiple_branches)
   end
 
   def validation_errors
@@ -83,11 +74,6 @@ class Condition < ApplicationRecord
   def exit_page_heading=(value, **args)
     if exit_page.present?
       exit_page.send(:heading=, value, **args)
-    else
-      exit_page = ExitPage.new(question_page_id: routing_page_id)
-      exit_page.send(:heading=, value, **args)
-      exit_page.save!
-      attributes[:exit_page] = exit_page
     end
 
     super(value, **args)
@@ -96,11 +82,6 @@ class Condition < ApplicationRecord
   def exit_page_markdown=(value, **args)
     if exit_page.present?
       exit_page.send(:markdown=, value, **args)
-    else
-      exit_page = ExitPage.new(question_page_id: routing_page_id)
-      exit_page.send(:markdown=, value, **args)
-      exit_page.save!
-      attributes[:exit_page] = exit_page
     end
 
     super(value, **args)
