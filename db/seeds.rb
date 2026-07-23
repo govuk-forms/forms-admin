@@ -633,11 +633,11 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
   copy_of_answers_form.make_live!
 
   # add forms to groups
-  GroupForm.create! group: end_to_end_group, form_id: all_question_types_form.id # All question types form
-  GroupForm.create! group: end_to_end_group, form_id: e2e_s3_forms.id # s3 submission test form
-  GroupForm.create! group: test_group, form_id: branch_route_form.id # Branch routing form
-  GroupForm.create! group: test_group, form_id: none_of_the_above_form.id # None of the above form
-  GroupForm.create! group: test_group, form_id: welsh_form.id # Welsh form
+  GroupForm.create! group: end_to_end_group, form_id: all_question_types_form.id
+  GroupForm.create! group: end_to_end_group, form_id: e2e_s3_forms.id
+  GroupForm.create! group: test_group, form_id: branch_route_form.id
+  GroupForm.create! group: test_group, form_id: none_of_the_above_form.id
+  GroupForm.create! group: test_group, form_id: welsh_form.id
   GroupForm.create! group: multiple_branches_test_group, form_id: multiple_branch_form.id
   GroupForm.create! group: test_group, form_id: copy_of_answers_form.id
 end
