@@ -123,7 +123,7 @@ group :test do
   gem "pundit-matchers"
 
   # Code coverage reporter
-  gem "simplecov", "~> 0.22.0", require: false
+  gem "simplecov", "~> 1.0.1", require: false
 
   gem "webmock"
 
