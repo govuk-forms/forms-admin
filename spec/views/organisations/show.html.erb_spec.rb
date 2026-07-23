@@ -73,7 +73,6 @@ describe "organisations/show.html.erb" do
       expect(rendered).to have_text(I18n.t("organisations.show.admin_users.none"))
       expect(rendered).to have_text(I18n.t("organisations.show.mou_signatures.none"))
       expect(rendered).to have_text(I18n.t("organisations.show.domains.none"))
-      expect(rendered).to have_text(I18n.t("organisations.show.brands.none"))
     end
 
     it "shows brands guidance when there are no brands" do
@@ -88,6 +87,76 @@ describe "organisations/show.html.erb" do
 
     it "shows a fallback for the blank GOV.UK content ID" do
       expect(rendered).to have_css(".govuk-summary-list__value", text: I18n.t("organisations.show.not_set"))
+    end
+  end
+
+  describe "available brands" do
+    context "when the organisation has no brands" do
+      it "shows the GOV.UK brand with the default tag" do
+        expect(rendered).to have_css("td", text: /GOV\.UK\s+Default/)
+      end
+
+      it "does not show a make default button" do
+        expect(rendered).not_to have_button(I18n.t("organisations.show.brands.make_default"))
+      end
+    end
+
+    context "when the organisation has brands and no default brand" do
+      let(:brand) { create :brand, name: "Cheshire East Council" }
+
+      let(:organisation) do
+        create(:organisation, :with_org_admin, slug: "department-for-testing").tap do |organisation|
+          create(:organisation_brand, organisation:, brand:)
+        end
+      end
+
+      it "shows the default tag against the GOV.UK brand" do
+        expect(rendered).to have_css("td", text: /GOV\.UK\s+Default/)
+        expect(rendered).to have_css("td", text: /^\s*#{brand.name}\s*$/)
+      end
+
+      it "shows a make default button for the brand" do
+        expect(rendered).to have_css("form[action='#{organisation_default_brand_path(organisation)}'] button", text: I18n.t("organisations.show.brands.make_default"))
+        expect(rendered).to have_css("input[name='brand_id'][value='#{brand.id}']", visible: :hidden)
+      end
+
+      it "shows an enabled remove button for the brand" do
+        expect(rendered).to have_css("form[action='#{organisation_brand_path(organisation, brand)}'] button:not([disabled])", text: I18n.t("organisations.show.brands.remove"))
+      end
+    end
+
+    context "when the organisation has a default brand" do
+      let(:brand) { create :brand, name: "Cheshire East Council" }
+      let(:other_brand) { create :brand, name: "Aberdeenshire Council" }
+
+      let(:organisation) do
+        create(:organisation, :with_org_admin, slug: "department-for-testing").tap do |organisation|
+          create(:organisation_brand, organisation:, brand:)
+          create(:organisation_brand, organisation:, brand: other_brand)
+          organisation.update!(default_brand: brand)
+        end
+      end
+
+      it "shows the default tag against the default brand only" do
+        expect(rendered).to have_css("td", text: /#{brand.name}\s+Default/)
+        expect(rendered).to have_css("td", text: /^\s*GOV\.UK\s*$/)
+      end
+
+      it "disables the remove button for the default brand" do
+        expect(rendered).to have_css("form[action='#{organisation_brand_path(organisation, brand)}'] button[disabled]", text: I18n.t("organisations.show.brands.remove"))
+      end
+
+      it "does not show a make default button for the default brand" do
+        expect(rendered).not_to have_css("form[action='#{organisation_default_brand_path(organisation)}'] input[name='brand_id'][value='#{brand.id}']", visible: :hidden)
+      end
+
+      it "shows a make default button for the GOV.UK brand" do
+        expect(rendered).to have_css("form[action='#{organisation_default_brand_path(organisation)}'] button", text: /#{I18n.t('organisations.show.brands.make_default')}\s+GOV\.UK/)
+      end
+
+      it "shows a make default button for the other brand" do
+        expect(rendered).to have_css("input[name='brand_id'][value='#{other_brand.id}']", visible: :hidden)
+      end
     end
   end
 end

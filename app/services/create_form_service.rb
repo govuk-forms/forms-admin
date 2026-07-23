@@ -34,11 +34,19 @@ class CreateFormService
     if event.form_id.present?
       form = Form.find(event.form_id)
     else
-      form = Form.create!(creator_id: creator.id, name:)
+      form = Form.create!(creator_id: creator.id, name:, brand_id: default_brand_id(group))
       GroupForm.create!(group:, form_id: form.id)
       event.update!(form_id: form.id)
     end
 
     form
+  end
+
+private
+
+  def default_brand_id(group)
+    return nil unless FeatureService.new(group:).enabled?(:custom_branding)
+
+    group.organisation.default_brand&.slug
   end
 end

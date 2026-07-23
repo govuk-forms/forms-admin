@@ -15,6 +15,43 @@ RSpec.describe Organisation, type: :model do
     end
   end
 
+  describe "default brand" do
+    let(:organisation) { create :organisation }
+    let(:brand) { create :brand }
+
+    it "is valid when the default brand is one of the organisation's brands" do
+      create(:organisation_brand, organisation:, brand:)
+
+      organisation.default_brand = brand
+
+      expect(organisation).to be_valid
+    end
+
+    it "is invalid when the default brand is not one of the organisation's brands" do
+      organisation.default_brand = brand
+
+      expect(organisation).to be_invalid
+      expect(organisation.errors.of_kind?(:default_brand, :not_available)).to be true
+    end
+
+    it "is valid to clear the default brand" do
+      create(:organisation_brand, organisation:, brand:)
+      organisation.update!(default_brand: brand)
+
+      organisation.default_brand = nil
+
+      expect(organisation).to be_valid
+    end
+
+    it "does not validate the default brand unless it is changing" do
+      create(:organisation_brand, organisation:, brand:)
+      organisation.update!(default_brand: brand)
+      organisation.organisation_brands.delete_all
+
+      expect { organisation.update!(name: "Renamed Organisation") }.not_to raise_error
+    end
+  end
+
   describe "scopes" do
     describe ".with_users" do
       it "returns organisations with distinct users" do

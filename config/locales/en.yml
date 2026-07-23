@@ -172,6 +172,10 @@ en:
             agreed:
               crown: You must agree to the memorandum of understanding
               non_crown: You must agree to the agreement to continue
+        organisation:
+          attributes:
+            default_brand:
+              not_available: The default brand must be one of the organisation’s available brands
         organisation_domain:
           attributes:
             domain:
@@ -1492,6 +1496,9 @@ en:
       prompt: Select a brand
       submit: Add brand
       title: Add a brand
+    update_default:
+      success: "%{brand_name} is now the default brand for new forms in this organisation"
+      success_govuk: New forms in this organisation will use GOV.UK branding
   organisations:
     boolean:
       'false': 'No'
@@ -1536,9 +1543,11 @@ en:
         none: This organisation does not have any organisation admins.
       brands:
         add: Add a brand
-        guidance: Add brands to make them available for forms in this organisation to use. Forms that already use a brand will continue to use it, even if you remove the brand from this organisation.
+        default_tag: Default
+        govuk_brand_name: GOV.UK
+        guidance: Add brands to make them available for forms in this organisation to use. New forms will use the default brand, and people editing a form can change its brand. Forms that already use a brand will continue to use it, even if you remove the brand from this organisation.
         heading: Available brands
-        none: This organisation does not have any available brands. Forms use the default GOV.UK branding.
+        make_default: Make default
         remove: Remove
         table_headings:
           actions: Actions
