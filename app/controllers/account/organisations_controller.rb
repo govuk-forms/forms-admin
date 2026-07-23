@@ -12,7 +12,9 @@ module Account
     def update
       @organisation_input = OrganisationInput.new(account_organisation_input_params)
 
-      if @organisation_input.submit
+      if @organisation_input.not_listed_selected?
+        render :not_listed
+      elsif @organisation_input.submit
         redirect_to next_path
       else
         render :edit, status: :unprocessable_content

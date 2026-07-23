@@ -78,6 +78,21 @@ describe Account::OrganisationsController do
       end
     end
 
+    context "when the not listed radio option is selected" do
+      let(:params) { { account_organisation_input: { organisation_id: Account::OrganisationInput::NOT_LISTED_OPTION_VALUE } } }
+
+      it "renders the not_listed template" do
+        put account_organisation_path, params: params
+        expect(response).to render_template(:not_listed)
+      end
+
+      it "does not update the user's organisation" do
+        expect {
+          put account_organisation_path, params: params
+        }.not_to(change { user.reload.organisation })
+      end
+    end
+
     context "with invalid parameters" do
       let(:invalid_params) { { account_organisation_input: { organisation_id: nil } } }
 

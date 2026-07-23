@@ -60,7 +60,7 @@
 
     <% unless @organisation_input.radios? %>
       <%= govuk_section_break(visible: true, size: "l") %>
-      <%= govuk_details(summary_text: t('account.organisation.details_summary'), text: t('account.organisation.details_text_html', contact_link: contact_link)) %>
+      <%= govuk_details(summary_text: t('account.organisation.details_summary'), text: t('account.organisation.not_listed_html', contact_link: contact_link)) %>
     <% end %>
   </div>
 </div>
