@@ -1,10 +1,13 @@
 ---
 en:
   account:
-    organisation_details_summary: If your organisation is not listed
-    organisation_text_html: |
-      <p>If you’re from a central government organisation that’s not listed, %{contact_link}.</p>
-      <p>At the moment, GOV.UK Forms is only available to central government organisations. If you’re from an organisation outside central government, you can <a href="https://www.forms.service.gov.uk/forthcoming-features">read about future plans for GOV.UK Forms</a>.</p>
+    organisation:
+      details_summary: If your organisation is not listed
+      details_text_html: |
+        <p>If you’re from a central government organisation that’s not listed, %{contact_link}.</p>
+        <p>At the moment, GOV.UK Forms is only available to central government organisations. If you’re from an organisation outside central government, you can <a href="https://www.forms.service.gov.uk/forthcoming-features">read about future plans for GOV.UK Forms</a>.</p>
+      not_listed_option: The organisation I work for is not listed
+      you_created_account_with: You created your account using an @%{email_domain} email address.
     terms_of_use:
       accessibility:
         heading: Make forms that are easy to use and accessible
@@ -1202,6 +1205,8 @@ en:
           'false': One or more options
           'true': One option only
     legend:
+      account_organisation_input:
+        organisation_id: Which of these organisations do you work for?
       account_terms_of_use_input:
         agreed: Do you agree to these terms?
       forms_batch_submissions_input:

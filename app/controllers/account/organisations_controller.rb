@@ -19,12 +19,12 @@ module Account
       end
     end
 
+  private
+
     def account_organisation_input_params
-      params.require(:account_organisation_input).permit(:organisation_id)
+      params.fetch(:account_organisation_input, {}).permit(:organisation_id)
             .merge({ user: current_user, allowed_organisations: })
     end
-
-  private
 
     def redirect_if_organisation_exists
       redirect_to root_path if current_user.organisation.present?
