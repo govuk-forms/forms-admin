@@ -347,463 +347,354 @@ RSpec.describe "forms.rake", type: :task do
     end
   end
 
-  describe "forms:submission_type:set_to_email" do
+  describe "forms:delivery_configurations:enable_email" do
     subject(:task) do
-      Rake::Task["forms:submission_type:set_to_email"]
+      Rake::Task["forms:delivery_configurations:enable_email"]
     end
 
-    let(:form) do
-      create(:form, :live, submission_type: "s3", submission_format: [], delivery_configurations: [
-        create(:delivery_configuration, :s3),
-        create(:delivery_configuration, :daily_email),
-      ])
-    end
-    let!(:other_form) do
-      create(:form, :live, submission_type: "s3", submission_format: [], delivery_configurations: [
-        create(:delivery_configuration, :s3),
-      ])
-    end
+    let(:form) { create(:form) }
 
-    context "when the form is live" do
-      it "sets a form's submission_type to email" do
-        expect { task.invoke(form.id) }
-          .to change { form.reload.submission_type }.to("email")
+    context "with valid arguments" do
+      it "adds immediate email delivery to the form" do
+        expect {
+          task.invoke(form.id)
+        }.to change { form.reload.delivery_configurations.where(delivery_method: "email", delivery_schedule: "immediate").count }
+               .by(1)
       end
 
-      it "creates a DeliveryConfiguration for immediate email deliveries and removes the DeliveryConfiguration for s3" do
+      it "updates the draft form document delivery configurations" do
         task.invoke(form.id)
-        expect(form.reload.delivery_configurations.pluck(:delivery_method, :delivery_schedule, :formats)).to contain_exactly(
-          ["email", "immediate", []],
-          ["email", "daily", %w[csv]],
-        )
+
+        expect(form.reload.draft_form_document.content["delivery_configurations"])
+          .to include(a_hash_including("delivery_method" => "email", "delivery_schedule" => "immediate"))
       end
 
-      it "updates a form's live form document" do
-        task.invoke(form.id)
-        content = form.live_form_document.reload.content
-        expect(content["submission_type"]).to eq("email")
-        expect(content["submission_format"]).to eq([])
-        expect(content["delivery_configurations"]).to contain_exactly(
-          {
-            "delivery_method" => "email",
-            "delivery_schedule" => "immediate",
-            "formats" => [],
-          },
-          {
-            "delivery_method" => "email",
-            "delivery_schedule" => "daily",
-            "formats" => %w[csv],
-          },
-        )
+      context "when the form is live" do
+        let(:form) { create(:form, :live, :with_welsh_translation) }
+
+        it "updates the live form documents delivery configurations" do
+          task.invoke(form.id)
+
+          expect(form.reload.live_form_document.content["delivery_configurations"])
+            .to include(a_hash_including("delivery_method" => "email", "delivery_schedule" => "immediate"))
+          expect(form.reload.live_welsh_form_document.content["delivery_configurations"])
+            .to include(a_hash_including("delivery_method" => "email", "delivery_schedule" => "immediate"))
+        end
       end
 
-      it "updates the form's draft form document" do
-        task.invoke(form.id)
-        content = form.draft_form_document.reload.content
-        expect(content["submission_type"]).to eq("email")
-        expect(content["submission_format"]).to eq([])
-        expect(content["delivery_configurations"]).to contain_exactly(
-          {
-            "delivery_method" => "email",
-            "delivery_schedule" => "immediate",
-            "formats" => [],
-          },
-          {
-            "delivery_method" => "email",
-            "delivery_schedule" => "daily",
-            "formats" => %w[csv],
-          },
-        )
-      end
+      context "when email is already enabled" do
+        let(:form) { create(:form, :live, :with_welsh_translation) }
 
-      it "does not update a different form" do
-        expect { task.invoke(form.id) }
-          .not_to(change { other_form.reload.submission_type })
+        it "does not change the delivery configurations or form documents" do
+          task.invoke(form.id)
+
+          delivery_configuration_count = form.reload.delivery_configurations.where(delivery_method: "email", delivery_schedule: "immediate").count
+          draft_content = form.reload.draft_form_document.content.deep_dup
+          live_content = form.reload.live_form_document.content.deep_dup
+          live_welsh_content = form.reload.live_welsh_form_document.content.deep_dup
+
+          task.invoke(form.id)
+
+          expect(form.reload.delivery_configurations.where(delivery_method: "email", delivery_schedule: "immediate").count)
+            .to eq(delivery_configuration_count)
+
+          expect(form.reload.draft_form_document.content).to eq(draft_content)
+          expect(form.reload.live_form_document.content).to eq(live_content)
+          expect(form.reload.live_welsh_form_document&.content).to eq(live_welsh_content)
+        end
       end
     end
 
-    context "when the form is draft" do
-      let(:form) { create :form, submission_type: "s3" }
-
-      it "sets a form's submission_type to email" do
-        expect { task.invoke(form.id) }
-          .to change { form.reload.submission_type }.to("email")
-      end
-
-      it "updates the form's draft form document" do
-        task.invoke(form.id)
-        expect(form.draft_form_document.reload.content["submission_type"]).to eq("email")
-        expect(form.draft_form_document.reload.content["submission_format"]).to eq([])
-      end
-    end
-
-    context "when the provided submission format is empty" do
-      let(:form) { create :form, :live, submission_type: "s3", submission_format: %w[json] }
-
-      it "sets a form's submission format to empty" do
-        expect { task.invoke(form.id) }
-          .to change { form.reload.submission_format }.to([])
-      end
-
-      it "sets a form's submission_type to email" do
-        expect { task.invoke(form.id) }
-          .to change { form.reload.submission_type }.to("email")
-      end
-    end
-
-    context "when the provided submission format is email" do
-      let(:form) { create :form, :live, submission_type: "s3", submission_format: %w[json] }
-
-      it "sets a form's submission format to empty" do
-        expect { task.invoke(form.id, "email") }
-          .to change { form.reload.submission_format }.to([])
-      end
-
-      it "sets a form's submission_type to email" do
-        expect { task.invoke(form.id, "email") }
-          .to change { form.reload.submission_type }.to("email")
-      end
-
-      it "creates a DeliveryConfiguration with blank format" do
-        task.invoke(form.id, "email")
-        expect(form.reload.delivery_configurations.pluck(:delivery_method, :delivery_schedule, :formats)).to include(
-          ["email", "immediate", []],
-        )
-      end
-    end
-
-    context "when the provided submission format is csv" do
-      it "sets a form's submission format to csv" do
-        expect { task.invoke(form.id, "csv") }
-          .to change { form.reload.submission_format }.to(%w[csv])
-      end
-
-      it "sets a form's submission_type to email" do
-        expect { task.invoke(form.id, "csv") }
-          .to change { form.reload.submission_type }.to("email")
-      end
-
-      it "creates a DeliveryConfiguration with csv format" do
-        task.invoke(form.id, "csv")
-        expect(form.reload.delivery_configurations.pluck(:delivery_method, :delivery_schedule, :formats)).to include(
-          ["email", "immediate", %w[csv]],
-        )
-      end
-    end
-
-    context "when the provided submission formate is json" do
-      it "sets a form's submission format to json" do
-        expect { task.invoke(form.id, "json") }
-          .to change { form.reload.submission_format }.to(%w[json])
-      end
-
-      it "sets a form's submission_type to email" do
-        expect { task.invoke(form.id, "json") }
-          .to change { form.reload.submission_type }.to("email")
-      end
-
-      it "creates a DeliveryConfiguration with json format" do
-        task.invoke(form.id, "json")
-        expect(form.reload.delivery_configurations.pluck(:delivery_method, :delivery_schedule, :formats)).to include(
-          ["email", "immediate", %w[json]],
-        )
-      end
-    end
-
-    context "when the provided submission format is csv, json" do
-      it "sets a form's submission format to csv and json" do
-        expect { task.invoke(form.id, "csv", "json") }
-          .to change { form.reload.submission_format }.to(%w[csv json])
-      end
-
-      it "sets a form's submission_type to email" do
-        expect { task.invoke(form.id, "csv", "json") }
-          .to change { form.reload.submission_type }.to("email")
-      end
-
-      it "creates a DeliveryConfiguration with the provided formats" do
-        task.invoke(form.id, "csv", "json")
-        expect(form.reload.delivery_configurations.pluck(:delivery_method, :delivery_schedule, :formats)).to include(
-          ["email", "immediate", %w[csv json]],
-        )
-      end
-    end
-
-    context "when the provided submission_type is s3" do
-      it "aborts with a usage message" do
-        expect { task.invoke(form.id, "s3") }
-          .to raise_error(SystemExit)
-                .and output("submission_format must be one of csv, json\n").to_stderr
-      end
-    end
-
-    context "without arguments" do
-      it "aborts with a usage message" do
+    context "with invalid arguments" do
+      it "aborts with a usage message when the form id is missing" do
         expect {
           task.invoke
         }.to raise_error(SystemExit)
-               .and output("usage: rake forms:submission_type:set_to_email[<form_id>(, <submission_format>)*]\n").to_stderr
+               .and output(/usage: rake forms:delivery_configurations:enable_email\[<form_id>\]/).to_stderr
       end
     end
   end
 
-  describe "forms:submission_type:set_to_s3" do
+  describe "forms:delivery_configurations:disable_email" do
     subject(:task) do
-      Rake::Task["forms:submission_type:set_to_s3"]
+      Rake::Task["forms:delivery_configurations:disable_email"]
     end
 
     let(:form) do
-      create(:form, :with_welsh_translation, :live, delivery_configurations: [
+      create(:form, :live, :with_welsh_translation, delivery_configurations: [
         create(:delivery_configuration, :immediate_email),
-        create(:delivery_configuration, :daily_email),
+        create(:delivery_configuration, :s3),
       ])
     end
-    let!(:other_form) { create :form, :live }
-    let(:s3_bucket_name) { "a-bucket" }
-    let(:s3_bucket_aws_account_id) { "an-aws-account-id" }
-    let(:s3_bucket_region) { "eu-west-1" }
-    let(:format) { "csv" }
-    let(:valid_args) { [form.id, s3_bucket_name, s3_bucket_aws_account_id, s3_bucket_region, format] }
 
-    context "when the form is live" do
-      context "when the format is csv" do
-        it "sets a form's submission_type to s3" do
-          expect { task.invoke(*valid_args) }
-            .to change { form.reload.submission_type }.to("s3")
-        end
-
-        it "sets a form's submission_format to csv" do
-          expect { task.invoke(*valid_args) }
-            .to change { form.reload.submission_format }.to(%w[csv])
-        end
-
-        it "replaces the immediate email DeliveryConfiguration with an s3 configuration" do
-          task.invoke(*valid_args)
-          expect(form.reload.delivery_configurations.pluck(:delivery_method, :delivery_schedule, :formats)).to contain_exactly(
-            ["s3", "immediate", %w[csv]],
-            ["email", "daily", %w[csv]],
-          )
-        end
-
-        it "updates the live form document" do
-          task.invoke(*valid_args)
-          form_document = form.live_form_document.reload
-          expect(form_document.content["submission_type"]).to eq("s3")
-          expect(form_document.content["submission_format"]).to eq(%w[csv])
-          expect(form_document.content["s3_bucket_name"]).to eq(s3_bucket_name)
-          expect(form_document.content["s3_bucket_aws_account_id"]).to eq(s3_bucket_aws_account_id)
-          expect(form_document.content["s3_bucket_region"]).to eq(s3_bucket_region)
-          expect(form_document.content["delivery_configurations"]).to contain_exactly(
-            {
-              "delivery_method" => "s3",
-              "delivery_schedule" => "immediate",
-              "formats" => %w[csv],
-            },
-            {
-              "delivery_method" => "email",
-              "delivery_schedule" => "daily",
-              "formats" => %w[csv],
-            },
-          )
-        end
-
-        it "updates the live Welsh form document" do
-          task.invoke(*valid_args)
-          welsh_form_document = form.live_welsh_form_document.reload
-          expect(welsh_form_document.content["submission_type"]).to eq("s3")
-          expect(welsh_form_document.content["submission_format"]).to eq(%w[csv])
-          expect(welsh_form_document.content["s3_bucket_name"]).to eq(s3_bucket_name)
-          expect(welsh_form_document.content["s3_bucket_aws_account_id"]).to eq(s3_bucket_aws_account_id)
-          expect(welsh_form_document.content["s3_bucket_region"]).to eq(s3_bucket_region)
-          expect(welsh_form_document.content["delivery_configurations"]).to contain_exactly(
-            {
-              "delivery_method" => "s3",
-              "delivery_schedule" => "immediate",
-              "formats" => %w[csv],
-            },
-            {
-              "delivery_method" => "email",
-              "delivery_schedule" => "daily",
-              "formats" => %w[csv],
-            },
-          )
-        end
-
-        it "updates the draft form document" do
-          task.invoke(*valid_args)
-          form_document = form.draft_form_document.reload
-          expect(form_document.content["submission_type"]).to eq("s3")
-          expect(form_document.content["submission_format"]).to eq(%w[csv])
-          expect(form_document.content["s3_bucket_name"]).to eq(s3_bucket_name)
-          expect(form_document.content["s3_bucket_aws_account_id"]).to eq(s3_bucket_aws_account_id)
-          expect(form_document.content["s3_bucket_region"]).to eq(s3_bucket_region)
-          expect(form_document.content["delivery_configurations"]).to contain_exactly(
-            {
-              "delivery_method" => "s3",
-              "delivery_schedule" => "immediate",
-              "formats" => %w[csv],
-            },
-            {
-              "delivery_method" => "email",
-              "delivery_schedule" => "daily",
-              "formats" => %w[csv],
-            },
-          )
-        end
+    context "with valid arguments" do
+      it "removes immediate email delivery from the form" do
+        expect {
+          task.invoke(form.id)
+        }.to change { form.reload.delivery_configurations.where(delivery_method: "email", delivery_schedule: "immediate").count }
+               .by(-1)
       end
 
-      context "when the format is json" do
-        let(:format) { "json" }
+      it "updates the draft form document delivery configurations" do
+        task.invoke(form.id)
 
-        it "sets a form's submission_type to s3" do
-          expect { task.invoke(*valid_args) }
-            .to change { form.reload.submission_type }.to("s3")
-        end
-
-        it "sets a form's submission_format to json" do
-          expect { task.invoke(*valid_args) }
-            .to change { form.reload.submission_format }.to(%w[json])
-        end
-
-        it "replaces the immediate email DeliveryConfiguration with an s3 configuration with json format" do
-          task.invoke(*valid_args)
-          expect(form.reload.delivery_configurations.pluck(:delivery_method, :delivery_schedule, :formats)).to contain_exactly(
-            ["s3", "immediate", %w[json]],
-            ["email", "daily", %w[csv]],
-          )
-        end
-
-        it "updates the live form document" do
-          task.invoke(*valid_args)
-          form_document = form.live_form_document.reload
-          expect(form_document.content["submission_type"]).to eq("s3")
-          expect(form_document.content["submission_format"]).to eq(%w[json])
-          expect(form_document.content["delivery_configurations"]).to include(
-            {
-              "delivery_method" => "s3",
-              "delivery_schedule" => "immediate",
-              "formats" => %w[json],
-            },
-          )
-        end
-
-        it "updates the draft form document" do
-          task.invoke(*valid_args)
-          form_document = form.draft_form_document.reload
-          expect(form_document.content["submission_type"]).to eq("s3")
-          expect(form_document.content["submission_format"]).to eq(%w[json])
-          expect(form_document.content["delivery_configurations"]).to include(
-            {
-              "delivery_method" => "s3",
-              "delivery_schedule" => "immediate",
-              "formats" => %w[json],
-            },
-          )
-        end
+        expect(form.reload.draft_form_document.content["delivery_configurations"])
+          .not_to include(a_hash_including("delivery_method" => "email", "delivery_schedule" => "immediate"))
       end
 
-      it "sets a form's s3_bucket_name" do
-        expect { task.invoke(*valid_args) }
-          .to change { form.reload.s3_bucket_name }.to(s3_bucket_name)
-      end
+      context "when the form is live" do
+        it "updates the live form documents delivery configurations" do
+          task.invoke(form.id)
 
-      it "sets a form's s3_bucket_aws_account_id" do
-        expect { task.invoke(*valid_args) }
-          .to change { form.reload.s3_bucket_aws_account_id }.to(s3_bucket_aws_account_id)
-      end
-
-      it "sets a form's s3_bucket_region" do
-        expect { task.invoke(*valid_args) }
-          .to change { form.reload.s3_bucket_region }.to(s3_bucket_region)
-      end
-
-      it "does not update a different form" do
-        expect { task.invoke(*valid_args) }
-          .not_to(change { other_form.reload.submission_type })
+          expect(form.reload.live_form_document.content["delivery_configurations"])
+            .not_to include(a_hash_including("delivery_method" => "email", "delivery_schedule" => "immediate"))
+          expect(form.reload.live_welsh_form_document.content["delivery_configurations"])
+            .not_to include(a_hash_including("delivery_method" => "email", "delivery_schedule" => "immediate"))
+        end
       end
     end
 
-    context "when the form is draft" do
-      let(:form) { create :form }
-
-      it "updates the draft form document" do
-        task.invoke(*valid_args)
-        form_document = form.draft_form_document.reload
-        expect(form_document.content["submission_type"]).to eq("s3")
-        expect(form_document.content["submission_format"]).to eq([format])
-        expect(form_document.content["s3_bucket_name"]).to eq(s3_bucket_name)
-        expect(form_document.content["s3_bucket_aws_account_id"]).to eq(s3_bucket_aws_account_id)
-        expect(form_document.content["s3_bucket_region"]).to eq(s3_bucket_region)
-        expect(form_document.content["delivery_configurations"]).to include(
-          {
-            "delivery_method" => "s3",
-            "delivery_schedule" => "immediate",
-            "formats" => %w[csv],
-          },
-        )
-      end
-    end
-
-    context "without arguments" do
-      it "aborts with a usage message" do
+    context "with invalid arguments" do
+      it "aborts with a usage message when the form id is missing" do
         expect {
           task.invoke
         }.to raise_error(SystemExit)
-               .and output("usage: rake forms:submission_type:set_to_s3[<form_id>, <s3_bucket_name>, <s3_bucket_aws_account_id>, <s3_bucket_region>, <format>]\n").to_stderr
+               .and output(/usage: rake forms:delivery_configurations:disable_email\[<form_id>\]/).to_stderr
+      end
+
+      context "when email is already disabled" do
+        let(:form) do
+          create(:form, :live, :with_welsh_translation, delivery_configurations: [create(:delivery_configuration, :s3)])
+        end
+
+        it "aborts with an error" do
+          expect {
+            task.invoke(form.id)
+          }.to raise_error(SystemExit)
+                 .and output(/Email delivery is not enabled/).to_stderr
+        end
+      end
+
+      context "when the form would have no delivery methods if email delivery is disabled" do
+        let(:form) do
+          create(:form, :live, :with_welsh_translation, :with_email_delivery)
+        end
+
+        it "aborts with an error" do
+          expect {
+            task.invoke(form.id)
+          }.to raise_error(SystemExit)
+                 .and output(/Form will have no delivery methods, enable S3 delivery first/).to_stderr
+        end
+      end
+    end
+  end
+
+  describe "forms:delivery_configurations:disable_s3" do
+    subject(:task) do
+      Rake::Task["forms:delivery_configurations:disable_s3"]
+    end
+
+    let(:form) do
+      create(:form, :live, :with_welsh_translation, :with_s3_configuration, delivery_configurations: [
+        create(:delivery_configuration, :s3),
+        create(:delivery_configuration, :immediate_email),
+      ])
+    end
+
+    context "with valid arguments" do
+      it "removes immediate S3 delivery from the form" do
+        expect {
+          task.invoke(form.id)
+        }.to change { form.reload.delivery_configurations.where(delivery_method: "s3", delivery_schedule: "immediate").count }
+               .by(-1)
+      end
+
+      it "clears the form S3 configuration" do
+        expect {
+          task.invoke(form.id)
+        }.to change { form.reload.s3_bucket_name }.to(nil)
+                                                  .and change { form.reload.s3_bucket_aws_account_id }.to(nil)
+                                                                                                      .and change { form.reload.s3_bucket_region }.to(nil)
+      end
+
+      it "updates the draft form document" do
+        task.invoke(form.id)
+
+        expect(form.reload.draft_form_document.content["s3_bucket_name"]).to be_nil
+        expect(form.reload.draft_form_document.content["s3_bucket_aws_account_id"]).to be_nil
+        expect(form.reload.draft_form_document.content["s3_bucket_region"]).to be_nil
+        expect(form.reload.draft_form_document.content["delivery_configurations"])
+          .not_to include(a_hash_including("delivery_method" => "s3", "delivery_schedule" => "immediate"))
+      end
+
+      context "when the form is live" do
+        it "updates the live form documents" do
+          task.invoke(form.id)
+
+          expect(form.reload.live_form_document.content["s3_bucket_name"]).to be_nil
+          expect(form.reload.live_form_document.content["s3_bucket_aws_account_id"]).to be_nil
+          expect(form.reload.live_form_document.content["s3_bucket_region"]).to be_nil
+          expect(form.reload.live_form_document.content["delivery_configurations"])
+            .not_to include(a_hash_including("delivery_method" => "s3", "delivery_schedule" => "immediate"))
+
+          expect(form.reload.live_welsh_form_document.content["s3_bucket_name"]).to be_nil
+          expect(form.reload.live_welsh_form_document.content["s3_bucket_aws_account_id"]).to be_nil
+          expect(form.reload.live_welsh_form_document.content["s3_bucket_region"]).to be_nil
+          expect(form.reload.live_welsh_form_document.content["delivery_configurations"])
+            .not_to include(a_hash_including("delivery_method" => "s3", "delivery_schedule" => "immediate"))
+        end
       end
     end
 
-    context "without bucket name argument" do
-      it "aborts with a usage message" do
+    context "with invalid arguments" do
+      it "aborts with a usage message when the form id is missing" do
         expect {
-          task.invoke(1)
+          task.invoke
         }.to raise_error(SystemExit)
-               .and output("usage: rake forms:submission_type:set_to_s3[<form_id>, <s3_bucket_name>, <s3_bucket_aws_account_id>, <s3_bucket_region>, <format>]\n").to_stderr
+               .and output(/usage: rake forms:delivery_configurations:disable_s3\[<form_id>\]/).to_stderr
+      end
+
+      context "when S3 delivery is not enabled" do
+        let(:form) do
+          create(:form, :live, :with_welsh_translation, :with_email_delivery)
+        end
+
+        it "aborts with an error" do
+          expect {
+            task.invoke(form.id)
+          }.to raise_error(SystemExit)
+                 .and output(/S3 delivery is not enabled/).to_stderr
+        end
+      end
+
+      context "when the form would have no delivery methods if S3 delivery is disabled" do
+        let(:form) do
+          create(:form, :live, :with_welsh_translation, delivery_configurations: [create(:delivery_configuration, :s3)])
+        end
+
+        it "aborts with an error" do
+          expect {
+            task.invoke(form.id)
+          }.to raise_error(SystemExit)
+                 .and output(/Form will have no delivery methods, enable email delivery first/).to_stderr
+        end
+      end
+    end
+  end
+
+  describe "forms:delivery_configurations:enable_s3" do
+    subject(:task) do
+      Rake::Task["forms:delivery_configurations:enable_s3"]
+    end
+
+    let(:form) { create(:form, :live, :with_welsh_translation, :with_email_delivery) }
+    let(:s3_bucket_name) { "test-bucket" }
+    let(:s3_bucket_aws_account_id) { "123456789012" }
+    let(:s3_bucket_region) { "eu-west-1" }
+    let(:format) { "csv" }
+    let(:disable_email) { "false" }
+    let(:valid_args) { [form.id, s3_bucket_name, s3_bucket_aws_account_id, s3_bucket_region, format, disable_email] }
+
+    context "with valid arguments" do
+      it "updates the form S3 configuration" do
+        expect {
+          task.invoke(*valid_args)
+        }.to change { form.reload.s3_bucket_name }.to(s3_bucket_name)
+                                                  .and change { form.reload.s3_bucket_aws_account_id }.to(s3_bucket_aws_account_id)
+                                                                                                      .and change { form.reload.s3_bucket_region }.to(s3_bucket_region)
+      end
+
+      it "adds S3 delivery and keeps email enabled" do
+        expect {
+          task.invoke(*valid_args)
+        }.to change { form.reload.delivery_configurations.where(delivery_method: "s3", delivery_schedule: "immediate").count }
+               .by(1)
+
+        expect(form.reload.delivery_configurations.where(delivery_method: "email", delivery_schedule: "immediate").count)
+          .to eq(1)
+        expect(form.reload.delivery_configurations.find_by(delivery_method: "s3", delivery_schedule: "immediate").formats)
+          .to eq([format])
+      end
+
+      it "updates the draft and live form documents" do
+        task.invoke(*valid_args)
+
+        expect(form.reload.draft_form_document.content["s3_bucket_name"]).to eq(s3_bucket_name)
+        expect(form.reload.draft_form_document.content["s3_bucket_aws_account_id"]).to eq(s3_bucket_aws_account_id)
+        expect(form.reload.draft_form_document.content["s3_bucket_region"]).to eq(s3_bucket_region)
+
+        expect(form.reload.live_form_document.content["s3_bucket_name"]).to eq(s3_bucket_name)
+        expect(form.reload.live_form_document.content["s3_bucket_aws_account_id"]).to eq(s3_bucket_aws_account_id)
+        expect(form.reload.live_form_document.content["s3_bucket_region"]).to eq(s3_bucket_region)
+
+        expect(form.reload.live_welsh_form_document.content["s3_bucket_name"]).to eq(s3_bucket_name)
+        expect(form.reload.live_welsh_form_document.content["s3_bucket_aws_account_id"]).to eq(s3_bucket_aws_account_id)
+        expect(form.reload.live_welsh_form_document.content["s3_bucket_region"]).to eq(s3_bucket_region)
+
+        expect(form.reload.draft_form_document.content["delivery_configurations"])
+          .to include(a_hash_including("delivery_method" => "s3", "delivery_schedule" => "immediate", "formats" => [format]))
+        expect(form.reload.live_form_document.content["delivery_configurations"])
+          .to include(a_hash_including("delivery_method" => "s3", "delivery_schedule" => "immediate", "formats" => [format]))
+        expect(form.reload.live_welsh_form_document.content["delivery_configurations"])
+          .to include(a_hash_including("delivery_method" => "s3", "delivery_schedule" => "immediate", "formats" => [format]))
+      end
+
+      context "when there is already an S3 delivery configuration" do
+        let(:form) do
+          create(:form, :live, :with_welsh_translation, delivery_configurations: [
+            create(:delivery_configuration, :s3, formats: %w[json]),
+          ])
+        end
+
+        it "updates the format for the existing configuration" do
+          task.invoke(*valid_args)
+
+          expect(form.reload.delivery_configurations.find_by(delivery_method: "s3", delivery_schedule: "immediate").formats)
+            .to eq(%w[csv])
+
+          expect(form.reload.draft_form_document.content["delivery_configurations"])
+            .to include(a_hash_including("delivery_method" => "s3", "delivery_schedule" => "immediate", "formats" => %w[csv]))
+          expect(form.reload.live_form_document.content["delivery_configurations"])
+            .to include(a_hash_including("delivery_method" => "s3", "delivery_schedule" => "immediate", "formats" => %w[csv]))
+          expect(form.reload.live_welsh_form_document.content["delivery_configurations"])
+            .to include(a_hash_including("delivery_method" => "s3", "delivery_schedule" => "immediate", "formats" => %w[csv]))
+        end
+      end
+
+      context "when disable_email is true" do
+        let(:disable_email) { "true" }
+
+        it "removes email delivery" do
+          expect {
+            task.invoke(*valid_args)
+          }.to change { form.reload.delivery_configurations.where(delivery_method: "email", delivery_schedule: "immediate").count }
+                 .by(-1)
+
+          expect(form.reload.draft_form_document.content["delivery_configurations"])
+            .not_to include(a_hash_including("delivery_method" => "email", "delivery_schedule" => "immediate"))
+          expect(form.reload.live_form_document.content["delivery_configurations"])
+            .not_to include(a_hash_including("delivery_method" => "email", "delivery_schedule" => "immediate"))
+          expect(form.reload.live_welsh_form_document.content["delivery_configurations"])
+            .not_to include(a_hash_including("delivery_method" => "email", "delivery_schedule" => "immediate"))
+
+          expect(form.reload.live_form_document.content["s3_bucket_name"]).to eq(s3_bucket_name)
+          expect(form.reload.live_form_document.content["s3_bucket_aws_account_id"]).to eq(s3_bucket_aws_account_id)
+          expect(form.reload.live_form_document.content["s3_bucket_region"]).to eq(s3_bucket_region)
+
+          expect(form.reload.live_welsh_form_document.content["s3_bucket_name"]).to eq(s3_bucket_name)
+          expect(form.reload.live_welsh_form_document.content["s3_bucket_aws_account_id"]).to eq(s3_bucket_aws_account_id)
+          expect(form.reload.live_welsh_form_document.content["s3_bucket_region"]).to eq(s3_bucket_region)
+        end
       end
     end
 
-    context "without AWS account ID argument" do
-      it "aborts with a usage message" do
+    context "with invalid arguments" do
+      it "aborts with a usage message when the form id is missing" do
         expect {
-          task.invoke(1, s3_bucket_name)
+          task.invoke
         }.to raise_error(SystemExit)
-               .and output("usage: rake forms:submission_type:set_to_s3[<form_id>, <s3_bucket_name>, <s3_bucket_aws_account_id>, <s3_bucket_region>, <format>]\n").to_stderr
-      end
-    end
-
-    context "without region argument" do
-      it "aborts with a usage message" do
-        expect {
-          task.invoke(1, s3_bucket_name, s3_bucket_aws_account_id)
-        }.to raise_error(SystemExit)
-               .and output("usage: rake forms:submission_type:set_to_s3[<form_id>, <s3_bucket_name>, <s3_bucket_aws_account_id>, <s3_bucket_region>, <format>]\n").to_stderr
-      end
-    end
-
-    context "without format argument" do
-      it "aborts with a usage message" do
-        expect {
-          task.invoke(1, s3_bucket_name, s3_bucket_aws_account_id, "eu-west-2")
-        }.to raise_error(SystemExit)
-               .and output("usage: rake forms:submission_type:set_to_s3[<form_id>, <s3_bucket_name>, <s3_bucket_aws_account_id>, <s3_bucket_region>, <format>]\n").to_stderr
-      end
-    end
-
-    context "when region is not allowed" do
-      it "aborts with message" do
-        expect {
-          task.invoke(1, s3_bucket_name, s3_bucket_aws_account_id, "eu-west-3", "csv")
-        }.to raise_error(SystemExit)
-               .and output("s3_bucket_region must be one of eu-west-1 or eu-west-2\n").to_stderr
-      end
-    end
-
-    context "when format is invalid" do
-      it "aborts with a usage message" do
-        expect {
-          task.invoke(1, s3_bucket_name, s3_bucket_aws_account_id, "eu-west-2", "xml")
-        }.to raise_error(SystemExit)
-               .and output("format must be one of csv or json\n").to_stderr
+               .and output(/usage: rake forms:delivery_configurations:enable_s3\[<form_id>, <s3_bucket_name>, <s3_bucket_aws_account_id>, <s3_bucket_region>, <format>, <disable_email>\]/).to_stderr
       end
     end
   end
@@ -829,28 +720,28 @@ RSpec.describe "forms.rake", type: :task do
       expect {
         task.invoke(form.id)
       }.to raise_error(SystemExit)
-         .and output(/usage: rake forms:show_form_document\[<form_id>, <tag>, <language>\]/).to_stderr
+             .and output(/usage: rake forms:show_form_document\[<form_id>, <tag>, <language>\]/).to_stderr
     end
 
     it "aborts when the tag is invalid" do
       expect {
         task.invoke(form.id, "invalid", "en")
       }.to raise_error(SystemExit)
-         .and output(/tag must be one of draft, live or archived/).to_stderr
+             .and output(/tag must be one of draft, live or archived/).to_stderr
     end
 
     it "aborts when the language is invalid" do
       expect {
         task.invoke(form.id, "draft", "invalid")
       }.to raise_error(SystemExit)
-         .and output(/language must be en or cy/).to_stderr
+             .and output(/language must be en or cy/).to_stderr
     end
 
     it "aborts when the requested form document is missing" do
       expect {
         task.invoke(form.id, "draft", "cy")
       }.to raise_error(SystemExit)
-         .and output(/form #{form.id} \("#{form.name}"\) does not have a draft cy form document/).to_stderr
+             .and output(/form #{form.id} \("#{form.name}"\) does not have a draft cy form document/).to_stderr
     end
 
     context "when a form has a Welsh translation" do

@@ -73,75 +73,125 @@ namespace :forms do
     end
   end
 
-  namespace :submission_type do
-    desc "Set submission_type to email"
-    task :set_to_email, %i[form_id submission_formats] => :environment do |_, args|
-      submission_format = args[:submission_formats].nil? ? [] : args.to_a[1..]
-      submission_format = [] if submission_format == %w[email]
-
-      usage_message = "usage: rake forms:submission_type:set_to_email[<form_id>(, <submission_format>)*]".freeze
+  namespace :delivery_configurations do
+    desc "Enable email delivery for submissions"
+    task :enable_email, %i[form_id] => :environment do |_, args|
+      usage_message = "usage: rake forms:delivery_configurations:enable_email[<form_id>]".freeze
       abort usage_message if args[:form_id].blank?
 
-      supported_formats = %w[csv json]
-      abort "submission_format must be one of #{supported_formats.join(', ')}" unless submission_format.all? { supported_formats.include? it }
-
-      form_id = args[:form_id]
-      Rails.logger.info("Setting submission_type to email with submission_format #{submission_format} for form: #{form_id}")
-
-      form = Form.find(form_id)
-      form.submission_type = "email"
-      form.submission_format = submission_format
-
+      form = Form.find(args[:form_id])
       delivery_configuration = form.delivery_configurations.find_or_initialize_by(delivery_method: :email, delivery_schedule: :immediate)
-      delivery_configuration.formats = submission_format
       delivery_configuration.save!
 
-      form.delivery_configurations.where(delivery_method: :s3).destroy_all
+      # ensure draft form document is updated
+      form.delivery_configurations.reload
       form.save!
 
       if form.is_live?
-        form_document = form.live_form_document
-        content = form_document.content
+        form.form_documents.where(tag: "live").find_each do |form_document|
+          delivery_configurations = form_document["content"]["delivery_configurations"]
+          has_email_delivery = delivery_configurations.any? { |d| d["delivery_method"] == "email" && d["delivery_schedule"] == "immediate" }
 
-        content[:submission_type] = "email"
-        content[:submission_format] = submission_format
-        content[:delivery_configurations] = form.delivery_configurations.map(&:as_json)
-
-        form_document.save!
+          unless has_email_delivery
+            delivery_configurations << DeliveryConfiguration.new(form: form, delivery_method: "email", delivery_schedule: "immediate")
+          end
+          form_document.save!
+        end
       end
 
-      Rails.logger.info("Set submission_type to email with submission_format #{submission_format} for form: #{form_id}")
+      Rails.logger.info "Enabled email delivery for #{fmt_form(form)}"
     end
 
-    desc "Set submission_type to s3"
-    task :set_to_s3, %i[form_id s3_bucket_name s3_bucket_aws_account_id s3_bucket_region format] => :environment do |_, args|
-      usage_message = "usage: rake forms:submission_type:set_to_s3[<form_id>, <s3_bucket_name>, <s3_bucket_aws_account_id>, <s3_bucket_region>, <format>]".freeze
+    desc "Disable email delivery for submissions"
+    task :disable_email, %i[form_id] => :environment do |_, args|
+      usage_message = "usage: rake forms:delivery_configurations:disable_email[<form_id>]".freeze
+      abort usage_message if args[:form_id].blank?
+
+      form = Form.find(args[:form_id])
+      abort "Email delivery is not enabled" if form.immediate_email_delivery_configuration.nil?
+      abort "Form will have no delivery methods, enable S3 delivery first" if form.delivery_configurations.immediate.one?
+
+      form.delivery_configurations.where(delivery_method: :email, delivery_schedule: :immediate).destroy_all
+
+      # ensure draft form document is updated
+      form.delivery_configurations.reload
+      form.save!
+
+      if form.is_live?
+        form.form_documents.where(tag: "live").find_each do |form_document|
+          delivery_configurations = form_document["content"]["delivery_configurations"]
+          delivery_configurations.reject! { |d| d["delivery_method"] == "email" && d["delivery_schedule"] == "immediate" }
+          form_document.save!
+        end
+      end
+
+      Rails.logger.info "Disabled email delivery for #{fmt_form(form)}"
+    end
+
+    desc "Disable S3 delivery for submissions"
+    task :disable_s3, %i[form_id] => :environment do |_, args|
+      usage_message = "usage: rake forms:delivery_configurations:disable_s3[<form_id>]".freeze
+      abort usage_message if args[:form_id].blank?
+
+      form = Form.find(args[:form_id])
+      abort "S3 delivery is not enabled" if form.s3_delivery_configuration.nil?
+      abort "Form will have no delivery methods, enable email delivery first" if form.delivery_configurations.immediate.one?
+
+      form.s3_bucket_name = nil
+      form.s3_bucket_aws_account_id = nil
+      form.s3_bucket_region = nil
+      form.delivery_configurations.where(delivery_method: :s3, delivery_schedule: :immediate).destroy_all
+
+      # ensure draft form document is updated
+      form.delivery_configurations.reload
+      form.save!
+
+      if form.is_live?
+        form.form_documents.where(tag: "live").find_each do |form_document|
+          content = form_document.content
+
+          content["s3_bucket_name"] = nil
+          content["s3_bucket_aws_account_id"] = nil
+          content["s3_bucket_region"] = nil
+
+          delivery_configurations = content["delivery_configurations"]
+          delivery_configurations.reject! { |d| d["delivery_method"] == "s3" && d["delivery_schedule"] == "immediate" }
+
+          form_document.save!
+        end
+      end
+
+      Rails.logger.info "Disabled s3 delivery for #{fmt_form(form)}"
+    end
+
+    desc "Enable S3 delivery for submissions"
+    task :enable_s3, %i[form_id s3_bucket_name s3_bucket_aws_account_id s3_bucket_region format disable_email] => :environment do |_, args|
+      usage_message = "usage: rake forms:delivery_configurations:enable_s3[<form_id>, <s3_bucket_name>, <s3_bucket_aws_account_id>, <s3_bucket_region>, <format>, <disable_email>]".freeze
       abort usage_message if args[:form_id].blank?
       abort usage_message if args[:s3_bucket_name].blank?
       abort usage_message if args[:s3_bucket_aws_account_id].blank?
       abort usage_message if args[:s3_bucket_region].blank?
       abort usage_message if args[:format].blank?
+      abort usage_message if args[:disable_email].blank? || !args[:disable_email].in?(%w[true false])
       abort "s3_bucket_region must be one of eu-west-1 or eu-west-2" unless %w[eu-west-1 eu-west-2].include? args[:s3_bucket_region]
       abort "format must be one of csv or json" unless %w[csv json].include? args[:format]
 
-      submission_type = "s3"
-      submission_format = [args[:format]]
+      formats = [args[:format]]
+      disable_email = args[:disable_email] == "true"
 
-      Rails.logger.info("Setting submission_type to #{submission_type} and s3_bucket_name to #{args[:s3_bucket_name]} for form: #{args[:form_id]}")
+      Rails.logger.info("Enabling s3 submissions with s3_bucket_name #{args[:s3_bucket_name]} for form: #{args[:form_id]}")
       form = Form.find(args[:form_id])
-      form.submission_type = submission_type
-      form.submission_format = submission_format
       form.s3_bucket_name = args[:s3_bucket_name]
       form.s3_bucket_aws_account_id = args[:s3_bucket_aws_account_id]
       form.s3_bucket_region = args[:s3_bucket_region]
 
       delivery_configuration = form.delivery_configurations.find_or_initialize_by(delivery_method: :s3, delivery_schedule: :immediate)
-      delivery_configuration.formats = submission_format
+      delivery_configuration.formats = formats
       delivery_configuration.save!
 
-      # For now, disable email delivery per submission. After we've migrated to using the DeliveryConfigurations in
-      # forms-runner we can allow enabling both email and s3.
-      form.delivery_configurations.where(delivery_method: :email, delivery_schedule: :immediate).destroy_all
+      if disable_email
+        form.delivery_configurations.where(delivery_method: :email, delivery_schedule: :immediate).destroy_all
+      end
 
       form.save!
 
@@ -149,18 +199,32 @@ namespace :forms do
         form.form_documents.where(tag: "live").find_each do |form_document|
           content = form_document.content
 
-          content[:submission_type] = submission_type
-          content[:submission_format] = submission_format
-          content[:s3_bucket_name] = args[:s3_bucket_name]
-          content[:s3_bucket_aws_account_id] = args[:s3_bucket_aws_account_id]
-          content[:s3_bucket_region] = args[:s3_bucket_region]
-          content[:delivery_configurations] = form.delivery_configurations.map(&:as_json)
+          content["s3_bucket_name"] = args[:s3_bucket_name]
+          content["s3_bucket_aws_account_id"] = args[:s3_bucket_aws_account_id]
+          content["s3_bucket_region"] = args[:s3_bucket_region]
+
+          delivery_configurations = content["delivery_configurations"]
+          existing_s3_configuration = delivery_configurations.find { |d| d["delivery_method"] == "s3" && d["delivery_schedule"] == "immediate" }
+
+          if existing_s3_configuration.present?
+            existing_s3_configuration["formats"] = formats
+          else
+            delivery_configurations << DeliveryConfiguration.new(form: form, delivery_method: "s3", delivery_schedule: "immediate", formats: formats)
+          end
+
+          if disable_email
+            delivery_configurations.reject! { |d| d["delivery_method"] == "email" && d["delivery_schedule"] == "immediate" }
+          end
 
           form_document.save!
         end
       end
 
-      Rails.logger.info("Set submission_type to #{submission_type} and s3_bucket_name to #{args[:s3_bucket_name]} for form: #{args[:form_id]}")
+      if disable_email
+        Rails.logger.info("Enabled s3 submissions to bucket #{args[:s3_bucket_name]} and disabled email submissions for form: #{args[:form_id]}")
+      else
+        Rails.logger.info("Enabled s3 submissions to bucket #{args[:s3_bucket_name]} for form: #{args[:form_id]}. Email submissions are still enabled.")
+      end
     end
   end
 
