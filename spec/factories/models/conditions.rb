@@ -13,8 +13,8 @@ FactoryBot.define do
     exit_page_markdown { nil }
 
     # Define the association but we want to set it to nil by default
-    association :exit_page
-    exit_page_id { nil }
+    # association :exit_page
+    exit_page { nil }
 
     trait :with_exit_page do
       goto_page { nil }

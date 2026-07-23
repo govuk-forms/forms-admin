@@ -112,7 +112,7 @@ RSpec.describe PageListComponent::View, type: :component do
         end
 
         context "when the condition has an exit page heading" do
-          let!(:condition) { create :condition, :with_exit_page, routing_page_id: pages.first.id, check_page_id: pages.first.id, answer_value: "Option 1" }
+          let!(:condition) { create :condition, :with_exit_page, routing_page: pages.first, check_page_id: pages.first.id, answer_value: "Option 1" }
 
           before do
             render_inline(page_list_component)

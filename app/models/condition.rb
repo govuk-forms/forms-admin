@@ -84,7 +84,10 @@ class Condition < ApplicationRecord
     if exit_page.present?
       exit_page.send(:heading=, value, **args)
     else
-      attributes[:exit_page] = ExitPage.new(heading: value, question_page: routing_page, **args)
+      exit_page = ExitPage.new(question_page_id: routing_page_id)
+      exit_page.send(:heading=, value, **args)
+      exit_page.save!
+      attributes[:exit_page] = exit_page
     end
 
     super(value, **args)
@@ -94,7 +97,10 @@ class Condition < ApplicationRecord
     if exit_page.present?
       exit_page.send(:markdown=, value, **args)
     else
-      attributes[:exit_page] = ExitPage.new(markdown: value, question_page: routing_page, **args)
+      exit_page = ExitPage.new(question_page_id: routing_page_id)
+      exit_page.send(:markdown=, value, **args)
+      exit_page.save!
+      attributes[:exit_page] = exit_page
     end
 
     super(value, **args)
