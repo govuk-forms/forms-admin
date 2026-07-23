@@ -26,8 +26,8 @@ RSpec.describe Membership, type: :model do
   end
 
   it "is invalid if the user and group are not in the same organisation" do
-    org1 = create :organisation, id: 1, slug: "test-org"
-    org2 = create :organisation, id: 2, slug: "ministry-of-testing"
+    org1 = create :organisation, slug: "test-org"
+    org2 = create :organisation, slug: "ministry-of-testing"
     user = create :user, organisation: org1
     group = create :group, organisation: org2
     membership = build(:membership, user:, group:)
@@ -54,7 +54,7 @@ RSpec.describe Membership, type: :model do
 
   describe ".destroy_invalid_organisation_memberships" do
     it "does not remove memberships for the same organisation" do
-      org1 = create :organisation, id: 1, slug: "test-org"
+      org1 = create :organisation, slug: "test-org"
       user = create :user, organisation: org1
       group = create :group, organisation: org1
       membership = create(:membership, user:, group:)
@@ -64,8 +64,8 @@ RSpec.describe Membership, type: :model do
     end
 
     it "removes mismatched memberships" do
-      org1 = create :organisation, id: 1, slug: "test-org"
-      org2 = create :organisation, id: 2, slug: "ministry-of-testing"
+      org1 = create :organisation, slug: "test-org"
+      org2 = create :organisation, slug: "ministry-of-testing"
       user = create :user, organisation: org1
       group = create :group, organisation: org1
       membership = create(:membership, user:, group:)
@@ -76,8 +76,8 @@ RSpec.describe Membership, type: :model do
     end
 
     it "does not remove memberships for other users" do
-      org1 = create :organisation, id: 1, slug: "test-org"
-      org2 = create :organisation, id: 2, slug: "ministry-of-testing"
+      org1 = create :organisation, slug: "test-org"
+      org2 = create :organisation, slug: "ministry-of-testing"
 
       user1 = create :user, organisation: org1
       user2 = create :user, organisation: org1

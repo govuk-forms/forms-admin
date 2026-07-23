@@ -3,7 +3,7 @@ require "rails_helper"
 RSpec.describe Forms::SubmissionEmailController, type: :request do
   include ActionView::Helpers::TextHelper
 
-  let(:organisation) { build :organisation, id: 1, slug: "test-org" }
+  let(:organisation) { build :organisation, slug: "test-org" }
   let(:user) { standard_user }
   let(:user_outside_group) { build :user, id: 2, organisation: }
 

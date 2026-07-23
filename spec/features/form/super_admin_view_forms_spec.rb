@@ -2,7 +2,7 @@ require "rails_helper"
 
 feature "View forms", type: :feature do
   let(:org_forms) { [build(:form, id: 1, name: "Org form")] }
-  let(:other_org) { create :organisation, id: 2, slug: "Other org" }
+  let(:other_org) { create :organisation, slug: "Other org" }
   let(:other_org_user) { create :user, organisation: other_org }
   let(:other_org_forms) { [build(:form, id: 2, name: "Other org form")] }
   let(:other_org_group) { create :group, organisation_id: other_org.id }
