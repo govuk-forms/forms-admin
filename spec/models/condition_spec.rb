@@ -760,7 +760,6 @@ RSpec.describe Condition, type: :model do
 
         it "changing the welsh heading, changes the ExitPage welsh heading" do
           condition.exit_page_heading_cy = "welsh heading"
-          debugger
           condition.save!
           expect(condition.exit_page.reload.heading_cy).to eq("welsh heading")
         end
