@@ -260,6 +260,10 @@ class Forms::WelshPageTranslationInput < BaseInput
     page.answer_type == "selection"
   end
 
+  def selection_options_exceed_visibility_threshold?
+    page.answer_settings&.selection_options&.size.to_i > 30
+  end
+
   # We need to normalize the Welsh answer settings to match the English ones.
   # The only answer settings that need translating are the selection options
   # We ensure that welsh answer settings are correct by copying the English

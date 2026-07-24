@@ -124,6 +124,11 @@
             <% if page_form.object.page_has_selection_options? %>
               <%= render ScrollingWrapperComponent::View.new(aria_label: t("forms.welsh_translation.new.section_headings.selection_options", question_number: page_form.object.page.position)) do %>
                 <%= page_form.govuk_fieldset legend: nil, described_by: ["selection_options_cy_table_caption"] do %>
+                  <% if page_form.object.selection_options_exceed_visibility_threshold? %>
+                    <p class="govuk-body govuk-!-margin-bottom-4">
+                      You have added a list of options that is very large, exceeds 30 options. To add translations for this list you need to download a copy of your form and upload it with all of the translations for each option. We will only update translations added to the upload file, meaning if you have already added a translation you can leave it in the downloaded file or leave that cell blank and this will not change your current translation.
+                    </p>
+                  <% end %>
                   <% hidden_selection_option_fields = [] %>
                   <%= govuk_table(classes: @table_presenter.two_column_classes) do |table| %>
                     <%= table.with_caption(size: 's',

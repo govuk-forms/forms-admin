@@ -292,6 +292,10 @@ describe "forms/welsh_translation/new.html.erb" do
           expect(rendered).to have_field("Enter Welsh option 2")
         end
 
+        it "does not show the large list guidance text" do
+          expect(rendered).not_to have_text("You have added a list of options that is very large, exceeds 30 options.")
+        end
+
         context "when the page has more than 30 selection options" do
           let(:page) { create :page, :selection_with_autocomplete }
 
@@ -309,6 +313,7 @@ describe "forms/welsh_translation/new.html.erb" do
             visible_selection_option_fields = "input[type='text'][id^='forms_welsh_selection_option_translation_input_#{page.id}_selection_options_cy_']"
             hidden_selection_option_fields = "input[type='hidden'][name*='selection_options_cy'][name$='[name_cy]']"
 
+            expect(rendered).to have_text("You have added a list of options that is very large, exceeds 30 options. To add translations for this list you need to download a copy of your form and upload it with all of the translations for each option. We will only update translations added to the upload file, meaning if you have already added a translation you can leave it in the downloaded file or leave that cell blank and this will not change your current translation.")
             expect(rendered).to have_css(visible_selection_option_fields, count: 2)
             expect(rendered).to have_css(hidden_selection_option_fields, count: 29, visible: :all)
           end
