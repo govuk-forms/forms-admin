@@ -15,8 +15,8 @@ class ServiceNavigationComponent::ServiceNavigationComponentPreview < ViewCompon
   def with_super_admin_navigation_links
     render(ServiceNavigationComponent::View.new(navigation_items: [
       { text: "Your groups", href: "/" },
-      { text: "MOUs", href: "/mous" },
       { text: "Users", href: "/users" },
+      { text: "Organisations", href: "/organisations" },
       { text: "Reports", href: "/reports" },
       { text: "Support", href: "/support" },
       { text: "A User", href: nil, classes: ["app-service-navigation__item--featured"] },
