@@ -13,31 +13,38 @@ class Condition < ApplicationRecord
   validates_associated :exit_page
 
   before_destroy :destroy_postconditions
-  before_save :sync_exit_page
+  before_validation :sync_exit_page
 
   translates :exit_page_heading
   translates :exit_page_markdown, presence: false # Without presence here, the value is nil if set to ""
+
+  alias_method :legacy_exit_page_heading, :exit_page_heading
+  alias_method :legacy_exit_page_heading=, :exit_page_heading=
+  alias_method :legacy_exit_page_heading_cy, :exit_page_heading_cy
+  alias_method :legacy_exit_page_markdown, :exit_page_markdown
+  alias_method :legacy_exit_page_markdown=, :exit_page_markdown=
+  alias_method :legacy_exit_page_markdown_cy, :exit_page_markdown_cy
+
+  def sync_exit_page
+    if legacy_exit_page_heading.present? && legacy_exit_page_markdown.present?
+      self.exit_page ||= build_exit_page(question_page: routing_page)
+
+      exit_page.heading = legacy_exit_page_heading
+      exit_page.markdown = legacy_exit_page_markdown
+      exit_page.heading_cy = legacy_exit_page_heading_cy
+      exit_page.markdown_cy = legacy_exit_page_markdown_cy
+    end
+
+    if legacy_exit_page_heading.blank? || legacy_exit_page_markdown.blank?
+      exit_page&.mark_for_destruction
+    end
+  end
 
   def self.create_and_update_form!(**args)
     condition = Condition.new(**args)
 
     condition.save_and_update_form
     condition
-  end
-
-  def sync_exit_page
-    if exit_page_heading.present? || exit_page_markdown.present?
-      build_exit_page(question_page: routing_page) if exit_page.nil?
-
-      exit_page.heading = exit_page_heading
-      exit_page.markdown = exit_page_markdown
-      exit_page.question_page = routing_page
-    end
-
-    if exit_page_heading.blank? || exit_page_markdown.blank?
-      exit_page&.destroy!
-      self.exit_page = nil
-    end
   end
 
   def save_and_update_form(**args)
@@ -60,17 +67,17 @@ class Condition < ApplicationRecord
     ].compact
   end
 
-  def exit_page_heading(**args)
-    return exit_page&.heading(**args) if exit_page.present?
+  # def exit_page_heading(**args)
+  #   return exit_page&.heading(**args) if exit_page.present?
 
-    super(**args)
-  end
+  #   super(**args)
+  # end
 
-  def exit_page_markdown(**args)
-    return exit_page&.markdown(**args) if exit_page.present?
+  # def exit_page_markdown(**args)
+  #   return exit_page&.markdown(**args) if exit_page.present?
 
-    super(**args)
-  end
+  #   super(**args)
+  # end
 
   # def exit_page_heading=(value, **args)
   #   if exit_page.present?
@@ -87,6 +94,30 @@ class Condition < ApplicationRecord
 
   #   super(value, **args)
   # end
+
+  def exit_page_heading(locale: nil, **options)
+    exit_page&.heading(locale:, **options) || legacy_exit_page_heading(locale:, **options)
+  end
+
+  def exit_page_heading=(value, locale: nil, **options)
+    public_send(:legacy_exit_page_heading=, value, locale: locale, **options)
+  end
+
+  def exit_page_heading_cy
+    exit_page&.heading_cy || legacy_exit_page_heading_cy
+  end
+
+  def exit_page_markdown(locale: nil, **options)
+    exit_page&.markdown(locale:, **options) || legacy_exit_page_markdown(locale:, **options)
+  end
+
+  def exit_page_markdown=(value, locale: nil, **options)
+    public_send(:legacy_exit_page_markdown=, value, locale: locale, **options)
+  end
+
+  def exit_page_markdown_cy
+    exit_page&.markdown_cy || legacy_exit_page_markdown_cy
+  end
 
   def warning_goto_page_doesnt_exist
     return nil if is_exit_page?
