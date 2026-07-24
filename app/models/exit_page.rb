@@ -1,6 +1,7 @@
 class ExitPage < ApplicationRecord
   extend Mobility
   belongs_to :question_page, class_name: "Page", optional: false
+  has_many :conditions, class_name: "Condition", dependent: :nullify
 
   validates :heading, presence: true
   validates :markdown, presence: true
