@@ -188,6 +188,7 @@ private
     form.translations.where(locale: :cy).delete_all
     Page::Translation.where(locale: :cy, page_id: form.page_ids).delete_all
     Condition::Translation.where(locale: :cy, condition_id: form.condition_ids).delete_all
+    ExitPage::Translation.where(locale: :cy, exit_page_id: form.exit_page_ids).delete_all
   end
 
   def revert_delivery_configurations(form_document_content)
