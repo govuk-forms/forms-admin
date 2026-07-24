@@ -1,7 +1,7 @@
 require "rails_helper"
 
 describe "sitemap/index.html.erb" do
-  let(:locals) { { active_groups: [], trial_groups: [], should_show_users_link: false, should_show_mous_link: false, should_show_reports_link: false } }
+  let(:locals) { { active_groups: [], trial_groups: [], should_show_users_link: false, should_show_organisations_link: false, should_show_reports_link: false } }
 
   def render_template
     render template: "sitemap/index", locals:
@@ -59,20 +59,32 @@ describe "sitemap/index.html.erb" do
     end
   end
 
-  context "when the should_show_mous_link is true" do
-    let(:locals) { super().merge(should_show_mous_link: true) }
+  context "when the should_show_organisations_link is true" do
+    let(:locals) { super().merge(should_show_organisations_link: true) }
 
-    it "includes a link to the MOUs page" do
+    it "includes a link to the organisations page" do
+      render_template
+
+      expect(rendered).to have_link("Organisations", href: organisations_path)
+    end
+
+    it "includes a link to the MOU signing page" do
       render_template
 
       expect(rendered).to have_link("Memorandum of Understanding", href: mou_signature_url)
     end
   end
 
-  context "when should_show_mous_link is false" do
-    let(:locals) { super().merge(should_show_mous_link: false) }
+  context "when should_show_organisations_link is false" do
+    let(:locals) { super().merge(should_show_organisations_link: false) }
 
-    it "does not include a link to the MOUs page" do
+    it "does not include a link to the organisations page" do
+      render_template
+
+      expect(rendered).not_to have_link("Organisations")
+    end
+
+    it "does not include a link to the MOU signing page" do
       render_template
 
       expect(rendered).not_to have_link("Memorandum of Understanding")

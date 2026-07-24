@@ -6,7 +6,7 @@ class SitemapController < WebController
     render locals: { active_groups:,
                      trial_groups:,
                      should_show_users_link: should_show_users?,
-                     should_show_mous_link: should_show_mous_link?,
+                     should_show_organisations_link: should_show_organisations_link?,
                      should_show_reports_link: should_show_reports_link? }
   end
 
@@ -14,8 +14,8 @@ class SitemapController < WebController
     Pundit.policy(current_user, :user).can_manage_user?
   end
 
-  def should_show_mous_link?
-    Pundit.policy(current_user, :mou_signature).can_manage_mous?
+  def should_show_organisations_link?
+    Pundit.policy(current_user, :organisation).can_view_organisations?
   end
 
   def should_show_reports_link?
