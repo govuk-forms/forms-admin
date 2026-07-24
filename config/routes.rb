@@ -215,8 +215,6 @@ Rails.application.routes.draw do
     resource :contact_for_research, controller: :contact_for_research, only: %i[edit update]
   end
 
-  resources :mou_signatures, only: %i[index], path: "mous"
-
   resources :organisations, only: %i[index show] do
     resources :brands, controller: :organisation_brands, only: %i[new create destroy]
     patch "default-brand", to: "organisation_brands#update_default", as: :default_brand
