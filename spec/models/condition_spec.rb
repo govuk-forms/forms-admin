@@ -723,7 +723,7 @@ RSpec.describe Condition, type: :model do
 
   describe "using the new ExitPage model" do
     describe "#exit_page_heading" do
-      let(:condition) { create :condition, exit_page_heading: "English heading", exit_page_heading_cy: "Welsh heading" }
+      let(:condition) { create :condition, exit_page_heading: "English heading", exit_page_markdown: "English markdown", exit_page_heading_cy: "Welsh heading", exit_page_markdown_cy: "Welsh markdown" }
 
       it "returns the heading" do
         expect(condition.exit_page_heading).to eq("English heading")
@@ -740,6 +740,29 @@ RSpec.describe Condition, type: :model do
 
         it "returns the welsh heading if the condition an ExitPage" do
           expect(condition.exit_page_heading_cy).to eq("Exit page welsh heading")
+        end
+      end
+
+      describe "changing the heading" do
+        let(:new_heading) { "New heading" }
+
+        it "updates the heading" do
+          condition.exit_page_heading = new_heading
+          expect(condition.exit_page_heading).to eq(new_heading)
+        end
+
+        it "updates the ExitPage model" do
+          condition.exit_page_heading = new_heading
+
+          condition.save!
+          expect(condition.exit_page.heading).to eq(new_heading)
+        end
+
+        it "changing the welsh heading, changes the ExitPage welsh heading" do
+          condition.exit_page_heading_cy = "welsh heading"
+          debugger
+          condition.save!
+          expect(condition.exit_page.reload.heading_cy).to eq("welsh heading")
         end
       end
     end

@@ -9,9 +9,11 @@ class Condition < ApplicationRecord
   belongs_to :goto_page, class_name: "Page", optional: true
 
   has_one :form, through: :routing_page
-  belongs_to :exit_page, optional: true
+  belongs_to :exit_page, optional: true, autosave: true
+  validates_associated :exit_page
 
   before_destroy :destroy_postconditions
+  before_save :sync_exit_page
 
   translates :exit_page_heading
   translates :exit_page_markdown, presence: false # Without presence here, the value is nil if set to ""
@@ -23,21 +25,23 @@ class Condition < ApplicationRecord
     condition
   end
 
-  def sync_exit_pages
-    if exit_page_markdown.present?
-      if exit_page.present?
-        exit_page.update!(heading: exit_page_heading, markdown: exit_page_markdown, question_page: routing_page)
-      else
-        ExitPage.create!(heading: exit_page_heading, markdown: exit_page_markdown, question_page: routing_page)
-      end
-    elsif exit_page.present?
-      exit_page.destroy!
+  def sync_exit_page
+    if exit_page_heading.present? || exit_page_markdown.present?
+      build_exit_page(question_page: routing_page) if exit_page.nil?
+
+      exit_page.heading = exit_page_heading
+      exit_page.markdown = exit_page_markdown
+      exit_page.question_page = routing_page
+    end
+
+    if exit_page_heading.blank? || exit_page_markdown.blank?
+      exit_page&.destroy!
+      self.exit_page = nil
     end
   end
 
   def save_and_update_form(**args)
     save!
-    sync_exit_pages
     form.save_question_changes!
   end
 
@@ -68,21 +72,21 @@ class Condition < ApplicationRecord
     super(**args)
   end
 
-  def exit_page_heading=(value, **args)
-    if exit_page.present?
-      exit_page.send(:heading=, value, **args)
-    end
+  # def exit_page_heading=(value, **args)
+  #   if exit_page.present?
+  #     exit_page.send(:heading=, value, **args)
+  #   end
 
-    super(value, **args)
-  end
+  #   super(value, **args)
+  # end
 
-  def exit_page_markdown=(value, **args)
-    if exit_page.present?
-      exit_page.send(:markdown=, value, **args)
-    end
+  # def exit_page_markdown=(value, **args)
+  #   if exit_page.present?
+  #     exit_page.send(:markdown=, value, **args)
+  #   end
 
-    super(value, **args)
-  end
+  #   super(value, **args)
+  # end
 
   def warning_goto_page_doesnt_exist
     return nil if is_exit_page?
