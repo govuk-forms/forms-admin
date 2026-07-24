@@ -152,6 +152,10 @@ class User < ApplicationRecord
     super(options)
   end
 
+  def email_domain
+    email.split("@").last.downcase.strip
+  end
+
 private
 
   def requires_name?
