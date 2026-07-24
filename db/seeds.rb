@@ -43,6 +43,8 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
   test_org.organisation_domains.create! domain: "digital.cabinet-office.gov.uk"
   test_org.organisation_domains.create! domain: "dsit.gov.uk"
   mot_org = Organisation.create! slug: "ministry-of-tests", name: "Ministry of Tests", abbreviation: "MOT"
+  mot_org.organisation_domains.create! domain: "example.com"
+  mot_org.organisation_domains.create! domain: "example.gov.uk"
   Organisation.create! slug: "department-for-testing", name: "Department for Testing", abbreviation: "DfT"
   Organisation.create! slug: "closed-org", name: "Closed Org", abbreviation: "CO", closed: true
 
