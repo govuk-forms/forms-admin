@@ -481,13 +481,12 @@ RSpec.describe Page, type: :model do
     end
 
     context "when page has routing conditions and ExitPages" do
-      let(:routing_conditions) { [create(:condition, exit_page:)] }
+      let(:routing_conditions) { [create(:condition)] }
       let(:check_conditions) { routing_conditions }
-      let(:exit_page) { create :exit_page }
+      let(:exit_page) { create :exit_page, question_page: page }
 
       before do
-        exit_page.question_page = page
-        exit_page.save!
+        routing_conditions.first.exit_page = exit_page
       end
 
       it "does not delete existing conditions or ExitPages" do
@@ -792,14 +791,10 @@ RSpec.describe Page, type: :model do
     end
 
     context "when the page has an ExitPage" do
-      let!(:exit_page) { create :exit_page, question_page: page }
-
-      before do
-        create(:condition, routing_page_id: page.id, check_page_id: page.id, exit_page:)
-      end
+      let!(:condition) { create(:condition, :with_exit_page, routing_page_id: page.id, check_page_id: page.id) }
 
       it "includes the exit page" do
-        expect(page.reload.as_form_document_step(second_page)["exit_pages"].first).to match a_hash_including("id" => exit_page.id, "markdown" => exit_page.markdown, "heading" => exit_page.heading)
+        expect(page.reload.as_form_document_step(second_page)["exit_pages"].first).to match a_hash_including("id" => condition.exit_page_id, "markdown" => condition.exit_page.markdown, "heading" => condition.exit_page.heading)
       end
     end
   end
