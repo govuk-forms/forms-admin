@@ -127,7 +127,7 @@ class Forms::WelshPageTranslationInput < BaseInput
       next unless english_selection_option
 
       Forms::WelshSelectionOptionTranslationInput.new(**selection_option_attrs.symbolize_keys, page:, selection_option: english_selection_option)
-    }.compact
+    }.compact.sort_by(&:id)
   end
 
   def form_field_id(attribute)

@@ -291,6 +291,28 @@ describe "forms/welsh_translation/new.html.erb" do
           expect(rendered).to have_css("td", text: page.answer_settings.selection_options.second["name"])
           expect(rendered).to have_field("Enter Welsh option 2")
         end
+
+        context "when the page has more than 30 selection options" do
+          let(:page) { create :page, :selection_with_autocomplete }
+
+          let(:welsh_translation_input) do
+            super().tap do |input|
+              selection_options_input = input.page_translations.find { |page_translation| page_translation.page == page }
+
+              selection_options_input.selection_options_cy.each_with_index do |selection_option, index|
+                selection_option.name_cy = index < 2 ? "" : "Welsh option #{index + 1}"
+              end
+            end
+          end
+
+          it "renders inputs only for blank selection options and preserves the rest with hidden fields" do
+            visible_selection_option_fields = "input[type='text'][id^='forms_welsh_selection_option_translation_input_#{page.id}_selection_options_cy_']"
+            hidden_selection_option_fields = "input[type='hidden'][name*='selection_options_cy'][name$='[name_cy]']"
+
+            expect(rendered).to have_css(visible_selection_option_fields, count: 2)
+            expect(rendered).to have_css(hidden_selection_option_fields, count: 29, visible: :all)
+          end
+        end
       end
 
       context "when a page has a selection question with none of the above" do

@@ -460,6 +460,22 @@ RSpec.describe Forms::WelshPageTranslationInput, type: :model do
         expect(page.reload.answer_settings_cy.selection_options.second.name).to eq("welsh option 2")
         expect(page.reload.answer_settings_cy.selection_options.second.value).to eq("Option 2")
       end
+
+      context "when the submitted selection options are not in index order" do
+        let(:new_input_data) do
+          super().merge({ selection_options_cy_attributes: {
+            "0" => { "id" => "1", "name_cy" => "welsh option 2" },
+            "1" => { "id" => "0", "name_cy" => "welsh option 1" },
+          } })
+        end
+
+        it "saves the selection options in the original English order" do
+          welsh_page_translation_input.submit
+
+          expect(page.reload.answer_settings_cy.selection_options.map(&:name)).to eq(["welsh option 1", "welsh option 2"])
+          expect(page.reload.answer_settings_cy.selection_options.map(&:value)).to eq(["Option 1", "Option 2"])
+        end
+      end
     end
 
     context "when the page has a selection question with none of the above" do

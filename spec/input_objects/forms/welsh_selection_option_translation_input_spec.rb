@@ -107,4 +107,43 @@ RSpec.describe Forms::WelshSelectionOptionTranslationInput, type: :model do
       end
     end
   end
+
+  describe "#show_name_input?" do
+    context "when the page has 30 or fewer selection options" do
+      it "shows the input regardless of whether the name has a value" do
+        expect(welsh_selection_option_translation_input.show_name_input?).to be true
+      end
+    end
+
+    context "when the page has more than 30 selection options" do
+      let(:page) { build(:page, :selection_with_autocomplete, id: 747) }
+      let(:selection_option_cy) { DataStruct.new(name: "Option 1", value: page.answer_settings.selection_options.first["value"]) }
+
+      context "when the selection option already has a Welsh value" do
+        let(:new_input_data) { super().merge(name_cy: "Welsh option") }
+
+        it "hides the input" do
+          expect(welsh_selection_option_translation_input.show_name_input?).to be false
+        end
+      end
+
+      context "when the selection option does not have a Welsh value" do
+        let(:new_input_data) { super().merge(name_cy: "") }
+
+        it "shows the input" do
+          expect(welsh_selection_option_translation_input.show_name_input?).to be true
+        end
+      end
+
+      context "when the selection option has validation errors" do
+        let(:new_input_data) { super().merge(name_cy: "a" * 251) }
+
+        it "shows the input" do
+          welsh_selection_option_translation_input.validate
+
+          expect(welsh_selection_option_translation_input.show_name_input?).to be true
+        end
+      end
+    end
+  end
 end

@@ -3,6 +3,7 @@ class Forms::WelshSelectionOptionTranslationInput < BaseInput
   include ActionView::Helpers::FormTagHelper
   include ActiveModel::Attributes
 
+  SELECTION_OPTIONS_VISIBLE_INPUT_THRESHOLD = 30
   NAME_MAX_LENGTH = 250
 
   attr_accessor :selection_option, :page
@@ -46,6 +47,12 @@ class Forms::WelshSelectionOptionTranslationInput < BaseInput
     id + 1
   end
 
+  def show_name_input?
+    return true unless selection_options_exceed_visibility_threshold?
+
+    name_cy.blank? || errors[:name_cy].present?
+  end
+
   def question_number
     page.position
   end
@@ -54,7 +61,11 @@ class Forms::WelshSelectionOptionTranslationInput < BaseInput
     name_cy.blank?
   end
 
-private
+  private
+
+  def selection_options_exceed_visibility_threshold?
+    page&.answer_settings&.selection_options&.size.to_i > SELECTION_OPTIONS_VISIBLE_INPUT_THRESHOLD
+  end
 
   def name_present?
     if name_cy.blank?
