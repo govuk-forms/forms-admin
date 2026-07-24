@@ -1,12 +1,5 @@
 class MouSignaturesController < WebController
-  before_action :set_agreement_type, except: %i[index]
-  after_action :verify_authorized, only: %i[index]
-
-  def index
-    authorize MouSignature, :can_manage_mous?
-    @mou_signatures = MouSignature.all
-    render template: "mou_signatures/index", locals: { mou_signatures: @mou_signatures }
-  end
+  before_action :set_agreement_type
 
   def show
     @mou_signature = current_user.current_organisation_mou_signature

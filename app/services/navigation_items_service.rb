@@ -22,7 +22,6 @@ class NavigationItemsService
 
     navigation_items = [
       your_groups_navigation_item,
-      mou_navigation_item,
       users_navigation_item,
       organisations_navigation_item,
       brands_navigation_item,
@@ -41,12 +40,6 @@ private
 
   def your_groups_navigation_item
     NavigationItem.new(text: I18n.t("header.your_groups"), href: "/", active: false)
-  end
-
-  def mou_navigation_item
-    return nil unless should_show_mous_link?
-
-    NavigationItem.new(text: I18n.t("header.mous"), href: mou_signatures_path, active: false)
   end
 
   def users_navigation_item
@@ -101,10 +94,6 @@ private
 
   def should_show_user_profile_link?
     Pundit.policy(user, :user).can_manage_user?
-  end
-
-  def should_show_mous_link?
-    Pundit.policy(user, :mou_signature).can_manage_mous?
   end
 
   def should_show_organisations_link?

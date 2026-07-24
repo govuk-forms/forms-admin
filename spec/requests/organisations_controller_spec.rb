@@ -203,7 +203,7 @@ RSpec.describe OrganisationsController, type: :request do
         expect(response.body).to include(organisation.name)
         expect(response.body).to include(organisation.slug)
         expect(response.body).to include(organisation.admin_users.first.email)
-        expect(response.body).to include(I18n.t("mou_signatures.index.agreement_type.#{organisation.mou_signatures.first.agreement_type}"))
+        expect(response.body).to include(I18n.t("mou_signatures.agreement_type.#{organisation.mou_signatures.first.agreement_type}"))
         expect(response.body).to include(organisation_domain.domain)
       end
 
