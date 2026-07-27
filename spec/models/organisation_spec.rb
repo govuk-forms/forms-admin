@@ -130,6 +130,37 @@ RSpec.describe Organisation, type: :model do
       end
     end
 
+    describe ".for_domain" do
+      it "returns all organisations with matching domain" do
+        matched_org = create(:organisation, organisation_domains: [
+          create(:organisation_domain, domain: "example.com"),
+          create(:organisation_domain, domain: "example.gov.uk"),
+        ])
+        other_matched_org = create(:organisation, organisation_domains: [
+          create(:organisation_domain, domain: "example.com"),
+        ])
+        create(:organisation, organisation_domains: [
+          create(:organisation_domain, domain: "example.gov.uk"),
+        ])
+        create(:organisation)
+
+        expect(described_class.for_domain("example.com")).to contain_exactly(matched_org, other_matched_org)
+      end
+
+      it "does not return organisations with no domains set" do
+        create(:organisation)
+        expect(described_class.for_domain("example.com")).to be_empty
+      end
+
+      it "does not match an email with a subdomain of a domain associated with an organisation" do
+        create(:organisation, organisation_domains: [
+          create(:organisation_domain, domain: "example.com"),
+        ])
+
+        expect(described_class.for_domain("subdomain.example.com")).to be_empty
+      end
+    end
+
     describe ".order_by_live_form_count" do
       let!(:organisation_with_two_live_forms) { create :organisation, slug: "org-with-two-live-forms" }
       let!(:organisation_with_one_live_form) { create :organisation, slug: "org-with-one-live-form" }

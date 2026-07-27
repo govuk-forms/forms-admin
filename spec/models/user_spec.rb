@@ -597,4 +597,16 @@ describe User, type: :model do
       }.to change(user, :last_signed_in_at).to(Time.zone.now)
     end
   end
+
+  describe "#email_domain" do
+    it "returns the domain part of the email" do
+      user = create(:user, email: "user@example.com")
+      expect(user.email_domain).to eq("example.com")
+    end
+
+    it "strips whitespace" do
+      user = create(:user, email: " user@example.com ")
+      expect(user.email_domain).to eq("example.com")
+    end
+  end
 end

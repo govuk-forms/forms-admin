@@ -1,14 +1,15 @@
 require "rails_helper"
 
 describe Account::OrganisationInput do
-  subject(:organisation_input) { described_class.new(user:) }
+  subject(:organisation_input) { described_class.new(user:, allowed_organisations:) }
 
   let(:user) { create(:user, :with_no_org) }
   let(:organisation) { create(:organisation) }
+  let(:allowed_organisations) { [organisation, *create_list(:organisation, 2)] }
 
   describe "validations" do
     it "is valid with a valid organisation_id" do
-      organisation_input.organisation_id = organisation.id
+      organisation_input.organisation_id = organisation.id.to_s
       expect(organisation_input).to be_valid
     end
 
@@ -18,12 +19,19 @@ describe Account::OrganisationInput do
       expect(organisation_input).to be_invalid
       expect(organisation_input.errors[:organisation_id]).to include(error_message)
     end
+
+    it "is invalid when the organisation is not in the allowed_organisations list" do
+      organisation_input.organisation_id = create(:organisation).id.to_s
+      error_message = I18n.t("activemodel.errors.models.account/organisation_input.attributes.organisation_id.inclusion")
+      expect(organisation_input).to be_invalid
+      expect(organisation_input.errors[:organisation_id]).to include(error_message)
+    end
   end
 
   describe "#submit" do
     context "with valid attributes" do
       before do
-        organisation_input.organisation_id = organisation.id
+        organisation_input.organisation_id = organisation.id.to_s
       end
 
       it "updates the user organisation_id" do
@@ -36,7 +44,7 @@ describe Account::OrganisationInput do
 
       it "logs the organisation_chosen event" do
         expect(Rails.logger).to receive(:info).with("User chose their organisation", {
-          organisation_id: organisation.id,
+          organisation_id: organisation.id.to_s,
         })
         organisation_input.submit
       end

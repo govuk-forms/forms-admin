@@ -38,6 +38,11 @@ class Organisation < ApplicationRecord
     end
   }
 
+  scope :for_domain, lambda { |domain|
+    joins(:organisation_domains)
+      .where(organisation_domains: { domain: domain })
+  }
+
   scope :order_by_user_count, lambda {
     order(Arel.sql("(SELECT COUNT(*) FROM users WHERE users.organisation_id = organisations.id) DESC"))
       .order(:name)

@@ -1,29 +1,67 @@
 <% set_page_title(title_with_error_prefix(t('page_titles.account_organisation'), @organisation_input.errors.any?)) %>
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds">
-    <%= form_with(model: @organisation_input , url: account_organisation_path, method: :patch) do |f| %>
-      <% if @organisation_input &.errors.any? %>
+    <%= form_with(model: @organisation_input, url: account_organisation_path, method: :patch) do |f| %>
+      <% if @organisation_input&.errors.any? %>
         <%= f.govuk_error_summary %>
       <% end %>
 
-      <%= render DfE::Autocomplete::View.new(
-        f,
-        attribute_name: :organisation_id,
-        form_field: f.govuk_collection_select(:organisation_id,
-                                              Organisation.not_closed.order(:name),
-                                              :id,
-                                              :name_with_abbreviation,
-                                              class: ['govuk-!-width-three-quarters'],
-                                              options: { prompt: t('users.edit.organisation_prompt') },
-                                              label: { size: 'xl', tag: 'h1' },
-                                             ),
-      html_attributes: { 'data-show-all-values' => 'true'},
-      )%>
+      <% show_relevant_organisations_enabled = FeatureService.enabled?(:show_relevant_organisations) %>
+      <% if show_relevant_organisations_enabled %>
+        <h1 class="govuk-heading-l">
+          <%= t("page_titles.account_organisation") %>
+        </h1>
+
+        <p><%= t("account.organisation.you_created_account_with", email_domain: @organisation_input.user.email_domain) %></p>
+      <% end %>
+
+      <% if @organisation_input.radios? %>
+        <%= f.govuk_radio_buttons_fieldset(:organisation_id, legend: { size: 'm', tag: 'h2' }) do %>
+          <% @organisation_input.allowed_organisations.each.with_index do |organisation, index| %>
+            <%= f.govuk_radio_button(
+                  :organisation_id,
+                  organisation.id,
+                  label: { text: organisation.name_with_abbreviation },
+                  link_errors: index.zero?) %>
+          <% end %>
+
+          <%= f.govuk_radio_divider %>
+          <%= f.govuk_radio_button(
+                :organisation_id,
+                Account::OrganisationInput::NOT_LISTED_OPTION_VALUE,
+                label: { text: t("account.organisation.not_listed_option") },
+                link_errors: false
+              ) %>
+        <% end %>
+      <% else %>
+        <% label_options = if show_relevant_organisations_enabled
+                             { size: 'm', tag: 'h2', text: t("helpers.legend.account_organisation_input.organisation_id") }
+                           else
+                             { size: 'xl', tag: 'h1' }
+                           end %>
+
+        <%= render DfE::Autocomplete::View.new(
+          f,
+          attribute_name: :organisation_id,
+          form_field: f.govuk_collection_select(
+            :organisation_id,
+            @organisation_input.allowed_organisations,
+            :id,
+            :name_with_abbreviation,
+            class: ['govuk-!-width-three-quarters'],
+            options: { prompt: t('users.edit.organisation_prompt') },
+            label: label_options,
+          ),
+          html_attributes: { 'data-show-all-values' => 'true' },
+        ) %>
+      <% end %>
       <%= f.govuk_submit t("save_and_continue") %>
     <% end %>
 
-  <%= govuk_section_break(visible:true, size: "l") %>
-  <%= govuk_details(summary_text: t('account.organisation_details_summary'), text: t('account.organisation_text_html', contact_link: contact_link)) %>
+    <% unless @organisation_input.radios? %>
+      <%= govuk_section_break(visible: true, size: "l") %>
+      <%= govuk_details(summary_text: t('account.organisation.details_summary'), text: t('account.organisation.not_listed_html', contact_link: contact_link)) %>
+    <% end %>
   </div>
 </div>
 
