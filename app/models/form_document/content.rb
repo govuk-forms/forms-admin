@@ -21,8 +21,6 @@ class FormDocument::Content
   attribute :support_email, :string
   attribute :support_phone, :string
   attribute :s3_bucket_name, :string
-  attribute :submission_type, :string
-  attribute :submission_format, array: true
   attribute :declaration_text, :string
   attribute :declaration_markdown, :string
   attribute :s3_bucket_region, :string
@@ -31,8 +29,6 @@ class FormDocument::Content
   attribute :privacy_policy_url, :string
   attribute :s3_bucket_aws_account_id, :string
   attribute :what_happens_next_markdown, :string
-  attribute :send_daily_submission_batch, :boolean
-  attribute :send_weekly_submission_batch, :boolean
   attribute :send_copy_of_answers, :string
   attribute :delivery_configurations, array: true
 
