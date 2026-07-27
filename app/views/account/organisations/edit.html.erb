@@ -12,7 +12,7 @@
           <%= t("page_titles.account_organisation") %>
         </h1>
 
-        <p><%= t("account.organisation.you_created_account_with", email_domain: @organisation_input.user.email_domain) %></p>
+        <p><%= t(".you_created_account_with", email_domain: @organisation_input.user.email_domain) %></p>
       <% end %>
 
       <% if @organisation_input.radios? %>
@@ -29,7 +29,7 @@
           <%= f.govuk_radio_button(
                 :organisation_id,
                 Account::OrganisationInput::NOT_LISTED_OPTION_VALUE,
-                label: { text: t("account.organisation.not_listed_option") },
+                label: { text: t(".not_listed_option") },
                 link_errors: false
               ) %>
         <% end %>
@@ -60,7 +60,7 @@
 
     <% unless @organisation_input.radios? %>
       <%= govuk_section_break(visible: true, size: "l") %>
-      <%= govuk_details(summary_text: t('account.organisation.details_summary'), text: t('account.organisation.not_listed_html', contact_link: contact_link)) %>
+      <%= govuk_details(summary_text: t('.details_summary'), text: t('.not_listed_html', contact_link: contact_link)) %>
     <% end %>
   </div>
 </div>

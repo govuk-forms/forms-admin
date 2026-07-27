@@ -1,13 +1,18 @@
 ---
 en:
   account:
-    organisation:
-      details_summary: If your organisation is not listed
-      not_listed_html: |
-        <p>If you’re from a central government organisation that’s not listed, %{contact_link}.</p>
-        <p>At the moment, GOV.UK Forms is only available to central government organisations. If you’re from an organisation outside central government, you can <a href="https://www.forms.service.gov.uk/forthcoming-features">read about future plans for GOV.UK Forms</a>.</p>
-      not_listed_option: The organisation I work for is not listed
-      you_created_account_with: You created your account using an @%{email_domain} email address.
+    organisations:
+      edit:
+        details_summary: If your organisation is not listed
+        not_listed_html: |
+          <p>If you’re from a central government organisation that’s not listed, %{contact_link}.</p>
+          <p>At the moment, GOV.UK Forms is only available to central government organisations. If you’re from an organisation outside central government, you can <a href="https://www.forms.service.gov.uk/forthcoming-features">read about future plans for GOV.UK Forms</a>.</p>
+        not_listed_option: The organisation I work for is not listed
+        you_created_account_with: You created your account using an @%{email_domain} email address.
+      not_listed:
+        not_listed_html: |
+          <p>If you’re from a central government organisation that’s not listed, %{contact_link}.</p>
+          <p>At the moment, GOV.UK Forms is only available to central government organisations. If you’re from an organisation outside central government, you can <a href="https://www.forms.service.gov.uk/forthcoming-features">read about future plans for GOV.UK Forms</a>.</p>
     terms_of_use:
       accessibility:
         heading: Make forms that are easy to use and accessible
