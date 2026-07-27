@@ -210,9 +210,13 @@ Rails.application.routes.draw do
 
   namespace :account do
     resource :name, only: %i[edit update]
-    resource :organisation, only: %i[edit update]
     resource :terms_of_use, controller: :terms_of_use, only: %i[edit update]
     resource :contact_for_research, controller: :contact_for_research, only: %i[edit update]
+
+    resource :organisation, only: %i[edit update] do
+      get "/confirm", to: "organisations#show_confirm", as: :show_confirm
+      post "/confirm", to: "organisations#confirm", as: :confirm
+    end
   end
 
   resources :organisations, only: %i[index show] do

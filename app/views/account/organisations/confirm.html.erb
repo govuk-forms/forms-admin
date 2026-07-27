@@ -1,0 +1,22 @@
+<% set_page_title(title_with_error_prefix(t('page_titles.confirm_account_organisation'), @confirm_organisation_input.errors.any?)) %>
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <%= form_with(model: @confirm_organisation_input, url: confirm_account_organisation_path) do |f| %>
+      <% if @confirm_organisation_input&.errors.any? %>
+        <%= f.govuk_error_summary %>
+      <% end %>
+
+      <h1 class="govuk-heading-l">
+        <%= t('page_titles.confirm_account_organisation') %>
+      </h1>
+
+      <%= t('.body_html', organisation: @confirm_organisation_input.organisation.name_with_abbreviation) %>
+
+      <%= f.govuk_collection_radio_buttons :confirm,
+        @confirm_organisation_input.values, ->(option) { option },
+        legend: { text: t('.radios_legend', organisation: @confirm_organisation_input.organisation.name_with_abbreviation), size: 'm' } %>
+
+      <%= f.govuk_submit t("save_and_continue") %>
+      <% end %>
+  </div>
+</div>

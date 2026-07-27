@@ -2,6 +2,9 @@
 en:
   account:
     organisations:
+      confirm:
+        body_html: "<p>Based on the email address you used to create your account, we think your organisation is <strong>%{organisation}</strong>.</p>"
+        radios_legend: Do you work for %{organisation}?
       edit:
         details_summary: If your organisation is not listed
         not_listed_html: |
@@ -1682,6 +1685,7 @@ en:
     change_name: Name your form
     change_order_pages_added_error: Sorry, we could not save the new question order
     change_page_order: Change your question order
+    confirm_account_organisation: Confirm your organisation
     confirm_delete_exit_page: Your exit page will be deleted
     confirm_email: Enter the confirmation code
     confirm_email_success: Email address confirmed
