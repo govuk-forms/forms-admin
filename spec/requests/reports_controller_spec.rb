@@ -592,7 +592,7 @@ RSpec.describe ReportsController, type: :request do
         archived_form = create(:form, :archived)
         [*live_forms, archived_form]
       end
-      let(:expected_csv_filename) { "live_forms_report-2025-05-15 15:31:57 UTC.csv" }
+      let(:expected_csv_filename) { "live-or-archived_forms_report-2025-05-15 15:31:57 UTC.csv" }
 
       before do
         login_as_super_admin_user
@@ -722,7 +722,7 @@ RSpec.describe ReportsController, type: :request do
         archived_form = create(:form, :archived, pages_count: 2)
         [*live_forms, archived_form]
       end
-      let(:expected_csv_filename) { "live_questions_report-2025-05-15 15:31:57 UTC.csv" }
+      let(:expected_csv_filename) { "live-or-archived_questions_report-2025-05-15 15:31:57 UTC.csv" }
 
       before do
         login_as_super_admin_user

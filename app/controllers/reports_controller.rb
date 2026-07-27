@@ -184,7 +184,7 @@ class ReportsController < WebController
 
     send_data Reports::FormsCsvReportService.new(forms).csv,
               type: "text/csv; charset=iso-8859-1",
-              disposition: "attachment; filename=#{csv_filename('live_forms_report')}"
+              disposition: "attachment; filename=#{csv_filename('live-or-archived_forms_report')}"
   end
 
   def live_questions_csv
@@ -193,7 +193,7 @@ class ReportsController < WebController
 
     send_data Reports::QuestionsCsvReportService.new(questions).csv,
               type: "text/csv; charset=iso-8859-1",
-              disposition: "attachment; filename=#{csv_filename('live_questions_report')}"
+              disposition: "attachment; filename=#{csv_filename('live-or-archived_questions_report')}"
   end
 
   def contact_for_research
