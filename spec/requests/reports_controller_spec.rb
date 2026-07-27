@@ -586,20 +586,21 @@ RSpec.describe ReportsController, type: :request do
       end
     end
 
-    describe "#live_forms_csv" do
+    describe "#forms_csv" do
       let(:forms) do
         live_forms = create_list(:form, 2, :live)
         archived_form = create(:form, :archived)
-        [*live_forms, archived_form]
+        draft_forms = create_list(:form, 2)
+        [*live_forms, archived_form, *draft_forms]
       end
-      let(:expected_csv_filename) { "live_forms_report-2025-05-15 15:31:57 UTC.csv" }
+      let(:expected_csv_filename) { "live-or-archived_forms_report-2025-05-15 15:31:57 UTC.csv" }
 
       before do
         login_as_super_admin_user
 
         travel_to Time.utc(2025, 5, 15, 15, 31, 57)
 
-        get report_live_forms_csv_path
+        get report_forms_csv_path(tag: "live-or-archived")
       end
 
       it_behaves_like "csv response"
@@ -716,20 +717,21 @@ RSpec.describe ReportsController, type: :request do
       end
     end
 
-    describe "#live_questions_csv" do
+    describe "#questions_csv" do
       let(:forms) do
         live_forms = create_list(:form, 2, :live, pages_count: 3)
         archived_form = create(:form, :archived, pages_count: 2)
-        [*live_forms, archived_form]
+        draft_forms = create_list(:form, 2)
+        [*live_forms, archived_form, *draft_forms]
       end
-      let(:expected_csv_filename) { "live_questions_report-2025-05-15 15:31:57 UTC.csv" }
+      let(:expected_csv_filename) { "live-or-archived_questions_report-2025-05-15 15:31:57 UTC.csv" }
 
       before do
         login_as_super_admin_user
 
         travel_to Time.utc(2025, 5, 15, 15, 31, 57)
 
-        get report_live_questions_csv_path
+        get report_questions_csv_path(tag: "live-or-archived")
       end
 
       it_behaves_like "csv response"

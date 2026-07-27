@@ -10,8 +10,10 @@
     </ul>
     <p><%= t(".download_form_data_as_a_csv_file") %></p>
     <ul class="govuk-list govuk-list--bullet">
-      <li><%= govuk_link_to t("reports.csv_downloads.forms"), report_live_forms_csv_path, no_visited_state: true %></li>
-      <li><%= govuk_link_to t("reports.csv_downloads.questions"), report_live_questions_csv_path, no_visited_state: true %></li>
+      <li><%= govuk_link_to t("reports.csv_downloads.forms", tag: tag_label("live-or-archived")), report_forms_csv_path(tag: "live-or-archived"), no_visited_state: true %></li>
+      <li><%= govuk_link_to t("reports.csv_downloads.forms", tag: tag_label("draft")), report_forms_csv_path(tag: "draft"), no_visited_state: true %></li>
+      <li><%= govuk_link_to t("reports.csv_downloads.questions", tag: tag_label("live-or-archived")), report_questions_csv_path(tag: "live-or-archived"), no_visited_state: true %></li>
+      <li><%= govuk_link_to t("reports.csv_downloads.questions", tag: tag_label("draft")), report_questions_csv_path(tag: "draft"), no_visited_state: true %></li>
     </ul>
     <p><%= t(".user_reports") %></p>
     <ul class="govuk-list govuk-list--bullet">

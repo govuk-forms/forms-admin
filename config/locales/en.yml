@@ -1983,8 +1983,8 @@ en:
         name: Name
       title: Users interested in research
     csv_downloads:
-      forms: Download data about all live or archived forms
-      questions: Download all questions in live or archived forms
+      forms: Download data about all %{tag} forms
+      questions: Download all questions in %{tag} forms
     features:
       answer_types:
         heading: Answer type usage

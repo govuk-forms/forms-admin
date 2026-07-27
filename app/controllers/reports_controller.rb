@@ -179,21 +179,23 @@ class ReportsController < WebController
     questions_feature_report(tag, params[:action], questions, type: :selection_questions_with_none_of_the_above)
   end
 
-  def live_forms_csv
-    forms = Reports::FormDocumentsService.form_documents(tag: "live-or-archived")
+  def forms_csv
+    tag = params[:tag]
+    forms = Reports::FormDocumentsService.form_documents(tag:)
 
     send_data Reports::FormsCsvReportService.new(forms).csv,
               type: "text/csv; charset=iso-8859-1",
-              disposition: "attachment; filename=#{csv_filename('live_forms_report')}"
+              disposition: "attachment; filename=#{csv_filename("#{tag}_forms_report")}"
   end
 
-  def live_questions_csv
-    forms = Reports::FormDocumentsService.form_documents(tag: "live-or-archived")
+  def questions_csv
+    tag = params[:tag]
+    forms = Reports::FormDocumentsService.form_documents(tag:)
     questions = Reports::FeatureReportService.new(forms).questions
 
     send_data Reports::QuestionsCsvReportService.new(questions).csv,
               type: "text/csv; charset=iso-8859-1",
-              disposition: "attachment; filename=#{csv_filename('live_questions_report')}"
+              disposition: "attachment; filename=#{csv_filename("#{tag}_questions_report")}"
   end
 
   def contact_for_research
