@@ -9,15 +9,40 @@ class Condition < ApplicationRecord
   belongs_to :goto_page, class_name: "Page", optional: true
 
   has_one :form, through: :routing_page
-  belongs_to :exit_page, optional: true
+  belongs_to :exit_page, optional: true, autosave: true
+  validates_associated :exit_page
 
   before_destroy :destroy_postconditions
+  before_validation :sync_exit_page
 
   translates :exit_page_heading
   translates :exit_page_markdown, presence: false # Without presence here, the value is nil if set to ""
 
-  def self.create_and_update_form!(...)
-    condition = Condition.new(...)
+  alias_method :legacy_exit_page_heading, :exit_page_heading
+  alias_method :legacy_exit_page_heading=, :exit_page_heading=
+  def legacy_exit_page_heading_cy = legacy_exit_page_heading(locale: :cy)
+  alias_method :legacy_exit_page_markdown, :exit_page_markdown
+  alias_method :legacy_exit_page_markdown=, :exit_page_markdown=
+  def legacy_exit_page_markdown_cy = legacy_exit_page_markdown(locale: :cy)
+
+  def sync_exit_page
+    if legacy_exit_page_heading.present? && legacy_exit_page_markdown.present?
+      self.exit_page ||= build_exit_page(question_page: routing_page)
+
+      exit_page.heading = legacy_exit_page_heading
+      exit_page.markdown = legacy_exit_page_markdown
+      exit_page.heading_cy = legacy_exit_page_heading_cy
+      exit_page.markdown_cy = legacy_exit_page_markdown_cy
+    end
+
+    if legacy_exit_page_heading.blank? || legacy_exit_page_markdown.blank?
+      exit_page&.mark_for_destruction
+    end
+  end
+
+  def self.create_and_update_form!(**args)
+    condition = Condition.new(**args)
+
     condition.save_and_update_form
     condition
   end
@@ -28,7 +53,9 @@ class Condition < ApplicationRecord
   end
 
   def destroy_and_update_form!
+    exit_page_to_delete = exit_page
     destroy! && form.save_question_changes!
+    exit_page_to_delete.presence&.destroy! # unless FeatureService.new(group: form.group).enabled?(:multiple_branches)
   end
 
   def validation_errors
@@ -38,6 +65,30 @@ class Condition < ApplicationRecord
       warning_routing_to_next_page,
       warning_goto_page_before_routing_page,
     ].compact
+  end
+
+  def exit_page_heading(locale: nil, **options)
+    exit_page&.heading(locale:, **options) || legacy_exit_page_heading(locale:, **options)
+  end
+
+  def exit_page_heading=(value, locale: nil, **options)
+    public_send(:legacy_exit_page_heading=, value, locale: locale, **options)
+  end
+
+  def exit_page_heading_cy
+    exit_page&.heading_cy || legacy_exit_page_heading_cy
+  end
+
+  def exit_page_markdown(locale: nil, **options)
+    exit_page&.markdown(locale:, **options) || legacy_exit_page_markdown(locale:, **options)
+  end
+
+  def exit_page_markdown=(value, locale: nil, **options)
+    public_send(:legacy_exit_page_markdown=, value, locale: locale, **options)
+  end
+
+  def exit_page_markdown_cy
+    exit_page&.markdown_cy || legacy_exit_page_markdown_cy
   end
 
   def warning_goto_page_doesnt_exist
