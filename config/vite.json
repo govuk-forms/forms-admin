@@ -10,7 +10,7 @@
       "app/components/**/*.scss",
       "app/components/**/*.js"
     ],
-    "publicOutputDir": "assets",
+    "publicOutputDir": "assets/forms-admin",
     "assetsDir": "",
     "autoBuild": false
   },
