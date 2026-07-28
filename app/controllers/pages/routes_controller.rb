@@ -1,9 +1,8 @@
 class Pages::RoutesController < PagesController
   def show
-    back_link_url = form_pages_path(current_form.id)
     route_summary_card_data_presenter = RouteSummaryCardDataPresenter.new(form: current_form, page:)
 
-    render locals: { current_form:, page:, back_link_url:, route_summary_card_data_presenter: }
+    render locals: { current_form:, page:, route_summary_card_data_presenter: }
   end
 
   def delete
