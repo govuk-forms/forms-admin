@@ -59,8 +59,8 @@ class Page < ApplicationRecord
       form.save_question_changes!
 
       if answer_type_changed_from_selection_only_one_option || answer_settings_changed_from_only_one_option
-        exit_pages.destroy_all
         check_conditions.destroy_all
+        exit_pages.destroy_all
       end
     end
 
