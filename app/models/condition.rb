@@ -10,7 +10,6 @@ class Condition < ApplicationRecord
 
   has_one :form, through: :routing_page
   belongs_to :exit_page, optional: true, autosave: true
-  validates_associated :exit_page
 
   before_destroy :destroy_postconditions
   before_validation :sync_exit_page
