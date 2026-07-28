@@ -212,7 +212,7 @@ describe "forms/_made_live_form.html.erb" do
     let(:form_metadata) { create(:form, :live, delivery_configurations: [create(:delivery_configuration, :daily_email)]) }
 
     it "tells the user they getting a daily CSV" do
-      expect(rendered).to include(I18n.t("forms.made_live_form.how_you_get_completed_forms.batch_submissions.daily_enabled"))
+      expect(rendered).to include(I18n.t("forms.made_live_form.how_you_get_completed_forms.batch_submissions.daily_enabled", submission_email: form_document.submission_email))
     end
   end
 
@@ -220,7 +220,7 @@ describe "forms/_made_live_form.html.erb" do
     let(:form_metadata) { create(:form, :live, delivery_configurations: [create(:delivery_configuration, :weekly_email)]) }
 
     it "tells the user they getting a weekly CSV" do
-      expect(rendered).to include(I18n.t("forms.made_live_form.how_you_get_completed_forms.batch_submissions.weekly_enabled"))
+      expect(rendered).to include(I18n.t("forms.made_live_form.how_you_get_completed_forms.batch_submissions.weekly_enabled", submission_email: form_document.submission_email))
     end
   end
 
@@ -233,7 +233,7 @@ describe "forms/_made_live_form.html.erb" do
     end
 
     it "tells the user they getting a daily and weekly CSV" do
-      expect(rendered).to include(I18n.t("forms.made_live_form.how_you_get_completed_forms.batch_submissions.daily_and_weekly_enabled"))
+      expect(rendered).to include(I18n.t("forms.made_live_form.how_you_get_completed_forms.batch_submissions.daily_and_weekly_enabled", submission_email: form_document.submission_email))
     end
   end
 

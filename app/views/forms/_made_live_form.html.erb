@@ -168,11 +168,11 @@
 
     <h4 class="govuk-heading-s"><%= t(".how_you_get_completed_forms.batch_submissions.title") %></h4>
     <% if form_document.daily_submission_batch_enabled? && form_document.weekly_submission_batch_enabled? %>
-      <p><%= t(".how_you_get_completed_forms.batch_submissions.daily_and_weekly_enabled") %></p>
+      <p><%= t(".how_you_get_completed_forms.batch_submissions.daily_and_weekly_enabled", submission_email: form_document.submission_email) %></p>
     <% elsif form_document.daily_submission_batch_enabled? %>
-      <p><%= t(".how_you_get_completed_forms.batch_submissions.daily_enabled") %></p>
+      <p><%= t(".how_you_get_completed_forms.batch_submissions.daily_enabled", submission_email: form_document.submission_email) %></p>
     <% elsif form_document.weekly_submission_batch_enabled? %>
-      <p><%= t(".how_you_get_completed_forms.batch_submissions.weekly_enabled") %></p>
+      <p><%= t(".how_you_get_completed_forms.batch_submissions.weekly_enabled", submission_email: form_document.submission_email) %></p>
     <% else %>
       <p><%= t(".how_you_get_completed_forms.batch_submissions.disabled") %></p>
     <% end %>

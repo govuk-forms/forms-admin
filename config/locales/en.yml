@@ -504,11 +504,11 @@ en:
       draft_edit: Edit the draft of this form
       how_you_get_completed_forms:
         batch_submissions:
-          daily_and_weekly_enabled: You are getting daily and weekly batches of completed forms.
-          daily_enabled: You are getting a daily batch of completed forms.
+          daily_and_weekly_enabled: You are getting daily and weekly batches of completed forms sent to %{submission_email}.
+          daily_enabled: You are getting a daily batch of completed forms sent to %{submission_email}.
           disabled: You have not opted to get a daily or weekly batch of completed forms.
           title: Daily and weekly CSVs
-          weekly_enabled: You are getting a weekly batch of completed forms.
+          weekly_enabled: You are getting a weekly batch of completed forms sent to %{submission_email}.
         email:
           disabled: You have not opted to get completed forms by email.
           enabled: You’re getting completed forms sent to %{submission_email}.
