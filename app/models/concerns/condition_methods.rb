@@ -1,6 +1,6 @@
 module ConditionMethods
   def is_exit_page?
-    !exit_page_markdown.nil? || try(:exit_page_id).present?
+    !exit_page_markdown.nil?
   end
 
   alias_method :exit_page?, :is_exit_page?

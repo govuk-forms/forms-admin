@@ -271,15 +271,6 @@ RSpec.describe Condition, type: :model do
         expect(condition.warning_goto_page_doesnt_exist).to be_nil
       end
     end
-
-    context "when exit_page_id is present using ExitPage" do
-      let(:exit_page) { create :exit_page }
-      let(:condition) { create :condition, routing_page_id: routing_page.id, goto_page_id: nil, exit_page_id: exit_page.id }
-
-      it "returns nil" do
-        expect(condition.warning_goto_page_doesnt_exist).to be_nil
-      end
-    end
   end
 
   describe "#warning_answer_doesnt_exist" do
@@ -654,8 +645,7 @@ RSpec.describe Condition, type: :model do
     end
 
     context "when the condition has an ExitPage" do
-      let(:exit_page) { create :exit_page, question_page: check_page }
-      let(:condition) { create :condition, exit_page_id: exit_page.id, routing_page_id: check_page.id }
+      let(:condition) { create :condition, :with_exit_page, routing_page_id: check_page.id }
 
       it "includes the exit_page_id" do
         expect(condition.as_json).to include({
