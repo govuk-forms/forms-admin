@@ -136,63 +136,71 @@ describe "forms/_made_live_form.html.erb" do
 
   it "contains information about how you get completed forms" do
     expect(rendered).to have_css("h3", text: I18n.t("forms.made_live_form.how_you_get_completed_forms.title"))
-    expect(rendered).to have_xpath("//h3[text()='#{I18n.t('forms.made_live_form.how_you_get_completed_forms.title')}']/following-sibling::h4", text: "Email")
-    expect(rendered).to have_text(form_document.submission_email)
   end
 
-  context "when the submission type is 'email'" do
+  context "when only email submissions are configured" do
+    let(:formats) { [] }
+    let(:form_metadata) do
+      create(:form, :live, delivery_configurations: [create(:delivery_configuration, :immediate_email, formats: formats)])
+    end
+
+    it "tells the user that email submission is enabled" do
+      expect(rendered).to have_xpath("//h3[text()='#{I18n.t('forms.made_live_form.how_you_get_completed_forms.title')}']/following-sibling::h4", text: "Email")
+      expect(rendered).to include(I18n.t("forms.made_live_form.how_you_get_completed_forms.email.enabled", submission_email: form_document.submission_email))
+    end
+
     context "when CSV submission is enabled" do
-      let(:form_metadata) do
-        create(:form, :live, delivery_configurations: [create(:delivery_configuration, :immediate_email, formats: %w[csv])])
-      end
+      let(:formats) { %w[csv] }
 
       it "tells the user they have CSVs enabled" do
-        expect(rendered).to have_css("h4", text: I18n.t("forms.made_live_form.how_you_get_completed_forms.csv_and_json"))
-        expect(rendered).to include(I18n.t("forms.made_live_form.how_you_get_completed_forms.submission_format.email.email_csv_html"))
+        expect(rendered).to include(I18n.t("forms.made_live_form.how_you_get_completed_forms.email.format.email_csv_html"))
       end
     end
 
     context "when JSON submission is enabled" do
-      let(:form_metadata) do
-        create(:form, :live, delivery_configurations: [create(:delivery_configuration, :immediate_email, formats: %w[json])])
-      end
+      let(:formats) { %w[json] }
 
       it "tells the user they have JSON submissions enabled" do
-        expect(rendered).to have_css("h4", text: I18n.t("forms.made_live_form.how_you_get_completed_forms.csv_and_json"))
-        expect(rendered).to include(I18n.t("forms.made_live_form.how_you_get_completed_forms.submission_format.email.email_json_html"))
+        expect(rendered).to include(I18n.t("forms.made_live_form.how_you_get_completed_forms.email.format.email_json_html"))
       end
     end
 
     context "when both CSV and JSON submissions are enabled" do
-      let(:form_metadata) do
-        create(:form, :live, delivery_configurations: [create(:delivery_configuration, :immediate_email, formats: %w[csv json])])
-      end
+      let(:formats) { %w[csv json] }
 
       it "tells the user they have CSV and JSON submissions enabled" do
-        expect(rendered).to have_css("h4", text: I18n.t("forms.made_live_form.how_you_get_completed_forms.csv_and_json"))
-        expect(rendered).to include(I18n.t("forms.made_live_form.how_you_get_completed_forms.submission_format.email.email_csv_json_html"))
+        expect(rendered).to include(I18n.t("forms.made_live_form.how_you_get_completed_forms.email.format.email_csv_json_html"))
       end
     end
 
-    context "when CSV submission is not enabled" do
-      let(:form_metadata) do
-        create(:form, :live, delivery_configurations: [create(:delivery_configuration, :immediate_email, formats: [])])
-      end
+    context "when no email submission attachments are enabled" do
+      let(:formats) { [] }
 
-      it "tells the user they do not have CSVs enabled" do
-        expect(rendered).to have_css("h4", text: I18n.t("forms.made_live_form.how_you_get_completed_forms.csv_and_json"))
-        expect(rendered).to include(I18n.t("forms.made_live_form.how_you_get_completed_forms.submission_format.email.email_html"))
+      it "tells the user they do not have CSV or JSON enabled" do
+        expect(rendered).to include(I18n.t("forms.made_live_form.how_you_get_completed_forms.email.format.email_html"))
       end
+    end
+
+    it "tells the user that S3 is not enabled" do
+      expect(rendered).to have_css("h4", text: I18n.t("forms.made_live_form.how_you_get_completed_forms.s3.heading"))
+      expect(rendered).to include(I18n.t("forms.made_live_form.how_you_get_completed_forms.s3.disabled"))
     end
   end
 
-  context "when the submission type is 's3'" do
+  context "when only S3 delivery is configured" do
     let(:form_metadata) do
-      create(:form, :live, delivery_configurations: [create(:delivery_configuration, :s3)])
+      create(:form, :live, :with_s3_configuration, delivery_configurations: [create(:delivery_configuration, :s3)])
     end
 
-    it "does not include the CSV and JSON section" do
-      expect(rendered).not_to have_css("h4", text: I18n.t("forms.made_live_form.how_you_get_completed_forms.csv_and_json"))
+    it "tells the user that s3 submission are enabled" do
+      expect(rendered).to have_css("h4", text: I18n.t("forms.made_live_form.how_you_get_completed_forms.s3.heading"))
+      expect(rendered).to have_text(I18n.t("forms.made_live_form.how_you_get_completed_forms.s3.enabled",
+                                           delivery_format: "CSV", bucket_name: form_document.s3_bucket_name))
+    end
+
+    it "tells the user that email submissions are not enabled" do
+      expect(rendered).to have_xpath("//h3[text()='#{I18n.t('forms.made_live_form.how_you_get_completed_forms.title')}']/following-sibling::h4", text: "Email")
+      expect(rendered).to include(I18n.t("forms.made_live_form.how_you_get_completed_forms.email.disabled"))
     end
   end
 

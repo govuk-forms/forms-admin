@@ -509,18 +509,23 @@ en:
           disabled: You have not opted to get a daily or weekly batch of completed forms.
           title: Daily and weekly CSVs
           weekly_enabled: You are getting a weekly batch of completed forms.
-        csv_and_json: CSV and JSON
-        submission_email: Email
-        submission_format:
-          email:
+        email:
+          disabled: You have not opted to get completed forms by email.
+          enabled: You’re getting completed forms sent to %{submission_email}.
+          format:
             email_csv_html: |
-              Each completed form is also attached to the email as a CSV file.</br>
-              You have not opted to get each completed form as a JSON file.
-            email_csv_json_html: Each completed form is also attached to the email as a CSV file and a JSON file.
-            email_html: You have not opted to also get each completed form as a JSON or CSV file.
+              Data from each completed form is also attached to the email as a CSV file.</br>
+              You have not opted to get data from each completed form as a JSON file.
+            email_csv_json_html: Data from each completed form is also attached to the email as a CSV file and a JSON file.
+            email_html: You have not opted to also get data from each completed form attached to the email as a JSON or CSV file.
             email_json_html: |
-              Each completed form is also attached to the email as a JSON file.</br>
-              You have not opted to get each completed form as a CSV file.
+              Data from each completed form is also attached to the email as a JSON file.</br>
+              You have not opted to get data from each completed form attached to the email as a CSV file.
+          heading: Email
+        s3:
+          disabled: You have not opted to receive completed forms in an AWS S3 bucket.
+          enabled: You’re receiving %{delivery_format} files in the AWS S3 bucket %{bucket_name}
+          heading: AWS S3 bucket
         title: How you get completed forms
       live_form_url: Form URL
       live_form_url_multilingual:

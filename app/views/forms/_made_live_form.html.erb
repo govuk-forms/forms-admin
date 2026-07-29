@@ -147,13 +147,23 @@
 
     <h3 class="govuk-heading-m"><%= t(".how_you_get_completed_forms.title") %></h3>
 
-    <h4 class="govuk-heading-s"><%= t('.how_you_get_completed_forms.submission_email') %></h4>
-    <p class="govuk-!-text-break-word"><%= form_document.submission_email %></p>
-
+    <h4 class="govuk-heading-s"><%= t('.how_you_get_completed_forms.email.heading') %></h4>
     <% if form_document.has_email_delivery? %>
+      <p class="govuk-!-text-break-word"><%= t('.how_you_get_completed_forms.email.enabled', submission_email: form_document.submission_email) %></p>
+
       <% formats = ["email", *form_document.email_delivery_configuration["formats"]].join("_") %>
-      <h4 class="govuk-heading-s"><%= t(".how_you_get_completed_forms.csv_and_json") %></h4>
-      <p><%= t(".how_you_get_completed_forms.submission_format.email.#{formats}_html") %></p>
+      <p><%= t(".how_you_get_completed_forms.email.format.#{formats}_html") %></p>
+    <% else %>
+      <p><%= t('.how_you_get_completed_forms.email.disabled') %></p>
+    <% end %>
+
+    <h4 class="govuk-heading-s"><%= t('.how_you_get_completed_forms.s3.heading') %></h4>
+    <% if form_document.has_s3_delivery? %>
+      <p><%= t('.how_you_get_completed_forms.s3.enabled',
+        delivery_format: form_document.s3_delivery_configuration["formats"].sole.upcase,
+        bucket_name: form_document.s3_bucket_name) %></p>
+    <% else %>
+      <p><%= t('.how_you_get_completed_forms.s3.disabled') %></p>
     <% end %>
 
     <h4 class="govuk-heading-s"><%= t(".how_you_get_completed_forms.batch_submissions.title") %></h4>
