@@ -138,7 +138,7 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
   # create some test groups
   end_to_end_group = Group.create! name: "End to end tests", organisation: gds, status: :active
   smoke_test_group = Group.create! name: "Smoke tests", organisation: gds, status: :active
-  test_group = Group.create! name: "Test Group", organisation: gds, creator: default_user, status: :active, send_filler_answers_enabled: true
+  test_group = Group.create! name: "Test Group", organisation: gds, creator: default_user, status: :active
   multiple_branches_test_group = Group.create! name: "Test Group with multiple branches", organisation: gds, creator: default_user, status: :active, multiple_branches_enabled: true
   Group.create! name: "Ministry of Tests forms", organisation: mot_org
   Group.create! name: "Ministry of Tests forms - secret!", organisation: mot_org, creator: mot_user

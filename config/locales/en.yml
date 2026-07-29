@@ -775,7 +775,6 @@ en:
       flags:
         custom_branding_enabled: Custom branding
         multiple_branches_enabled: Multiple branches
-        send_filler_answers_enabled: Send a copy of completed answers to form fillers
       hint: You can turn a feature flag on, but not off. A feature can change how a form or group works, which might take extra steps to reverse. Ask a developer if you need to switch a feature off.
       title: Feature flags
     form_table_caption: Forms in ‘%{group_name}’
@@ -2397,8 +2396,7 @@ en:
         name: Super admin
     save: Save
   what_happens_next:
-    confirmation_email: The optional email confirmation will also include the contact details you provide for the form, and the date and time of submission. It will not include a copy of their answers.
-    confirmation_email_send_filler_answers_enabled: The optional email confirmation will also include the contact details you provide for the form, and the date and time of submission. If you’ve given people the option to ask for a copy of their answers - and the person filling in the form requests this - their answers will be added to the confirmation email.
+    confirmation_email: The optional email confirmation will also include the contact details you provide for the form, and the date and time of submission. If you’ve given people the option to ask for a copy of their answers - and the person filling in the form requests this - their answers will be added to the confirmation email.
     example:
       body: We’ll send you an email to let you know the outcome. You’ll usually get a response within 10 working days.
       heading: Example

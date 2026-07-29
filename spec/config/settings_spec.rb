@@ -24,7 +24,6 @@ describe "Settings" do
 
     include_examples expected_value_test, :exit_pages, features, { "enabled_by_group" => true }
     include_examples expected_value_test, :multiple_branches, features, { "enabled_by_group" => true }
-    include_examples expected_value_test, :send_filler_answers, features, { "enabled_by_group" => true }
     include_examples expected_value_test, :show_relevant_organisations, features, false
   end
 

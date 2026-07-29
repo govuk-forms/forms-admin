@@ -68,9 +68,7 @@ private
     if FeatureService.new(group: @form.group).enabled?(:custom_branding)
       rows << { task_name: I18n.t("forms.task_list_#{create_or_edit}.create_form_optional_subsection.brand"), path: form_brand_path(@form.id), status: @task_statuses[:brand_status] }
     end
-    if FeatureService.new(group: @form.group).enabled?(:send_filler_answers)
-      rows << { task_name: I18n.t("forms.task_list_#{create_or_edit}.create_form_optional_subsection.copy_of_answers"), path: copy_of_answers_path(@form.id), status: @task_statuses[:copy_of_answers_status] }
-    end
+    rows << { task_name: I18n.t("forms.task_list_#{create_or_edit}.create_form_optional_subsection.copy_of_answers"), path: copy_of_answers_path(@form.id), status: @task_statuses[:copy_of_answers_status] }
 
     {
       title: I18n.t("forms.task_list.optional_tasks_title", count: rows.count),

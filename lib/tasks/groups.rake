@@ -42,13 +42,6 @@ namespace :groups do
     toggle_multiple_branches_enabled(args[:group_id])
   end
 
-  desc "Toggle send_filler_answers_enabled for a group"
-  task :toggle_send_filler_answers_enabled, %i[group_id] => :environment do |_, args|
-    usage_message = "usage: rake groups:toggle_send_filler_answers_enabled[<group_external_id>]".freeze
-    abort usage_message if args[:group_id].blank?
-    toggle_send_filler_answers_enabled(args[:group_id])
-  end
-
   desc "Toggle custom_branding_enabled for a group"
   task :toggle_custom_branding_enabled, %i[group_id] => :environment do |_, args|
     usage_message = "usage: rake groups:toggle_custom_branding_enabled[<group_external_id>]".freeze
@@ -129,15 +122,6 @@ def toggle_multiple_branches_enabled(group_id)
   group.save!
 
   Rails.logger.info "multiple_branches_enabled for #{fmt_group(group)} is now set to #{group.reload.multiple_branches_enabled}"
-end
-
-def toggle_send_filler_answers_enabled(group_id)
-  group = Group.find_by!(external_id: group_id)
-
-  group.send_filler_answers_enabled = !group.send_filler_answers_enabled
-  group.save!
-
-  Rails.logger.info "send_filler_answers_enabled for #{fmt_group(group)} is now set to #{group.reload.send_filler_answers_enabled}"
 end
 
 def toggle_custom_branding_enabled(group_id)

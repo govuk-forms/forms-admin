@@ -6,9 +6,8 @@ describe FormTaskListService do
   let(:organisation) { build :organisation, :with_signed_mou, id: 1 }
   let(:form) { create(:form, :new_form, pages:) }
   let(:pages) { [] }
-  let(:group) { create(:group, name: "Group 1", organisation:, status: group_status, send_filler_answers_enabled:, custom_branding_enabled:) }
+  let(:group) { create(:group, name: "Group 1", organisation:, status: group_status, custom_branding_enabled:) }
   let(:group_status) { :trial }
-  let(:send_filler_answers_enabled) { true }
   let(:custom_branding_enabled) { true }
 
   let(:can_view_form) { true }
@@ -172,19 +171,9 @@ describe FormTaskListService do
         end
       end
 
-      context "when the send_filler_answers feature is enabled" do
-        it "has link to copy of answers settings" do
-          expect(section_rows[2][:task_name]).to eq "Give people the option to ask for a copy of their answers"
-          expect(section_rows[2][:path]).to eq "/forms/#{form.id}/copy-of-answers"
-        end
-      end
-
-      context "when the send_filler_answers feature is disabled" do
-        let(:send_filler_answers_enabled) { false }
-
-        it "does not have link to copy of answers settings" do
-          expect(section_rows.count).to eq 2
-        end
+      it "has link to copy of answers settings" do
+        expect(section_rows[2][:task_name]).to eq "Give people the option to ask for a copy of their answers"
+        expect(section_rows[2][:path]).to eq "/forms/#{form.id}/copy-of-answers"
       end
     end
 
