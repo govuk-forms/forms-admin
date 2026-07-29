@@ -12,9 +12,9 @@ en:
           <p>At the moment, GOV.UK Forms is only available to central government organisations. If you’re from an organisation outside central government, you can <a href="https://www.forms.service.gov.uk/forthcoming-features">read about future plans for GOV.UK Forms</a>.</p>
         not_listed_option: The organisation I work for is not listed
         you_created_account_with: You created your account using an @%{email_domain} email address.
-      not_listed:
-        not_listed_html: |
-          <p>If you’re from a central government organisation that’s not listed, %{contact_link}.</p>
+      no_matches:
+        body_html: |
+          <p>If you’re from a central government organisation, %{contact_link}.</p>
           <p>At the moment, GOV.UK Forms is only available to central government organisations. If you’re from an organisation outside central government, you can <a href="https://www.forms.service.gov.uk/forthcoming-features">read about future plans for GOV.UK Forms</a>.</p>
     terms_of_use:
       accessibility:
@@ -1723,10 +1723,10 @@ en:
     new_group: Give your group a name
     new_page: Edit question
     new_secondary_skip: 'Route for any other answer: set questions to skip'
+    no_matching_organisation: Sorry, we couldn’t match your email address to an organisation
     non_crown_agreement_confirmation: You’ve agreed to the GOV.UK Forms agreement
     non_crown_agreement_new: GOV.UK Forms agreement
     not_found: Page not found
-    organisation_not_listed: What to do if your organisation is not listed
     organisations: Organisations
     payment_link: Add a link to a payment page on GOV.UK Pay
     privacy_policy: Provide a link to privacy information for this form

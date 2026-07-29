@@ -15,7 +15,7 @@ module Account
       @organisation_input = OrganisationInput.new(account_organisation_input_params)
 
       if @organisation_input.not_listed_selected?
-        render :not_listed
+        render :no_matches
       elsif @organisation_input.submit
         redirect_to next_path
       else
@@ -40,7 +40,7 @@ module Account
       )
 
       return render :confirm, status: :unprocessable_content if @confirm_organisation_input.invalid?
-      return render :not_listed unless @confirm_organisation_input.confirmed?
+      return render :no_matches unless @confirm_organisation_input.confirmed?
 
       current_user.update!(organisation: organisation)
       Rails.logger.info("User chose their organisation", { organisation_id: organisation.id })

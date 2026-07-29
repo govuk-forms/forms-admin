@@ -95,9 +95,9 @@ describe Account::OrganisationsController do
         create(:organisation, organisation_domains: [create(:organisation_domain, domain: domain)])
       end
 
-      it "renders the not_listed template" do
+      it "renders the no_matches template" do
         put account_organisation_path, params: params
-        expect(response).to render_template(:not_listed)
+        expect(response).to render_template(:no_matches)
       end
 
       it "does not update the user's organisation" do
@@ -217,10 +217,10 @@ describe Account::OrganisationsController do
       context "when 'no' is selected" do
         let(:params) { { account_confirm_organisation_input: { confirm: "no" } } }
 
-        it "renders the not_listed template and does not update the user's organisation" do
+        it "renders the no_matches template and does not update the user's organisation" do
           post confirm_account_organisation_path, params: params
           expect(user.reload.organisation).to be_nil
-          expect(response).to render_template(:not_listed)
+          expect(response).to render_template(:no_matches)
         end
       end
 
