@@ -2,8 +2,6 @@ class Form < ApplicationRecord
   include FormStateMachine
   extend Mobility
 
-  self.ignored_columns += %i[language submission_type submission_format send_daily_submission_batch send_weekly_submission_batch]
-
   SUPPORTED_LANGUAGES = %w[en cy].freeze
 
   has_many :pages, -> { order(position: :asc) }, dependent: :destroy
