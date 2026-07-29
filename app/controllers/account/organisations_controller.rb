@@ -3,6 +3,7 @@ module Account
     include AfterSignInPathHelper
 
     before_action :redirect_if_organisation_exists
+    before_action :render_if_no_matches
     skip_before_action :redirect_if_account_not_completed
 
     def edit
@@ -61,6 +62,10 @@ module Account
 
     def redirect_if_organisation_exists
       redirect_to root_path if current_user.organisation.present?
+    end
+
+    def render_if_no_matches
+      render :no_matches if allowed_organisations.empty?
     end
 
     def next_path

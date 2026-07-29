@@ -29,6 +29,13 @@ describe Account::OrganisationsController do
             expect(input_object.allowed_organisations).to match_array(matching_orgs)
           end
 
+          context "when there are no organisations the user can select" do
+            it "renders the no_matches template" do
+              get edit_account_organisation_path
+              expect(response).to render_template(:no_matches)
+            end
+          end
+
           context "when there is only one organisation the user can select" do
             it "redirects to the confirm organisation path" do
               create(:organisation, organisation_domains: [create(:organisation_domain, domain: domain)])
@@ -165,6 +172,13 @@ describe Account::OrganisationsController do
         end
       end
     end
+
+    context "when there are no organisations the user can select" do
+      it "renders the no_matches template" do
+        put account_organisation_path, params: {}
+        expect(response).to render_template(:no_matches)
+      end
+    end
   end
 
   describe "GET #show_confirm", :feature_show_relevant_organisations do
@@ -178,6 +192,13 @@ describe Account::OrganisationsController do
         input_object = assigns(:confirm_organisation_input)
         expect(input_object).to be_a(Account::ConfirmOrganisationInput)
         expect(input_object.organisation).to eq(organisation)
+      end
+    end
+
+    context "when there are no organisations the user can select" do
+      it "renders the no_matches template" do
+        get show_confirm_account_organisation_path
+        expect(response).to render_template(:no_matches)
       end
     end
 
@@ -236,6 +257,13 @@ describe Account::OrganisationsController do
           error = I18n.t("activemodel.errors.models.account/confirm_organisation_input.attributes.confirm.blank", organisation: organisation.name_with_abbreviation)
           expect(response.body).to include(error)
         end
+      end
+    end
+
+    context "when there are no organisations the user can select" do
+      it "renders the no_matches template" do
+        post confirm_account_organisation_path, params: params
+        expect(response).to render_template(:no_matches)
       end
     end
 
