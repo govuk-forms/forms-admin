@@ -52,9 +52,8 @@ class Condition < ApplicationRecord
   end
 
   def destroy_and_update_form!
-    exit_page_to_delete = exit_page
+    exit_page.presence&.destroy!
     destroy! && form.save_question_changes!
-    exit_page_to_delete.presence&.destroy! # unless FeatureService.new(group: form.group).enabled?(:multiple_branches)
   end
 
   def validation_errors
