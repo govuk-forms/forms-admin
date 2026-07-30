@@ -2,8 +2,7 @@ require "rails_helper"
 
 describe "forms/what_happens_next/new.html.erb" do
   let(:current_form) { create :form }
-  let(:group) { create(:group, send_filler_answers_enabled:) }
-  let(:send_filler_answers_enabled) { true }
+  let(:group) { create(:group) }
   let(:what_happens_next_input) { Forms::WhatHappensNextInput.new(form: current_form).assign_form_values }
   let(:preview_html) { "" }
 
@@ -31,17 +30,7 @@ describe "forms/what_happens_next/new.html.erb" do
     expect(rendered).to have_text(I18n.t("what_happens_next.reference_numbers"))
   end
 
-  context "when send_filler_answers feature flag is enabled" do
-    it "has content saying that answers might be included in the confirmation email" do
-      expect(rendered).to have_text(I18n.t("what_happens_next.confirmation_email_send_filler_answers_enabled"))
-    end
-  end
-
-  context "when send_filler_answers feature flag is disabled" do
-    let(:send_filler_answers_enabled) { false }
-
-    it "has content saying answers will not be included in the confirmation email" do
-      expect(rendered).to have_text(I18n.t("what_happens_next.confirmation_email"))
-    end
+  it "has content saying that answers might be included in the confirmation email" do
+    expect(rendered).to have_text(I18n.t("what_happens_next.confirmation_email"))
   end
 end

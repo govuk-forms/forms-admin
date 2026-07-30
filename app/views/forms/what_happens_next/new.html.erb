@@ -24,11 +24,7 @@
 
       <%= t("what_happens_next.how_this_content_is_used_html") %>
 
-      <% if FeatureService.new(group: current_form.group).enabled?(:send_filler_answers) %>
-        <p><%= t("what_happens_next.confirmation_email_send_filler_answers_enabled") %></p>
-      <% else %>
-        <p><%= t("what_happens_next.confirmation_email") %></p>
-      <% end %>
+      <p><%= t("what_happens_next.confirmation_email") %></p>
 
       <%= govuk_inset_text do %>
         <%= t("what_happens_next.reference_numbers") %>
