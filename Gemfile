@@ -57,7 +57,7 @@ gem "lograge"
 gem "opentelemetry-exporter-otlp", "~> 0.34.1"
 gem "opentelemetry-instrumentation-all", "~> 0.94.0"
 gem "opentelemetry-propagator-xray", "~> 0.27.0"
-gem "opentelemetry-sdk", "~> 1.12"
+gem "opentelemetry-sdk", "~> 1.13"
 
 # Use GOV.UK Nofity api to send emails
 gem "govuk_notify_rails"
