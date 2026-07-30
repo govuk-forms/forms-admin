@@ -307,7 +307,7 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
       DeliveryConfiguration.create(
         delivery_method: :s3,
         delivery_schedule: :immediate,
-        formats: [],
+        formats: %w[csv],
       ),
     ],
   )

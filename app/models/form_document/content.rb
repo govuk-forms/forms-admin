@@ -57,9 +57,15 @@ class FormDocument::Content
   end
 
   def email_delivery_configuration
-    delivery_configurations.find do |delivery_configuration|
-      delivery_configuration["delivery_method"] == "email" && delivery_configuration["delivery_schedule"] == "immediate"
-    end
+    immediate_delivery_configuration("email")
+  end
+
+  def has_s3_delivery?
+    s3_delivery_configuration.present?
+  end
+
+  def s3_delivery_configuration
+    immediate_delivery_configuration("s3")
   end
 
   def daily_submission_batch_enabled?
@@ -71,6 +77,14 @@ class FormDocument::Content
   def weekly_submission_batch_enabled?
     delivery_configurations.any? do |delivery_configuration|
       delivery_configuration["delivery_schedule"] == "weekly"
+    end
+  end
+
+private
+
+  def immediate_delivery_configuration(delivery_method)
+    delivery_configurations.find do |delivery_configuration|
+      delivery_configuration["delivery_method"] == delivery_method && delivery_configuration["delivery_schedule"] == "immediate"
     end
   end
 end

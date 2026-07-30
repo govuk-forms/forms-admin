@@ -504,23 +504,28 @@ en:
       draft_edit: Edit the draft of this form
       how_you_get_completed_forms:
         batch_submissions:
-          daily_and_weekly_enabled: You are getting daily and weekly batches of completed forms.
-          daily_enabled: You are getting a daily batch of completed forms.
+          daily_and_weekly_enabled: You are getting daily and weekly batches of completed forms sent to %{submission_email}.
+          daily_enabled: You are getting a daily batch of completed forms sent to %{submission_email}.
           disabled: You have not opted to get a daily or weekly batch of completed forms.
           title: Daily and weekly CSVs
-          weekly_enabled: You are getting a weekly batch of completed forms.
-        csv_and_json: CSV and JSON
-        submission_email: Email
-        submission_format:
-          email:
+          weekly_enabled: You are getting a weekly batch of completed forms sent to %{submission_email}.
+        email:
+          disabled: You have not opted to get completed forms by email.
+          enabled: You’re getting completed forms sent to %{submission_email}.
+          format:
             email_csv_html: |
-              Each completed form is also attached to the email as a CSV file.</br>
-              You have not opted to get each completed form as a JSON file.
-            email_csv_json_html: Each completed form is also attached to the email as a CSV file and a JSON file.
-            email_html: You have not opted to also get each completed form as a JSON or CSV file.
+              Data from each completed form is also attached to the email as a CSV file.</br>
+              You have not opted to get data from each completed form as a JSON file.
+            email_csv_json_html: Data from each completed form is also attached to the email as a CSV file and a JSON file.
+            email_html: You have not opted to also get data from each completed form attached to the email as a JSON or CSV file.
             email_json_html: |
-              Each completed form is also attached to the email as a JSON file.</br>
-              You have not opted to get each completed form as a CSV file.
+              Data from each completed form is also attached to the email as a JSON file.</br>
+              You have not opted to get data from each completed form attached to the email as a CSV file.
+          heading: Email
+        s3:
+          disabled: You have not opted to receive completed forms in an AWS S3 bucket.
+          enabled: You’re receiving %{delivery_format} files in the AWS S3 bucket %{bucket_name}
+          heading: AWS S3 bucket
         title: How you get completed forms
       live_form_url: Form URL
       live_form_url_multilingual:
@@ -2254,8 +2259,8 @@ en:
       s3_details:
         summary_content_html: |
           <p>You can get completed forms sent to an AWS S3 bucket instead of an email address.</p>
-          <p>To find out more about this option, including how to set it up, <a href="https://www.forms.service.gov.uk/processing-completed-form-submissions">read our guidance on processing completed form submissions</a>.</p>
-          <p>You still need to set an email address here to mark this task complete. When you switch to an S3 bucket, you’ll stop getting completed forms by email.</p>
+          <p>You need to set an email address here to mark this task complete, even if you want to receive completed forms in an AWS S3 bucket.</p>
+          <p>To find out how to set up an AWS S3 bucket, <a href="https://www.forms.service.gov.uk/processing-completed-form-submissions">read our guidance on processing completed form submissions</a>.</p>
         summary_text: Get completed forms sent to an AWS S3 bucket
   share_preview:
     body_html: |
