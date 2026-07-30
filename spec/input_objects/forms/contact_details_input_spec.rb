@@ -14,13 +14,6 @@ RSpec.describe Forms::ContactDetailsInput, type: :model do
           expect(contact_details_input).to be_invalid
         end
 
-        it "is invalid if it is not a government email address" do
-          contact_details_input = build :contact_details_input, email: "something@gmail.com"
-          expect(contact_details_input).to be_invalid
-
-          expect(contact_details_input.errors).to be_added :email, :non_government_email
-        end
-
         it_behaves_like "a field that rejects invalid email addresses" do
           let(:model) { build :contact_details_input }
           let(:attribute) { :email }
@@ -31,12 +24,23 @@ RSpec.describe Forms::ContactDetailsInput, type: :model do
           expect(contact_details_input).to be_valid
         end
 
-        context "when the user has an email address in an email domain not ending with .gov.uk" do
-          let(:current_user) { build :user, email: "user@non-departmental.example" }
+        context "when the email is a non-government email address" do
+          let(:form) { create :form, :with_group }
+          let(:contact_details_input) { build :contact_details_input, email: "something@non-departmental.example", form: form }
 
-          it "is valid if given an email address in the same domain as the user" do
-            contact_details_input = build(:contact_details_input, email: "something@non-departmental.example", current_user:)
-            expect(contact_details_input).to be_valid
+          it "is invalid" do
+            expect(contact_details_input).to be_invalid
+            expect(contact_details_input.errors).to be_added :email, :non_government_email
+          end
+
+          context "and the organisation has an associated domain matching the email" do
+            before do
+              create :organisation_domain, organisation: form.group.organisation, domain: "non-departmental.example"
+            end
+
+            it "is valid" do
+              expect(contact_details_input).to be_valid
+            end
           end
         end
       end

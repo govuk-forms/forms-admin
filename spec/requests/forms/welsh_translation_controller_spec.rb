@@ -128,8 +128,10 @@ RSpec.describe Forms::WelshTranslationController, type: :request do
         expect(flash).to be_empty
       end
 
-      context "and the current user is signed in with an email address at the same domain" do
-        let(:standard_user) { build :user, :standard, organisation: test_org, email: Faker::Internet.email(domain:) }
+      context "and the organisation has an associated domain matching the email" do
+        before do
+          create :organisation_domain, organisation: group.organisation, domain: domain
+        end
 
         it "redirects to the form task list and displays a success banner including text about being marked complete" do
           post(welsh_translation_create_path(id), params:)

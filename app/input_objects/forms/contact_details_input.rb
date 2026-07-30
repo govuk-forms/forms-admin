@@ -1,5 +1,5 @@
 class Forms::ContactDetailsInput < BaseInput
-  attr_accessor :form, :email, :phone, :link_text, :link_href, :contact_details_supplied, :current_user
+  attr_accessor :form, :email, :phone, :link_text, :link_href, :contact_details_supplied
 
   validates :email, presence: true, email_address: true, if: -> { supplied :supply_email }
   validates :email, allowed_email_domain: true, if: -> { supplied :supply_email }
