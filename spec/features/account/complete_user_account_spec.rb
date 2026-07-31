@@ -1,8 +1,9 @@
 require "rails_helper"
 
-feature "Add account organisation to user without organisation", type: :feature do
-  let(:user) { create :user, :with_no_org, name: nil, terms_agreed_at: nil }
-  let!(:organisation) { create :organisation }
+feature "Add account organisation to user without organisation", :feature_show_relevant_organisations, type: :feature do
+  let(:domain) { "example.gov.uk" }
+  let(:user) { create :user, :with_no_org, email: Faker::Internet.email(domain: domain), name: nil, terms_agreed_at: nil }
+  let!(:organisation) { create :organisation, organisation_domains: [create(:organisation_domain, domain: domain)] }
 
   before do
     OmniAuth.config.test_mode = true
@@ -12,6 +13,9 @@ feature "Add account organisation to user without organisation", type: :feature 
     )
 
     allow(Settings).to receive(:auth_provider).and_return("auth0")
+
+    # add another org so a list of options is displayed
+    create :organisation, organisation_domains: [create(:organisation_domain, domain: domain)]
   end
 
   after do
@@ -47,7 +51,7 @@ private
   end
 
   def and_i_select_an_organisation
-    fill_in "Select your organisation", with: "#{organisation.name}\n"
+    choose organisation.name_with_abbreviation
     click_button "Save and continue"
   end
 

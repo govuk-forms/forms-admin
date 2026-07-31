@@ -60,7 +60,7 @@ describe "account/organisations/edit.html.erb" do
       end
 
       it "displays the user's email domain" do
-        expect(rendered).to have_content(I18n.t("account.organisation.you_created_account_with", email_domain: "example.com"))
+        expect(rendered).to have_content(I18n.t("account.organisations.edit.you_created_account_with", email_domain: "example.com"))
       end
 
       context "when there are fewer than 30 organisations" do
@@ -81,7 +81,7 @@ describe "account/organisations/edit.html.erb" do
 
         it "has a radio button for organisation not listed" do
           expect(rendered).to have_selector("input[type='radio'][value='not_listed'][name='account_organisation_input[organisation_id]']")
-          expect(rendered).to have_selector("label[for='account-organisation-input-organisation-id-not-listed-field']", text: I18n.t("account.organisation.not_listed_option"))
+          expect(rendered).to have_selector("label[for='account-organisation-input-organisation-id-not-listed-field']", text: I18n.t("account.organisations.edit.not_listed_option"))
         end
 
         it "does not render the not listed details component" do
@@ -112,7 +112,7 @@ describe "account/organisations/edit.html.erb" do
 
         it "renders the not listed details component" do
           expect(rendered).to have_selector("details.govuk-details")
-          expect(rendered).to have_selector("summary.govuk-details__summary", text: I18n.t("account.organisation.details_summary"))
+          expect(rendered).to have_selector("summary.govuk-details__summary", text: I18n.t("account.organisations.edit.details_summary"))
         end
       end
     end

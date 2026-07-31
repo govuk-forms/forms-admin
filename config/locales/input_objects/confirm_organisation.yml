@@ -1,0 +1,15 @@
+---
+en:
+  activemodel:
+    errors:
+      models:
+        account/confirm_organisation_input:
+          attributes:
+            confirm:
+              blank: Select ‘Yes’ if you work for %{organisation}
+  helpers:
+    label:
+      account_confirm_organisation_input:
+        confirm_options:
+          'no': No, I work for a different organisation
+          'yes': 'Yes'
