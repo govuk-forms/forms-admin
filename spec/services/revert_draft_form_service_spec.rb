@@ -137,6 +137,58 @@ describe RevertDraftFormService do
       end
     end
 
+    context "with an exit page condition" do
+      let(:live_form) { create(:form, :ready_for_live, pages_count: 1) }
+
+      before do
+        live_form.pages.first.update!(answer_type: "selection", answer_settings: { "only_one_option" => "true", "selection_options" => [{ "name" => "Yes" }, { "name" => "No" }] })
+        live_form.pages.first.routing_conditions.create!(
+          answer_value: "No",
+          routing_page_id: live_form.pages.first.id,
+          check_page_id: live_form.pages.first.id,
+          exit_page_heading: "You cannot continue",
+          exit_page_markdown: "Please contact us",
+        )
+        FormDocument.create!(form: live_form, tag: "live", content: live_form.as_form_document(live_at: live_form.updated_at))
+        live_form.update!(state: :live_with_draft)
+      end
+
+      context "when the exit page content is changed in the draft" do
+        before do
+          condition = live_form.pages.first.routing_conditions.first
+          condition.update!(exit_page_heading: "Something else", exit_page_markdown: "Something else entirely")
+        end
+
+        it "restores the original exit page content" do
+          revert_draft(live_tag)
+
+          live_form.reload
+          condition = live_form.pages.first.routing_conditions.first
+
+          expect(condition.exit_page_heading).to eq("You cannot continue")
+          expect(condition.exit_page_markdown).to eq("Please contact us")
+        end
+      end
+
+      context "when the exit page is removed in the draft" do
+        before do
+          condition = live_form.pages.first.routing_conditions.first
+          condition.update!(exit_page_heading: nil, exit_page_markdown: nil)
+        end
+
+        it "restores the original exit page and its ExitPage record" do
+          revert_draft(live_tag)
+
+          live_form.reload
+          condition = live_form.pages.first.routing_conditions.first
+
+          expect(condition.exit_page).to be_present
+          expect(condition.exit_page_heading).to eq("You cannot continue")
+          expect(condition.exit_page_markdown).to eq("Please contact us")
+        end
+      end
+    end
+
     context "when the delivery configurations are changed in the draft" do
       let(:live_form) do
         create(:form, :live, delivery_configurations: [

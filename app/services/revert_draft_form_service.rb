@@ -117,6 +117,8 @@ private
     condition.routing_page = Page.find_by!(external_id: condition_data["routing_page_id"]) if condition_data["routing_page_id"]
     condition.check_page = Page.find_by!(external_id: condition_data["check_page_id"]) if condition_data["check_page_id"]
     condition.goto_page = Page.find_by!(external_id: condition_data["goto_page_id"]) if condition_data["goto_page_id"]
+    condition.exit_page_heading = condition_data["exit_page_heading"]
+    condition.exit_page_markdown = condition_data["exit_page_markdown"]
   end
 
   def welsh_form_document_exists?(tag)
@@ -188,6 +190,7 @@ private
     form.translations.where(locale: :cy).delete_all
     Page::Translation.where(locale: :cy, page_id: form.page_ids).delete_all
     Condition::Translation.where(locale: :cy, condition_id: form.condition_ids).delete_all
+    ExitPage::Translation.where(locale: :cy, exit_page_id: form.exit_page_ids).delete_all
   end
 
   def revert_delivery_configurations(form_document_content)

@@ -271,15 +271,6 @@ RSpec.describe Condition, type: :model do
         expect(condition.warning_goto_page_doesnt_exist).to be_nil
       end
     end
-
-    context "when exit_page_id is present using ExitPage" do
-      let(:exit_page) { create :exit_page }
-      let(:condition) { create :condition, routing_page_id: routing_page.id, goto_page_id: nil, exit_page_id: exit_page.id }
-
-      it "returns nil" do
-        expect(condition.warning_goto_page_doesnt_exist).to be_nil
-      end
-    end
   end
 
   describe "#warning_answer_doesnt_exist" do
@@ -654,8 +645,7 @@ RSpec.describe Condition, type: :model do
     end
 
     context "when the condition has an ExitPage" do
-      let(:exit_page) { create :exit_page, question_page: check_page }
-      let(:condition) { create :condition, exit_page_id: exit_page.id, routing_page_id: check_page.id }
+      let(:condition) { create :condition, :with_exit_page, routing_page_id: check_page.id }
 
       it "includes the exit_page_id" do
         expect(condition.as_json).to include({
@@ -717,6 +707,105 @@ RSpec.describe Condition, type: :model do
         condition.normalise_welsh!
         expect(condition.reload.exit_page_heading_cy).to be_nil
         expect(condition.reload.exit_page_markdown_cy).to be_nil
+      end
+    end
+  end
+
+  describe "using the new ExitPage model" do
+    describe "#sync_exit_page" do
+      context "when no associated exit page exists" do
+        context "when exit page heading is set but not exit page markdown" do
+          subject(:condition) { build :condition, routing_page_id: create(:page).id, exit_page_heading: "Exit page heading" }
+
+          it "does not create an associated exit page" do
+            condition.save!
+            expect(condition.reload.exit_page).to be_nil
+          end
+        end
+
+        context "when exit page markdown is set but not exit page heading" do
+          subject(:condition) { build :condition, routing_page_id: create(:page).id, exit_page_markdown: "Exit page markdown" }
+
+          it "does not create an associated exit page" do
+            condition.save!
+            expect(condition.reload.exit_page).to be_nil
+          end
+        end
+
+        context "when exit page heading and markdown are set" do
+          subject(:condition) { build :condition, routing_page_id: create(:page).id, exit_page_heading: "Exit page heading", exit_page_markdown: "Exit page markdown" }
+
+          it "creates an associated exit page" do
+            condition.save!
+            expect(condition.reload.exit_page).to be_present
+          end
+
+          it "passes the exit page values to the new exit page" do
+            condition.save!
+            expect(condition.reload.exit_page.markdown).to eq(condition.exit_page_markdown)
+            expect(condition.reload.exit_page.heading).to eq(condition.exit_page_heading)
+          end
+
+          context "when the condition has a Welsh translation for exit page content" do
+            subject(:condition) do
+              build(
+                :condition,
+                routing_page_id: create(:page).id,
+                exit_page_heading: "Exit page heading",
+                exit_page_markdown: "Exit page markdown",
+                exit_page_heading_cy: "Exit page Welsh heading",
+                exit_page_markdown_cy: "Exit page Welsh markdown",
+              )
+            end
+
+            it "passes the exit page Welsh values to the new exit page" do
+              condition.save!
+              expect(condition.reload.exit_page.markdown_cy).to eq(condition.exit_page_markdown_cy)
+              expect(condition.reload.exit_page.heading_cy).to eq(condition.exit_page_heading_cy)
+            end
+          end
+        end
+      end
+
+      context "when an associated exit page exists" do
+        subject(:condition) do
+          create(
+            :condition,
+            routing_page_id: create(:page).id,
+            exit_page_heading: "Exit page heading",
+            exit_page_markdown: "Exit page markdown",
+            exit_page_heading_cy: "Exit page Welsh heading",
+            exit_page_markdown_cy: "Exit page Welsh markdown",
+          )
+        end
+
+        it "updates the associated exit page" do
+          updated_markdown = "New markdown"
+          condition.exit_page_markdown = updated_markdown
+          condition.save!
+          expect(condition.reload.exit_page.markdown).to eq(updated_markdown)
+          expect(condition.reload.exit_page.heading).to eq(condition.exit_page_heading)
+        end
+
+        it "removes the associated exit page if the condition no longer has exit page markdown" do
+          condition.exit_page_markdown = nil
+          condition.save!
+          expect(condition.reload.exit_page).to be_nil
+        end
+
+        it "removes the associated exit page if the condition no longer has exit page heading" do
+          condition.exit_page_heading = nil
+          condition.save!
+          expect(condition.reload.exit_page).to be_nil
+        end
+
+        it "removes Welsh translations without deleting the exit page" do
+          condition.exit_page_markdown_cy = nil
+          condition.save!
+          condition.exit_page.reload
+          expect(condition.exit_page).to be_present
+          expect(condition.exit_page.markdown_cy).to be_nil
+        end
       end
     end
   end
