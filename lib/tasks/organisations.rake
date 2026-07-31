@@ -158,6 +158,44 @@ namespace :organisations do
         Rails.logger.info("Added domains for #{organisation.name}: #{domains.join(', ')}")
       end
     end
+
+    desc "Populate organisation domains from a list of organisations and domains"
+    task :populate_from_list, [] => :environment do |_, args|
+      organisations_and_domains = args.to_a
+
+      usage_message = "usage: rake organisations:domains:populate_from_list[Department for testing:dftest.gov.uk\,testing.gov.uk,Example Org:example.gov.uk]".freeze
+      abort usage_message if organisations_and_domains.empty?
+
+      organisations_successfully_populated = []
+      missing_organisations = []
+
+      organisations_and_domains.map { it.split(":") }.each do |organisation_and_domain|
+        org_name = organisation_and_domain.first
+        domains = organisation_and_domain.second.split(",")
+
+        organisation = Organisation.find_by(name: org_name)
+
+        if organisation.present?
+          Rails.logger.info("Adding domains for organisation #{org_name}")
+
+          domains.each do |domain|
+            Rails.logger.info("Adding domain #{domain} to organisation #{org_name}")
+            if organisation.organisation_domains.find_by(domain:).present?
+              Rails.logger.info("Skipped adding domain #{domain} as it already exists for organisation #{org_name}")
+            else
+              organisation.organisation_domains.create!(domain: domain)
+              Rails.logger.info("Successfully added #{domain} to organisation #{org_name}")
+            end
+          end
+          organisations_successfully_populated.push(org_name)
+        else
+          missing_organisations.push(org_name)
+        end
+      end
+
+      Rails.logger.info "Domains were successfully populated for the following organisations: #{organisations_successfully_populated.join(', ')}" if organisations_successfully_populated.any?
+      Rails.logger.info "The following organisations could not be found: #{missing_organisations.join(', ')}" if missing_organisations.any?
+    end
   end
 end
 

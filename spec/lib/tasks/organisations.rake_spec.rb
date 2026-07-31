@@ -389,4 +389,66 @@ RSpec.describe "organisations.rake", type: :task do
       expect(second_organisation.reload.organisation_domains.pluck(:domain)).to match_array(%w[service.gov.uk])
     end
   end
+
+  describe "organisations:domains:populate_from_list" do
+    subject(:task) do
+      Rake::Task["organisations:domains:populate_from_list"]
+    end
+
+    let!(:organisation) { create :organisation, slug: "test-org", name: "Test Org" }
+
+    it "adds domains to an organisation" do
+      expect(Rails.logger).to receive(:info).with("Adding domains for organisation Test Org")
+      expect(Rails.logger).to receive(:info).with("Adding domain example.gov.uk to organisation Test Org")
+      expect(Rails.logger).to receive(:info).with("Adding domain example.org to organisation Test Org")
+      expect(Rails.logger).to receive(:info).with("Successfully added example.gov.uk to organisation Test Org")
+      expect(Rails.logger).to receive(:info).with("Successfully added example.org to organisation Test Org")
+      expect(Rails.logger).to receive(:info).with("Domains were successfully populated for the following organisations: Test Org")
+
+      expect {
+        task.invoke("Test Org:example.gov.uk\,example.org")
+      }.to change { organisation.reload.organisation_domains.pluck(:domain) }
+        .from([])
+        .to(match_array(%w[example.gov.uk example.org]))
+    end
+
+    it "raises an error when a domain is invalid" do
+      expect {
+        task.invoke("Test Org:not a domain")
+      }.to raise_error(ActiveRecord::RecordInvalid, /Enter a domain name in the correct format, like subdomain\.gov\.uk/)
+
+      expect(organisation.reload.organisation_domains).to be_empty
+    end
+
+    context "when a domain already exists for an organisation" do
+      before do
+        create :organisation_domain, organisation:, domain: "example.gov.uk"
+      end
+
+      it "skips the existing domain" do
+        expect(Rails.logger).to receive(:info).with("Adding domains for organisation Test Org")
+        expect(Rails.logger).to receive(:info).with("Adding domain example.gov.uk to organisation Test Org")
+        expect(Rails.logger).to receive(:info).with("Skipped adding domain example.gov.uk as it already exists for organisation Test Org")
+        expect(Rails.logger).to receive(:info).with("Adding domain example.org to organisation Test Org")
+        expect(Rails.logger).to receive(:info).with("Successfully added example.org to organisation Test Org")
+        expect(Rails.logger).to receive(:info).with("Domains were successfully populated for the following organisations: Test Org")
+
+        expect {
+          task.invoke("Test Org:example.gov.uk\,example.org")
+        }.to change { organisation.reload.organisation_domains.pluck(:domain) }
+          .from(["example.gov.uk"])
+          .to(match_array(%w[example.gov.uk example.org]))
+      end
+    end
+
+    context "when a an organisation cannot be found" do
+      it "skips the existing domain" do
+        expect(Rails.logger).to receive(:info).with("The following organisations could not be found: Renamed Test Org")
+
+        expect {
+          task.invoke("Renamed Test Org:example.gov.uk\,example.org")
+        }.not_to(change { organisation.reload.organisation_domains.pluck(:domain) })
+      end
+    end
+  end
 end
