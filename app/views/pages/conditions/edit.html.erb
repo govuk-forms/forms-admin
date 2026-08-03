@@ -49,7 +49,7 @@
 
       <% if condition_input.record.exit_page? %>
         <p class="govuk-body">
-          <%= govuk_link_to t("page_conditions.edit_exit_page", exit_page_heading: condition_input.record.exit_page_heading), edit_exit_page_path(condition_input.form.id, condition_input.page.id, condition_input.record.id) %>
+          <%= govuk_link_to t("page_conditions.edit_exit_page", exit_page_heading: condition_input.record.exit_page_heading), conditions_exit_page_edit_path(condition_input.form.id, condition_input.page.id, condition_input.record.id) %>
         </p>
       <% end %>
 
