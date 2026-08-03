@@ -162,7 +162,7 @@ RSpec.describe Pages::ConditionsController, type: :request do
         let(:group) { create(:group, organisation: standard_user.organisation) }
 
         it "redirects to the new exit page" do
-          expect(response).to redirect_to new_exit_page_path(form_id: form.id, page_id: page.id, answer_value: "Wales")
+          expect(response).to redirect_to conditions_exit_page_new_path(form_id: form.id, page_id: page.id, answer_value: "Wales")
         end
       end
 
@@ -304,7 +304,7 @@ RSpec.describe Pages::ConditionsController, type: :request do
 
       it "redirects to the edit exit page" do
         put update_condition_path(form_id: form.id, page_id: page.id, condition_id: condition.id, params:)
-        expect(response).to redirect_to edit_exit_page_path(form_id: form.id, page_id: page.id, condition_id: condition.id)
+        expect(response).to redirect_to conditions_exit_page_edit_path(form_id: form.id, page_id: page.id, condition_id: condition.id)
       end
     end
 

@@ -28,7 +28,7 @@ class Pages::ConditionsController < PagesController
 
     if condition_input.submit
       if condition_input.create_exit_page?
-        redirect_to new_exit_page_path(current_form.id, page.id, answer_value: condition_input.answer_value)
+        redirect_to conditions_exit_page_new_path(current_form.id, page.id, answer_value: condition_input.answer_value)
       else
         # TODO: Route number is hardcoded whilst we can only have one value for it
         # https://trello.com/c/BfkZEIgM/3446-set-route-count-dynamically-instead-of-hard-coding-it
@@ -63,7 +63,7 @@ class Pages::ConditionsController < PagesController
 
     if condition_input.update_condition
       if condition_input.create_exit_page?
-        redirect_to edit_exit_page_path(current_form.id, page.id, condition.id)
+        redirect_to conditions_exit_page_edit_path(current_form.id, page.id, condition.id)
       else
         redirect_to show_routes_path(form_id: current_form.id, page_id: page.id), success: t("banner.success.route_updated", question_number: condition_input.page.position)
       end
