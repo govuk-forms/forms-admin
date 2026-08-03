@@ -22,23 +22,24 @@ RSpec.describe Forms::SubmissionEmailInput, type: :model do
       expect(submission_email_input).to be_valid
     end
 
-    context "when the user has an email address in an email domain not ending with .gov.uk" do
-      before do
-        submission_email_input_with_user.current_user = OpenStruct.new(
-          name: "Arms Length Body User",
-          email: "user@alb.example",
-        )
+    context "when the email is a non-government email address" do
+      it "is invalid" do
+        submission_email_input = build :submission_email_input, temporary_submission_email: "a@gmail.com"
+        expect(submission_email_input).to be_invalid
       end
 
-      it "is valid if given an email address in the same domain as the user" do
-        submission_email_input_with_user.temporary_submission_email = "submissions@alb.example"
-        expect(submission_email_input_with_user).to be_valid
-      end
-    end
+      context "and the organisation has an associated domain matching the email" do
+        let(:form) { create :form, :with_group }
 
-    it "is invalid if given an email address for a non-government inbox" do
-      submission_email_input = build :submission_email_input, temporary_submission_email: "a@gmail.com"
-      expect(submission_email_input).to be_invalid
+        before do
+          create :organisation_domain, organisation: form.group.organisation, domain: "alb.example"
+        end
+
+        it "is valid" do
+          submission_email_input_with_user.temporary_submission_email = "submissions@alb.example"
+          expect(submission_email_input_with_user).to be_valid
+        end
+      end
     end
 
     it "is invalid if not given an email address" do

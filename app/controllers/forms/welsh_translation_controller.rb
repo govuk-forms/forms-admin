@@ -86,7 +86,7 @@ module Forms
           { selection_options_cy_attributes: %i[id name_cy] },
           { condition_translations_attributes: WelshConditionTranslationInput.attribute_names },
         ],
-      ).merge(current_user:, form: current_form)
+      ).merge(form: current_form)
     end
 
     def delete_welsh_translation_params

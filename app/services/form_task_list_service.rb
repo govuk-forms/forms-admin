@@ -12,7 +12,7 @@ class FormTaskListService
   def initialize(form:, current_user:)
     @current_user = current_user
     @form = form
-    @form.set_task_status_service(TaskStatusService.new(form:, current_user:))
+    @form.set_task_status_service(TaskStatusService.new(form:))
     @task_statuses = form.all_task_statuses
     @task_counts = status_counts
   end

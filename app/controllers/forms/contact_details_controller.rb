@@ -19,7 +19,7 @@ module Forms
   private
 
     def contact_details_input_params
-      params.require(:forms_contact_details_input).permit(:email, :phone, :link_href, :link_text, contact_details_supplied: []).merge(form: current_form, current_user:)
+      params.require(:forms_contact_details_input).permit(:email, :phone, :link_href, :link_text, contact_details_supplied: []).merge(form: current_form)
     end
   end
 end

@@ -10,7 +10,7 @@ RSpec.describe OrgAdminAlertsService do
 
   before do
     GroupForm.create!(form: form, group:)
-    form.set_task_status_service(TaskStatusService.new(form:, current_user:))
+    form.set_task_status_service(TaskStatusService.new(form:))
   end
 
   describe "#form_made_live" do

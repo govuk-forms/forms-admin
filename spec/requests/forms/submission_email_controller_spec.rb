@@ -48,32 +48,44 @@ RSpec.describe Forms::SubmissionEmailController, type: :request do
 
   describe "#create" do
     let(:temporary_submission_email) { user.email }
+    let(:params) do
+      {
+        forms_submission_email_input: {
+          temporary_submission_email:,
+          notify_response_id: Faker::Internet.uuid,
+        },
+      }
+    end
 
     before do
       allow(submission_email_mailer_spy).to receive(:send_confirmation_code)
-
-      post(
-        submission_email_path(form.id),
-        params: {
-          forms_submission_email_input: {
-            temporary_submission_email:,
-            notify_response_id: Faker::Internet.uuid,
-          },
-        },
-      )
     end
 
     it "redirects to the email code sent page" do
+      post(submission_email_path(form.id), params: params)
       expect(response).to redirect_to(submission_email_code_sent_path(form.id))
     end
 
-    context "when user submits an invalid email address" do
-      let(:temporary_submission_email) { "a@gmail.com" }
+    context "when user submits a non-government email address" do
+      let(:domain) { "ogd.example" }
+      let(:temporary_submission_email) { Faker::Internet.email(domain:) }
 
       it "does not accept the submission email address" do
+        post(submission_email_path(form.id), params: params)
         expect(response.body).to include I18n.t("error_summary.heading")
         expect(response.body).to include I18n.t("errors.messages.non_government_email")
         expect(response).to have_http_status :unprocessable_content
+      end
+
+      context "and the organisation has an associated domain matching the email" do
+        before do
+          create :organisation_domain, organisation: group.organisation, domain: domain
+        end
+
+        it "redirects to the email code sent page" do
+          post(submission_email_path(form.id), params: params)
+          expect(response).to redirect_to(submission_email_code_sent_path(form.id))
+        end
       end
     end
 
@@ -81,15 +93,8 @@ RSpec.describe Forms::SubmissionEmailController, type: :request do
       let(:user) { user_outside_group }
 
       it "is forbidden" do
+        post(submission_email_path(form.id), params: params)
         expect(response).to have_http_status(:forbidden)
-      end
-    end
-
-    context "when current user has a government email address not ending with .gov.uk" do
-      let(:user) { standard_user.tap { |user| user.email = "user@alb.example" } }
-
-      it "redirects to the email code sent page" do
-        expect(response).to redirect_to(submission_email_code_sent_path(form.id))
       end
     end
   end

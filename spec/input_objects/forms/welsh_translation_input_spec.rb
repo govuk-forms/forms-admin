@@ -3,7 +3,6 @@ require "rails_helper"
 RSpec.describe Forms::WelshTranslationInput, type: :model do
   subject(:welsh_translation_input) { described_class.new(new_input_data) }
 
-  let(:current_user) { build :user }
   let(:form) { build_form }
   let(:page) do
     create :page,
@@ -19,7 +18,6 @@ RSpec.describe Forms::WelshTranslationInput, type: :model do
 
   let(:new_input_data) do
     {
-      current_user:,
       form:,
       mark_complete:,
       name_cy: "New Welsh name",
@@ -55,7 +53,7 @@ RSpec.describe Forms::WelshTranslationInput, type: :model do
       payment_url: "https://www.gov.uk/english-payment",
       payment_url_cy: "https://www.gov.uk/payments/your-welsh-payment-link",
     }
-    build(:form, default_attributes.merge(attributes))
+    build(:form, :with_group, default_attributes.merge(attributes))
   end
 
   def build_empty_welsh_form
@@ -197,12 +195,13 @@ RSpec.describe Forms::WelshTranslationInput, type: :model do
               expect(welsh_translation_input.errors.full_messages_for(:support_email_cy)).to include "Support email cy #{I18n.t('activemodel.errors.models.forms/welsh_translation_input.attributes.support_email_cy.non_government_email')}"
             end
 
-            context "when the user has an email address with the same domain" do
-              let(:current_user) { build :user, email: "user@example.com" }
+            context "and the organisation has an associated domain matching the email" do
+              before do
+                create :organisation_domain, organisation: form.group.organisation, domain: "example.com"
+              end
 
               it "is valid" do
                 expect(welsh_translation_input).to be_valid
-                expect(welsh_translation_input.errors.full_messages_for(:support_email_cy)).to be_empty
               end
             end
           end

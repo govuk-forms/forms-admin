@@ -14,10 +14,8 @@ describe StepSummaryCardService do
 
   let(:pages) { form.pages }
 
-  let(:current_user) { build :user }
-
   before do
-    form.set_task_status_service(TaskStatusService.new(form:, current_user:))
+    form.set_task_status_service(TaskStatusService.new(form:))
   end
 
   describe "#all_options_for_answer_type" do

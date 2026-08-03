@@ -3,8 +3,6 @@ require "rails_helper"
 RSpec.describe Form, type: :model do
   subject(:form) { described_class.new }
 
-  let(:current_user) { build :user }
-
   describe "factory" do
     it "has a valid factory" do
       form = create :form
@@ -39,7 +37,7 @@ RSpec.describe Form, type: :model do
 
     describe "task status traits" do
       before do
-        form.set_task_status_service(TaskStatusService.new(form:, current_user:))
+        form.set_task_status_service(TaskStatusService.new(form:))
       end
 
       describe "ready for live trait" do
@@ -511,7 +509,7 @@ RSpec.describe Form, type: :model do
 
   describe "FormStateMachine" do
     before do
-      form.set_task_status_service(TaskStatusService.new(form:, current_user:))
+      form.set_task_status_service(TaskStatusService.new(form: form))
     end
 
     describe "#make_live!" do
@@ -873,7 +871,7 @@ RSpec.describe Form, type: :model do
 
   describe "#all_incomplete_tasks" do
     before do
-      form.set_task_status_service(TaskStatusService.new(form:, current_user:))
+      form.set_task_status_service(TaskStatusService.new(form: form))
     end
 
     context "when a form is complete and ready to be made live" do
@@ -960,7 +958,7 @@ RSpec.describe Form, type: :model do
     let(:form) { build :form, :live, :with_group, group: }
 
     before do
-      form.set_task_status_service(TaskStatusService.new(form:, current_user:))
+      form.set_task_status_service(TaskStatusService.new(form:))
     end
 
     it "returns a hash with each of the task statuses" do
@@ -1443,7 +1441,7 @@ RSpec.describe Form, type: :model do
     let(:form) { create :form }
 
     before do
-      form.set_task_status_service(TaskStatusService.new(form:, current_user:))
+      form.set_task_status_service(TaskStatusService.new(form:))
     end
 
     context "when the language being checked is English" do
