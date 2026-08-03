@@ -200,4 +200,32 @@ describe WebController, type: :controller do
       expect(log_output.string).not_to include "authenticity_token"
     end
   end
+
+  context "when a template is missing" do
+    controller do
+      def missing_template
+        render "missing_template"
+      end
+    end
+
+    before do
+      request.env["warden"] = instance_double(
+        Warden::Proxy,
+        authenticate!: true,
+        authenticated?: true,
+        set_user: nil,
+        user: create(:user),
+      )
+      routes.draw { get "missing_template" => "web#missing_template" }
+    end
+
+    it "returns 406 when request format is not HTML" do
+      get :missing_template, format: :json
+      expect(response).to have_http_status(:not_acceptable)
+    end
+
+    it "raises the error when the request format is HTML" do
+      expect { get :missing_template, format: :html }.to raise_error(ActionView::MissingTemplate)
+    end
+  end
 end
