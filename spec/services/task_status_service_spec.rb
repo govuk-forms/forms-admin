@@ -2,12 +2,10 @@ require "rails_helper"
 
 describe TaskStatusService do
   subject(:task_status_service) do
-    described_class.new(form:, current_user:)
+    described_class.new(form:)
   end
 
   let(:group) { create :group }
-
-  let(:current_user) { build(:user, role: :standard) }
 
   before do
     form.set_task_status_service(task_status_service)
@@ -337,15 +335,6 @@ describe TaskStatusService do
 
         it "returns completed" do
           expect(task_status_service.all_task_statuses[:welsh_language_status]).to eq :completed
-        end
-
-        context "and the support email contains a non-gov.uk email with the same domain as the user" do
-          let(:current_user) { build(:user, role: :standard, email: "example@example.com") }
-          let(:form) { create(:form, :ready_for_live, :with_group, :with_welsh_translation, welsh_completed: true, group:, support_email_cy: "support@example.com") }
-
-          it "returns completed" do
-            expect(task_status_service.all_task_statuses[:welsh_language_status]).to eq :completed
-          end
         end
       end
 

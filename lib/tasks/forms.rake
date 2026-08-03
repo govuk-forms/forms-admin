@@ -35,7 +35,7 @@ namespace :forms do
 
     # the make_live event guard checks the form's task statuses through a
     # service that is normally injected by the controller
-    form.set_task_status_service(TaskStatusService.new(form:, current_user: nil))
+    form.set_task_status_service(TaskStatusService.new(form:))
 
     events = Form.event_path(from: form.aasm.current_state, to: args[:state].to_sym)
 

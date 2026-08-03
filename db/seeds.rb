@@ -193,7 +193,7 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
       ),
     ],
   )
-  smoke_test_form.set_task_status_service(TaskStatusService.new(form: smoke_test_form, current_user: nil))
+  smoke_test_form.set_task_status_service(TaskStatusService.new(form: smoke_test_form))
   smoke_test_form.make_live!
 
   all_question_types_form = Form.create!(
@@ -279,7 +279,7 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
       ),
     ],
   )
-  all_question_types_form.set_task_status_service(TaskStatusService.new(form: all_question_types_form, current_user: craig))
+  all_question_types_form.set_task_status_service(TaskStatusService.new(form: all_question_types_form))
   all_question_types_form.make_live!
 
   e2e_s3_forms = Form.create!(
@@ -313,7 +313,7 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
       ),
     ],
   )
-  e2e_s3_forms.set_task_status_service(TaskStatusService.new(form: e2e_s3_forms, current_user: craig))
+  e2e_s3_forms.set_task_status_service(TaskStatusService.new(form: e2e_s3_forms))
   e2e_s3_forms.make_live!
 
   branch_route_form = Form.create!(
@@ -410,7 +410,7 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
         - Confirmed that you are eligible to submit this form
     MARKDOWN
   )
-  branch_route_form.set_task_status_service(TaskStatusService.new(form: branch_route_form, current_user: craig))
+  branch_route_form.set_task_status_service(TaskStatusService.new(form: branch_route_form))
   branch_route_form.reload.make_live!
 
   none_of_the_above_form = Form.create!(
@@ -465,7 +465,7 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
       ),
     ],
   )
-  none_of_the_above_form.set_task_status_service(TaskStatusService.new(form: none_of_the_above_form, current_user: craig))
+  none_of_the_above_form.set_task_status_service(TaskStatusService.new(form: none_of_the_above_form))
   none_of_the_above_form.make_live!
 
   welsh_form = Form.create!(
@@ -534,7 +534,7 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
     ],
   )
 
-  welsh_form.set_task_status_service(TaskStatusService.new(form: welsh_form, current_user: craig))
+  welsh_form.set_task_status_service(TaskStatusService.new(form: welsh_form))
   welsh_form.make_live!
 
   multiple_branch_form = Form.create!(
@@ -644,7 +644,7 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
     goto_page: multiple_branch_form.pages[5],
     answer_value: "Northern Ireland",
   )
-  multiple_branch_form.set_task_status_service(TaskStatusService.new(form: multiple_branch_form, current_user: craig))
+  multiple_branch_form.set_task_status_service(TaskStatusService.new(form: multiple_branch_form))
   multiple_branch_form.make_live!
 
   copy_of_answers_form = Form.create!(
@@ -677,7 +677,7 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
       ),
     ],
   )
-  copy_of_answers_form.set_task_status_service(TaskStatusService.new(form: multiple_branch_form, current_user: craig))
+  copy_of_answers_form.set_task_status_service(TaskStatusService.new(form: multiple_branch_form))
   copy_of_answers_form.make_live!
 
   # add forms to groups

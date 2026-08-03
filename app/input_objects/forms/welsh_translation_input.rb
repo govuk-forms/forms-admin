@@ -2,7 +2,7 @@ class Forms::WelshTranslationInput < Forms::MarkCompleteInput
   include TextInputHelper
   include ActiveModel::Attributes
 
-  attr_accessor :current_user, :form, :page_translations
+  attr_accessor :form, :page_translations
 
   attribute :mark_complete
 

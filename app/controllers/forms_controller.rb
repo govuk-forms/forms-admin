@@ -25,7 +25,7 @@ private
 
   def load_form
     @current_form = Form.find(params[:form_id])
-    @current_form.set_task_status_service(TaskStatusService.new(form: @current_form, current_user:))
+    @current_form.set_task_status_service(TaskStatusService.new(form: @current_form))
     @initial_form_state = @current_form.state
   end
 
