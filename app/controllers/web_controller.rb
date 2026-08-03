@@ -23,6 +23,14 @@ class WebController < ApplicationController
     render "errors/forbidden", status: :forbidden, formats: :html
   end
 
+  rescue_from ActionView::MissingTemplate do |exception|
+    if request.format && request.format != :html
+      head :not_acceptable
+    else
+      raise exception
+    end
+  end
+
   PRIVILEGED_AUTH0_CONNECTION_STRATEGIES = %w[
     google-apps
   ].freeze
