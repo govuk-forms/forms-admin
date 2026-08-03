@@ -6,7 +6,7 @@ describe "pages/exit_page/new.html.erb" do
   let(:exit_page_input) { Pages::ExitPageInput.new(form:, page: pages.first, answer_value: "Option 1") }
 
   before do
-    render template: "pages/exit_page/new", locals: { exit_page_input:, preview_html: "Preview HTML", check_preview_validation: "true" }
+    render template: "conditions/exit_page/new", locals: { exit_page_input:, preview_html: "Preview HTML", check_preview_validation: "true" }
   end
 
   it "sets the correct title" do

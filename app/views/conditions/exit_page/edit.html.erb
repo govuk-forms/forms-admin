@@ -6,7 +6,7 @@
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds-from-desktop">
 
-    <%= form_with model: update_exit_page_input, url: update_exit_page_path(update_exit_page_input.form.id, update_exit_page_input.page.id, update_exit_page_input.record.id), method: 'PUT' do |f| %>
+    <%= form_with model: update_exit_page_input, url: conditions_exit_page_update_path(update_exit_page_input.form.id, update_exit_page_input.page.id, update_exit_page_input.record.id), method: 'PUT' do |f| %>
       <%= f.govuk_error_summary %>
       <h1 class="govuk-heading-l">
         <span class="govuk-caption-l"><%= t("page_titles.routing_page_caption", question_number: update_exit_page_input.page.position) %></span>
@@ -15,10 +15,10 @@
       </h1>
 
       <%= f.govuk_text_field( :exit_page_heading, value: update_exit_page_input.exit_page_heading, label: { size: 'm' })  %>
-      
+
       <%= render MarkdownEditorComponent::View.new(:exit_page_markdown,
         form_builder: f,
-        render_preview_path: exit_page_render_preview_path(form_id: update_exit_page_input.form.id, page_id: update_exit_page_input.page.id, check_preview_validation:),
+        render_preview_path: conditions_exit_page_render_preview_path(form_id: update_exit_page_input.form.id, page_id: update_exit_page_input.page.id, check_preview_validation:),
         preview_html: preview_html,
         form_model: update_exit_page_input,
         label: t("helpers.label.pages_exit_page_input.exit_page_markdown"),
@@ -29,7 +29,7 @@
         <%= f.govuk_submit t("save_and_continue") %>
         <%= govuk_link_to t('cancel'), edit_condition_path(update_exit_page_input.form.id, update_exit_page_input.page.id, update_exit_page_input.record.id) %>
       </div>
-      <%= govuk_button_link_to t('.delete_exit_page'), delete_exit_page_path(update_exit_page_input.form.id, update_exit_page_input.page.id, update_exit_page_input.record.id), warning: true %>
+      <%= govuk_button_link_to t('.delete_exit_page'), conditions_exit_page_delete_path(update_exit_page_input.form.id, update_exit_page_input.page.id, update_exit_page_input.record.id), warning: true %>
     <% end %>
   </div>
 </div>

@@ -1,6 +1,6 @@
 require "rails_helper"
 
-describe "pages/exit_page/delete.html.erb" do
+describe "conditions/exit_page/delete.html.erb" do
   let(:form) { create :form }
   let(:pages) do
     build_list(:page, 3) do |page, i|
@@ -16,7 +16,7 @@ describe "pages/exit_page/delete.html.erb" do
     assign(:exit_page, exit_page)
     assign(:delete_exit_page_input, exit_page_input)
 
-    render template: "pages/exit_page/delete"
+    render template: "conditions/exit_page/delete"
   end
 
   it "sets the correct title" do
