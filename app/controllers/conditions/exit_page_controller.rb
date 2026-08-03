@@ -1,11 +1,11 @@
-class Pages::ExitPageController < PagesController
+class Conditions::ExitPageController < PagesController
   before_action :can_add_page_routing, only: %i[new create delete destroy]
   before_action :ensure_answer_value_present, only: %i[new create]
 
   def new
     exit_page_input = Pages::ExitPageInput.new(form: current_form, page:, answer_value: params[:answer_value])
 
-    render template: "pages/exit_page/new", locals: { exit_page_input:, preview_html: preview_html(exit_page_input), check_preview_validation: false }
+    render template: "conditions/exit_page/new", locals: { exit_page_input:, preview_html: preview_html(exit_page_input), check_preview_validation: false }
   end
 
   def create
@@ -16,7 +16,7 @@ class Pages::ExitPageController < PagesController
       # https://trello.com/c/BfkZEIgM/3446-set-route-count-dynamically-instead-of-hard-coding-it
       redirect_to show_routes_path(form_id: current_form.id, page_id: page.id), success: t("banner.success.exit_page_created")
     else
-      render template: "pages/exit_page/new", locals: { exit_page_input:, preview_html: preview_html(exit_page_input), check_preview_validation: true }, status: :unprocessable_content
+      render template: "conditions/exit_page/new", locals: { exit_page_input:, preview_html: preview_html(exit_page_input), check_preview_validation: true }, status: :unprocessable_content
     end
   end
 
@@ -25,7 +25,7 @@ class Pages::ExitPageController < PagesController
 
     update_exit_page_input = Pages::UpdateExitPageInput.new(form: current_form, page:, record: condition).assign_condition_values
 
-    render template: "pages/exit_page/edit", locals: { update_exit_page_input:, preview_html: preview_html(update_exit_page_input), check_preview_validation: false }
+    render template: "conditions/exit_page/edit", locals: { update_exit_page_input:, preview_html: preview_html(update_exit_page_input), check_preview_validation: false }
   end
 
   def update
@@ -38,7 +38,7 @@ class Pages::ExitPageController < PagesController
     if update_exit_page_input.submit
       redirect_to edit_condition_path(form_id: current_form.id, page_id: page.id, condition_id: update_exit_page_input.record.id), success: t("banner.success.exit_page_updated")
     else
-      render template: "pages/exit_page/edit", locals: { update_exit_page_input:, preview_html: preview_html(update_exit_page_input), check_preview_validation: true }, status: :unprocessable_content
+      render template: "conditions/exit_page/edit", locals: { update_exit_page_input:, preview_html: preview_html(update_exit_page_input), check_preview_validation: true }, status: :unprocessable_content
     end
   end
 
@@ -62,7 +62,7 @@ class Pages::ExitPageController < PagesController
     end
 
     unless @delete_exit_page_input.confirmed?
-      return redirect_to edit_exit_page_path(@current_form.id, @page.id, @exit_page.id)
+      return redirect_to conditions_exit_page_edit_path(@current_form.id, @page.id, @exit_page.id)
     end
 
     @exit_page.destroy_and_update_form!

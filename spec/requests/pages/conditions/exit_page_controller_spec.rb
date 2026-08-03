@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe Pages::ExitPageController, type: :request do
+RSpec.describe Conditions::ExitPageController, type: :request do
   let(:form) { create :form, :ready_for_routing, id: 1 }
   let(:pages) { form.pages }
   let(:page) do
@@ -29,11 +29,11 @@ RSpec.describe Pages::ExitPageController, type: :request do
 
   describe "#new" do
     before do
-      get new_exit_page_path(form_id: form.id, page_id: selected_page.id, answer_value: answer_value)
+      get conditions_exit_page_new_path(form_id: form.id, page_id: selected_page.id, answer_value: answer_value)
     end
 
     it "renders the new exit page template" do
-      expect(response).to render_template("pages/exit_page/new")
+      expect(response).to render_template("conditions/exit_page/new")
     end
 
     context "when user should not be allowed to add routes to pages" do
@@ -59,7 +59,7 @@ RSpec.describe Pages::ExitPageController, type: :request do
     let(:params) { { pages_exit_page_input: { exit_page_heading: "Exit Page Heading", exit_page_markdown: "Exit Page Markdown", answer_value: } } }
 
     before do
-      post create_exit_page_path(form_id: form.id, page_id: selected_page.id, params:)
+      post conditions_exit_page_create_path(form_id: form.id, page_id: selected_page.id, params:)
     end
 
     it "redirects to the show routes page with a success message" do
@@ -81,7 +81,7 @@ RSpec.describe Pages::ExitPageController, type: :request do
 
       it "renders new page with a 422 error code" do
         expect(response).to have_http_status(:unprocessable_content)
-        expect(response).to render_template("pages/exit_page/new")
+        expect(response).to render_template("conditions/exit_page/new")
       end
     end
 
@@ -98,11 +98,11 @@ RSpec.describe Pages::ExitPageController, type: :request do
 
   describe "#edit" do
     before do
-      get edit_exit_page_path(form_id: form.id, page_id: selected_page.id, condition_id: condition.id)
+      get conditions_exit_page_edit_path(form_id: form.id, page_id: selected_page.id, condition_id: condition.id)
     end
 
     it "renders the edit exit page template" do
-      expect(response).to render_template("pages/exit_page/edit")
+      expect(response).to render_template("conditions/exit_page/edit")
     end
   end
 
@@ -110,7 +110,7 @@ RSpec.describe Pages::ExitPageController, type: :request do
     let(:params) { { pages_update_exit_page_input: { exit_page_heading: "Exit Page Heading", exit_page_markdown: "Exit Page Markdown" } } }
 
     before do
-      put update_exit_page_path(form_id: form.id, page_id: selected_page.id, condition_id: condition.id, params:)
+      put conditions_exit_page_update_path(form_id: form.id, page_id: selected_page.id, condition_id: condition.id, params:)
     end
 
     it "redirects to the edit condition page with a success message" do
@@ -124,7 +124,7 @@ RSpec.describe Pages::ExitPageController, type: :request do
 
       it "renders edit page with a 422 error code" do
         expect(response).to have_http_status(:unprocessable_content)
-        expect(response).to render_template("pages/exit_page/edit")
+        expect(response).to render_template("conditions/exit_page/edit")
       end
     end
   end
@@ -133,11 +133,11 @@ RSpec.describe Pages::ExitPageController, type: :request do
     before do
       allow(condition).to receive(:exit_page?).and_return(true)
 
-      get delete_exit_page_path(form_id: form.id, page_id: selected_page.id, condition_id: condition.id)
+      get conditions_exit_page_delete_path(form_id: form.id, page_id: selected_page.id, condition_id: condition.id)
     end
 
     it "renders the delete exit page template with the correct assignments" do
-      expect(response).to render_template("pages/exit_page/delete")
+      expect(response).to render_template("conditions/exit_page/delete")
       expect(assigns(:exit_page)).to eq(condition)
       expect(assigns(:delete_exit_page_input)).to be_a(Pages::DeleteExitPageInput)
     end
@@ -157,7 +157,7 @@ RSpec.describe Pages::ExitPageController, type: :request do
     let(:params) { { pages_delete_exit_page_input: { confirm: "yes" } } }
 
     before do
-      delete destroy_exit_page_path(form_id: form.id, page_id: selected_page.id, condition_id: condition.id, params:)
+      delete conditions_exit_page_destroy_path(form_id: form.id, page_id: selected_page.id, condition_id: condition.id, params:)
     end
 
     it "redirects to form pages path with a success message and deletes the exit page" do
@@ -171,7 +171,7 @@ RSpec.describe Pages::ExitPageController, type: :request do
       let(:params) { { pages_delete_exit_page_input: { confirm: nil } } }
 
       it "renders the delete template again" do
-        expect(response).to render_template("pages/exit_page/delete")
+        expect(response).to render_template("conditions/exit_page/delete")
       end
     end
 
@@ -179,7 +179,7 @@ RSpec.describe Pages::ExitPageController, type: :request do
       let(:params) { { pages_delete_exit_page_input: { confirm: "no" } } }
 
       it "redirects to form pages path without deleting the exit page" do
-        expect(response).to redirect_to(edit_exit_page_path(form.id, page.id, condition.id))
+        expect(response).to redirect_to(conditions_exit_page_edit_path(form.id, page.id, condition.id))
         expect(Condition.exists?(condition.id)).to be true
       end
     end
@@ -189,7 +189,7 @@ RSpec.describe Pages::ExitPageController, type: :request do
 
       before do
         allow(condition).to receive(:exit_page?).and_return(false)
-        delete destroy_exit_page_path(form_id: form.id, page_id: selected_page.id, condition_id: condition.id, params:)
+        delete conditions_exit_page_destroy_path(form_id: form.id, page_id: selected_page.id, condition_id: condition.id, params:)
       end
 
       it "redirects to the form pages page" do
@@ -213,7 +213,7 @@ RSpec.describe Pages::ExitPageController, type: :request do
     let(:check_preview_validation) { "true" }
 
     before do
-      post exit_page_render_preview_path(form_id: form.id, page_id: page.id), params: { markdown:, check_preview_validation: }
+      post conditions_exit_page_render_preview_path(form_id: form.id, page_id: page.id), params: { markdown:, check_preview_validation: }
     end
 
     it "returns a JSON object containing the converted HTML" do
