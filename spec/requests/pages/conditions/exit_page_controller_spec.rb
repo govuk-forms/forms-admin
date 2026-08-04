@@ -56,7 +56,7 @@ RSpec.describe Conditions::ExitPageController, type: :request do
   end
 
   describe "#create" do
-    let(:params) { { pages_exit_page_input: { exit_page_heading: "Exit Page Heading", exit_page_markdown: "Exit Page Markdown", answer_value: } } }
+    let(:params) { { conditions_exit_page_input: { exit_page_heading: "Exit Page Heading", exit_page_markdown: "Exit Page Markdown", answer_value: } } }
 
     before do
       post conditions_exit_page_create_path(form_id: form.id, page_id: selected_page.id, params:)
@@ -77,7 +77,7 @@ RSpec.describe Conditions::ExitPageController, type: :request do
     end
 
     context "when form submit fails" do
-      let(:params) { { pages_exit_page_input: { exit_page_heading: nil, exit_page_markdown: nil, answer_value: } } }
+      let(:params) { { conditions_exit_page_input: { exit_page_heading: nil, exit_page_markdown: nil, answer_value: } } }
 
       it "renders new page with a 422 error code" do
         expect(response).to have_http_status(:unprocessable_content)
@@ -229,7 +229,7 @@ RSpec.describe Conditions::ExitPageController, type: :request do
 
       it "returns a JSON object containing the converted HTML with an error" do
         expect(response).to have_http_status(:ok)
-        expect(response.body).to eq({ preview_html: I18n.t("exit_page.no_content_added_html"), errors: [I18n.t("activemodel.errors.models.pages/exit_page_input.attributes.exit_page_markdown.blank")] }.to_json)
+        expect(response.body).to eq({ preview_html: I18n.t("exit_page.no_content_added_html"), errors: [I18n.t("activemodel.errors.models.conditions/exit_page_input.attributes.exit_page_markdown.blank")] }.to_json)
       end
 
       context "when validation is disabled" do

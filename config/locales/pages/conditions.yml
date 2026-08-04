@@ -3,6 +3,16 @@ en:
   activemodel:
     errors:
       models:
+        conditions/exit_page_input:
+          attributes:
+            answer_value:
+              blank: Select the answer to base this route on
+            exit_page_heading:
+              blank: Enter a page heading
+              too_long: The page heading must be shorter than 5,000 characters
+            exit_page_markdown:
+              blank: Enter page content
+              too_long: The page content must be shorter than 5,000 characters
         pages/conditions_input:
           attributes:
             answer_value:
@@ -18,16 +28,6 @@ en:
           attributes:
             confirm:
               blank: Select yes if you want to delete this route
-        pages/exit_page_input:
-          attributes:
-            answer_value:
-              blank: Select the answer to base this route on
-            exit_page_heading:
-              blank: Enter a page heading
-              too_long: The page heading must be shorter than 5,000 characters
-            exit_page_markdown:
-              blank: Enter page content
-              too_long: The page content must be shorter than 5,000 characters
         pages/routing_page_input:
           attributes:
             routing_page_id:
@@ -42,19 +42,19 @@ en:
               too_long: The page content must be shorter than 5,000 characters
   helpers:
     hint:
-      pages_exit_page_input:
+      conditions_exit_page_input:
         exit_page_heading: Use a heading that summarises why someone cannot continue with the form. For example, ‘You’re not eligible for this service’.
         exit_page_markdown: Explain why they cannot continue to use the form and, if possible, tell them what they should do instead.
       pages_update_exit_page_input:
         exit_page_heading: Use a heading that summarises why someone cannot continue with the form. For example, ‘You’re not eligible for this service’.
         exit_page_markdown: Explain why they cannot continue to use the form and, if possible, tell them what they should do instead.
     label:
+      conditions_exit_page_input:
+        exit_page_heading: Page heading
+        exit_page_markdown: Page content
       pages_conditions_input:
         answer_value: If the answer selected is
         goto_page_id: skip the person to
-      pages_exit_page_input:
-        exit_page_heading: Page heading
-        exit_page_markdown: Page content
       pages_update_exit_page_input:
         exit_page_heading: Page heading
         exit_page_markdown: Page content

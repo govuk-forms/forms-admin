@@ -8,7 +8,7 @@ RSpec.describe Pages::UpdateExitPageInput, type: :model do
 
   describe "validations" do
     it "is invalid if exit_page_heading is nil" do
-      error_message = I18n.t("activemodel.errors.models.pages/exit_page_input.attributes.exit_page_heading.blank")
+      error_message = I18n.t("activemodel.errors.models.conditions/exit_page_input.attributes.exit_page_heading.blank")
       update_exit_page_input.exit_page_heading = nil
       expect(update_exit_page_input).to be_invalid
       expect(update_exit_page_input.errors.full_messages_for(:exit_page_heading)).to include("Exit page heading #{error_message}")

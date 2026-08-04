@@ -3,13 +3,13 @@ class Conditions::ExitPageController < PagesController
   before_action :ensure_answer_value_present, only: %i[new create]
 
   def new
-    exit_page_input = Pages::ExitPageInput.new(form: current_form, page:, answer_value: params[:answer_value])
+    exit_page_input = Conditions::ExitPageInput.new(form: current_form, page:, answer_value: params[:answer_value])
 
     render template: "conditions/exit_page/new", locals: { exit_page_input:, preview_html: preview_html(exit_page_input), check_preview_validation: false }
   end
 
   def create
-    exit_page_input = Pages::ExitPageInput.new(exit_page_input_params)
+    exit_page_input = Conditions::ExitPageInput.new(exit_page_input_params)
 
     if exit_page_input.submit
       # TODO: Route number is hardcoded whilst we can only have one value for it
@@ -72,7 +72,7 @@ class Conditions::ExitPageController < PagesController
 
   def render_preview
     authorize current_form, :can_view_form?
-    exit_page_input = Pages::ExitPageInput.new(exit_page_markdown: params[:markdown])
+    exit_page_input = Conditions::ExitPageInput.new(exit_page_markdown: params[:markdown])
     exit_page_input.validate if params[:check_preview_validation] == "true"
 
     render json: { preview_html: preview_html(exit_page_input), errors: exit_page_input.errors[:exit_page_markdown] }.to_json
@@ -85,7 +85,7 @@ private
   end
 
   def exit_page_input_params
-    params.require(:pages_exit_page_input).permit(:exit_page_heading, :exit_page_markdown, :answer_value).merge(form: current_form, page:)
+    params.require(:conditions_exit_page_input).permit(:exit_page_heading, :exit_page_markdown, :answer_value).merge(form: current_form, page:)
   end
 
   def update_exit_page_input_params
@@ -93,7 +93,7 @@ private
   end
 
   def ensure_answer_value_present
-    return if params[:answer_value].present? || params.dig(:pages_exit_page_input, :answer_value).present?
+    return if params[:answer_value].present? || params.dig(:conditions_exit_page_input, :answer_value).present?
 
     redirect_to new_condition_path(current_form.id, page.id)
   end
