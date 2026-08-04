@@ -160,6 +160,12 @@ Rails.application.routes.draw do
           end
         end
 
+        resources :exit_pages, only: %i[new create], path: "exit-pages", module: :pages do
+          collection do
+            post "/preview" => "exit_pages#render_preview", as: :render_preview
+          end
+        end
+
         scope "/routes" do
           get "/" => "pages/routes#show", as: :show_routes
           get "/delete" => "pages/routes#delete", as: :delete_routes
