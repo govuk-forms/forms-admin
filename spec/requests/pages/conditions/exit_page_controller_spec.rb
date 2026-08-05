@@ -107,7 +107,7 @@ RSpec.describe Conditions::ExitPageController, type: :request do
   end
 
   describe "#update" do
-    let(:params) { { pages_update_exit_page_input: { exit_page_heading: "Exit Page Heading", exit_page_markdown: "Exit Page Markdown" } } }
+    let(:params) { { conditions_update_exit_page_input: { exit_page_heading: "Exit Page Heading", exit_page_markdown: "Exit Page Markdown" } } }
 
     before do
       put conditions_exit_page_update_path(form_id: form.id, page_id: selected_page.id, condition_id: condition.id, params:)
@@ -120,7 +120,7 @@ RSpec.describe Conditions::ExitPageController, type: :request do
     end
 
     context "when form submit fails" do
-      let(:params) { { pages_update_exit_page_input: { exit_page_heading: nil, exit_page_markdown: nil } } }
+      let(:params) { { conditions_update_exit_page_input: { exit_page_heading: nil, exit_page_markdown: nil } } }
 
       it "renders edit page with a 422 error code" do
         expect(response).to have_http_status(:unprocessable_content)

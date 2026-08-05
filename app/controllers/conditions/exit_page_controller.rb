@@ -23,7 +23,7 @@ class Conditions::ExitPageController < PagesController
   def edit
     condition = page.routing_conditions.find(params[:condition_id])
 
-    update_exit_page_input = Pages::UpdateExitPageInput.new(form: current_form, page:, record: condition).assign_condition_values
+    update_exit_page_input = Conditions::UpdateExitPageInput.new(form: current_form, page:, record: condition).assign_condition_values
 
     render template: "conditions/exit_page/edit", locals: { update_exit_page_input:, preview_html: preview_html(update_exit_page_input), check_preview_validation: false }
   end
@@ -33,7 +33,7 @@ class Conditions::ExitPageController < PagesController
 
     form_params = update_exit_page_input_params.merge(record: condition)
 
-    update_exit_page_input = Pages::UpdateExitPageInput.new(form_params)
+    update_exit_page_input = Conditions::UpdateExitPageInput.new(form_params)
 
     if update_exit_page_input.submit
       redirect_to edit_condition_path(form_id: current_form.id, page_id: page.id, condition_id: update_exit_page_input.record.id), success: t("banner.success.exit_page_updated")
@@ -89,7 +89,7 @@ private
   end
 
   def update_exit_page_input_params
-    params.require(:pages_update_exit_page_input).permit(:exit_page_heading, :exit_page_markdown).merge(form: current_form, page:)
+    params.require(:conditions_update_exit_page_input).permit(:exit_page_heading, :exit_page_markdown).merge(form: current_form, page:)
   end
 
   def ensure_answer_value_present
