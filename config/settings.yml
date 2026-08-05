@@ -6,6 +6,8 @@ features:
     enabled_by_group: true
   multiple_branches:
     enabled_by_group: true
+  save_and_return:
+    enabled_by_group: true
   show_relevant_organisations: false
 
 forms_api:
