@@ -196,6 +196,40 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
   smoke_test_form.set_task_status_service(TaskStatusService.new(form: smoke_test_form))
   smoke_test_form.make_live!
 
+  e2e_s3_forms = Form.create!(
+    name: "S3 submission test form",
+    pages: [
+      Page.create(
+        question_text: "Single line of text",
+        answer_type: "text",
+        answer_settings: {
+          input_type: "single_line",
+        },
+      ),
+    ],
+    question_section_completed: true,
+    declaration_markdown: "",
+    declaration_section_completed: true,
+    privacy_policy_url: "https://www.gov.uk/help/privacy-notice",
+    submission_email:,
+    support_email: "your.email+fakedata84701@gmail.com.gov.uk",
+    support_phone: "08000800",
+    what_happens_next_markdown: "Test",
+    share_preview_completed: true,
+    s3_bucket_region: "eu-west-2",
+    s3_bucket_name: "govuk-forms-submissions-to-s3-test",
+    s3_bucket_aws_account_id: "711966560482",
+    delivery_configurations: [
+      DeliveryConfiguration.create(
+        delivery_method: :s3,
+        delivery_schedule: :immediate,
+        formats: %w[csv],
+      ),
+    ],
+  )
+  e2e_s3_forms.set_task_status_service(TaskStatusService.new(form: e2e_s3_forms))
+  e2e_s3_forms.make_live!
+
   all_question_types_form = Form.create!(
     name: "All question types form",
     creator_id: craig.id,
@@ -281,40 +315,6 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
   )
   all_question_types_form.set_task_status_service(TaskStatusService.new(form: all_question_types_form))
   all_question_types_form.make_live!
-
-  e2e_s3_forms = Form.create!(
-    name: "s3 submission test form",
-    pages: [
-      Page.create(
-        question_text: "Single line of text",
-        answer_type: "text",
-        answer_settings: {
-          input_type: "single_line",
-        },
-      ),
-    ],
-    question_section_completed: true,
-    declaration_markdown: "",
-    declaration_section_completed: true,
-    privacy_policy_url: "https://www.gov.uk/help/privacy-notice",
-    submission_email:,
-    support_email: "your.email+fakedata84701@gmail.com.gov.uk",
-    support_phone: "08000800",
-    what_happens_next_markdown: "Test",
-    share_preview_completed: true,
-    s3_bucket_region: "eu-west-2",
-    s3_bucket_name: "govuk-forms-submissions-to-s3-test",
-    s3_bucket_aws_account_id: "711966560482",
-    delivery_configurations: [
-      DeliveryConfiguration.create(
-        delivery_method: :s3,
-        delivery_schedule: :immediate,
-        formats: %w[csv],
-      ),
-    ],
-  )
-  e2e_s3_forms.set_task_status_service(TaskStatusService.new(form: e2e_s3_forms))
-  e2e_s3_forms.make_live!
 
   branch_route_form = Form.create!(
     name: "Branch route form",
