@@ -256,6 +256,20 @@ namespace :forms do
 
     puts JSON.pretty_generate(form_document.as_json)
   end
+
+  desc "Add exit page objects for all existing exit pages"
+  task sync_all_exit_pages: :environment do
+    Rails.logger.info "Starting with #{ExitPage.count} exit page objects"
+
+    Condition.find_each do |condition|
+      if condition.is_exit_page? && condition.exit_page.nil?
+        condition.sync_exit_page
+        condition.save!
+      end
+    end
+
+    Rails.logger.info "Finished with #{ExitPage.count} exit page objects"
+  end
 end
 
 def move_forms(form_ids, group_id)

@@ -753,4 +753,57 @@ RSpec.describe "forms.rake", type: :task do
       end
     end
   end
+
+  describe "forms:sync_all_exit_pages" do
+    subject(:task) do
+      Rake::Task["forms:sync_all_exit_pages"]
+    end
+
+    it "creates an exit page object for exit page conditions that are missing one" do
+      condition = create(:condition, :with_exit_page)
+
+      condition.exit_page.destroy!
+
+      expect {
+        task.invoke
+      }.to change(ExitPage, :count).by(1)
+
+      expect(condition.reload.exit_page).to be_present
+    end
+
+    it "creates an exit page that has the same properties as the condition's exit page content" do
+      condition = create(
+        :condition,
+        exit_page_heading: "Exit page heading",
+        exit_page_markdown: "Exit page markdown",
+        exit_page_heading_cy: "Welsh exit page heading",
+        exit_page_markdown_cy: "Welsh exit page markdown",
+      )
+
+      condition.exit_page.destroy!
+
+      task.invoke
+
+      expect(condition.reload.exit_page.markdown).to eq(condition.exit_page_markdown)
+      expect(condition.reload.exit_page.heading).to eq(condition.exit_page_heading)
+      expect(condition.reload.exit_page.markdown_cy).to eq(condition.exit_page_markdown_cy)
+      expect(condition.reload.exit_page.heading_cy).to eq(condition.exit_page_heading_cy)
+    end
+
+    it "does not create an exit page object when one already exists" do
+      create(:condition, :with_exit_page)
+
+      expect {
+        task.invoke
+      }.not_to change(ExitPage, :count)
+    end
+
+    it "does not create exit page objects for conditions that are not exit pages" do
+      create(:condition)
+
+      expect {
+        task.invoke
+      }.not_to change(ExitPage, :count)
+    end
+  end
 end
