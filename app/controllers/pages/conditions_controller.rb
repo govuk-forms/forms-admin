@@ -100,7 +100,7 @@ class Pages::ConditionsController < PagesController
 
   def confirm_delete_exit_page
     condition = page.routing_conditions.find(params[:condition_id])
-    delete_exit_page_input = Pages::DeleteExitPageInput.new
+    delete_exit_page_input = Conditions::DeleteExitPageInput.new
 
     render template: "pages/conditions/confirm_delete_exit_page", locals: {
       answer_value: params.require(:answer_value),
@@ -115,7 +115,7 @@ class Pages::ConditionsController < PagesController
 
     return redirect_to form_pages_path(current_form.id) unless condition.exit_page?
 
-    delete_exit_page_input = Pages::DeleteExitPageInput.new(delete_exit_page_params)
+    delete_exit_page_input = Conditions::DeleteExitPageInput.new(delete_exit_page_params)
 
     unless delete_exit_page_input.valid?
       return render template: "pages/conditions/confirm_delete_exit_page", locals: {

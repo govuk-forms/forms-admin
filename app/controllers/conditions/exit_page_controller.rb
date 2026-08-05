@@ -44,7 +44,7 @@ class Conditions::ExitPageController < PagesController
 
   def delete
     @exit_page = page.routing_conditions.find(params[:condition_id])
-    @delete_exit_page_input = Pages::DeleteExitPageInput.new
+    @delete_exit_page_input = Conditions::DeleteExitPageInput.new
   end
 
   def destroy
@@ -55,7 +55,7 @@ class Conditions::ExitPageController < PagesController
 
     @exit_page = condition
 
-    @delete_exit_page_input = Pages::DeleteExitPageInput.new(params.require(:pages_delete_exit_page_input).permit(:confirm))
+    @delete_exit_page_input = Conditions::DeleteExitPageInput.new(params.require(:conditions_delete_exit_page_input).permit(:confirm))
 
     unless @delete_exit_page_input.valid?
       return render :delete, status: :unprocessable_content

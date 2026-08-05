@@ -139,7 +139,7 @@ RSpec.describe Conditions::ExitPageController, type: :request do
     it "renders the delete exit page template with the correct assignments" do
       expect(response).to render_template("conditions/exit_page/delete")
       expect(assigns(:exit_page)).to eq(condition)
-      expect(assigns(:delete_exit_page_input)).to be_a(Pages::DeleteExitPageInput)
+      expect(assigns(:delete_exit_page_input)).to be_a(Conditions::DeleteExitPageInput)
     end
 
     context "when user should not be allowed to add/delete routes to pages" do
@@ -154,7 +154,7 @@ RSpec.describe Conditions::ExitPageController, type: :request do
   end
 
   describe "#destroy" do
-    let(:params) { { pages_delete_exit_page_input: { confirm: "yes" } } }
+    let(:params) { { conditions_delete_exit_page_input: { confirm: "yes" } } }
 
     before do
       delete conditions_exit_page_destroy_path(form_id: form.id, page_id: selected_page.id, condition_id: condition.id, params:)
@@ -168,7 +168,7 @@ RSpec.describe Conditions::ExitPageController, type: :request do
     end
 
     context "when confirmation is not provided" do
-      let(:params) { { pages_delete_exit_page_input: { confirm: nil } } }
+      let(:params) { { conditions_delete_exit_page_input: { confirm: nil } } }
 
       it "renders the delete template again" do
         expect(response).to render_template("conditions/exit_page/delete")
@@ -176,7 +176,7 @@ RSpec.describe Conditions::ExitPageController, type: :request do
     end
 
     context "when confirmation is no" do
-      let(:params) { { pages_delete_exit_page_input: { confirm: "no" } } }
+      let(:params) { { conditions_delete_exit_page_input: { confirm: "no" } } }
 
       it "redirects to form pages path without deleting the exit page" do
         expect(response).to redirect_to(conditions_exit_page_edit_path(form.id, page.id, condition.id))

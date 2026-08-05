@@ -7,7 +7,7 @@ describe "conditions/exit_page/delete.html.erb" do
       page.id = i + 1
     end
   end
-  let(:exit_page_input) { Pages::DeleteExitPageInput.new }
+  let(:exit_page_input) { Conditions::DeleteExitPageInput.new }
   let(:exit_page) { build :condition, :with_exit_page, id: 1 }
 
   before do
