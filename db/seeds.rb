@@ -402,13 +402,18 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
     routing_page: branch_route_form.pages.first,
     goto_page: nil,
     answer_value: "No",
-    exit_page_heading: "You are not eligible to submit this form",
-    exit_page_markdown: <<~MARKDOWN,
-      To complete this form you must:
+    exit_page: ExitPage.create!(
+      question_page: branch_route_form.pages.first,
+      heading: "You are not eligible to submit this form",
+      markdown: <<~MARKDOWN,
+        To complete this form you must:
 
-        - Be over 16
-        - Confirmed that you are eligible to submit this form
-    MARKDOWN
+          - Be over 16
+          - Confirmed that you are eligible to submit this form
+      MARKDOWN
+    ),
+    exit_page_heading: ExitPage.last.heading,
+    exit_page_markdown: ExitPage.last.markdown,
   )
   branch_route_form.set_task_status_service(TaskStatusService.new(form: branch_route_form))
   branch_route_form.reload.make_live!
