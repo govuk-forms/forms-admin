@@ -3,7 +3,7 @@
 
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds">
-    <%= form_with(model: delete_exit_page_input, url: conditions_exit_page_update_path(condition_id: exit_page.id, form_id: @current_form.id, page_id: @page.id, params: { answer_value:, goto_page_id:})) do |f| %>
+    <%= form_with(model: delete_exit_page_input, url: update_change_exit_page_path(condition_id: exit_page.id, form_id: @current_form.id, page_id: @page.id, params: { answer_value:, goto_page_id:})) do |f| %>
       <% if delete_exit_page_input&.errors.any? %>
         <%= f.govuk_error_summary %>
       <% end %>
