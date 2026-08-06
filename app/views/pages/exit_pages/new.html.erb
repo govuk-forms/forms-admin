@@ -1,0 +1,40 @@
+<% set_page_title(title_with_error_prefix(t("page_titles.exit_page_new"), exit_page_input.errors&.any?)) %>
+<% content_for :back_link, govuk_back_link_to(routes_path(@current_form.id), t(".back_link")) %>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds-from-desktop">
+
+    <%= form_with model: exit_page_input, url: exit_pages_path(@current_form.id, exit_page_input.page.id), method: 'POST' do |f| %>
+      <%= f.govuk_error_summary %>
+      <h1 class="govuk-heading-l">
+        <span class="govuk-caption-l"><%= t("page_titles.exit_page_new_caption", question_number: exit_page_input.page.position) %></span>
+        <span class="govuk-visually-hidden"> - </span>
+        <%= t("page_titles.add_exit_page") %>
+      </h1>
+
+      <%= govuk_summary_list(actions: false) do |summary_list|
+          summary_list.with_row do |row|
+              row.with_key { t("page_route_card.question_name_short", question_number: exit_page_input.page.position) }
+              row.with_value { "#{exit_page_input.page.question_text}" }
+          end;
+      end %>
+
+      <%= f.govuk_text_field( :heading, label: { size: 'm' } )  %>
+
+      <%= render MarkdownEditorComponent::View.new(:markdown,
+        form_builder: f,
+        render_preview_path: render_preview_exit_pages_path(form_id: @current_form.id, page_id: exit_page_input.page.id, check_preview_validation:),
+        preview_html: preview_html,
+        form_model: exit_page_input,
+        label: t("helpers.label.pages_exit_page_input.markdown"),
+        hint: t("helpers.hint.pages_exit_page_input.markdown"),
+        allow_headings: true) %>
+
+      <div class="govuk-button-group">
+        <%= f.govuk_submit t("save_and_continue") %>
+        <%= govuk_link_to t('cancel'), routes_path(@current_form.id) %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
