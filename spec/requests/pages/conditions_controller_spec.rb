@@ -491,7 +491,7 @@ RSpec.describe Pages::ConditionsController, type: :request do
         condition_id: condition.id,
         answer_value: answer_value,
         goto_page_id: goto_page_id,
-        params: { pages_delete_exit_page_input: { confirm: } },
+        params: { conditions_delete_exit_page_input: { confirm: } },
       )
     end
 

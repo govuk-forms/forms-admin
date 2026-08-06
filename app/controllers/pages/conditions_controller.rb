@@ -167,7 +167,7 @@ private
   end
 
   def delete_exit_page_params
-    params.require(:pages_delete_exit_page_input).permit(:confirm)
+    params.require(:conditions_delete_exit_page_input).permit(:confirm)
   end
 
   def new_condition_or_show_routes_path(page)
