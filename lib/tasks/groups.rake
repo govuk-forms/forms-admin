@@ -35,25 +35,20 @@ namespace :groups do
     end
   end
 
-  desc "Toggle multiple_branches_enabled for a group"
-  task :toggle_multiple_branches_enabled, %i[group_id] => :environment do |_, args|
-    usage_message = "usage: rake groups:toggle_multiple_branches_enabled[<group_external_id>]".freeze
-    abort usage_message if args[:group_id].blank?
-    toggle_group_feature_flag(args[:group_id], "multiple_branches_enabled")
-  end
+  desc "Toggle a group-scoped feature flag for a group"
+  task :toggle_feature_flag, %i[feature_name group_id] => :environment do |_, args|
+    usage_message = "usage: rake groups:toggle_feature_flag[<feature_name>, <group_external_id>]".freeze
+    abort usage_message if args[:feature_name].blank? || args[:group_id].blank?
 
-  desc "Toggle custom_branding_enabled for a group"
-  task :toggle_custom_branding_enabled, %i[group_id] => :environment do |_, args|
-    usage_message = "usage: rake groups:toggle_custom_branding_enabled[<group_external_id>]".freeze
-    abort usage_message if args[:group_id].blank?
-    toggle_group_feature_flag(args[:group_id], "custom_branding_enabled")
-  end
+    # accept the feature name with or without the _enabled suffix
+    attribute_name = "#{args[:feature_name].delete_suffix('_enabled')}_enabled"
 
-  desc "Toggle save_and_return_enabled for a group"
-  task :toggle_save_and_return_enabled, %i[group_id] => :environment do |_, args|
-    usage_message = "usage: rake groups:toggle_save_and_return_enabled[<group_external_id>]".freeze
-    abort usage_message if args[:group_id].blank?
-    toggle_group_feature_flag(args[:group_id], "save_and_return_enabled")
+    unless Group.feature_flag_attributes.include?(attribute_name)
+      valid_names = Group.feature_flag_attributes.map { |attribute| attribute.delete_suffix("_enabled") }
+      abort "unknown feature flag: #{args[:feature_name]}. Valid feature flags: #{valid_names.join(', ')}"
+    end
+
+    toggle_group_feature_flag(args[:group_id], attribute_name)
   end
 end
 

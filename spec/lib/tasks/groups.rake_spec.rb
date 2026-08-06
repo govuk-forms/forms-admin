@@ -48,15 +48,30 @@ RSpec.describe "groups.rake", type: :task do
     end
   end
 
-  describe "groups:toggle_multiple_branches_enabled" do
-    subject(:task) { Rake::Task["groups:toggle_multiple_branches_enabled"] }
+  describe "groups:toggle_feature_flag" do
+    subject(:task) { Rake::Task["groups:toggle_feature_flag"] }
 
-    it "with correct arguments toggles multiple_branches_enabled for the group" do
-      group = create(:group, multiple_branches_enabled: false)
+    let(:feature_flag) { Group.feature_flag_attributes.first }
+    let(:feature_name) { feature_flag.delete_suffix("_enabled") }
+
+    before do
+      skip "no group feature flags are configured" if Group.feature_flag_attributes.empty?
+    end
+
+    it "with correct arguments toggles the feature flag on for the group" do
+      group = create(:group, feature_flag => false)
 
       expect {
-        task.invoke(group.external_id)
-      }.to change { group.reload.multiple_branches_enabled }.from(false).to(true)
+        task.invoke(feature_name, group.external_id)
+      }.to change { group.reload.send(feature_flag) }.from(false).to(true)
+    end
+
+    it "with correct arguments toggles the feature flag off for the group" do
+      group = create(:group, feature_flag => true)
+
+      expect {
+        task.invoke(feature_name, group.external_id)
+      }.to change { group.reload.send(feature_flag) }.from(true).to(false)
     end
 
     it "with no arguments raises an error" do
@@ -66,62 +81,25 @@ RSpec.describe "groups.rake", type: :task do
       .and output(/usage/).to_stderr
     end
 
-    it "with invalid group id raises an error" do
-      invalid_args = %w[some_id_that_does_not_exist]
+    it "with no group id raises an error" do
       expect {
-        task.invoke(*invalid_args)
-      }.to raise_error(ActiveRecord::RecordNotFound)
-    end
-  end
-
-  describe "groups:toggle_custom_branding_enabled" do
-    subject(:task) { Rake::Task["groups:toggle_custom_branding_enabled"] }
-
-    it "with correct arguments toggles custom_branding_enabled for the group" do
-      group = create(:group, custom_branding_enabled: false)
-
-      expect {
-        task.invoke(group.external_id)
-      }.to change { group.reload.custom_branding_enabled }.from(false).to(true)
-    end
-
-    it "with no arguments raises an error" do
-      expect {
-        task.invoke
+        task.invoke(feature_name)
       }.to raise_error(SystemExit)
       .and output(/usage/).to_stderr
     end
 
-    it "with invalid group id raises an error" do
-      invalid_args = %w[some_id_that_does_not_exist]
-      expect {
-        task.invoke(*invalid_args)
-      }.to raise_error(ActiveRecord::RecordNotFound)
-    end
-  end
-
-  describe "groups:toggle_save_and_return_enabled" do
-    subject(:task) { Rake::Task["groups:toggle_save_and_return_enabled"] }
-
-    it "with correct arguments toggles save_and_return_enabled for the group" do
-      group = create(:group, save_and_return_enabled: false)
+    it "with an unknown feature name lists the valid feature flags" do
+      group = create(:group)
 
       expect {
-        task.invoke(group.external_id)
-      }.to change { group.reload.save_and_return_enabled }.from(false).to(true)
-    end
-
-    it "with no arguments raises an error" do
-      expect {
-        task.invoke
+        task.invoke("not_a_feature", group.external_id)
       }.to raise_error(SystemExit)
-      .and output(/usage/).to_stderr
+      .and output(/unknown feature flag: not_a_feature. Valid feature flags: .*#{feature_name}/).to_stderr
     end
 
     it "with invalid group id raises an error" do
-      invalid_args = %w[some_id_that_does_not_exist]
       expect {
-        task.invoke(*invalid_args)
+        task.invoke(feature_name, "some_id_that_does_not_exist")
       }.to raise_error(ActiveRecord::RecordNotFound)
     end
   end
