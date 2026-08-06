@@ -99,4 +99,30 @@ RSpec.describe "groups.rake", type: :task do
       }.to raise_error(ActiveRecord::RecordNotFound)
     end
   end
+
+  describe "groups:toggle_save_and_return_enabled" do
+    subject(:task) { Rake::Task["groups:toggle_save_and_return_enabled"] }
+
+    it "with correct arguments toggles save_and_return_enabled for the group" do
+      group = create(:group, save_and_return_enabled: false)
+
+      expect {
+        task.invoke(group.external_id)
+      }.to change { group.reload.save_and_return_enabled }.from(false).to(true)
+    end
+
+    it "with no arguments raises an error" do
+      expect {
+        task.invoke
+      }.to raise_error(SystemExit)
+      .and output(/usage/).to_stderr
+    end
+
+    it "with invalid group id raises an error" do
+      invalid_args = %w[some_id_that_does_not_exist]
+      expect {
+        task.invoke(*invalid_args)
+      }.to raise_error(ActiveRecord::RecordNotFound)
+    end
+  end
 end

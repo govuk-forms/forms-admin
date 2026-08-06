@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_30_153106) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_05_145629) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -196,6 +196,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_30_153106) do
     t.boolean "multiple_branches_enabled", default: false
     t.string "name"
     t.bigint "organisation_id"
+    t.boolean "save_and_return_enabled", default: false
     t.string "status", default: "trial"
     t.datetime "updated_at", null: false
     t.bigint "upgrade_requester_id"

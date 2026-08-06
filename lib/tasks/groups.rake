@@ -39,14 +39,21 @@ namespace :groups do
   task :toggle_multiple_branches_enabled, %i[group_id] => :environment do |_, args|
     usage_message = "usage: rake groups:toggle_multiple_branches_enabled[<group_external_id>]".freeze
     abort usage_message if args[:group_id].blank?
-    toggle_multiple_branches_enabled(args[:group_id])
+    toggle_group_feature_flag(args[:group_id], "multiple_branches_enabled")
   end
 
   desc "Toggle custom_branding_enabled for a group"
   task :toggle_custom_branding_enabled, %i[group_id] => :environment do |_, args|
     usage_message = "usage: rake groups:toggle_custom_branding_enabled[<group_external_id>]".freeze
     abort usage_message if args[:group_id].blank?
-    toggle_custom_branding_enabled(args[:group_id])
+    toggle_group_feature_flag(args[:group_id], "custom_branding_enabled")
+  end
+
+  desc "Toggle save_and_return_enabled for a group"
+  task :toggle_save_and_return_enabled, %i[group_id] => :environment do |_, args|
+    usage_message = "usage: rake groups:toggle_save_and_return_enabled[<group_external_id>]".freeze
+    abort usage_message if args[:group_id].blank?
+    toggle_group_feature_flag(args[:group_id], "save_and_return_enabled")
   end
 end
 
@@ -115,20 +122,11 @@ def remove_group(task_name, group_id)
   Rails.logger.info "#{task_name}: removed #{fmt_group(group)}"
 end
 
-def toggle_multiple_branches_enabled(group_id)
+def toggle_group_feature_flag(group_id, attribute_name)
   group = Group.find_by!(external_id: group_id)
 
-  group.multiple_branches_enabled = !group.multiple_branches_enabled
+  group.send("#{attribute_name}=", !group.send(attribute_name))
   group.save!
 
-  Rails.logger.info "multiple_branches_enabled for #{fmt_group(group)} is now set to #{group.reload.multiple_branches_enabled}"
-end
-
-def toggle_custom_branding_enabled(group_id)
-  group = Group.find_by!(external_id: group_id)
-
-  group.custom_branding_enabled = !group.custom_branding_enabled
-  group.save!
-
-  Rails.logger.info "custom_branding_enabled for #{fmt_group(group)} is now set to #{group.reload.custom_branding_enabled}"
+  Rails.logger.info "#{attribute_name} for #{fmt_group(group)} is now set to #{group.reload.send(attribute_name)}"
 end

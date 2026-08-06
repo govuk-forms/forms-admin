@@ -788,6 +788,7 @@ en:
       flags:
         custom_branding_enabled: Custom branding
         multiple_branches_enabled: Multiple branches
+        save_and_return_enabled: Save and return
       hint: You can turn a feature flag on, but not off. A feature can change how a form or group works, which might take extra steps to reverse. Ask a developer if you need to switch a feature off.
       title: Feature flags
     form_table_caption: Forms in ‘%{group_name}’
