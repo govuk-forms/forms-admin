@@ -145,13 +145,19 @@ Rails.application.routes.draw do
           delete "/:condition_id/delete" => "pages/conditions#destroy", as: :destroy_condition
           get "/:condition_id/confirm-delete-exit-page" => "pages/conditions#confirm_delete_exit_page", as: :confirm_change_exit_page
           post "/:condition_id/confirm-delete-exit-page" => "pages/conditions#update_change_exit_page", as: :update_change_exit_page
-          get "/exit-page/new" => "pages/exit_page#new", as: :new_exit_page
-          post "/exit-page/new" => "pages/exit_page#create", as: :create_exit_page
-          post "/exit-page-preview" => "pages/exit_page#render_preview", as: :exit_page_render_preview
-          get "/exit-page/:condition_id" => "pages/exit_page#edit", as: :edit_exit_page
-          put "/exit-page/:condition_id" => "pages/exit_page#update", as: :update_exit_page
-          get "/exit-page/:condition_id/delete" => "pages/exit_page#delete", as: :delete_exit_page
-          delete "/exit-page/:condition_id" => "pages/exit_page#destroy", as: :destroy_exit_page
+
+          # These are the legacy exit page routes. Exit pages for multiple branches will be based on page
+          scope module: :conditions, as: :conditions do
+            scope "/exit-page", as: :exit_page do
+              get "/new" => "exit_page#new", as: :new
+              post "/new" => "exit_page#create", as: :create
+              post "/preview" => "exit_page#render_preview", as: :render_preview
+              get "/:condition_id" => "exit_page#edit", as: :edit
+              put "/:condition_id" => "exit_page#update", as: :update
+              get "/:condition_id/delete" => "exit_page#delete", as: :delete
+              delete "/:condition_id" => "exit_page#destroy", as: :destroy
+            end
+          end
         end
 
         scope "/routes" do

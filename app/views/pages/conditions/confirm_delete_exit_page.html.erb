@@ -13,7 +13,7 @@
         <%= t('page_titles.confirm_delete_exit_page') %>
       </h1>
 
-      <%= t(".body_html", exit_page_heading: link_to(exit_page.exit_page_heading, edit_exit_page_path(@current_form.id, @page.id, exit_page.id))) %>
+      <%= t(".body_html", exit_page_heading: link_to(exit_page.exit_page_heading, conditions_exit_page_edit_path(@current_form.id, @page.id, exit_page.id))) %>
 
       <%= f.govuk_collection_radio_buttons :confirm,
                                            delete_exit_page_input.values, ->(option) { option }, ->(option) { t('helpers.label.confirm_delete_exit_page_input.options.' + "#{option}") },

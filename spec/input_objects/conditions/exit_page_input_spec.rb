@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe Pages::ExitPageInput, type: :model do
+RSpec.describe Conditions::ExitPageInput, type: :model do
   let(:exit_page_input) { described_class.new(form:, page:, answer_value:) }
   let(:form) { create :form, :ready_for_routing }
   let(:pages) { form.pages }
@@ -18,35 +18,35 @@ RSpec.describe Pages::ExitPageInput, type: :model do
 
   describe "validations" do
     it "is invalid if answer_value is nil" do
-      error_message = I18n.t("activemodel.errors.models.pages/exit_page_input.attributes.answer_value.blank")
+      error_message = I18n.t("activemodel.errors.models.conditions/exit_page_input.attributes.answer_value.blank")
       exit_page_input.answer_value = nil
       expect(exit_page_input).to be_invalid
       expect(exit_page_input.errors.full_messages_for(:answer_value)).to include("Answer value #{error_message}")
     end
 
     it "is invalid if exit_page_heading is nil" do
-      error_message = I18n.t("activemodel.errors.models.pages/exit_page_input.attributes.exit_page_heading.blank")
+      error_message = I18n.t("activemodel.errors.models.conditions/exit_page_input.attributes.exit_page_heading.blank")
       exit_page_input.exit_page_heading = nil
       expect(exit_page_input).to be_invalid
       expect(exit_page_input.errors.full_messages_for(:exit_page_heading)).to include("Exit page heading #{error_message}")
     end
 
     it "is invalid if exit_page_markdown is nil" do
-      error_message = I18n.t("activemodel.errors.models.pages/exit_page_input.attributes.exit_page_markdown.blank")
+      error_message = I18n.t("activemodel.errors.models.conditions/exit_page_input.attributes.exit_page_markdown.blank")
       exit_page_input.exit_page_markdown = nil
       expect(exit_page_input).to be_invalid
       expect(exit_page_input.errors.full_messages_for(:exit_page_markdown)).to include("Exit page markdown #{error_message}")
     end
 
     it "is invalid if exit_page_heading is too long" do
-      error_message = I18n.t("activemodel.errors.models.pages/exit_page_input.attributes.exit_page_heading.too_long")
+      error_message = I18n.t("activemodel.errors.models.conditions/exit_page_input.attributes.exit_page_heading.too_long")
       exit_page_input.exit_page_heading = "a" * 5000
       expect(exit_page_input).to be_invalid
       expect(exit_page_input.errors.full_messages_for(:exit_page_heading)).to include("Exit page heading #{error_message}")
     end
 
     it "in invalid if exit_page_markdown is too long" do
-      error_message = I18n.t("activemodel.errors.models.pages/exit_page_input.attributes.exit_page_markdown.too_long")
+      error_message = I18n.t("activemodel.errors.models.conditions/exit_page_input.attributes.exit_page_markdown.too_long")
       exit_page_input.exit_page_markdown = "a" * 5000
       expect(exit_page_input).to be_invalid
       expect(exit_page_input.errors.full_messages_for(:exit_page_markdown)).to include("Exit page markdown #{error_message}")

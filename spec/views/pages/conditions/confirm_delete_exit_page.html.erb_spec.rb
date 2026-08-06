@@ -3,7 +3,7 @@ require "rails_helper"
 describe "pages/conditions/confirm_delete_exit_page.html.erb" do
   let(:form) { create :form, pages: [page] }
   let(:page) { build :page, id: 1, form_id: 1, position: 1 }
-  let(:exit_page_input) { Pages::DeleteExitPageInput.new }
+  let(:exit_page_input) { Conditions::DeleteExitPageInput.new }
   let(:exit_page) { build :condition, :with_exit_page, id: 1 }
 
   before do

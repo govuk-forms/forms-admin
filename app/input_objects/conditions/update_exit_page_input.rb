@@ -1,4 +1,4 @@
-class Pages::UpdateExitPageInput < BaseInput
+class Conditions::UpdateExitPageInput < BaseInput
   attr_accessor :form, :page, :record, :exit_page_markdown, :exit_page_heading
 
   validates :exit_page_heading, :exit_page_markdown, presence: true

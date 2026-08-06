@@ -1,5 +1,5 @@
 <% set_page_title(title_with_error_prefix(t(".title"), @delete_exit_page_input.errors.any?)) %>
-<% content_for :back_link, govuk_back_link_to(edit_exit_page_path(@current_form.id, @page.id, @exit_page.id), t(".back_link")) %>
+<% content_for :back_link, govuk_back_link_to(conditions_exit_page_edit_path(@current_form.id, @page.id, @exit_page.id), t(".back_link")) %>
 
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds">
@@ -10,7 +10,7 @@
 
   <%= render(
     @delete_exit_page_input,
-    url: destroy_exit_page_path(condition_id: @exit_page.id, form_id: @current_form.id, page_id: @page.id),
+    url: conditions_exit_page_destroy_path(condition_id: @exit_page.id, form_id: @current_form.id, page_id: @page.id),
     caption_text: @exit_page.exit_page_heading,
     legend_text: t(".title"),
     hint_text: nil,

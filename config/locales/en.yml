@@ -326,6 +326,15 @@ en:
     up_to_3000_options: You can have up to 3,000 options.
     up_to_30_options: You can have up to 30 options.
   cancel: Cancel
+  conditions:
+    exit_page:
+      delete:
+        back_link: Back to edit exit page
+        banner: If you delete this exit page, the route to it will also be deleted
+        title: Are you sure you want to delete this exit page?
+      edit:
+        back_link: Back to edit route 1
+        delete_exit_page: Delete exit page
   contact_details:
     new:
       body_html: |
@@ -1849,14 +1858,6 @@ en:
     delete_question: Delete question
     destroy:
       success: The question, ‘%{question_text}’, has been deleted
-    exit_page:
-      delete:
-        back_link: Back to edit exit page
-        banner: If you delete this exit page, the route to it will also be deleted
-        title: Are you sure you want to delete this exit page?
-      edit:
-        back_link: Back to edit route 1
-        delete_exit_page: Delete exit page
     heading: Edit question
     index:
       add_a_question_route: Add a question route
