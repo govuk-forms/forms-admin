@@ -22,10 +22,25 @@ describe "Settings" do
   describe ".features" do
     features = settings[:features]
 
-    include_examples expected_value_test, :exit_pages, features, { "enabled_by_group" => true }
-    include_examples expected_value_test, :multiple_branches, features, { "enabled_by_group" => true }
-    include_examples expected_value_test, :save_and_return, features, { "enabled_by_group" => true }
     include_examples expected_value_test, :show_relevant_organisations, features, false
+
+    describe "group-scoped feature flags" do
+      group_features = features.select { |_, config| config.is_a?(Hash) && config["enabled_by_group"] }
+
+      it "has a settings entry for every feature flag column on the groups table" do
+        feature_flag_columns = Group.column_names.grep(/_enabled\z/)
+        settings_feature_columns = group_features.keys.map { |name| "#{name}_enabled" }
+
+        expect(settings_feature_columns).to include(*feature_flag_columns)
+      end
+
+      it "has a label for every feature flag on the feature flags page" do
+        Group.feature_flag_attributes.each do |attribute|
+          translation_key = "groups.feature_flags.flags.#{attribute}"
+          expect(I18n.exists?(translation_key)).to be(true), "expected a translation for #{translation_key}"
+        end
+      end
+    end
   end
 
   describe "forms_api" do
