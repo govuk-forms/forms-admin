@@ -1,0 +1,120 @@
+require "rails_helper"
+
+RSpec.describe Pages::ExitPagesController, :feature_multiple_branches, type: :request do
+  let(:form) { create(:form, :with_group, :with_pages, pages_count: 1, group:) }
+  let(:page) { form.pages.first }
+  let(:group) { create(:group, organisation: test_org, memberships: [create(:membership, user: standard_user)]) }
+
+  before do
+    login_as standard_user
+  end
+
+  describe "#new" do
+    before do
+      get new_exit_page_path(form_id: form.id, page_id: page.id)
+    end
+
+    it "renders the template" do
+      expect(response).to have_rendered("exit_pages/new")
+      expect(response.body).to include("Add exit page")
+    end
+
+    context "when the multiple branches feature is not enabled", feature_multiple_branches: false do
+      it "is forbidden" do
+        expect(response).to have_http_status(:not_found)
+      end
+    end
+
+    context "when the user is not in the form's group" do
+      let(:group) { create(:group, organisation: test_org, memberships: []) }
+
+      it "returns a forbidden status code" do
+        expect(response).to have_http_status :forbidden
+      end
+    end
+  end
+
+  describe "#create" do
+    let(:params) { { pages_exit_page_input: { heading: "Exit Page Heading", markdown: "Exit Page Markdown" } } }
+
+    before do
+      post exit_pages_path(form_id: form.id, page_id: page.id, params:)
+    end
+
+    it "creates an exit page" do
+      expect(response).to redirect_to(routes_path(form.id))
+      expect(flash[:success]).to eq(I18n.t("banner.success.exit_page_saved"))
+
+      exit_page = page.reload.exit_pages.first
+
+      expect(exit_page.heading).to eq("Exit Page Heading")
+      expect(exit_page.markdown).to eq("Exit Page Markdown")
+    end
+
+    context "when the user doesn't submit valid params" do
+      let(:params) { { pages_exit_page_input: { heading: nil, markdown: nil } } }
+
+      it "renders the exit page template" do
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(response).to render_template("exit_pages/new")
+      end
+    end
+
+    context "when the multiple branches feature is not enabled", feature_multiple_branches: false do
+      it "is forbidden" do
+        expect(response).to have_http_status(:not_found)
+      end
+    end
+
+    context "when the user is not in the form's group" do
+      let(:group) { create(:group, organisation: test_org, memberships: []) }
+
+      it "returns a forbidden status code" do
+        expect(response).to have_http_status :forbidden
+      end
+    end
+  end
+
+  describe "#render_preview" do
+    let(:markdown) { "[Markdown](https://example.com)" }
+
+    before do
+      post render_preview_exit_pages_path(form_id: form.id, page_id: page.id), params: { markdown: }
+    end
+
+    it "returns a JSON object containing the converted HTML" do
+      expected_preview_html = <<~HTML.strip
+        <p class="govuk-body"><a href="https://example.com" class="govuk-link" rel="noreferrer noopener" target="_blank">Markdown (opens in new tab)</a></p>
+      HTML
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to eq({
+        preview_html: expected_preview_html,
+        errors: [],
+      }.to_json)
+    end
+
+    context "when markdown is blank" do
+      let(:markdown) { "" }
+
+      it "returns a JSON object containing the converted HTML" do
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to eq({ preview_html: I18n.t("markdown_editor.no_markdown_content_html"), errors: [] }.to_json)
+      end
+    end
+
+    context "when the multiple branches feature is not enabled", feature_multiple_branches: false do
+      it "is forbidden" do
+        expect(response).to have_http_status(:not_found)
+      end
+    end
+
+    context "when the user is not in the form's group" do
+      let(:group) { create(:group, organisation: test_org, memberships: []) }
+
+      it "returns a forbidden status code" do
+        expect(response).to have_http_status :forbidden
+      end
+    end
+  end
+end
