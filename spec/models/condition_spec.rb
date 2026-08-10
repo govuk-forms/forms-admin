@@ -807,6 +807,18 @@ RSpec.describe Condition, type: :model do
           expect(condition.exit_page.markdown_cy).to be_nil
         end
       end
+
+      context "when the condition is attached to an external ExitPage" do
+        subject(:condition) { create :condition }
+
+        let(:external_exit_page) { create :exit_page }
+
+        it "doesn't delete the external exit page" do
+          condition.exit_page = external_exit_page
+          condition.save!
+          expect(condition.reload.exit_page).to eq(external_exit_page)
+        end
+      end
     end
   end
 end
