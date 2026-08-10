@@ -1745,6 +1745,7 @@ en:
     edit_exit_page: Edit exit page
     email_code_sent: Confirmation code sent
     error_prefix: 'Error: '
+    exit_page_edit: Edit exit page
     exit_page_new: Add exit page
     exit_page_new_caption: Question %{question_number}’s exit pages
     forbidden: You cannot view this page
@@ -1897,6 +1898,10 @@ en:
     destroy:
       success: The question, ‘%{question_text}’, has been deleted
     exit_pages:
+      edit:
+        back_link: Back to edit question routes
+        no_options_to_this_exit_page: No route to this exit page
+        options_to_this_exit_page: Options that go to this exit page
       new:
         back_link: Back to edit question routes
     heading: Edit question
