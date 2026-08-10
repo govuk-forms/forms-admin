@@ -1,0 +1,23 @@
+---
+en:
+  activemodel:
+    errors:
+      models:
+        pages/update_exit_page_input:
+          attributes:
+            heading:
+              blank: Enter a page heading
+              too_long: Page heading must be %{count} characters or less
+            markdown:
+              blank: Enter page content
+              too_long: Page content must be %{count} characters or less
+              unsupported_markdown_syntax: Page content can only contain formatting for links, subheadings (##), bulleted lists (*), or numbered lists (1.)
+  helpers:
+    hint:
+      pages_update_exit_page_input:
+        heading: Use a heading that summarises why someone cannot continue with the form. For example, ‘You’re not eligible for this service’.
+        markdown: Explain why they cannot continue to use the form and, if possible, tell them what they should do instead.
+    label:
+      pages_update_exit_page_input:
+        heading: Page heading
+        markdown: Page content
