@@ -256,6 +256,52 @@ RSpec.describe PageListComponent::View, type: :component do
       end
     end
 
+    context "when the page has a route to an exit page" do
+      let!(:condition) { create :condition, :with_exit_page, routing_page_id: first_page.id, answer_value: "Option 1" }
+
+      before do
+        render_inline(page_list_component)
+      end
+
+      it "renders the condition description" do
+        condition_description = "Go to exit page 1, ‘#{condition.exit_page.heading}’ if the answer is:"
+        condition_answer_value = "‘#{condition.answer_value}’"
+
+        expect(page).to have_css("dd.govuk-summary-list__value", text: condition_description)
+        expect(page).to have_css("li", text: condition_answer_value)
+      end
+    end
+
+    context "when the page has routes to multiple exit pages" do
+      let!(:first_condition) { create :condition, :with_exit_page, routing_page_id: first_page.id, answer_value: "Option 1" }
+      let!(:second_condition) { create :condition, :with_exit_page, routing_page_id: first_page.id, answer_value: "Option 2" }
+      let!(:third_condition) do
+        create :condition,
+               exit_page_id: second_condition.exit_page.id,
+               routing_page_id: first_page.id, answer_value: "Option 3",
+               exit_page_heading: second_condition.exit_page.heading,
+               exit_page_markdown: second_condition.exit_page.markdown
+      end
+
+      before do
+        render_inline(page_list_component)
+      end
+
+      it "renders the conditions grouped by exit pages with indexing" do
+        first_condition_description = "Go to exit page 1, ‘#{first_condition.exit_page.heading}’ if the answer is:"
+        first_condition_answer_value = "‘#{first_condition.answer_value}’"
+        second_condition_description = "Go to exit page 2, ‘#{second_condition.exit_page.heading}’ if the answer is:"
+        second_condition_answer_value = "‘#{second_condition.answer_value}’"
+        third_condition_answer_value = "‘#{third_condition.answer_value}’"
+
+        expect(page).to have_css("dd.govuk-summary-list__value", text: first_condition_description)
+        expect(page).to have_css("li", text: first_condition_answer_value)
+        expect(page).to have_css("dd.govuk-summary-list__value", text: second_condition_description)
+        expect(page).to have_css("li", text: second_condition_answer_value)
+        expect(page).to have_css("li", text: third_condition_answer_value)
+      end
+    end
+
     context "when the page has an unconditional route" do
       context "when the route is to another page" do
         before do
@@ -466,10 +512,13 @@ RSpec.describe PageListComponent::View, type: :component do
     end
 
     describe "#condition_group_description" do
-      context "when skip_to_end is false" do
-        let(:group) do
-          [build(:condition, skip_to_end: false, goto_page_id: pages.third.id, answer_value: "Option 1")]
-        end
+      let(:group) do
+        { group_type:, conditions: [condition] }
+      end
+
+      context "when the group is a goto_page group" do
+        let(:group_type) { :goto_page }
+        let(:condition) { build(:condition, routing_page_id: pages.first.id, goto_page_id: pages.third.id, answer_value: "Option 1") }
 
         it "returns the correct description" do
           expected_text = "Go to #{pages.third.position}, ‘#{pages.third.question_text}’ if the answer is:"
@@ -477,13 +526,26 @@ RSpec.describe PageListComponent::View, type: :component do
         end
       end
 
-      context "when skip_to_end is true" do
-        let(:group) do
-          [build(:condition, skip_to_end: true, goto_page_id: nil)]
-        end
+      context "when the group is a skip to end group" do
+        let(:group_type) { :skip_to_end }
+        let(:condition) { build(:condition, skip_to_end: true, answer_value: "Option 1") }
 
         it "returns the correct description" do
           expected_text = "Go to the end of the form if the answer is:"
+          expect(page_list_component.condition_group_description(group)).to eq(expected_text)
+        end
+      end
+
+      context "when the group is an exit page group" do
+        let(:group) do
+          { group_type:, exit_page_index: 1, conditions: [condition] }
+        end
+
+        let(:group_type) { :exit_page }
+        let(:condition) { create(:condition, :with_exit_page, answer_value: "Option 1") }
+
+        it "returns the correct description" do
+          expected_text = "Go to exit page 1, ‘#{condition.exit_page.heading}’ if the answer is:"
           expect(page_list_component.condition_group_description(group)).to eq(expected_text)
         end
       end
@@ -541,6 +603,8 @@ RSpec.describe PageListComponent::View, type: :component do
         { value: "Option 1" },
         { value: "Option 2" },
         { value: "Option 3" },
+        { value: "Option 4" },
+        { value: "Option 5" },
       ]
     end
 
@@ -549,7 +613,8 @@ RSpec.describe PageListComponent::View, type: :component do
         create(:condition, routing_page_id: pages[0].id, answer_value: "Option 1", goto_page_id: pages[2].id),
         create(:condition, routing_page_id: pages[0].id, answer_value: "Option 2", goto_page_id: pages[2].id),
         create(:condition, routing_page_id: pages[0].id, answer_value: "Option 3", goto_page_id: pages[3].id),
-        create(:condition, routing_page_id: pages[0].id, answer_value: nil, goto_page_id: nil, skip_to_end: true),
+        create(:condition, routing_page_id: pages[0].id, answer_value: "Option 4", goto_page_id: nil, skip_to_end: true),
+        create(:condition, :with_exit_page, routing_page_id: pages[0].id, answer_value: "Option 5"),
       ]
     end
 
@@ -559,11 +624,12 @@ RSpec.describe PageListComponent::View, type: :component do
       conditions
     end
 
-    it "groups conditions by goto_page_id" do
+    it "groups conditions by goto page, skip to end, and exit page" do
       expected = [
-        [pages[2].id, [conditions[0], conditions[1]]],
-        [pages[3].id, [conditions[2]]],
-        [nil, [conditions[3]]],
+        { group_type: :goto_page, conditions: [conditions[0], conditions[1]] },
+        { group_type: :goto_page, conditions: [conditions[2]] },
+        { group_type: :skip_to_end, conditions: [conditions[3]] },
+        { group_type: :exit_page, exit_page_index: 1, conditions: [conditions[4]] },
       ]
       result = page_list_component.answer_value_groups(form.pages.first)
       expect(result).to eq expected
@@ -572,17 +638,20 @@ RSpec.describe PageListComponent::View, type: :component do
     context "when given a different order of selection options" do
       let(:selection_options) do
         [
+          { value: "Option 5" },
+          { value: "Option 4" },
           { value: "Option 3" },
           { value: "Option 2" },
           { value: "Option 1" },
         ]
       end
 
-      it "returns the conditions in the same order" do
+      it "returns the condition groupings based on the selection options order" do
         expected = [
-          [pages[2].id, [conditions[1], conditions[0]]],
-          [pages[3].id, [conditions[2]]],
-          [nil, [conditions[3]]],
+          { group_type: :goto_page, conditions: [conditions[2]] },
+          { group_type: :goto_page, conditions: [conditions[1], conditions[0]] },
+          { group_type: :skip_to_end, conditions: [conditions[3]] },
+          { group_type: :exit_page, exit_page_index: 1, conditions: [conditions[4]] },
         ]
 
         result = page_list_component.answer_value_groups(form.pages.first)
@@ -602,11 +671,11 @@ RSpec.describe PageListComponent::View, type: :component do
 
       it "sorts groups by page position, not page id" do
         expected = [
-          [pages[2].id, [conditions[0], conditions[1]]],
-          [pages[3].id, [conditions[2]]],
-          [nil, [conditions[3]]],
+          { group_type: :goto_page, conditions: [conditions[0], conditions[1]] },
+          { group_type: :goto_page, conditions: [conditions[2]] },
+          { group_type: :skip_to_end, conditions: [conditions[3]] },
+          { group_type: :exit_page, exit_page_index: 1, conditions: [conditions[4]] },
         ]
-
         result = page_list_component.answer_value_groups(form.pages.first)
         expect(result).to eq expected
       end
