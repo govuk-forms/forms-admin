@@ -49,10 +49,10 @@
               <% end %>
 
                 <% if page.routing_conditions.first.answer_value.present? %>
-                  <% answer_value_groups(page).each do |_, group| %>
+                  <% answer_value_groups(page).each do |group| %>
                     <p><%= condition_group_description(group) %></p>
                     <ul class="govuk-list govuk-list--bullet">
-                      <% group.each do |condition| %>
+                      <% group[:conditions].each do |condition| %>
                         <li>
                           <%= answer_value_text_for_condition2(condition) %>
                         </li>
