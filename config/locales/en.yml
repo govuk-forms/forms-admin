@@ -256,6 +256,7 @@ en:
     success:
       exit_page_created: Your exit page has been added
       exit_page_deleted: Your exit page has been deleted
+      exit_page_saved: Your exit page has been saved
       exit_page_updated: Your exit page has been saved
       form:
         batch_submissions:
@@ -1709,6 +1710,7 @@ en:
     email_code_sent: Confirmation code sent
     error_prefix: 'Error: '
     exit_page_new: Add exit page
+    exit_page_new_caption: Question %{question_number}’s exit pages
     forbidden: You cannot view this page
     group_confirm_new: Create a new group for forms
     group_confirm_upgrade_request: Request to upgrade this trial group
@@ -1858,6 +1860,9 @@ en:
     delete_question: Delete question
     destroy:
       success: The question, ‘%{question_text}’, has been deleted
+    exit_pages:
+      new:
+        back_link: Back to edit question routes
     heading: Edit question
     index:
       add_a_question_route: Add a question route
