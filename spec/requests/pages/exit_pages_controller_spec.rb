@@ -75,6 +75,74 @@ RSpec.describe Pages::ExitPagesController, :feature_multiple_branches, type: :re
     end
   end
 
+  describe "#edit" do
+    let(:exit_page) { create(:exit_page, question_page: page) }
+
+    before do
+      get edit_exit_page_path(form.id, page.id, exit_page.id)
+    end
+
+    it "renders the template" do
+      expect(response).to have_rendered("exit_pages/edit")
+      expect(response.body).to include("Edit exit page")
+    end
+
+    context "when the multiple branches feature is not enabled", feature_multiple_branches: false do
+      it "is forbidden" do
+        expect(response).to have_http_status(:not_found)
+      end
+    end
+
+    context "when the user is not in the form's group" do
+      let(:group) { create(:group, organisation: test_org, memberships: []) }
+
+      it "returns a forbidden status code" do
+        expect(response).to have_http_status :forbidden
+      end
+    end
+  end
+
+  describe "#update" do
+    let(:exit_page) { create(:exit_page, question_page: page) }
+
+    before do
+      patch exit_page_path(form.id, page.id, exit_page.id), params: { pages_update_exit_page_input: { heading: "Exit Page Heading", markdown: "Exit Page Markdown" } }
+    end
+
+    it "updates the exit page" do
+      expect(response).to redirect_to(routes_path(form.id))
+      expect(flash[:success]).to eq(I18n.t("banner.success.exit_page_saved"))
+
+      expect(exit_page.reload.heading).to eq("Exit Page Heading")
+      expect(exit_page.reload.markdown).to eq("Exit Page Markdown")
+    end
+
+    context "when the exit page is invalid" do
+      before do
+        patch exit_page_path(form.id, page.id, exit_page.id), params: { pages_update_exit_page_input: { heading: nil, markdown: nil } }
+      end
+
+      it "renders the exit page template" do
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(response).to render_template("exit_pages/edit")
+      end
+    end
+
+    context "when the multiple branches feature is not enabled", feature_multiple_branches: false do
+      it "is forbidden" do
+        expect(response).to have_http_status(:not_found)
+      end
+    end
+
+    context "when the user is not in the form's group" do
+      let(:group) { create(:group, organisation: test_org, memberships: []) }
+
+      it "returns a forbidden status code" do
+        expect(response).to have_http_status :forbidden
+      end
+    end
+  end
+
   describe "#render_preview" do
     let(:markdown) { "[Markdown](https://example.com)" }
 

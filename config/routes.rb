@@ -160,7 +160,7 @@ Rails.application.routes.draw do
           end
         end
 
-        resources :exit_pages, only: %i[new create], path: "exit-pages", module: :pages do
+        resources :exit_pages, only: %i[new create edit update], path: "exit-pages", module: :pages do
           collection do
             post "/preview" => "exit_pages#render_preview", as: :render_preview
           end

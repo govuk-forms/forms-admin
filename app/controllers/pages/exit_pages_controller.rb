@@ -18,6 +18,22 @@ class Pages::ExitPagesController < PagesController
     end
   end
 
+  def edit
+    exit_page_input = Pages::UpdateExitPageInput.new(exit_page:).assign_exit_page_values
+
+    render locals: { exit_page_input:, preview_html: preview_html(exit_page_input), check_preview_validation: false }
+  end
+
+  def update
+    exit_page_input = Pages::UpdateExitPageInput.new(update_exit_page_input_params.merge(exit_page:))
+
+    if exit_page_input.submit
+      redirect_to routes_path(form_id: current_form.id), success: t("banner.success.exit_page_saved")
+    else
+      render :edit, locals: { exit_page_input:, preview_html: preview_html(exit_page_input), check_preview_validation: true }, status: :unprocessable_content
+    end
+  end
+
   def render_preview
     exit_page_input = Pages::ExitPageInput.new(markdown: params[:markdown])
     exit_page_input.validate if params[:check_preview_validation] == "true"
@@ -27,8 +43,16 @@ class Pages::ExitPagesController < PagesController
 
 private
 
+  def exit_page
+    @exit_page ||= page.exit_pages.find(params[:id])
+  end
+
   def exit_page_input_params
     params.require(:pages_exit_page_input).permit(:heading, :markdown).merge(page:)
+  end
+
+  def update_exit_page_input_params
+    params.require(:pages_update_exit_page_input).permit(:heading, :markdown).merge(page:)
   end
 
   def check_user_has_permission
