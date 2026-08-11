@@ -16,6 +16,11 @@ RSpec.describe FormDocumentSyncService do
 
         expect(FormDocument.last).to have_attributes(form:, tag: "live", content: form.as_form_document(live_at: expected_live_at), version: 1)
       end
+
+      it "sets the latest_form_document_id on the form" do
+        service.synchronize_live_form
+        expect(form.reload.latest_form_document_id).to eq(FormDocument.last.id)
+      end
     end
 
     context "when there is an existing live form document" do
@@ -89,6 +94,11 @@ RSpec.describe FormDocumentSyncService do
         welsh_doc = FormDocument.find_by(form:, tag: "live", language: "cy")
         expect(english_doc.version).to eq(1)
         expect(welsh_doc.version).to eq(1)
+      end
+
+      it "sets the latest_form_document_id on the form to the English form document" do
+        service.synchronize_live_form
+        expect(form.reload.latest_form_document_id).to eq(FormDocument.find_by(form:, tag: "live", language: "en").id)
       end
 
       context "and the Welsh form fails to save" do
@@ -230,6 +240,11 @@ RSpec.describe FormDocumentSyncService do
         expect(FormDocument.find_by(form:, tag: "draft", language: "en").version).to be_nil
       end
 
+      it "does not set the latest_form_document_id" do
+        service.update_draft_form_document
+        expect(form.reload.latest_form_document_id).to be_nil
+      end
+
       context "when there is a declaration in Welsh but not in English translations" do
         let(:form) { create(:form, available_languages: %w[en cy], declaration_markdown: "", declaration_markdown_cy: "Shouldn't be here") }
 
@@ -305,6 +320,11 @@ RSpec.describe FormDocumentSyncService do
         }.to change(FormDocument, :count).by(1)
 
         expect(FormDocument.last).to have_attributes(form:, tag: "live", content: form.as_form_document(live_at: expected_live_at), version: 1)
+      end
+
+      it "sets the latest_form_document_id on the form" do
+        service.synchronize_only_live_english_form
+        expect(form.reload.latest_form_document_id).to eq(FormDocument.find_by(form:, tag: "live", language: "en").id)
       end
     end
 
@@ -414,7 +434,8 @@ RSpec.describe FormDocumentSyncService do
 
     context "when there is a live English form document" do
       before do
-        create :form_document, :live, form:, language: "en", content: { "available_languages" => %w[en] }
+        form_document = create :form_document, :live, form:, language: "en", content: { "available_languages" => %w[en] }
+        form.latest_form_document_id = form_document.id
       end
 
       context "when there is no existing Welsh form document" do
@@ -428,6 +449,12 @@ RSpec.describe FormDocumentSyncService do
           expect(welsh_form_document.content["available_languages"]).to eq %w[en cy]
           expect(welsh_form_document.version).to eq 1
           expect(welsh_form_document).to have_attributes(form:, tag: "live", content: welsh_form_content)
+        end
+
+        it "does not change the latest_live_form_document_id" do
+          expect {
+            service.synchronize_only_live_welsh_form
+          }.to(not_change { form.reload.latest_form_document_id })
         end
       end
 
