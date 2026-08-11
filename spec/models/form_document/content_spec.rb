@@ -47,7 +47,8 @@ RSpec.describe FormDocument::Content, type: :model do
                              submission_type
                              submission_format
                              send_daily_submission_batch
-                             send_weekly_submission_batch]
+                             send_weekly_submission_batch
+                             latest_form_document_id]
     expected_attributes = form.attributes.except(*excluded_attributes)
     expect(form_document_content).to have_attributes(expected_attributes)
   end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_11_111936) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_11_140129) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -168,6 +168,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_11_111936) do
     t.string "external_id"
     t.datetime "first_made_live_at"
     t.text "form_slug"
+    t.bigint "latest_form_document_id"
     t.text "name"
     t.string "payment_url"
     t.text "privacy_policy_url"
@@ -187,6 +188,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_11_111936) do
     t.boolean "welsh_completed", default: false
     t.text "what_happens_next_markdown"
     t.index ["external_id"], name: "index_forms_on_external_id", unique: true
+    t.index ["latest_form_document_id"], name: "index_forms_on_latest_form_document_id"
   end
 
   create_table "groups", force: :cascade do |t|
@@ -355,6 +357,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_11_111936) do
   add_foreign_key "exit_pages", "pages", column: "question_page_id", on_delete: :cascade
   add_foreign_key "form_documents", "forms"
   add_foreign_key "form_translations", "forms"
+  add_foreign_key "forms", "form_documents", column: "latest_form_document_id", on_delete: :nullify
   add_foreign_key "groups", "users", column: "creator_id"
   add_foreign_key "groups", "users", column: "upgrade_requester_id"
   add_foreign_key "memberships", "groups"

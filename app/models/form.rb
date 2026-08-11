@@ -46,7 +46,7 @@ class Form < ApplicationRecord
 
   after_create :set_external_id
   after_update :update_draft_form_document
-  ATTRIBUTES_NOT_IN_FORM_DOCUMENT = %i[state external_id pages question_section_completed declaration_section_completed share_preview_completed welsh_completed].freeze
+  ATTRIBUTES_NOT_IN_FORM_DOCUMENT = %i[state external_id pages question_section_completed declaration_section_completed share_preview_completed welsh_completed latest_form_document_id].freeze
 
   attr_accessor :task_status_service
 
