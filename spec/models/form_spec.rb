@@ -7,26 +7,37 @@ RSpec.describe Form, type: :model do
     it "has a valid factory" do
       form = create :form
       expect(form).to be_valid
+      expect(form.draft_form_document).to be_present
     end
 
     it "has a live trait" do
-      form = build :form, :live
+      form = create :form, :live
       expect(form.state).to eq "live"
+      expect(form.live_form_document).to be_present
+      expect(form.latest_form_document_id).to eq(form.live_form_document.id)
     end
 
     it "has a live with draft trait" do
-      form = build :form, :live_with_draft
+      form = create :form, :live_with_draft
       expect(form.state).to eq "live_with_draft"
+      expect(form.live_form_document).to be_present
+      expect(form.draft_form_document).to be_present
+      expect(form.latest_form_document_id).to eq(form.live_form_document.id)
     end
 
     it "has an archived trait" do
-      form = build :form, :archived
+      form = create :form, :archived
       expect(form.state).to eq "archived"
+      expect(form.archived_form_document).to be_present
+      expect(form.latest_form_document_id).to eq(form.archived_form_document.id)
     end
 
     it "has an archived with draft trait" do
-      form = build :form, :archived_with_draft
+      form = create :form, :archived_with_draft
       expect(form.state).to eq "archived_with_draft"
+      expect(form.archived_form_document).to be_present
+      expect(form.draft_form_document).to be_present
+      expect(form.latest_form_document_id).to eq(form.archived_form_document.id)
     end
 
     it "has a ready for routing trait" do
