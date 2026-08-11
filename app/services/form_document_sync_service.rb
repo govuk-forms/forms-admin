@@ -117,6 +117,7 @@ private
       language:,
     )
     form_document.content = content
+    form_document.version = 1 if tag == LIVE_TAG
 
     form_document.save!
   end
