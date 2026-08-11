@@ -34,6 +34,30 @@ class Pages::ExitPagesController < PagesController
     end
   end
 
+  def delete
+    delete_confirmation_input = Pages::DeleteExitPageInput.new
+
+    render locals: { delete_confirmation_input:, page:, exit_page: }
+  end
+
+  def destroy
+    delete_confirmation_input = Pages::DeleteExitPageInput.new(params.require(:pages_delete_exit_page_input).permit(:confirm))
+
+    unless delete_confirmation_input.valid?
+      return render :delete, locals: { delete_confirmation_input:, page:, exit_page: }, status: :unprocessable_content
+    end
+
+    unless delete_confirmation_input.confirmed?
+      return redirect_to edit_exit_page_path(@current_form.id, page.id, exit_page.id)
+    end
+
+    current_form.save_question_changes! do
+      exit_page.destroy!
+    end
+
+    redirect_to routes_path(@current_form.id), success: t("banner.success.exit_page_deleted")
+  end
+
   def render_preview
     exit_page_input = Pages::ExitPageInput.new(markdown: params[:markdown])
     exit_page_input.validate if params[:check_preview_validation] == "true"
@@ -44,7 +68,7 @@ class Pages::ExitPagesController < PagesController
 private
 
   def exit_page
-    @exit_page ||= page.exit_pages.find(params[:id])
+    @exit_page ||= page.exit_pages.find(params.require(:id))
   end
 
   def exit_page_input_params

@@ -49,6 +49,7 @@
 
       <div class="govuk-button-group">
         <%= f.govuk_submit t("save_and_continue") %>
+        <%= govuk_button_link_to t('.delete_exit_page'), delete_exit_page_path(@current_form.id, exit_page_input.exit_page.question_page.id, exit_page_input.exit_page.id), warning: true %>
         <%= govuk_link_to t('cancel'), routes_path(@current_form.id) %>
       </div>
     <% end %>

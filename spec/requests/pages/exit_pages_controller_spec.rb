@@ -143,6 +143,78 @@ RSpec.describe Pages::ExitPagesController, :feature_multiple_branches, type: :re
     end
   end
 
+  describe "#delete" do
+    let(:exit_page) { create(:exit_page, question_page: page) }
+
+    before do
+      get delete_exit_page_path(form_id: form.id, page_id: page.id, id: exit_page.id)
+    end
+
+    it "renders the template" do
+      expect(response).to have_rendered("exit_pages/delete")
+      expect(response.body).to include("Are you sure you want to delete this exit page?")
+    end
+
+    context "when the multiple branches feature is not enabled", feature_multiple_branches: false do
+      it "is forbidden" do
+        expect(response).to have_http_status(:not_found)
+      end
+    end
+
+    context "when the user is not in the form's group" do
+      let(:group) { create(:group, organisation: test_org, memberships: []) }
+
+      it "returns a forbidden status code" do
+        expect(response).to have_http_status :forbidden
+      end
+    end
+  end
+
+  describe "#destroy" do
+    subject!(:exit_page) { create(:exit_page, question_page: page) }
+
+    let(:form) { create(:form, :with_group, :with_pages, pages_count: 1, group:, question_section_completed: true) }
+    let(:exit_page_url) { exit_page_path(form_id: form.id, page_id: page.id, id: exit_page.id) }
+    let(:params) { { pages_delete_exit_page_input: { confirm: "yes" } } }
+
+    it "deletes the exit page" do
+      expect { delete exit_page_url, params: }.to change(page.reload.exit_pages, :count).by(-1)
+    end
+
+    it "sets question_section_completed to false and updates the draft" do
+      expect { delete exit_page_url, params: }.to change { form.reload.question_section_completed? }.from(true).to(false)
+        .and(change { form.draft_form_document.reload.updated_at })
+    end
+
+    it "redirects to the routes page" do
+      delete(exit_page_url, params:)
+      expect(response).to redirect_to(routes_path(form_id: form.id))
+    end
+
+    it "displays a success flash message" do
+      delete(exit_page_url, params:)
+      expect(flash[:success]).to eq(I18n.t("banner.success.exit_page_deleted"))
+    end
+
+    context "when not confirmed" do
+      let(:params) { { pages_delete_exit_page_input: { confirm: "no" } } }
+
+      it "redirects to the edit exit page page" do
+        delete(exit_page_url, params:)
+        expect(response).to redirect_to(edit_exit_page_path(form_id: form.id, page_id: page.id, id: exit_page.id))
+      end
+    end
+
+    context "when the params are invalid" do
+      let(:params) { { pages_delete_exit_page_input: { confirm: nil } } }
+
+      it "returns an unprocessable content response" do
+        delete(exit_page_url, params:)
+        expect(response).to have_http_status :unprocessable_content
+      end
+    end
+  end
+
   describe "#render_preview" do
     let(:markdown) { "[Markdown](https://example.com)" }
 
