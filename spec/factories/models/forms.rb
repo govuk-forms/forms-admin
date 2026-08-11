@@ -105,7 +105,7 @@ FactoryBot.define do
       after(:create) do |form|
         form.available_languages.each do |language|
           Mobility.with_locale(language) do
-            form_document = FormDocument.create!(form:, tag: "live", content: form.as_form_document(live_at: form.updated_at), language:)
+            form_document = FormDocument.create!(form:, tag: "live", content: form.as_form_document(live_at: form.updated_at), language:, version: 1)
             form.update_column(:latest_form_document_id, form_document.id) if language == "en"
           end
         end
@@ -124,7 +124,7 @@ FactoryBot.define do
       after(:create) do |form|
         form.available_languages.each do |language|
           Mobility.with_locale(language) do
-            form_document = FormDocument.create!(form:, tag: "archived", content: form.as_form_document(live_at: form.updated_at), language:)
+            form_document = FormDocument.create!(form:, tag: "archived", content: form.as_form_document(live_at: form.updated_at), language:, version: 1)
             form.update_column(:latest_form_document_id, form_document.id) if language == "en"
           end
         end

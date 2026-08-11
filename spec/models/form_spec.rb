@@ -14,6 +14,7 @@ RSpec.describe Form, type: :model do
       form = create :form, :live
       expect(form.state).to eq "live"
       expect(form.live_form_document).to be_present
+      expect(form.live_form_document.version).to eq(1)
       expect(form.latest_form_document_id).to eq(form.live_form_document.id)
     end
 
@@ -29,6 +30,7 @@ RSpec.describe Form, type: :model do
       form = create :form, :archived
       expect(form.state).to eq "archived"
       expect(form.archived_form_document).to be_present
+      expect(form.archived_form_document.version).to eq(1)
       expect(form.latest_form_document_id).to eq(form.archived_form_document.id)
     end
 
