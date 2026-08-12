@@ -5,7 +5,16 @@ RSpec.describe Api::BrandsController, type: :request do
 
   describe "#show" do
     context "when the brand exists" do
-      let(:brand) { create :brand, name: "Golden Zephyr", slug: "golden-zephyr" }
+      let(:brand) do
+        create :brand,
+               name: "Golden Zephyr",
+               slug: "golden-zephyr",
+               header_background_colour: "#ffffff",
+               border_colour: "#206c49",
+               logo_alt_text: "Golden Zephyr Council",
+               logo_link: "https://www.goldenzephyr.example.com",
+               copyright_holder: "Golden Zephyr Council"
+      end
 
       before do
         get "/api/v2/brands/#{brand.id}", headers:
@@ -19,6 +28,11 @@ RSpec.describe Api::BrandsController, type: :request do
         expect(response.parsed_body).to eq({
           "name" => "Golden Zephyr",
           "slug" => "golden-zephyr",
+          "header_background_colour" => "#ffffff",
+          "border_colour" => "#206c49",
+          "logo_alt_text" => "Golden Zephyr Council",
+          "logo_link" => "https://www.goldenzephyr.example.com",
+          "copyright_holder" => "Golden Zephyr Council",
         })
       end
 
