@@ -101,4 +101,23 @@ RSpec.describe ExitPage, type: :model do
       )
     end
   end
+
+  describe "#options_to_this_exit_page" do
+    it "when the exit_page has linked conditions, returns an array of the answer values of conditions that go to this exit page" do
+      question_page = create(:page)
+      exit_page = create(:exit_page, question_page:)
+      create(:condition, routing_page: question_page, exit_page_id: exit_page.id, answer_value: "option 1")
+      create(:condition, exit_page:, answer_value: "option 2")
+      create(:condition, exit_page:, answer_value: "option 3")
+
+      expect(exit_page.options_to_this_exit_page).to eq(["option 1", "option 2", "option 3"])
+    end
+
+    it "when the exit_page has no linked conditions, returns an empty array" do
+      question_page = create(:page)
+      exit_page = create(:exit_page, question_page:)
+
+      expect(exit_page.options_to_this_exit_page).to eq([])
+    end
+  end
 end
