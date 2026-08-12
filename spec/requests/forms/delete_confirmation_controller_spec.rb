@@ -49,6 +49,15 @@ RSpec.describe Forms::DeleteConfirmationController, type: :request do
         expect(flash[:success]).to eq "The draft form, ‘Form 1’, has been deleted"
       end
 
+      context "when the form is live" do
+        let(:form) { create(:form, :live) }
+
+        it "deletes the form and redirects" do
+          expect(response).to redirect_to(group_path(group))
+          expect(Form.exists?(form.id)).to be false
+        end
+      end
+
       context "when current user is not in group for form" do
         let(:membership) { nil }
 
