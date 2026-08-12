@@ -14,6 +14,7 @@ class Form < ApplicationRecord
   has_one :archived_welsh_form_document, -> { where tag: "archived", language: :cy }, class_name: "FormDocument"
   has_one :draft_welsh_form_document, -> { where tag: "draft", language: :cy }, class_name: "FormDocument"
   has_one :draft_form_document, -> { where tag: "draft", language: :en }, class_name: "FormDocument"
+  belongs_to :latest_form_document, class_name: "FormDocument", optional: true
   has_many :conditions, through: :pages, source: :routing_conditions
   has_many :exit_pages, through: :pages, source: :exit_pages
   has_many :delivery_configurations, dependent: :destroy
@@ -46,7 +47,7 @@ class Form < ApplicationRecord
 
   after_create :set_external_id
   after_update :update_draft_form_document
-  ATTRIBUTES_NOT_IN_FORM_DOCUMENT = %i[state external_id pages question_section_completed declaration_section_completed share_preview_completed welsh_completed].freeze
+  ATTRIBUTES_NOT_IN_FORM_DOCUMENT = %i[state external_id pages question_section_completed declaration_section_completed share_preview_completed welsh_completed latest_form_document_id].freeze
 
   attr_accessor :task_status_service
 

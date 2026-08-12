@@ -117,8 +117,12 @@ private
       language:,
     )
     form_document.content = content
+    form_document.version = 1 if tag == LIVE_TAG
 
     form_document.save!
+
+    # use update_column to skip callbacks so we don't sync the draft form document again
+    form.update_column(:latest_form_document_id, form_document.id) if language == "en" && tag == LIVE_TAG
   end
 
   def delete_form_documents_by_tag(tag)
