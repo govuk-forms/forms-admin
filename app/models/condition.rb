@@ -34,7 +34,7 @@ class Condition < ApplicationRecord
       exit_page.markdown_cy = legacy_exit_page_markdown_cy
     end
 
-    if legacy_exit_page_heading.blank? || legacy_exit_page_markdown.blank?
+    if (legacy_exit_page_heading.blank? || legacy_exit_page_markdown.blank?) && (exit_page_heading_changed? || exit_page_markdown_changed?)
       exit_page&.mark_for_destruction
     end
   end
