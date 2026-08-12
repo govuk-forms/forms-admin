@@ -6,32 +6,8 @@ RSpec.describe Pages::ExitPageInput, type: :model do
   let(:heading) { "the heading" }
   let(:markdown) { "some markdown" }
 
-  describe "validations" do
-    it "is invalid if heading is nil" do
-      error_message = I18n.t("activemodel.errors.models.pages/exit_page_input.attributes.heading.blank")
-      exit_page_input.heading = nil
-      expect(exit_page_input).to be_invalid
-      expect(exit_page_input.errors.full_messages_for(:heading)).to include("Heading #{error_message}")
-    end
-
-    it "is invalid if markdown is nil" do
-      error_message = I18n.t("activemodel.errors.models.pages/exit_page_input.attributes.markdown.blank")
-      exit_page_input.markdown = nil
-      expect(exit_page_input).to be_invalid
-      expect(exit_page_input.errors.full_messages_for(:markdown)).to include("Markdown #{error_message}")
-    end
-
-    it "is invalid if heading is too long" do
-      error_message = I18n.t("activemodel.errors.models.pages/exit_page_input.attributes.heading.too_long", count: 250)
-      exit_page_input.heading = "a" * 251
-      expect(exit_page_input).to be_invalid
-      expect(exit_page_input.errors.full_messages_for(:heading)).to include("Heading #{error_message}")
-    end
-
-    it_behaves_like "a markdown field with headings allowed", :mark_complete do
-      let(:model) { exit_page_input }
-      let(:attribute) { :markdown }
-    end
+  it_behaves_like "validates exit pages" do
+    let(:model) { exit_page_input }
   end
 
   describe "#submit" do
