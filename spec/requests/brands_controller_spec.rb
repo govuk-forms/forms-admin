@@ -73,6 +73,11 @@ RSpec.describe BrandsController, type: :request do
       it "shows the brand's properties" do
         expect(response.body).to include(brand.name)
         expect(response.body).to include(brand.slug)
+        expect(response.body).to include(brand.logo_alt_text)
+        expect(response.body).to include(brand.logo_link)
+        expect(response.body).to include(brand.header_background_colour)
+        expect(response.body).to include(brand.border_colour)
+        expect(response.body).to include(brand.copyright_holder)
       end
     end
   end
@@ -92,6 +97,13 @@ RSpec.describe BrandsController, type: :request do
       it "returns http code 200 and renders the new view" do
         expect(response).to have_http_status(:ok)
         expect(response).to render_template("brands/new")
+      end
+
+      it "has a labelled field for each brand attribute" do
+        page = Capybara.string(response.body)
+        ["Brand name", "Slug", "Logo alt text", "Logo link", "Header background colour", "Header and footer border colour", "Copyright holder"].each do |label|
+          expect(page).to have_field(label)
+        end
       end
     end
   end
@@ -205,6 +217,13 @@ RSpec.describe BrandsController, type: :request do
       it "returns http code 200 and renders the edit view" do
         expect(response).to have_http_status(:ok)
         expect(response).to render_template("brands/edit")
+      end
+
+      it "has a labelled field for each editable brand attribute" do
+        page = Capybara.string(response.body)
+        ["Brand name", "Logo alt text", "Logo link", "Header background colour", "Header and footer border colour", "Copyright holder"].each do |label|
+          expect(page).to have_field(label)
+        end
       end
     end
   end

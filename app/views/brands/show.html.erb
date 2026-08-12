@@ -12,6 +12,31 @@
       end
 
       summary_list.with_row do |row|
+        row.with_key { t('brands.show.summary.logo_alt_text') }
+        row.with_value { @brand.logo_alt_text }
+      end
+
+      summary_list.with_row do |row|
+        row.with_key { t('brands.show.summary.logo_link') }
+        row.with_value { @brand.logo_link }
+      end
+
+      summary_list.with_row do |row|
+        row.with_key { t('brands.show.summary.header_background_colour') }
+        row.with_value { @brand.header_background_colour }
+      end
+
+      summary_list.with_row do |row|
+        row.with_key { t('brands.show.summary.border_colour') }
+        row.with_value { @brand.border_colour }
+      end
+
+      summary_list.with_row do |row|
+        row.with_key { t('brands.show.summary.copyright_holder') }
+        row.with_value { @brand.copyright_holder }
+      end
+
+      summary_list.with_row do |row|
         row.with_key { t('brands.show.summary.created_at') }
         row.with_value { l(@brand.created_at.to_date, format: :long) }
       end
