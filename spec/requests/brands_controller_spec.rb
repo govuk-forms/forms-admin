@@ -98,7 +98,19 @@ RSpec.describe BrandsController, type: :request do
 
   describe "#create" do
     let(:path) { brands_path }
-    let(:params) { { brand: { name: "Testshire Council", slug: "testshire" } } }
+    let(:params) do
+      {
+        brand: {
+          name: "Testshire Council",
+          slug: "testshire",
+          header_background_colour: "#ffffff",
+          border_colour: "#206c49",
+          logo_alt_text: "Testshire Council",
+          logo_link: "https://www.testshire.example.com",
+          copyright_holder: "Testshire Council",
+        },
+      }
+    end
 
     it_behaves_like "unauthorized user is forbidden" do
       let(:do_request) { post path, params: params }
@@ -121,14 +133,21 @@ RSpec.describe BrandsController, type: :request do
         login_as_super_admin_user
       end
 
-      it "creates a brand with the given name and slug" do
+      it "creates a brand with the given attributes" do
         expect {
           post path, params: params
         }.to change(Brand, :count).by(1)
 
         brand = Brand.last
-        expect(brand.name).to eq("Testshire Council")
-        expect(brand.slug).to eq("testshire")
+        expect(brand).to have_attributes(
+          name: "Testshire Council",
+          slug: "testshire",
+          header_background_colour: "#ffffff",
+          border_colour: "#206c49",
+          logo_alt_text: "Testshire Council",
+          logo_link: "https://www.testshire.example.com",
+          copyright_holder: "Testshire Council",
+        )
       end
 
       it "redirects to the brand page with a success message" do
@@ -139,7 +158,24 @@ RSpec.describe BrandsController, type: :request do
       end
 
       context "when the brand is invalid" do
-        let(:params) { { brand: { name: "", slug: "testshire" } } }
+        before do
+          params[:brand][:name] = ""
+        end
+
+        it "does not create a brand and re-renders the new view" do
+          expect {
+            post path, params: params
+          }.not_to change(Brand, :count)
+
+          expect(response).to have_http_status(:unprocessable_content)
+          expect(response).to render_template("brands/new")
+        end
+      end
+
+      context "when a colour is not a hex colour code" do
+        before do
+          params[:brand][:border_colour] = "green"
+        end
 
         it "does not create a brand and re-renders the new view" do
           expect {
@@ -176,7 +212,19 @@ RSpec.describe BrandsController, type: :request do
   describe "#update" do
     let(:brand) { create :brand, slug: "testshire", name: "Testshire Council" }
     let(:path) { brand_path(brand) }
-    let(:params) { { brand: { name: "Greater Testshire Council", slug: "greater-testshire" } } }
+    let(:params) do
+      {
+        brand: {
+          name: "Greater Testshire Council",
+          slug: "greater-testshire",
+          header_background_colour: "#f0f0f0",
+          border_colour: "#123abc",
+          logo_alt_text: "Greater Testshire Council",
+          logo_link: "https://www.greater-testshire.example.com",
+          copyright_holder: "Greater Testshire Council",
+        },
+      }
+    end
 
     it_behaves_like "unauthorized user is forbidden" do
       let(:do_request) { put path, params: params }
@@ -199,10 +247,18 @@ RSpec.describe BrandsController, type: :request do
         login_as_super_admin_user
       end
 
-      it "updates the brand's name but not its slug" do
+      it "updates the brand's attributes but not its slug" do
         put path, params: params
 
-        expect(brand.reload).to have_attributes(name: "Greater Testshire Council", slug: "testshire")
+        expect(brand.reload).to have_attributes(
+          name: "Greater Testshire Council",
+          slug: "testshire",
+          header_background_colour: "#f0f0f0",
+          border_colour: "#123abc",
+          logo_alt_text: "Greater Testshire Council",
+          logo_link: "https://www.greater-testshire.example.com",
+          copyright_holder: "Greater Testshire Council",
+        )
       end
 
       it "redirects to the brand page with a success message" do

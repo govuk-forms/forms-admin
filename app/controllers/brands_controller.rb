@@ -51,10 +51,10 @@ private
   end
 
   def brand_params
-    params.require(:brand).permit(:name, :slug)
+    params.require(:brand).permit(:name, :slug, :header_background_colour, :border_colour, :logo_alt_text, :logo_link, :copyright_holder)
   end
 
   def update_brand_params
-    params.require(:brand).permit(:name)
+    params.require(:brand).permit(:name, :header_background_colour, :border_colour, :logo_alt_text, :logo_link, :copyright_holder)
   end
 end
