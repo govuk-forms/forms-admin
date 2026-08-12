@@ -34,50 +34,66 @@ RSpec.describe Api::FormDocumentsController, type: :request do
       end
 
       context "when the tag is live" do
-        let(:live_form_name) { "Live form" }
-        let(:form) { create(:form, :live, name: live_form_name) }
+        let(:form) { create(:form, :live) }
 
         before do
-          # change the form object so we can be sure we're returning the live form document
-          form.name = "Draft form"
-          form.save!
-
-          get "/api/v2/forms/#{form.id}/live", headers:
+          create :form_document, :live, form: form, version: 2, content: { name: "v2 form" }
+          create :form_document, :live, form: form, version: 3, content: { name: "v3 form" }
         end
 
         it "returns http success" do
+          get("/api/v2/forms/#{form.id}/live", headers:)
           expect(response).to have_http_status(:success)
         end
 
-        it "returns the live form document" do
+        it "returns the latest live form document" do
+          get("/api/v2/forms/#{form.id}/live", headers:)
           expect(response.parsed_body).to include({
-            form_id: form.id.to_s,
-            name: live_form_name,
+            name: "v3 form",
           })
+        end
+
+        context "and the most recent version is archived" do
+          before do
+            create :form_document, :archived, form: form, version: 4
+          end
+
+          it "returns http not found" do
+            get("/api/v2/forms/#{form.id}/live", headers:)
+            expect(response).to have_http_status(:not_found)
+          end
         end
       end
 
       context "when the tag is archived" do
-        let(:archived_form_name) { "Archived form" }
-        let(:form) { create(:form, :archived, name: archived_form_name) }
+        let(:form) { create(:form, :archived) }
 
         before do
-          # change the form object so we can be sure we're returning the archived form document
-          form.name = "Draft form"
-          form.save!
-
-          get "/api/v2/forms/#{form.id}/archived"
+          create :form_document, :archived, form: form, version: 2, content: { name: "v2 form" }
+          create :form_document, :archived, form: form, version: 3, content: { name: "v3 form" }
         end
 
         it "returns http success" do
+          get("/api/v2/forms/#{form.id}/archived")
           expect(response).to have_http_status(:success)
         end
 
         it "returns the archived form document" do
+          get("/api/v2/forms/#{form.id}/archived")
           expect(response.parsed_body).to include({
-            form_id: form.id.to_s,
-            name: archived_form_name,
+            name: "v3 form",
           })
+        end
+
+        context "and the most recent version is live" do
+          before do
+            create :form_document, :live, form: form, version: 4
+          end
+
+          it "returns http not found" do
+            get("/api/v2/forms/#{form.id}/archived")
+            expect(response).to have_http_status(:not_found)
+          end
         end
       end
     end
@@ -123,14 +139,16 @@ RSpec.describe Api::FormDocumentsController, type: :request do
       let(:form) { create :form }
 
       before do
-        create :form_document, :live, form: form, language: "en", content: { form_id: form.id.to_s, language: "en" }
-        create :form_document, :live, form: form, language: "cy", content: { form_id: form.id.to_s, language: "cy" }
+        create :form_document, :live, form: form, language: "en", version: 1
+        create :form_document, :live, form: form, language: "en", version: 2, content: { name: "Live form v2", language: "en" }
+        create :form_document, :live, form: form, language: "cy", version: 1
+        create :form_document, :live, form: form, language: "cy", version: 2, content: { name: "Welsh live form v2", language: "cy" }
       end
 
       it "when not given a language, defaults to english returns the live form document in english" do
         get("/api/v2/forms/#{form.id}/live", headers:)
         expect(response.parsed_body).to include({
-          form_id: form.id.to_s,
+          name: "Live form v2",
           language: "en",
         })
       end
@@ -138,7 +156,7 @@ RSpec.describe Api::FormDocumentsController, type: :request do
       it "when given welsh param returns the live form document in welsh" do
         get("/api/v2/forms/#{form.id}/live?language=cy", headers:)
         expect(response.parsed_body).to include({
-          form_id: form.id.to_s,
+          name: "Welsh live form v2",
           language: "cy",
         })
       end

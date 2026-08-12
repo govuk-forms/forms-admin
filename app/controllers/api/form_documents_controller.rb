@@ -10,7 +10,15 @@ class Api::FormDocumentsController < ApplicationController
 private
 
   def form_document
-    @form_document ||= FormDocument.find_by!(form_document_params)
+    form_id, tag, language = form_document_params.values_at(:form_id, :tag, :language)
+
+    return FormDocument.find_by!(form_id:, tag:, language:) if tag == "draft"
+
+    latest_form_document = FormDocument.latest_live_or_archived(form_id:, language:)
+
+    raise NotFoundError unless latest_form_document&.tag == tag
+
+    latest_form_document
   end
 
   def form_document_params
