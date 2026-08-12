@@ -133,10 +133,12 @@ module PageListComponent
         .values
         .sort_by { |grouped_conditions| grouped_conditions.first.exit_page&.created_at }
 
-      exit_page_groups.each_with_index do |grouped_conditions, index|
+      exit_page_positions = ExitPage.positions_for_page(page)
+
+      exit_page_groups.each do |grouped_conditions|
         groups << {
           group_type: :exit_page,
-          exit_page_index: index + 1,
+          exit_page_index: exit_page_positions[grouped_conditions.first.exit_page.id],
           conditions: grouped_conditions,
         }
       end
