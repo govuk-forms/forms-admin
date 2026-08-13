@@ -53,6 +53,11 @@ RSpec.describe Api::FormDocumentsController, type: :request do
           })
         end
 
+        it "logs the returned form document version", :capture_logging do
+          get("/api/v2/forms/#{form.id}/live", headers:)
+          expect(log_line["form_document_version"]).to eq 3
+        end
+
         context "and the most recent version is archived" do
           before do
             create :form_document, :archived, form: form, version: 4

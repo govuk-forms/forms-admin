@@ -18,6 +18,8 @@ private
 
     raise NotFoundError unless latest_form_document&.tag == tag
 
+    CurrentLoggingAttributes.form_document_version = latest_form_document&.version
+
     latest_form_document
   end
 
