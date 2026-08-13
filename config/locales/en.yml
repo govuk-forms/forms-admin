@@ -2206,13 +2206,6 @@ en:
       draft: draft
       live: live
       live-or-archived: live or archived
-    users_per_organisation:
-      heading: Number of users per organisation
-      table_headings:
-        organisation_name: Organisation
-        total_number_of_users: Total Number of Users
-        user_count: User count
-      title: Number of users per organisation
   routes:
     show:
       not_enough_pages_html: |

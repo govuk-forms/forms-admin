@@ -204,12 +204,6 @@ class ReportsController < WebController
     render locals: { data: }
   end
 
-  def users_per_organisation
-    data = Reports::OrganisationsReportService.new.users_per_organisation_report
-
-    render locals: { data: }
-  end
-
   def organisation_domains
     data = Reports::OrganisationsReportService.new.organisation_domains_report
 

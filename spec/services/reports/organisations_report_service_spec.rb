@@ -34,36 +34,4 @@ describe Reports::OrganisationsReportService do
       end
     end
   end
-
-  describe "#users_per_organisation_report" do
-    it "returns the correct format" do
-      expect(service.users_per_organisation_report).to match({
-        caption: I18n.t("reports.users_per_organisation.heading"),
-        first_cell_is_header: true,
-        head: [
-          { text: I18n.t("reports.users_per_organisation.table_headings.organisation_name") },
-          { text: I18n.t("reports.users_per_organisation.table_headings.user_count"), numeric: true },
-        ],
-        rows: [[{ text: I18n.t("reports.users_per_organisation.table_headings.total_number_of_users") }, { text: 0, numeric: true }]],
-      })
-    end
-
-    context "with orgs and users" do
-      it "returns the correct rows" do
-        org1 = create :organisation, slug: "with-most-users"
-        org2 = create :organisation, slug: "with-one-user"
-        create :organisation, slug: "with-no-users"
-        create :user, organisation: org1
-        create :user, organisation: org1
-        create :user, organisation: org2
-        create :user, :with_no_org
-        expect(service.users_per_organisation_report[:rows]).to eq([
-          [{ text: I18n.t("reports.users_per_organisation.table_headings.total_number_of_users") }, { text: 4, numeric: true }],
-          [{ text: org1.name }, { text: 2, numeric: true }],
-          [{ text: org2.name }, { text: 1, numeric: true }],
-          [{ text: I18n.t("users.index.organisation_blank") }, { text: 1, numeric: true }],
-        ])
-      end
-    end
-  end
 end
