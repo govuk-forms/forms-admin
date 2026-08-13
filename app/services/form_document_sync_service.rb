@@ -11,10 +11,10 @@ class FormDocumentSyncService
 
   def synchronize_live_form
     FormDocument.transaction do
-      synchronize_documents_for_tag(LIVE_TAG, live_at: form.updated_at)
-
       # A new live version replaces any previous archived version
       delete_form_documents_by_tag(ARCHIVED_TAG)
+
+      synchronize_documents_for_tag(LIVE_TAG, live_at: form.updated_at)
     end
   end
 
@@ -23,9 +23,6 @@ class FormDocumentSyncService
       # Ensure we only archive forms that are currently live
       raise ActiveRecord::RecordNotFound, "Cannot archive a form that has no live version." unless live_documents.exists?
 
-      # Remove any pre-existing archived documents
-      delete_form_documents_by_tag(ARCHIVED_TAG)
-
       # Change all live documents to archived
       live_documents.update_all(tag: ARCHIVED_TAG)
     end
@@ -33,14 +30,11 @@ class FormDocumentSyncService
 
   def synchronize_archived_welsh_form
     FormDocument.transaction do
-      # Ensure we only archive forms that are currently live
-      raise ActiveRecord::RecordNotFound, "Cannot archive a form that has no live version." unless FormDocument.where(form:, tag: LIVE_TAG, language: "cy").exists?
+      live_welsh_form_document = FormDocument.find_by(form:, tag: LIVE_TAG, language: "cy")
 
-      # Remove any pre-existing archived documents
-      FormDocument.where(form:, tag: ARCHIVED_TAG, language: "cy").delete_all
+      raise ActiveRecord::RecordNotFound, "Cannot archive a form that has no live version." unless live_welsh_form_document
 
-      # Change all live documents to archived
-      FormDocument.where(form:, tag: LIVE_TAG, language: "cy").update_all(tag: ARCHIVED_TAG)
+      live_welsh_form_document.update!(tag: ARCHIVED_TAG)
 
       # Update the content of the live version to show that it doesn't support welsh anymore
       FormDocument.where(form:, tag: [LIVE_TAG, DRAFT_TAG], language: "en").find_each do |live_document|
@@ -57,36 +51,31 @@ class FormDocumentSyncService
       # If we've already made the Welsh version live, changes to the Welsh version must be made live at the same time by calling a different method
       raise ActiveRecord::RecordNotFound, "Cannot make changes to only the live English form if there is already a live Welsh version." if FormDocument.where(form:, tag: LIVE_TAG, language: "cy").exists?
 
-      content = form_content("en", live_at: form.updated_at)
-      update_or_create_form_document(LIVE_TAG, content, "en")
-
-      # Update the content of the live English version to to not include Welsh in available_languages
-      FormDocument.where(form:, tag: [LIVE_TAG], language: "en").find_each do |live_document|
-        live_document.content["available_languages"] = %w[en]
-        live_document.save!
-      end
-
       # A new live version replaces any previous archived version
       delete_form_documents_by_tag(ARCHIVED_TAG)
+
+      content = form_content("en", live_at: form.updated_at)
+      content["available_languages"] = %w[en] # don't include Welsh in available languages
+      update_or_create_form_document(LIVE_TAG, content, "en")
     end
   end
 
   def synchronize_only_live_welsh_form
     FormDocument.transaction do
+      live_english_form_document = FormDocument.find_by(form:, tag: LIVE_TAG, language: "en")
+
       # Ensure we only make Welsh version live if there is already an existing live English version
-      raise ActiveRecord::RecordNotFound, "Cannot make Welsh version live unless there is already a live English version." unless FormDocument.where(form:, tag: LIVE_TAG, language: "en").exists?
+      raise ActiveRecord::RecordNotFound, "Cannot make Welsh version live unless there is already a live English version." unless live_english_form_document
+
+      # A new live version replaces the archived version
+      delete_form_documents_by_tag(ARCHIVED_TAG)
 
       content = form_content("cy", live_at: form.updated_at)
       update_or_create_form_document(LIVE_TAG, content, "cy")
 
       # Update the content of the live English version to show that it now supports Welsh
-      FormDocument.where(form:, tag: [LIVE_TAG], language: "en").find_each do |live_document|
-        live_document.content["available_languages"] = %w[en cy]
-        live_document.save!
-      end
-
-      # A new live version replaces any previous archived version
-      delete_form_documents_by_tag(ARCHIVED_TAG)
+      live_english_form_document.content["available_languages"] = %w[en cy]
+      live_english_form_document.save!
     end
   end
 
