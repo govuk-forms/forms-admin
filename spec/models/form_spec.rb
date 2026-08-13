@@ -1697,4 +1697,18 @@ RSpec.describe Form, type: :model do
       end
     end
   end
+
+  describe "#latest_live_or_archived_form_document" do
+    let(:form) { create(:form, :live, :with_welsh_translation) }
+
+    before do
+      allow(FormDocument).to receive(:latest_live_or_archived).and_call_original
+    end
+
+    it "calls FormDocument.latest_live_or_archived with the language" do
+      form_document = form.latest_live_or_archived_form_document(language: "cy")
+      expect(form_document).to eq(FormDocument.find_by(form_id: form.id, language: "cy", tag: "live"))
+      expect(FormDocument).to have_received(:latest_live_or_archived).with(form_id: form.id, language: "cy")
+    end
+  end
 end

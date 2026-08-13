@@ -234,7 +234,7 @@ class Form < ApplicationRecord
   end
 
   def changed_from_live_version?(language:)
-    live_document = language == "cy" ? latest_welsh_form_document : latest_form_document
+    live_document = latest_live_or_archived_form_document(language:)
     return false if live_document.blank?
 
     ignored_keys = %w[live_at available_languages updated_at]
@@ -245,6 +245,10 @@ class Form < ApplicationRecord
 
   def only_s3_delivery_enabled?
     delivery_configurations.immediate.one? && delivery_configurations.immediate.first.delivery_method == "s3"
+  end
+
+  def latest_live_or_archived_form_document(language:)
+    FormDocument.latest_live_or_archived(form_id: id, language: language)
   end
 
   def has_live_welsh_translation?
