@@ -1,6 +1,7 @@
 class Pages::ExitPagesController < PagesController
-  before_action :check_multiple_branches_enabled
   before_action :check_user_has_permission
+  before_action :check_multiple_branches_enabled
+  before_action :check_page_can_have_exit_pages
 
   def new
     exit_page_input = Pages::ExitPageInput.new(page: page)
@@ -85,6 +86,12 @@ private
 
   def check_multiple_branches_enabled
     return if FeatureService.new(group: current_form.group).enabled?(:multiple_branches)
+
+    render "errors/not_found", status: :not_found, formats: :html
+  end
+
+  def check_page_can_have_exit_pages
+    return if Forms::RoutesInput.route_with_selection_options?(page)
 
     render "errors/not_found", status: :not_found, formats: :html
   end

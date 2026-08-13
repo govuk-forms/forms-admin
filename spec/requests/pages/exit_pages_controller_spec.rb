@@ -1,7 +1,7 @@
 require "rails_helper"
 
 RSpec.describe Pages::ExitPagesController, :feature_multiple_branches, type: :request do
-  let(:form) { create(:form, :with_group, :with_pages, pages_count: 1, group:) }
+  let(:form) { create(:form, :with_group, :with_pages, pages: [create(:page, :with_selection_settings)], group:) }
   let(:page) { form.pages.first }
   let(:group) { create(:group, organisation: test_org, memberships: [create(:membership, user: standard_user)]) }
 
@@ -173,7 +173,7 @@ RSpec.describe Pages::ExitPagesController, :feature_multiple_branches, type: :re
   describe "#destroy" do
     subject!(:exit_page) { create(:exit_page, question_page: page) }
 
-    let(:form) { create(:form, :with_group, :with_pages, pages_count: 1, group:, question_section_completed: true) }
+    let(:form) { super().tap { |f| f.question_section_completed = true } }
     let(:exit_page_url) { exit_page_path(form_id: form.id, page_id: page.id, id: exit_page.id) }
     let(:params) { { pages_delete_exit_page_input: { confirm: "yes" } } }
 
