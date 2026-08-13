@@ -5,20 +5,12 @@ class FormsController < WebController
 
   attr_reader :current_form
 
-  def current_live_form
-    @current_live_form ||= FormDocument::Content.from_form_document(current_form.latest_form_document)
+  def current_live_or_archived_form
+    @current_live_or_archived_form ||= FormDocument::Content.from_form_document(current_form.latest_form_document)
   end
 
-  def current_live_welsh_form
-    @current_live_welsh_form ||= FormDocument::Content.from_form_document(current_form.latest_welsh_form_document)
-  end
-
-  def current_archived_form
-    @current_archived_form ||= FormDocument::Content.from_form_document(current_form.latest_form_document)
-  end
-
-  def current_archived_welsh_form
-    @current_archived_welsh_form ||= FormDocument::Content.from_form_document(current_form.latest_welsh_form_document)
+  def current_live_or_archived_welsh_form
+    @current_live_or_archived_welsh_form ||= FormDocument::Content.from_form_document(current_form.latest_welsh_form_document)
   end
 
 private
