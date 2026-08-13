@@ -15,4 +15,14 @@ class ExitPage < ApplicationRecord
       "markdown" => markdown,
     }
   end
+
+  def position
+    question_page.exit_pages.order(:created_at).pluck(:id).index(id).to_i + 1
+  end
+
+  def self.positions_for_page(question_page)
+    question_page.exit_pages.order(:created_at).pluck(:id).each_with_index.to_h do |exit_page_id, index|
+      [exit_page_id, index + 1]
+    end
+  end
 end

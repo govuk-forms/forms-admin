@@ -69,4 +69,36 @@ RSpec.describe ExitPage, type: :model do
       expect(exit_page.as_form_document_exit_page).to match a_hash_including("id" => exit_page.id, "heading" => exit_page.heading, "markdown" => exit_page.markdown)
     end
   end
+
+  describe "#position" do
+    let!(:question_page) { create(:page) }
+    let!(:exit_page) { create(:exit_page, question_page:) }
+
+    it "returns the position of the exit page" do
+      expect(exit_page.position).to eq(1)
+    end
+
+    context "when there are multiple exit pages" do
+      let!(:second_exit_page) { create(:exit_page, question_page:) }
+
+      it "returns the position of the exit page" do
+        expect(second_exit_page.position).to eq(2)
+      end
+    end
+  end
+
+  describe ".positions_for_page" do
+    let!(:question_page) { create(:page) }
+    let!(:first_exit_page) { create(:exit_page, question_page:, created_at: Time.zone.local(2024, 1, 1, 9, 0, 0)) }
+    let!(:second_exit_page) { create(:exit_page, question_page:, created_at: Time.zone.local(2024, 1, 1, 9, 5, 0)) }
+    let!(:zeroth_exit_page) { create(:exit_page, question_page:, created_at: Time.zone.local(2024, 1, 1, 8, 0, 0)) }
+
+    it "returns the exit page positions in created_at order" do
+      expect(described_class.positions_for_page(question_page)).to include(
+        zeroth_exit_page.id => 1,
+        first_exit_page.id => 2,
+        second_exit_page.id => 3,
+      )
+    end
+  end
 end
