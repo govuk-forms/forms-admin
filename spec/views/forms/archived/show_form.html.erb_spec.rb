@@ -37,7 +37,7 @@ describe "archived/show_form.html.erb" do
   context "when the form has a Welsh translation" do
     let(:form_metadata) { create :form, :archived, :with_welsh_translation }
     let(:welsh_form_document) do
-      form_document_content = FormDocument::Content.from_form_document(form_metadata.archived_welsh_form_document)
+      form_document_content = FormDocument::Content.from_form_document(form_metadata.latest_welsh_form_document)
       form_document_content.first_made_live_at = 1.week.ago
       form_document_content
     end

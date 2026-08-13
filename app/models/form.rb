@@ -8,7 +8,6 @@ class Form < ApplicationRecord
   has_one :form_submission_email, dependent: :destroy
   has_one :group_form, dependent: :destroy
   has_many :form_documents, dependent: :destroy
-  has_one :archived_welsh_form_document, -> { where tag: "archived", language: :cy }, class_name: "FormDocument"
   has_one :draft_welsh_form_document, -> { where tag: "draft", language: :cy }, class_name: "FormDocument"
   has_one :draft_form_document, -> { where tag: "draft", language: :en }, class_name: "FormDocument"
 
@@ -252,6 +251,10 @@ class Form < ApplicationRecord
 
   def has_live_welsh_translation?
     latest_welsh_form_document&.tag == "live"
+  end
+
+  def has_archived_welsh_translation?
+    latest_welsh_form_document&.tag == "archived"
   end
 
 private
