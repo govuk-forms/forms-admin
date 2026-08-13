@@ -14,7 +14,7 @@ class FormsController < WebController
   end
 
   def current_archived_form
-    @current_archived_form ||= FormDocument::Content.from_form_document(current_form.archived_form_document)
+    @current_archived_form ||= FormDocument::Content.from_form_document(current_form.latest_form_document)
   end
 
   def current_archived_welsh_form

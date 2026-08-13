@@ -346,7 +346,7 @@ describe "forms/_made_live_form.html.erb" do
       let(:status) { :archived }
       let(:form_metadata) { create :form, :archived }
       let(:form_document) do
-        form_document_content = FormDocument::Content.from_form_document(form_metadata.archived_form_document)
+        form_document_content = FormDocument::Content.from_form_document(form_metadata.latest_form_document)
         form_document_content.live_at = 1.week.ago
         form_document_content
       end
@@ -364,7 +364,7 @@ describe "forms/_made_live_form.html.erb" do
       let(:status) { :archived }
       let(:form_metadata) { create :form, :archived_with_draft }
       let(:form_document) do
-        form_document_content = FormDocument::Content.from_form_document(form_metadata.archived_form_document)
+        form_document_content = FormDocument::Content.from_form_document(form_metadata.latest_form_document)
         form_document_content.live_at = 1.week.ago
         form_document_content
       end

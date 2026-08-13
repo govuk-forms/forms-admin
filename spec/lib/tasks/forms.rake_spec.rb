@@ -139,7 +139,7 @@ RSpec.describe "forms.rake", type: :task do
 
         form.reload
         expect(form.first_made_live_at).not_to be_nil
-        expect(form.archived_form_document).not_to be_nil
+        expect(form.latest_form_document).not_to be_nil
       end
 
       it "sets a draft form's state to archived_with_draft by transitioning through two intermediate states" do

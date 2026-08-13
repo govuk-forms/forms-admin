@@ -2,7 +2,7 @@ require "rails_helper"
 
 describe "forms/archived/show_pages.html.erb" do
   let(:form) { create :form, :archived }
-  let(:form_document) { FormDocument::Content.from_form_document(form.archived_form_document) }
+  let(:form_document) { FormDocument::Content.from_form_document(form.latest_form_document) }
   let(:welsh_form_document) { nil }
   let(:multiple_branches_enabled) { false }
 

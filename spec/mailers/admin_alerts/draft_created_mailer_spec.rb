@@ -77,7 +77,7 @@ describe AdminAlerts::DraftCreatedMailer, type: :mailer do
     it "includes the personalisation" do
       expect(mail.govuk_notify_personalisation[:form_name]).to eq(new_draft_name)
       expect(mail.govuk_notify_personalisation[:form_link]).to eq(form_url(archived_form))
-      expect(mail.govuk_notify_personalisation[:archived_form_name]).to eq(archived_form.archived_form_document.content["name"])
+      expect(mail.govuk_notify_personalisation[:archived_form_name]).to eq(archived_form.latest_form_document.content["name"])
       expect(mail.govuk_notify_personalisation[:archived_form_link]).to eq(archived_form_url(archived_form))
       expect(mail.govuk_notify_personalisation[:group_name]).to eq(archived_form.group.name)
       expect(mail.govuk_notify_personalisation[:user_name]).to eq(user.name)

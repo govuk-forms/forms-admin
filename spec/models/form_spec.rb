@@ -27,17 +27,17 @@ RSpec.describe Form, type: :model do
     it "has an archived trait" do
       form = create :form, :archived
       expect(form.state).to eq "archived"
-      expect(form.archived_form_document).to be_present
-      expect(form.archived_form_document.version).to eq(1)
-      expect(form.latest_form_document_id).to eq(form.archived_form_document.id)
+      expect(form.latest_form_document).to be_present
+      expect(form.latest_form_document.tag).to eq "archived"
+      expect(form.latest_form_document.version).to eq(1)
     end
 
     it "has an archived with draft trait" do
       form = create :form, :archived_with_draft
       expect(form.state).to eq "archived_with_draft"
-      expect(form.archived_form_document).to be_present
+      expect(form.latest_form_document).to be_present
+      expect(form.latest_form_document.tag).to eq "archived"
       expect(form.draft_form_document).to be_present
-      expect(form.latest_form_document_id).to eq(form.archived_form_document.id)
     end
 
     it "has a ready for routing trait" do
@@ -360,30 +360,6 @@ RSpec.describe Form, type: :model do
     end
   end
 
-  describe "archived_form_document" do
-    context "when there is no archived form document" do
-      it "returns nil" do
-        expect(form.archived_form_document).to be_nil
-      end
-    end
-
-    context "when there is an archived form document" do
-      subject(:form) { create :form, :archived }
-
-      it "returns nil" do
-        expect(form.archived_form_document).to be_a(FormDocument)
-      end
-    end
-
-    context "when there is only a live form document" do
-      subject(:form) { create :form, :live }
-
-      it "returns nil" do
-        expect(form.archived_form_document).to be_nil
-      end
-    end
-  end
-
   describe "archived_welsh_form_document" do
     context "when there is no archived Welsh form document" do
       subject(:form) { create :form, :archived }
@@ -568,8 +544,9 @@ RSpec.describe Form, type: :model do
         form.archive_live_form!
       end
 
-      it "creates a archived form document" do
-        expect { form.archive_live_form! }.to change { form.reload.archived_form_document }.from(nil)
+      it "archives the form document" do
+        form.archive_live_form!
+        expect(form.reload.latest_form_document.tag).to eq("archived")
       end
     end
 

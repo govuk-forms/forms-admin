@@ -29,7 +29,7 @@ class AdminAlerts::DraftCreatedMailer < GovukNotifyRails::Mailer
     send_mail(to_email:, personalisation: {
       form_name: form.name,
       form_link: form_url(form),
-      archived_form_name: form.archived_form_document.content["name"],
+      archived_form_name: form.latest_form_document.content["name"],
       archived_form_link: archived_form_url(form),
       group_name: form.group.name,
       user_name: user.name,
