@@ -14,7 +14,7 @@ RSpec.describe Reports::FeatureReportService do
   let(:form_documents) do
     forms.map do |form|
       # FormDocumentsService adds in the welsh_completed details as part of the database query
-      form.live_form_document.as_json
+      form.latest_form_document.as_json
           .merge({
             "welsh_completed" => form.welsh_completed,
           })
@@ -62,13 +62,13 @@ RSpec.describe Reports::FeatureReportService do
     create(:condition, :with_exit_page, routing_page_id: form.pages[0].id, check_page_id: form.pages[0].id, answer_value: "Option 1")
     create(:condition, routing_page_id: form.pages[1].id, check_page_id: form.pages[1].id, answer_value: "Option 1", goto_page_id: form.pages[3].id)
     create(:condition, routing_page_id: form.pages[2].id, check_page_id: form.pages[1].id, goto_page_id: form.pages[4].id)
-    form.live_form_document.update!(content: form.reload.as_form_document(live_at: form.updated_at))
+    form.latest_form_document.update!(content: form.reload.as_form_document(live_at: form.updated_at))
     form
   end
   let(:basic_route_form) do
     form = create(:form, :live, :ready_for_routing)
     create(:condition, routing_page_id: form.pages.first.id, check_page_id: form.pages.first.id, answer_value: "Option 1", skip_to_end: true)
-    form.live_form_document.update!(content: form.reload.as_form_document(live_at: form.updated_at))
+    form.latest_form_document.update!(content: form.reload.as_form_document(live_at: form.updated_at))
     form
   end
   let(:copied_form) do
@@ -336,7 +336,7 @@ RSpec.describe Reports::FeatureReportService do
         create(:page, :with_selection_settings, is_optional: true),
         create(:page, :with_selection_settings, is_optional: false),
       ])
-      form_document = form.live_form_document.as_json
+      form_document = form.latest_form_document.as_json
 
       questions = described_class.new([form_document]).selection_questions_with_none_of_the_above
       expect(questions.length).to eq 1

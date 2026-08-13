@@ -4,7 +4,7 @@ describe MakeFormLiveService do
   subject(:make_form_live_service) { described_class.call(current_form:, current_user:) }
 
   let(:current_form) { create :form, :ready_for_live }
-  let(:live_form_document) { current_form.live_form_document }
+  let(:live_form_document) { current_form.latest_form_document }
   let(:current_user) { build :user }
 
   before do

@@ -42,7 +42,7 @@ class AdminAlerts::DraftCreatedMailer < GovukNotifyRails::Mailer
     send_mail(to_email:, personalisation: {
       form_name: form.name,
       form_link: form_url(form),
-      live_form_name: form.live_form_document.content["name"],
+      live_form_name: form.latest_form_document.content["name"],
       live_form_link: live_form_url(form),
       group_name: form.group.name,
       user_name: user.name,

@@ -9,7 +9,7 @@ describe StepSummaryTableService do
   let(:pages) { [page] }
   let(:page) { create(:page) }
 
-  let(:form_document_content) { FormDocument::Content.from_form_document(form.live_form_document) }
+  let(:form_document_content) { FormDocument::Content.from_form_document(form.latest_form_document) }
   let(:welsh_form_document_content) { FormDocument::Content.from_form_document(form.live_welsh_form_document) }
   let(:form_document_steps) { form_document_content.steps }
   let(:welsh_form_document_steps) { welsh_form_document.steps }

@@ -109,7 +109,7 @@ describe AdminAlerts::DraftCreatedMailer, type: :mailer do
     it "includes the personalisation" do
       expect(mail.govuk_notify_personalisation[:form_name]).to eq(new_draft_name)
       expect(mail.govuk_notify_personalisation[:form_link]).to eq(form_url(live_form))
-      expect(mail.govuk_notify_personalisation[:live_form_name]).to eq(live_form.live_form_document.content["name"])
+      expect(mail.govuk_notify_personalisation[:live_form_name]).to eq(live_form.latest_form_document.content["name"])
       expect(mail.govuk_notify_personalisation[:live_form_link]).to eq(live_form_url(live_form))
       expect(mail.govuk_notify_personalisation[:group_name]).to eq(live_form.group.name)
       expect(mail.govuk_notify_personalisation[:user_name]).to eq(user.name)

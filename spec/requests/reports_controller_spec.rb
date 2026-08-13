@@ -168,7 +168,7 @@ RSpec.describe ReportsController, type: :request do
     let(:form) do
       form = create(:form, :live, :ready_for_routing)
       create(:condition, routing_page_id: form.pages.first.id, check_page_id: form.pages.first.id, answer_value: "Option 1", goto_page_id: form.pages.second.id)
-      form.live_form_document.update!(content: form.reload.as_form_document(live_at: form.updated_at))
+      form.latest_form_document.update!(content: form.reload.as_form_document(live_at: form.updated_at))
       form
     end
     let(:forms) { [form] }
@@ -199,7 +199,7 @@ RSpec.describe ReportsController, type: :request do
       form = create(:form, :live, :ready_for_routing)
       create(:condition, routing_page_id: form.pages.first.id, check_page_id: form.pages.first.id, answer_value: "Option 1", goto_page_id: form.pages.third.id)
       create(:condition, routing_page_id: form.pages.second.id, check_page_id: form.pages.first.id, goto_page_id: form.pages.fourth.id)
-      form.live_form_document.update!(content: form.reload.as_form_document(live_at: form.updated_at))
+      form.latest_form_document.update!(content: form.reload.as_form_document(live_at: form.updated_at))
       form
     end
     let(:forms) { [form] }
@@ -588,7 +588,7 @@ RSpec.describe ReportsController, type: :request do
       let(:form) do
         form = create(:form, :live, :ready_for_routing)
         create(:condition, routing_page_id: form.pages.first.id, check_page_id: form.pages.first.id, answer_value: "Option 1", goto_page_id: form.pages.second.id)
-        form.live_form_document.update!(content: form.reload.as_form_document(live_at: form.updated_at))
+        form.latest_form_document.update!(content: form.reload.as_form_document(live_at: form.updated_at))
         form
       end
       let(:forms) { [form, *create_list(:form, 2, :live)] }

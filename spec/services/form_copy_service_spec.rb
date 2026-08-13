@@ -144,7 +144,7 @@ RSpec.describe FormCopyService do
         source_form.reload
 
         # Update the live form document to include the pages and conditions
-        source_form.live_form_document.update!(content: source_form.as_form_document)
+        source_form.latest_form_document.update!(content: source_form.as_form_document)
       end
 
       it "copies routing conditions to the new form" do
@@ -194,7 +194,7 @@ RSpec.describe FormCopyService do
         source_form.reload
 
         # Update the live form document to include the pages and conditions
-        source_form.live_form_document.update!(content: source_form.as_form_document)
+        source_form.latest_form_document.update!(content: source_form.as_form_document)
       end
 
       it "copies exit page conditions" do

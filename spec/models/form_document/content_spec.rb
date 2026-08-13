@@ -4,7 +4,7 @@ RSpec.describe FormDocument::Content, type: :model do
   subject(:form_document_content) { described_class.from_form_document(form_document) }
 
   let(:form) { create :form, :live }
-  let(:form_document) { form.live_form_document }
+  let(:form_document) { form.latest_form_document }
 
   it "ignores any attributes that are not defined" do
     expect(described_class.new(foo: "bar").attributes).not_to include(:foo)
@@ -12,7 +12,7 @@ RSpec.describe FormDocument::Content, type: :model do
 
   describe "#made_live_date" do
     let(:form_document) do
-      form.live_form_document.tap do |form_document|
+      form.latest_form_document.tap do |form_document|
         form_document.content["first_made_live_at"] = first_made_live_at
       end
     end
@@ -74,7 +74,7 @@ RSpec.describe FormDocument::Content, type: :model do
 
   describe ".from_form_document" do
     let(:form) { create :form, :live }
-    let(:form_document) { form.live_form_document }
+    let(:form_document) { form.latest_form_document }
 
     it "creates a FormDocument::Content" do
       expect(described_class.from_form_document(form_document)).to be_a(described_class)
@@ -99,7 +99,7 @@ RSpec.describe FormDocument::Content, type: :model do
     end
 
     context "when available_languages is not set" do
-      let(:form_document) { form.live_form_document }
+      let(:form_document) { form.latest_form_document }
 
       it "returns false" do
         form_document.content.delete("available_languages")

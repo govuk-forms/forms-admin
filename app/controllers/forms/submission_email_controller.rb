@@ -63,7 +63,7 @@ module Forms
     end
 
     def current_live_form
-      @current_live_form ||= FormDocument::Content.from_form_document(current_form.live_form_document)
+      @current_live_form ||= FormDocument::Content.from_form_document(current_form.latest_form_document)
     end
   end
 end

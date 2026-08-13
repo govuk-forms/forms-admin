@@ -20,8 +20,8 @@ RSpec.describe Reports::SelectionQuestionService do
       ]
 
       [
-        create(:form, :live, pages: form_1_pages).live_form_document.as_json,
-        create(:form, :live, pages: form_2_pages).live_form_document.as_json,
+        create(:form, :live, pages: form_1_pages).latest_form_document.as_json,
+        create(:form, :live, pages: form_2_pages).latest_form_document.as_json,
       ]
     end
 

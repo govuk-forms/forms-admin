@@ -2,7 +2,7 @@ require "rails_helper"
 
 describe "forms/live/show_form.html.erb" do
   let(:form_metadata) { create :form, :live }
-  let(:form_document) { FormDocument::Content.from_form_document(form_metadata.live_form_document) }
+  let(:form_document) { FormDocument::Content.from_form_document(form_metadata.latest_form_document) }
   let(:welsh_form_document) { nil }
 
   before do

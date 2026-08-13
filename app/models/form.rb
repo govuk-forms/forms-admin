@@ -8,12 +8,12 @@ class Form < ApplicationRecord
   has_one :form_submission_email, dependent: :destroy
   has_one :group_form, dependent: :destroy
   has_many :form_documents, dependent: :destroy
-  has_one :live_form_document, -> { where tag: "live", language: :en }, class_name: "FormDocument"
   has_one :live_welsh_form_document, -> { where tag: "live", language: :cy }, class_name: "FormDocument"
   has_one :archived_form_document, -> { where tag: "archived", language: :en }, class_name: "FormDocument"
   has_one :archived_welsh_form_document, -> { where tag: "archived", language: :cy }, class_name: "FormDocument"
   has_one :draft_welsh_form_document, -> { where tag: "draft", language: :cy }, class_name: "FormDocument"
   has_one :draft_form_document, -> { where tag: "draft", language: :en }, class_name: "FormDocument"
+
   belongs_to :latest_form_document, class_name: "FormDocument", optional: true
   has_one :latest_welsh_form_document,
           -> { where(language: "cy").where.not(version: nil).order(version: :desc) },
@@ -235,7 +235,7 @@ class Form < ApplicationRecord
   end
 
   def changed_from_live_version?(language:)
-    live_document = language == "cy" ? live_welsh_form_document : live_form_document
+    live_document = language == "cy" ? live_welsh_form_document : latest_form_document
     return false if live_document.blank?
 
     ignored_keys = %w[live_at available_languages updated_at]
@@ -316,7 +316,7 @@ private
   end
 
   def english_version_has_been_made_live?
-    has_live_version && live_form_document.present?
+    has_live_version && latest_form_document.present?
   end
 
   def welsh_version_ready?

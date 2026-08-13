@@ -9,7 +9,7 @@ class MakeFormLiveService
     @current_form = current_form
     @current_form_was_live = current_form.is_live?
     @current_form_was_archived = current_form.is_archived?
-    @current_live_form = FormDocument::Content.from_form_document(current_form.live_form_document) if current_form.is_live?
+    @current_live_form = FormDocument::Content.from_form_document(current_form.latest_form_document) if current_form.is_live?
     @current_user = current_user
     @language = language
   end
