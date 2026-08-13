@@ -46,7 +46,6 @@ RSpec.describe ReportsController, type: :request do
           "Feature and answer type usage in draft forms",
           "Download data about all live or archived forms",
           "Download all questions in live or archived forms",
-          "Number of users per organisation",
           "When users last signed in",
           "Users interested in research",
         ]
