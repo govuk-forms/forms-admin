@@ -666,6 +666,25 @@ RSpec.describe Form, type: :model do
         }.to(change { form.reload.draft_form_document.content["updated_at"] })
       end
     end
+
+    context "when a block is passed" do
+      it "calls the block" do
+        expect {
+          form.save_question_changes! do
+            form.name = "New name"
+          end
+        }.to change { form.reload.name }.to("New name")
+      end
+
+      it "does not update draft if the block fails" do
+        expect {
+          form.save_question_changes! do
+            form.name = "New name"
+            raise "Something went wrong"
+          end
+        }.to raise_error("Something went wrong").and(not_change { form.reload.draft_form_document.content["name"] }).and(not_change { form.reload.updated_at })
+      end
+    end
   end
 
   describe "#save_draft!" do

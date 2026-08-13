@@ -51,11 +51,18 @@ class Form < ApplicationRecord
 
   attr_accessor :task_status_service
 
-  def save_question_changes!
-    self.question_section_completed = false
-    # Make sure the updated_at is updated as we use this to determine if the form has changed in forms-runner.
-    touch unless changed?
-    save_draft!
+  # Takes an optional blocl which will be called in the same transaction
+  # as the save.
+  def save_question_changes!(&block)
+    ActiveRecord::Base.transaction do
+      self.question_section_completed = false
+
+      block.call if block_given?
+
+      # Make sure the updated_at is updated as we use this to determine if the form has changed in forms-runner.
+      touch unless changed?
+      save_draft!
+    end
   end
 
   def save_draft!
