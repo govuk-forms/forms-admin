@@ -15,6 +15,10 @@ class Form < ApplicationRecord
   has_one :draft_welsh_form_document, -> { where tag: "draft", language: :cy }, class_name: "FormDocument"
   has_one :draft_form_document, -> { where tag: "draft", language: :en }, class_name: "FormDocument"
   belongs_to :latest_form_document, class_name: "FormDocument", optional: true
+  has_one :latest_welsh_form_document,
+          -> { where(language: "cy").where.not(version: nil).order(version: :desc) },
+          class_name: "FormDocument"
+
   has_many :conditions, through: :pages, source: :routing_conditions
   has_many :exit_pages, through: :pages, source: :exit_pages
   has_many :delivery_configurations, dependent: :destroy

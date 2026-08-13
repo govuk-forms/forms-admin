@@ -520,6 +520,42 @@ RSpec.describe Form, type: :model do
     end
   end
 
+  describe "latest_welsh_form_document" do
+    context "when there is no live Welsh form document" do
+      subject(:form) { create :form, :live }
+
+      it "returns nil" do
+        expect(form.live_welsh_form_document).to be_nil
+      end
+    end
+
+    context "when there are multiple live Welsh form documents" do
+      subject(:form) { create :form, :live, :with_welsh_translation }
+
+      before do
+        create :form_document, :live, form: form, language: "cy", version: 2
+      end
+
+      it "returns the latest live Welsh form document" do
+        expect(form.latest_welsh_form_document).to be_a(FormDocument)
+        expect(form.latest_welsh_form_document.version).to eq(2)
+      end
+    end
+
+    context "when the latest Welsh form document is archived" do
+      subject(:form) { create :form, :live, :with_welsh_translation }
+
+      before do
+        create :form_document, :archived, form: form, language: "cy", version: 2
+      end
+
+      it "returns the latest archived Welsh form document" do
+        expect(form.latest_welsh_form_document).to be_a(FormDocument)
+        expect(form.latest_welsh_form_document.version).to eq(2)
+      end
+    end
+  end
+
   describe "FormStateMachine" do
     before do
       form.set_task_status_service(TaskStatusService.new(form: form))
