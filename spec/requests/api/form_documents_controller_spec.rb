@@ -123,8 +123,8 @@ RSpec.describe Api::FormDocumentsController, type: :request do
       let(:form) { create :form }
 
       before do
-        create :form_document, form: form, tag: "live", language: "en", content: { form_id: form.id.to_s, language: "en" }
-        create :form_document, form: form, tag: "live", language: "cy", content: { form_id: form.id.to_s, language: "cy" }
+        create :form_document, :live, form: form, language: "en", content: { form_id: form.id.to_s, language: "en" }
+        create :form_document, :live, form: form, language: "cy", content: { form_id: form.id.to_s, language: "cy" }
       end
 
       it "when not given a language, defaults to english returns the live form document in english" do
