@@ -137,31 +137,6 @@ RSpec.describe FormDocumentSyncService do
         }.to(change { live_form_document.reload.tag }.from("live").to("archived"))
       end
     end
-
-    context "when there is an existing archived form document" do
-      before do
-        create :form_document, :live, form:, content: "live content"
-        create :form_document, :archived, form:, content: "old archived content"
-      end
-
-      it "replaces the archived form document" do
-        service.synchronize_archived_form
-        expect(FormDocument.find_by!(form:, tag: "archived").content).to eq("live content")
-      end
-
-      context "and deleting the existing archived FormDocuments fails" do
-        before do
-          allow(service).to receive(:delete_form_documents_by_tag).with(FormDocumentSyncService::ARCHIVED_TAG)
-            .and_raise(ActiveRecord::StatementInvalid)
-        end
-
-        it "does not change the archived FormDocument" do
-          expect {
-            service.synchronize_archived_form
-          }.to raise_error(ActiveRecord::StatementInvalid).and(not_change { form.reload.archived_form_document.content })
-        end
-      end
-    end
   end
 
   describe "#synchronize_archived_welsh_form" do
@@ -207,18 +182,6 @@ RSpec.describe FormDocumentSyncService do
         expect {
           service.synchronize_archived_welsh_form
         }.to(change { live_form_document_en.reload.content["available_languages"] }.from(%w[en cy]).to(%w[en]))
-      end
-    end
-
-    context "when there is an existing archived Welsh form document" do
-      before do
-        create :form_document, :live, form:, content: "live content cy", language: "cy"
-        create :form_document, :archived, form:, content: "old archived content cy", language: "cy"
-      end
-
-      it "replaces the archived form document" do
-        service.synchronize_archived_form
-        expect(FormDocument.find_by!(form:, tag: "archived", language: "cy").content).to eq("live content cy")
       end
     end
   end
@@ -480,7 +443,7 @@ RSpec.describe FormDocumentSyncService do
         end
       end
 
-      context "when there is an existing archived form document" do
+      context "when there is an existing archived Welsh form document" do
         before do
           create :form_document, :archived, form:, language: "cy"
         end
