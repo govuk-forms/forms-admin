@@ -10,7 +10,7 @@ class FormsController < WebController
   end
 
   def current_live_welsh_form
-    @current_live_welsh_form ||= FormDocument::Content.from_form_document(current_form.live_welsh_form_document)
+    @current_live_welsh_form ||= FormDocument::Content.from_form_document(current_form.latest_welsh_form_document)
   end
 
   def current_archived_form

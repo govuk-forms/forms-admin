@@ -158,7 +158,7 @@ private
 
   def make_only_welsh_live_status
     return :not_started if @form.can_make_language_live?(language: "cy")
-    return :completed if @form.live_welsh_form_document.present?
+    return :completed if @form.has_live_welsh_translation?
 
     :cannot_start
   end
@@ -168,7 +168,7 @@ private
     # and show the make live task and link. In this case, we will show a warning
     # message on the make live page asking the user to update the Welsh before
     # the form can be made live.
-    ignore_missing_welsh = @form.live_welsh_form_document.present?
+    ignore_missing_welsh = @form.has_live_welsh_translation?
     mandatory_tasks_completed?(ignore_missing_welsh:) ? :not_started : :cannot_start
   end
 

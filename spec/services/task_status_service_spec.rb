@@ -539,7 +539,7 @@ describe TaskStatusService do
         let(:welsh_form_document) { build(:form_document, :live, form:, language: "cy", content: form.as_form_document) }
 
         before do
-          allow(form).to receive(:live_welsh_form_document).and_return(welsh_form_document)
+          allow(form).to receive(:latest_welsh_form_document).and_return(welsh_form_document)
         end
 
         context "when the form already has a live Welsh version" do

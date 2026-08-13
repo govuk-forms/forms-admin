@@ -8,7 +8,6 @@ class Form < ApplicationRecord
   has_one :form_submission_email, dependent: :destroy
   has_one :group_form, dependent: :destroy
   has_many :form_documents, dependent: :destroy
-  has_one :live_welsh_form_document, -> { where tag: "live", language: :cy }, class_name: "FormDocument"
   has_one :archived_form_document, -> { where tag: "archived", language: :en }, class_name: "FormDocument"
   has_one :archived_welsh_form_document, -> { where tag: "archived", language: :cy }, class_name: "FormDocument"
   has_one :draft_welsh_form_document, -> { where tag: "draft", language: :cy }, class_name: "FormDocument"
@@ -235,7 +234,7 @@ class Form < ApplicationRecord
   end
 
   def changed_from_live_version?(language:)
-    live_document = language == "cy" ? live_welsh_form_document : latest_form_document
+    live_document = language == "cy" ? latest_welsh_form_document : latest_form_document
     return false if live_document.blank?
 
     ignored_keys = %w[live_at available_languages updated_at]
@@ -246,6 +245,10 @@ class Form < ApplicationRecord
 
   def only_s3_delivery_enabled?
     delivery_configurations.immediate.one? && delivery_configurations.immediate.first.delivery_method == "s3"
+  end
+
+  def has_live_welsh_translation?
+    latest_welsh_form_document&.tag == "live"
   end
 
 private
@@ -308,11 +311,11 @@ private
   end
 
   def can_make_english_version_live?
-    has_draft_version && all_ready_for_live?(ignore_missing_welsh: true) && live_welsh_form_document.blank?
+    has_draft_version && all_ready_for_live?(ignore_missing_welsh: true) && !has_live_welsh_translation?
   end
 
   def can_make_welsh_version_live?
-    english_version_has_been_made_live? && !changed_from_live_version?(language: "en") && welsh_version_ready? && live_welsh_form_document.blank?
+    english_version_has_been_made_live? && !changed_from_live_version?(language: "en") && welsh_version_ready? && !has_live_welsh_translation?
   end
 
   def english_version_has_been_made_live?
