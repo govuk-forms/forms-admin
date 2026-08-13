@@ -46,7 +46,6 @@ RSpec.describe ReportsController, type: :request do
           "Feature and answer type usage in draft forms",
           "Download data about all live or archived forms",
           "Download all questions in live or archived forms",
-          "Number of users per organisation",
           "When users last signed in",
           "Users interested in research",
         ]
@@ -811,26 +810,6 @@ RSpec.describe ReportsController, type: :request do
       it "returns http code 200 and renders the template" do
         expect(response).to have_http_status(:ok)
         expect(response).to render_template("reports/contact_for_research")
-      end
-    end
-  end
-
-  describe "#users_per_organisation" do
-    let(:path) { report_users_per_organisation_path }
-
-    include_examples "unauthorized user is forbidden"
-
-    context "when the user is a super admin" do
-      before do
-        login_as_super_admin_user
-
-        get path
-      end
-
-      it "returns http code 200 and renders the users report template" do
-        expect(response).to have_http_status(:ok)
-
-        expect(response).to render_template("reports/users_per_organisation")
       end
     end
   end
