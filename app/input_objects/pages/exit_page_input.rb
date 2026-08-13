@@ -6,6 +6,8 @@ class Pages::ExitPageInput < BaseInput
   def submit
     return false if invalid?
 
-    ExitPage.create!(question_page: page, heading:, markdown:)
+    page.form.save_question_changes! do
+      ExitPage.create!(question_page: page, heading:, markdown:)
+    end
   end
 end
