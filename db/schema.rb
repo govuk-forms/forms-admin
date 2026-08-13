@@ -10,12 +10,17 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_11_140129) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_12_141413) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
   create_table "brands", force: :cascade do |t|
+    t.string "border_colour"
+    t.string "copyright_holder"
     t.datetime "created_at", null: false
+    t.string "header_background_colour"
+    t.string "logo_alt_text"
+    t.string "logo_link"
     t.string "name", null: false
     t.string "slug", null: false
     t.datetime "updated_at", null: false

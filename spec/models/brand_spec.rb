@@ -35,6 +35,48 @@ RSpec.describe Brand, type: :model do
     expect(brand.errors).to be_of_kind(:slug, :taken)
   end
 
+  %i[header_background_colour border_colour logo_alt_text logo_link copyright_holder].each do |attribute|
+    it "is invalid without a #{attribute.to_s.humanize.downcase}" do
+      brand.public_send("#{attribute}=", nil)
+      expect(brand).to be_invalid
+      expect(brand.errors).to be_of_kind(attribute, :blank)
+    end
+  end
+
+  %i[header_background_colour border_colour].each do |attribute|
+    it "is invalid when the #{attribute.to_s.humanize.downcase} is not a lowercase 6-digit hex colour code" do
+      ["ffffff", "#FFFFFF", "#fff", "#gggggg", "white"].each do |colour|
+        brand.public_send("#{attribute}=", colour)
+        expect(brand).to be_invalid
+        expect(brand.errors).to be_of_kind(attribute, :invalid)
+      end
+    end
+
+    it "is valid when the #{attribute.to_s.humanize.downcase} is a lowercase 6-digit hex colour code" do
+      brand.public_send("#{attribute}=", "#0b0c0c")
+      expect(brand).to be_valid
+    end
+  end
+
+  it "is invalid when the logo link does not start with http:// or https://" do
+    ["www.example.com", "example.com", "ftp://example.com"].each do |url|
+      brand.logo_link = url
+      expect(brand).to be_invalid
+      expect(brand.errors).to be_of_kind(:logo_link, :invalid)
+    end
+  end
+
+  it "is invalid when the logo link contains more than one line" do
+    brand.logo_link = "https://www.example.com\nmalicious"
+    expect(brand).to be_invalid
+    expect(brand.errors).to be_of_kind(:logo_link, :invalid)
+  end
+
+  it "is valid when the logo link starts with https://" do
+    brand.logo_link = "https://www.example.com"
+    expect(brand).to be_valid
+  end
+
   it "is an error to insert a brand with an existing slug" do
     existing_brand = create(:brand)
 

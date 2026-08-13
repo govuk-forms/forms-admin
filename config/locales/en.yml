@@ -158,7 +158,23 @@ en:
       models:
         brand:
           attributes:
+            border_colour:
+              blank: Enter the header and footer border colour
+              invalid: 'Header and footer border colour must be a hex colour code, like #206c49'
+            copyright_holder:
+              blank: Enter the copyright holder
+            header_background_colour:
+              blank: Enter the header background colour
+              invalid: 'Header background colour must be a hex colour code, like #206c49'
+            logo_alt_text:
+              blank: Enter the logo alt text
+            logo_link:
+              blank: Enter the logo link
+              invalid: Enter the logo link in the correct format, starting with https://
+            name:
+              blank: Enter a brand name
             slug:
+              blank: Enter a slug
               invalid: Slug must only include lowercase letters a to z, numbers and hyphens
               taken: There is already a brand with this slug
         draft_question:
@@ -308,12 +324,17 @@ en:
       no_results: No brands found.
       table_caption: Brands
       table_headings:
-        name: Name
+        name: Brand name
         slug: Slug
     show:
       edit_brand: Edit this brand
       summary:
+        border_colour: Header and footer border colour
+        copyright_holder: Copyright holder
         created_at: Created
+        header_background_colour: Header background colour
+        logo_alt_text: Logo alt text
+        logo_link: Logo link
         slug: Slug
     success_messages:
       create: The brand has been created
@@ -991,6 +1012,13 @@ en:
     hint:
       account_name_input:
         name: You do not need to include a title or any middle names.
+      brand:
+        border_colour: 'Enter a hex colour code. For example, #206c49'
+        copyright_holder: Shown in the copyright notice in the form’s footer.
+        header_background_colour: 'Enter a hex colour code. For example, #206c49'
+        logo_alt_text: Describes the logo for people using screen readers. Usually the organisation’s name.
+        logo_link: The web address people go to when they select the logo. Usually the organisation’s website.
+        name: Used to identify the brand. Not shown to people filling in forms.
       forms_copy_input:
         name: The form name will be shown at the top of each page of the form. Use a name that describes what the form will help people to do. For example ‘Apply for a juggling licence’.
       page:
@@ -1058,6 +1086,13 @@ en:
       account_terms_of_use_input:
         agreed_options:
           '1': I agree to these terms
+      brand:
+        border_colour: Header and footer border colour
+        copyright_holder: Copyright holder
+        header_background_colour: Header background colour
+        logo_alt_text: Logo alt text
+        logo_link: Logo link
+        name: Brand name
       forms_batch_submissions_input:
         batch_frequencies_options:
           daily: Get a daily CSV of submissions

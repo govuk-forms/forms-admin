@@ -7,8 +7,24 @@
 #   Character.create(name: "Luke", movie: movies.first)
 
 if (HostingEnvironment.local_development? || HostingEnvironment.review?) && Brand.none?
-  Brand.create!(slug: "cheshire-east", name: "Cheshire East Council")
-  Brand.create!(slug: "south-gloucestershire", name: "South Gloucestershire Council")
+  Brand.create!(
+    slug: "toadstool-town",
+    name: "Toadstool Town Council",
+    header_background_colour: "#ffffff",
+    border_colour: "#206c49",
+    logo_alt_text: "Toadstool Town Council",
+    logo_link: "https://www.toadstooltown.example.com",
+    copyright_holder: "Toadstool Town Council",
+  )
+  Brand.create!(
+    slug: "dragonfly-district",
+    name: "Dragonfly District Council",
+    header_background_colour: "#ffffff",
+    border_colour: "#4b0082",
+    logo_alt_text: "Dragonfly District Council",
+    logo_link: "https://www.dragonflydistrict.example.com",
+    copyright_holder: "Dragonfly District Council",
+  )
 end
 
 if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User.none?
