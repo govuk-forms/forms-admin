@@ -65,4 +65,71 @@ RSpec.describe FormDocument, type: :model do
     form = create(:form) # also creates a draft form document
     expect { create(:form_document, :draft, form: form, language: "cy") }.not_to raise_error
   end
+
+  describe ".latest_live_or_archived" do
+    let(:form) { create :form }
+
+    context "when the form only has a draft form document" do
+      it "returns nil" do
+        expect(form.draft_form_document).to be_present
+        expect(described_class.latest_live_or_archived(form_id: form.id, language: "en")).to be_nil
+      end
+    end
+
+    context "when there is one form document with a version" do
+      let!(:form_document) { create :form_document, :live, form:, language: "en", version: 1 }
+
+      it "returns the form document" do
+        expect(described_class.latest_live_or_archived(form_id: form.id, language: "en")).to eq(form_document)
+      end
+
+      it "returns nil when no form document for the language exists" do
+        expect(described_class.latest_live_or_archived(form_id: form.id, language: "cy")).to be_nil
+      end
+    end
+
+    context "when there are multiple form documents with different versions" do
+      let(:latest_document) { create :form_document, :archived, form:, language: "en", version: 3 }
+
+      before do
+        create :form_document, :live, form:, language: "en", version: 1
+        latest_document
+        create :form_document, :live, form:, language: "en", version: 2
+      end
+
+      it "returns the latest form document with the highest version" do
+        expect(described_class.latest_live_or_archived(form_id: form.id, language: "en")).to eq(latest_document)
+      end
+    end
+
+    context "when there are form documents for different languages" do
+      let(:latest_english_document) { create :form_document, form:, language: "en", version: 2 }
+      let(:latest_welsh_document) { create :form_document, form:, language: "cy", version: 1 }
+
+      before do
+        create :form_document, form:, language: "en", version: 1
+        latest_english_document
+        latest_welsh_document
+      end
+
+      it "returns the latest English document regardless of Welsh versions" do
+        expect(described_class.latest_live_or_archived(form_id: form.id, language: "en")).to eq(latest_english_document)
+      end
+
+      it "returns the latest Welsh document regardless of English versions" do
+        expect(described_class.latest_live_or_archived(form_id: form.id, language: "cy")).to eq(latest_welsh_document)
+      end
+    end
+
+    context "when documents from other forms exist" do
+      let(:other_form) { create :form }
+      let!(:other_form_document) { create :form_document, :live, form: other_form, language: "en", version: 2 }
+      let!(:this_form_document) { create :form_document, :live, form:, language: "en", version: 1 }
+
+      it "only returns documents from the current form" do
+        expect(described_class.latest_live_or_archived(form_id: form.id, language: "en")).to eq(this_form_document)
+        expect(described_class.latest_live_or_archived(form_id: other_form.id, language: "en")).to eq(other_form_document)
+      end
+    end
+  end
 end

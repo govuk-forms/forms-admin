@@ -11,6 +11,7 @@ class CurrentLoggingAttributes < ActiveSupport::CurrentAttributes
             :acting_as_user_email,
             :acting_as_user_organisation_slug,
             :form_id,
+            :form_document_version,
             :page_id,
             :answer_type,
             :auth0_session_id,
