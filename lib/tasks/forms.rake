@@ -241,24 +241,6 @@ namespace :forms do
     end
   end
 
-  desc "Show a form's form_document as JSON"
-  task :show_form_document, %i[form_id tag language] => :environment do |_, args|
-    usage_message = "usage: rake forms:show_form_document[<form_id>, <tag>, <language>]"
-
-    abort usage_message if args[:form_id].blank? || args[:tag].blank?
-    language = args[:language].presence || "en"
-
-    abort "tag must be one of draft, live or archived" unless %w[draft live archived].include?(args[:tag])
-    abort "language must be en or cy" unless %w[en cy].include?(language)
-
-    form = Form.find(args[:form_id])
-
-    form_document = form.form_documents.find_by(tag: args[:tag], language:)
-    abort "#{fmt_form(form)} does not have a #{args[:tag]} #{language} form document" if form_document.blank?
-
-    puts JSON.pretty_generate(form_document.as_json)
-  end
-
   desc "Add exit page objects for all existing exit pages"
   task sync_all_exit_pages: :environment do
     Rails.logger.info "Starting with #{ExitPage.count} exit page objects"
