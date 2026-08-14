@@ -25,4 +25,10 @@ class ExitPage < ApplicationRecord
       [exit_page_id, index + 1]
     end
   end
+
+  def options_to_this_exit_page
+    return [] if conditions.nil?
+
+    conditions.pluck(:answer_value)
+  end
 end

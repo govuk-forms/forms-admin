@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe Pages::ExitPageInput, type: :model do
+RSpec.describe Pages::UpdateExitPageInput, type: :model do
   subject(:exit_page_input) { described_class.new(heading:, markdown:) }
 
   let(:heading) { "the heading" }
@@ -11,25 +11,23 @@ RSpec.describe Pages::ExitPageInput, type: :model do
   end
 
   describe "#submit" do
-    subject(:exit_page_input) { described_class.new(heading:, markdown:, page:) }
+    subject(:exit_page_input) { described_class.new(heading:, markdown:, page:, exit_page:) }
 
     let(:heading) { "the heading" }
     let(:markdown) { "some markdown" }
-    let(:page) { create :page }
     let(:form) { page.form }
+    let(:page) { create :page }
+    let(:exit_page) { create :exit_page, question_page: page }
 
     it "returns a truthy value" do
       expect(exit_page_input.submit).to be_truthy
     end
 
-    it "creates an exit page" do
-      expect {
-        exit_page_input.submit
-      }.to change(ExitPage, :count).by(1)
-
-      expect(page.exit_pages.first.question_page).to eq(page)
-      expect(page.exit_pages.first.heading).to eq(heading)
-      expect(page.exit_pages.first.markdown).to eq(markdown)
+    it "updates the exit page" do
+      exit_page_input.submit
+      expect(exit_page.question_page).to eq(page)
+      expect(exit_page.heading).to eq(heading)
+      expect(exit_page.markdown).to eq(markdown)
     end
 
     it "sets question_section_completed to false and updates the draft" do

@@ -1741,10 +1741,12 @@ en:
     copy_of_answers: Give people the option to get a copy of their answers by email
     date_settings: Are you asking for someone’s date of birth?
     declaration: Add a declaration for people to agree to
+    delete_exit_page: Are you sure you want to delete this exit page?
     delete_secondary_skip: Are you sure you want to delete the route for any other answer?
     edit_exit_page: Edit exit page
     email_code_sent: Confirmation code sent
     error_prefix: 'Error: '
+    exit_page_edit: Edit exit page
     exit_page_new: Add exit page
     exit_page_new_caption: Question %{question_number}’s exit pages
     forbidden: You cannot view this page
@@ -1897,6 +1899,15 @@ en:
     destroy:
       success: The question, ‘%{question_text}’, has been deleted
     exit_pages:
+      delete:
+        back_link: Back to edit exit page
+        caption: 'Exit page %{exit_page_number}: %{heading}'
+        title: Are you sure you want to delete this exit page?
+      edit:
+        back_link: Back to edit question routes
+        delete_exit_page: Delete exit page
+        no_options_to_this_exit_page: No route to this exit page
+        options_to_this_exit_page: Options that go to this exit page
       new:
         back_link: Back to edit question routes
     heading: Edit question
