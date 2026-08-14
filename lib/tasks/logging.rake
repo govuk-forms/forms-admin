@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "English"
 
 Rake::Task.define_task(:environment).enhance do

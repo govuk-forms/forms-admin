@@ -1,9 +1,11 @@
+# frozen_string_literal: true
+
 namespace :forms do
   desc "move one or more forms into group"
   task :move, [] => :environment do |_, args|
     *form_ids, group_id = args.to_a
 
-    usage_message = "usage: rake forms:move[<form_id>, ..., <group_id>]".freeze
+    usage_message = "usage: rake forms:move[<form_id>, ..., <group_id>]"
     abort usage_message if form_ids.blank? || group_id.blank?
 
     ActiveRecord::Base.transaction do
@@ -15,7 +17,7 @@ namespace :forms do
   task :move_dry_run, [] => :environment do |_, args|
     *form_ids, group_id = args.to_a
 
-    usage_message = "usage: rake forms:move_dry_run[<form_id>, ..., <group_id>]".freeze
+    usage_message = "usage: rake forms:move_dry_run[<form_id>, ..., <group_id>]"
     abort usage_message if form_ids.blank? || group_id.blank?
 
     ActiveRecord::Base.transaction do
@@ -27,7 +29,7 @@ namespace :forms do
 
   desc "set the state for a form by transitioning through the form state machine"
   task :set_state, %i[form_id state] => :environment do |_, args|
-    usage_message = "usage: rake forms:set_state[<form_id>, <state>]".freeze
+    usage_message = "usage: rake forms:set_state[<form_id>, <state>]"
     abort usage_message if args[:form_id].blank? || args[:state].blank?
     abort "state must be one of #{Form.states.keys.join(', ')}" unless Form.states.key?(args[:state])
 
@@ -57,7 +59,7 @@ namespace :forms do
   namespace :submission_email do
     desc "set the submission email for a form, without validation"
     task :update, %i[form_id submission_email] => :environment do |_, args|
-      usage_message = "usage: rake forms:submission_email:update[<form_id>, <submission_email>]".freeze
+      usage_message = "usage: rake forms:submission_email:update[<form_id>, <submission_email>]"
       abort usage_message if args[:form_id].blank? || args[:submission_email].blank?
       raise "'#{args[:submission_email]}' is not an email address" unless args[:submission_email].match?(/.*@.*/)
 
@@ -76,7 +78,7 @@ namespace :forms do
   namespace :delivery_configurations do
     desc "Enable email delivery for submissions"
     task :enable_email, %i[form_id] => :environment do |_, args|
-      usage_message = "usage: rake forms:delivery_configurations:enable_email[<form_id>]".freeze
+      usage_message = "usage: rake forms:delivery_configurations:enable_email[<form_id>]"
       abort usage_message if args[:form_id].blank?
 
       form = Form.find(args[:form_id])
@@ -104,7 +106,7 @@ namespace :forms do
 
     desc "Disable email delivery for submissions"
     task :disable_email, %i[form_id] => :environment do |_, args|
-      usage_message = "usage: rake forms:delivery_configurations:disable_email[<form_id>]".freeze
+      usage_message = "usage: rake forms:delivery_configurations:disable_email[<form_id>]"
       abort usage_message if args[:form_id].blank?
 
       form = Form.find(args[:form_id])
@@ -130,7 +132,7 @@ namespace :forms do
 
     desc "Disable S3 delivery for submissions"
     task :disable_s3, %i[form_id] => :environment do |_, args|
-      usage_message = "usage: rake forms:delivery_configurations:disable_s3[<form_id>]".freeze
+      usage_message = "usage: rake forms:delivery_configurations:disable_s3[<form_id>]"
       abort usage_message if args[:form_id].blank?
 
       form = Form.find(args[:form_id])
@@ -166,7 +168,7 @@ namespace :forms do
 
     desc "Enable S3 delivery for submissions"
     task :enable_s3, %i[form_id s3_bucket_name s3_bucket_aws_account_id s3_bucket_region format disable_email] => :environment do |_, args|
-      usage_message = "usage: rake forms:delivery_configurations:enable_s3[<form_id>, <s3_bucket_name>, <s3_bucket_aws_account_id>, <s3_bucket_region>, <format>, <disable_email>]".freeze
+      usage_message = "usage: rake forms:delivery_configurations:enable_s3[<form_id>, <s3_bucket_name>, <s3_bucket_aws_account_id>, <s3_bucket_region>, <format>, <disable_email>]"
       abort usage_message if args[:form_id].blank?
       abort usage_message if args[:s3_bucket_name].blank?
       abort usage_message if args[:s3_bucket_aws_account_id].blank?
@@ -241,7 +243,7 @@ namespace :forms do
 
   desc "Show a form's form_document as JSON"
   task :show_form_document, %i[form_id tag language] => :environment do |_, args|
-    usage_message = "usage: rake forms:show_form_document[<form_id>, <tag>, <language>]".freeze
+    usage_message = "usage: rake forms:show_form_document[<form_id>, <tag>, <language>]"
 
     abort usage_message if args[:form_id].blank? || args[:tag].blank?
     language = args[:language].presence || "en"

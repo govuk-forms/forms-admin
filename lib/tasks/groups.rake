@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 namespace :groups do
   desc "Move all groups in one organisation to another"
   task :move_all_groups_between_organisations, %i[source_organisation_id target_organisation_id] => :environment do |_, args|
@@ -19,14 +21,14 @@ namespace :groups do
 
   desc "Remove empty group"
   task :remove_group, %i[group_id] => :environment do |_, args|
-    usage_message = "usage: rake groups:remove_group[<group_external_id>]".freeze
+    usage_message = "usage: rake groups:remove_group[<group_external_id>]"
     abort usage_message if args[:group_id].blank?
     remove_group("groups:remove_group", args[:group_id])
   end
 
   desc "Remove empty group dry run"
   task :remove_group_dry_run, %i[group_id] => :environment do |_, args|
-    usage_message = "usage: rake groups:remove_group_run[<group_external_id>]".freeze
+    usage_message = "usage: rake groups:remove_group_run[<group_external_id>]"
     abort usage_message if args[:group_id].blank?
 
     ActiveRecord::Base.transaction do
@@ -37,7 +39,7 @@ namespace :groups do
 
   desc "Toggle a group-scoped feature flag for a group"
   task :toggle_feature_flag, %i[feature_name group_id] => :environment do |_, args|
-    usage_message = "usage: rake groups:toggle_feature_flag[<feature_name>, <group_external_id>]".freeze
+    usage_message = "usage: rake groups:toggle_feature_flag[<feature_name>, <group_external_id>]"
     abort usage_message if args[:feature_name].blank? || args[:group_id].blank?
 
     # accept the feature name with or without the _enabled suffix
@@ -55,7 +57,7 @@ end
 def run_task(task_name, args, rollback:)
   *group_ids, org_id = args.to_a
 
-  usage_message = "usage: rake #{task_name}[<group_external_id>, ..., <organisation_id>]".freeze
+  usage_message = "usage: rake #{task_name}[<group_external_id>, ..., <organisation_id>]"
   abort usage_message if group_ids.blank? || org_id.blank?
 
   ActiveRecord::Base.transaction do
@@ -65,7 +67,7 @@ def run_task(task_name, args, rollback:)
 end
 
 def run_bulk_task(task_name:, source_organisation_id:, target_organisation_id:, rollback:)
-  usage_message = "usage: rake #{task_name}[<source_organisation_id>, <target_organisation_id>]".freeze
+  usage_message = "usage: rake #{task_name}[<source_organisation_id>, <target_organisation_id>]"
   abort usage_message if source_organisation_id.blank? || target_organisation_id.blank?
 
   ActiveRecord::Base.transaction do

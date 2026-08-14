@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 namespace :users do
   desc "Delete user (dry run)"
   task :delete_user_dry_run, %i[user_id] => :environment do |_, args|
@@ -41,7 +43,7 @@ def update_user_roles
 end
 
 def run_deletion_task(task_name, args, rollback:)
-  usage_message = "usage: rake #{task_name}[<user_id>]".freeze
+  usage_message = "usage: rake #{task_name}[<user_id>]"
   abort usage_message if args[:user_id].blank?
 
   ActiveRecord::Base.transaction do

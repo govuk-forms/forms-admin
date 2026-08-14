@@ -1,7 +1,9 @@
+# frozen_string_literal: true
+
 namespace :mou_signatures do
   desc "Add MOU signature that was done offline"
   task :create, %i[user_email organisation_name agreed_at_date agreement_type] => :environment do |_, args|
-    usage_message = "usage: rake mou_signatures:create[<user_email>, <organisation_name>, <agreed_at_date>, <agreement_type>]".freeze
+    usage_message = "usage: rake mou_signatures:create[<user_email>, <organisation_name>, <agreed_at_date>, <agreement_type>]"
     abort usage_message if args[:user_email].blank? || args[:organisation_name].blank? || args[:agreed_at_date].blank? ||
       args[:agreement_type].blank?
 
@@ -16,7 +18,7 @@ namespace :mou_signatures do
 
   desc "Update the organisation that an MOU was signed for"
   task :update_organisation, %i[user_email current_organisation_name target_organisation_name] => :environment do |_, args|
-    usage_message = "usage: rake mou_signatures:update_organisation[<user_email>, <current_organisation_name>, <target_organisation_name>]".freeze
+    usage_message = "usage: rake mou_signatures:update_organisation[<user_email>, <current_organisation_name>, <target_organisation_name>]"
     abort usage_message if args[:user_email].blank? || args[:current_organisation_name].blank? || args[:target_organisation_name].blank?
 
     user = User.find_by(email: args[:user_email])
@@ -37,7 +39,7 @@ namespace :mou_signatures do
 
   desc "Revoke a user's signature on the MOU for an organisation"
   task :revoke_user_signature, %i[user_email target_organisation_name] => :environment do |_, args|
-    usage = "usage: rake mou_signatures:revoke_organisation[<user_email>, <target_organisation_name>]".freeze
+    usage = "usage: rake mou_signatures:revoke_organisation[<user_email>, <target_organisation_name>]"
     abort usage if args[:target_organisation_name].blank? || args[:user_email].blank?
 
     user = User.find_by(email: args[:user_email])
