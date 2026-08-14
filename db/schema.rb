@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_12_141413) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_13_112443) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -125,7 +125,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_12_141413) do
     t.text "tag", null: false, comment: "The tag for the form, for example: 'live' or 'draft'"
     t.datetime "updated_at", null: false
     t.integer "version"
-    t.index ["form_id", "tag", "language"], name: "index_form_documents_on_form_id_tag_and_language", unique: true
+    t.index ["form_id", "language"], name: "index_form_documents_only_one_draft_per_language", unique: true, where: "(version IS NULL)"
+    t.index ["form_id", "version", "language"], name: "index_form_documents_on_form_id_version_and_language", unique: true
     t.index ["form_id"], name: "index_form_documents_on_form_id"
   end
 

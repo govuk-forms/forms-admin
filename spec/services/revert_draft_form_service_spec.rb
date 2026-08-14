@@ -95,7 +95,7 @@ describe RevertDraftFormService do
           goto_page_id: live_form.pages.last.id,
           routing_page_id: live_form.pages.first.id,
         )
-        FormDocument.create!(form: live_form, tag: "live", content: live_form.as_form_document(live_at: live_form.updated_at))
+        create(:form_document, :live, form: live_form, content: live_form.as_form_document(live_at: live_form.updated_at))
         live_form.update!(state: :live_with_draft)
       end
 
@@ -149,7 +149,7 @@ describe RevertDraftFormService do
           exit_page_heading: "You cannot continue",
           exit_page_markdown: "Please contact us",
         )
-        FormDocument.create!(form: live_form, tag: "live", content: live_form.as_form_document(live_at: live_form.updated_at))
+        create(:form_document, :live, form: live_form, content: live_form.as_form_document(live_at: live_form.updated_at))
         live_form.update!(state: :live_with_draft)
       end
 
@@ -563,7 +563,7 @@ describe RevertDraftFormService do
           goto_page_id: archived_form.pages.last.id,
           routing_page_id: archived_form.pages.first.id,
         )
-        FormDocument.create!(form: archived_form, tag: "archived", content: archived_form.as_form_document(live_at: archived_form.updated_at))
+        create(:form_document, :archived, form: archived_form, content: archived_form.as_form_document(live_at: archived_form.updated_at))
         archived_form.update!(state: :archived_with_draft)
       end
 

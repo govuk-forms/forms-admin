@@ -46,8 +46,23 @@ RSpec.describe FormDocument, type: :model do
     expect(form_document.form).to be_a(Form)
   end
 
-  it "tags must be unique for a given form" do
-    form_document = create(:form_document, tag: "live")
-    expect { create(:form_document, form: form_document.form, tag: "live") }.to raise_error(ActiveRecord::RecordNotUnique)
+  it "raises an error if a form document with the same version exists for the form" do
+    form_document = create(:form_document, :live, version: 1)
+    expect { create(:form_document, :archived, form: form_document.form, version: 1) }.to raise_error(ActiveRecord::RecordNotUnique)
+  end
+
+  it "raises an error if a draft form document already exists for the form" do
+    form = create(:form) # also creates a draft form document
+    expect { create(:form_document, :draft, form: form) }.to raise_error(ActiveRecord::RecordNotUnique)
+  end
+
+  it "allows creating a form with the same version and a different language" do
+    form_document = create(:form_document, :live, language: "en")
+    expect { create(:form_document, :live, form: form_document.form, language: "cy") }.not_to raise_error
+  end
+
+  it "allows creating a draft form with a different language" do
+    form = create(:form) # also creates a draft form document
+    expect { create(:form_document, :draft, form: form, language: "cy") }.not_to raise_error
   end
 end
