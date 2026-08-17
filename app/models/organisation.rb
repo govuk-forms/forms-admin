@@ -20,8 +20,14 @@ class Organisation < ApplicationRecord
 
   scope :by_name, lambda { |name|
     if name.present?
-      where("lower(name) LIKE :search OR lower(abbreviation) LIKE :search",
-            search: "%#{sanitize_sql_like(name.downcase)}%")
+      where(
+        "lower(name) LIKE :search OR lower(abbreviation) LIKE :search OR EXISTS (
+          SELECT 1 FROM organisation_domains
+          WHERE organisation_domains.organisation_id = organisations.id
+            AND organisation_domains.domain LIKE :search
+        )",
+        search: "%#{sanitize_sql_like(name.downcase)}%",
+      )
     end
   }
 

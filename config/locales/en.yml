@@ -1565,8 +1565,8 @@ en:
           signed: Any agreement signed
         clear_filter: Clear filter
         name:
-          hint: Enter name or abbreviation
-          label: Name
+          hint: Enter name, abbreviation or email domain
+          label: Search
         sort:
           agreement_date: Date first agreement signed (newest first)
           draft_forms: Draft forms (most first)
