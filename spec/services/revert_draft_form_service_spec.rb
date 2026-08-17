@@ -52,6 +52,19 @@ describe RevertDraftFormService do
       end
     end
 
+    context "when there are multiple live versions of the form" do
+      before do
+        new_content = live_form.latest_form_document.content.merge("name" => "Form v2")
+        new_live_form_document = create(:form_document, :live, form: live_form, version: 2, content: new_content)
+        live_form.update!(latest_form_document: new_live_form_document)
+      end
+
+      it "reverts to the latest live version of the form" do
+        revert_draft(live_tag)
+        expect(live_form.reload.name).to eq("Form v2")
+      end
+    end
+
     context "when a page attribute is changed in the draft" do
       before do
         live_form.pages.first.update!(question_text: "A new draft question text")
@@ -86,7 +99,7 @@ describe RevertDraftFormService do
     end
 
     context "with routing conditions" do
-      let(:live_form) { create(:form, :ready_for_live, pages_count: 2) }
+      let(:live_form) { create(:form, :live_with_draft, pages_count: 2) }
 
       before do
         # live version with a routing condition
@@ -95,8 +108,7 @@ describe RevertDraftFormService do
           goto_page_id: live_form.pages.last.id,
           routing_page_id: live_form.pages.first.id,
         )
-        create(:form_document, :live, form: live_form, content: live_form.as_form_document(live_at: live_form.updated_at))
-        live_form.update!(state: :live_with_draft)
+        live_form.latest_form_document.update!(content: live_form.as_form_document(live_at: live_form.updated_at))
       end
 
       context "when a routing condition is added to the draft" do
@@ -138,7 +150,7 @@ describe RevertDraftFormService do
     end
 
     context "with an exit page condition" do
-      let(:live_form) { create(:form, :ready_for_live, pages_count: 1) }
+      let(:live_form) { create(:form, :live_with_draft, pages_count: 1) }
 
       before do
         live_form.pages.first.update!(answer_type: "selection", answer_settings: { "only_one_option" => "true", "selection_options" => [{ "name" => "Yes" }, { "name" => "No" }] })
@@ -149,8 +161,7 @@ describe RevertDraftFormService do
           exit_page_heading: "You cannot continue",
           exit_page_markdown: "Please contact us",
         )
-        create(:form_document, :live, form: live_form, content: live_form.as_form_document(live_at: live_form.updated_at))
-        live_form.update!(state: :live_with_draft)
+        live_form.latest_form_document.update!(content: live_form.as_form_document(live_at: live_form.updated_at))
       end
 
       context "when the exit page content is changed in the draft" do
@@ -296,6 +307,25 @@ describe RevertDraftFormService do
           expect(restored_welsh_doc).to be_present
           expect(restored_welsh_doc.content["name"]).to eq("Ffurflen Gymraeg")
           expect(live_form.name_cy).to eq("Ffurflen Gymraeg")
+        end
+      end
+
+      context "when there are multiple live form documents" do
+        before do
+          welsh_content = live_form.latest_welsh_form_document.content.merge("name" => "Welsh form v2")
+          create(:form_document, :live, form: live_form, version: 2, language: "cy", content: welsh_content)
+
+          new_live_english_document = create(:form_document, :live, form: live_form, version: 2, language: "en", content: live_form.latest_form_document.content)
+          live_form.update!(latest_form_document: new_live_english_document)
+        end
+
+        it "reverts to the latest live Welsh version" do
+          revert_draft(live_tag)
+
+          live_form.reload
+          restored_welsh_doc = live_form.draft_welsh_form_document
+          expect(restored_welsh_doc).to be_present
+          expect(restored_welsh_doc.content["name"]).to eq("Welsh form v2")
         end
       end
 
@@ -520,6 +550,19 @@ describe RevertDraftFormService do
       end
     end
 
+    context "when there are multiple live versions of the form" do
+      before do
+        new_content = archived_form.latest_form_document.content.merge("name" => "Form v2")
+        new_archived_form_document = create(:form_document, :archived, form: archived_form, version: 2, content: new_content)
+        archived_form.update!(latest_form_document: new_archived_form_document)
+      end
+
+      it "reverts to the latest archived version of the form" do
+        revert_draft(archived_tag)
+        expect(archived_form.reload.name).to eq("Form v2")
+      end
+    end
+
     context "when a page attribute is changed in the draft" do
       before do
         archived_form.pages.first.update!(question_text: "A new draft question text")
@@ -554,7 +597,7 @@ describe RevertDraftFormService do
     end
 
     context "with routing conditions" do
-      let(:archived_form) { create(:form, :ready_for_live, pages_count: 2) }
+      let(:archived_form) { create(:form, :archived_with_draft, pages_count: 2) }
 
       before do
         # archived version with a routing condition
@@ -563,8 +606,7 @@ describe RevertDraftFormService do
           goto_page_id: archived_form.pages.last.id,
           routing_page_id: archived_form.pages.first.id,
         )
-        create(:form_document, :archived, form: archived_form, content: archived_form.as_form_document(live_at: archived_form.updated_at))
-        archived_form.update!(state: :archived_with_draft)
+        archived_form.latest_form_document.update!(content: archived_form.as_form_document(live_at: archived_form.updated_at))
       end
 
       context "when a routing condition is added to the draft" do

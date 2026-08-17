@@ -16,7 +16,7 @@ class RevertDraftFormService
   # Returns true on success, false on failure
   def revert_draft_from_form_document(tag)
     # Return early if there's no draft to discard
-    form_document = FormDocument.find_by(form_id: form.id, tag:, language: "en")
+    form_document = tag == "draft" ? form.draft_form_document : form.latest_form_document
     return false if form_document.blank?
 
     form_document_content = form_document.content
@@ -25,8 +25,10 @@ class RevertDraftFormService
       revert_form_attributes(form_document_content)
       revert_pages_and_nested_associations(form_document_content["steps"])
       revert_delivery_configurations(form_document_content)
-      if welsh_form_document_exists?(tag)
-        revert_welsh_translations(tag)
+
+      welsh_form_document = FormDocument.find_by(form_id: form.id, tag:, version: form_document.version, language: "cy")
+      if welsh_form_document.present?
+        revert_welsh_translations(welsh_form_document)
       else
         clear_welsh_translations
       end
@@ -121,12 +123,7 @@ private
     condition.exit_page_markdown = condition_data["exit_page_markdown"]
   end
 
-  def welsh_form_document_exists?(tag)
-    FormDocument.exists?(form_id: form.id, tag:, language: "cy")
-  end
-
-  def revert_welsh_translations(tag)
-    welsh_form_document = FormDocument.find_by(form_id: form.id, tag:, language: "cy")
+  def revert_welsh_translations(welsh_form_document)
     return if welsh_form_document.blank?
 
     welsh_content = welsh_form_document.content
