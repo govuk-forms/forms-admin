@@ -225,6 +225,18 @@ RSpec.describe FormCopyService do
       it "creates a draft form document for the new form" do
         expect(copied_form.state).to eq("draft")
       end
+
+      context "when there are multiple versions of the live form" do
+        before do
+          content = source_form.as_form_document.merge({ "what_happens_next_markdown" => "New what happens next" })
+          form_document = create(:form_document, :live, form: source_form, version: 2, content: content)
+          source_form.update!(latest_form_document: form_document)
+        end
+
+        it "copies the latest version of the form" do
+          expect(copied_form.what_happens_next_markdown).to eq("New what happens next")
+        end
+      end
     end
 
     context "when copying from an archived form document" do
@@ -232,6 +244,18 @@ RSpec.describe FormCopyService do
 
       it "creates a draft form document for the new form" do
         expect(copied_form.state).to eq("draft")
+      end
+
+      context "when there are multiple versions of the archived form" do
+        before do
+          content = source_form.as_form_document.merge({ "what_happens_next_markdown" => "New what happens next" })
+          form_document = create(:form_document, :archived, form: source_form, version: 2, content: content)
+          source_form.update!(latest_form_document: form_document)
+        end
+
+        it "copies the latest version of the form" do
+          expect(copied_form.what_happens_next_markdown).to eq("New what happens next")
+        end
       end
     end
 
@@ -373,6 +397,51 @@ RSpec.describe FormCopyService do
         expect(copied_condition.exit_page_heading_cy).to eq("Welsh exit page heading")
         expect(copied_condition.exit_page_markdown_cy).to eq("Welsh exit page markdown")
       end
+
+      context "when there are multiple versions of the live form" do
+        before do
+          welsh_content = source_form.latest_welsh_form_document.content.merge({ "what_happens_next_markdown" => "New Welsh content" })
+          create(:form_document, :live, form: source_form, version: 2, language: "cy", content: welsh_content)
+
+          new_english_form_document = create(:form_document, :live, form: source_form, version: 2, language: "en", content: source_form.as_form_document)
+          source_form.update!(latest_form_document: new_english_form_document)
+        end
+
+        it "copies the latest Welsh version" do
+          copied_welsh = copied_form.draft_welsh_form_document
+          expect(copied_welsh).to be_present
+          expect(copied_welsh.content["what_happens_next_markdown"]).to eq("New Welsh content")
+        end
+      end
+    end
+
+    context "when the form has Welsh for the draft form a previously archived Welsh version" do
+      let(:source_form) { create(:form, :live, :with_welsh_translation) }
+
+      before do
+        FormDocumentSyncService.new(source_form).synchronize_archived_welsh_form
+
+        # make the draft have Welsh so we check the draft Welsh is not copied
+        source_form.update!(available_languages: %w[en cy])
+      end
+
+      context "when copying a live form" do
+        let(:tag) { "live" }
+
+        it "does not copy the Welsh translation" do
+          expect(copied_form).to be_present
+          expect(copied_form.draft_welsh_form_document).to be_nil
+        end
+      end
+
+      context "when copying an archived form" do
+        let(:tag) { "archived" }
+
+        it "does not copy the Welsh translation" do
+          expect(copied_form).to be_present
+          expect(copied_form.draft_welsh_form_document).to be_nil
+        end
+      end
     end
 
     context "when Welsh copy fails" do
@@ -388,7 +457,7 @@ RSpec.describe FormCopyService do
         # Stub the Welsh copying to raise an AR::RecordInvalid to simulate a failure mid-transaction
         service = described_class.new(source_form, logged_in_user)
         allow(service).to receive(:copy_welsh_translations)
-          .and_raise(ActiveRecord::RecordInvalid.new(Form.new))
+                            .and_raise(ActiveRecord::RecordInvalid.new(Form.new))
 
         expect {
           service.copy(tag: "live")
