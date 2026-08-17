@@ -1,15 +1,19 @@
 class Reports::FormDocumentsService
   class << self
     def form_documents(tag:)
-      form_document_tags = tag == "live-or-archived" ? %w[live archived] : tag
-      form_documents = FormDocument.joins(form: { group_form: { group: :organisation } })
-                                   .where(tag: form_document_tags, language: "en")
-                                   .where.not(organisation: { "internal": true })
-                                   .select("form_documents.*", "organisation.name AS organisation_name", "organisation.id AS organisation_id", "groups.external_id AS group_external_id", "groups.name AS group_name", "welsh_completed AS welsh_completed")
+      form_documents = if tag == "draft"
+                         FormDocument.joins(form: { group_form: { group: :organisation } })
+                                     .where(version: nil, language: "en")
+                       else
+                         FormDocument.joins("INNER JOIN forms ON forms.latest_form_document_id = form_documents.id")
+                                     .joins("INNER JOIN groups_form_ids ON groups_form_ids.form_id = forms.id")
+                                     .joins("INNER JOIN groups ON groups.id = groups_form_ids.group_id")
+                                     .joins("INNER JOIN organisations ON organisations.id = groups.organisation_id")
+                       end
 
-      if tag == "draft"
-        form_documents = form_documents.where(form: { "state": %w[draft live_with_draft archived_with_draft] })
-      end
+      form_documents = form_documents.where(forms: { "state": form_states_for_tag(tag) })
+                                     .where.not(organisations: { "internal": true })
+                                     .select("form_documents.*", "organisations.name AS organisation_name", "organisations.id AS organisation_id", "groups.external_id AS group_external_id", "groups.name AS group_name", "welsh_completed AS welsh_completed")
 
       form_documents.find_each(batch_size: 100).lazy.map(&:as_json)
     end
@@ -89,6 +93,15 @@ class Reports::FormDocumentsService
     end
 
   private
+
+    def form_states_for_tag(tag)
+      {
+        "draft" => %w[draft live_with_draft archived_with_draft],
+        "live" => %w[live live_with_draft],
+        "archived" => %w[archived archived_with_draft],
+        "live-or-archived" => %w[live live_with_draft archived archived_with_draft],
+      }[tag]
+    end
 
     def secondary_skip_conditions(form_document)
       form_document["content"]["steps"].lazy.flat_map do |step|
