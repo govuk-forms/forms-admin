@@ -25,6 +25,21 @@
 
       <%= f.govuk_text_field :copyright_holder, label: { size: 'm' } %>
 
+      <% if @brand.logo.attached? %>
+        <p class="govuk-body"><%= t(".current_file", file_name: t("helpers.label.brand.logo_file"), path: brand_asset_path(@brand.logo)) %></p>
+      <% end %>
+      <%= f.govuk_file_field :logo_file, label: { size: 'm' } %>
+
+      <% if @brand.favicon.attached? %>
+        <p class="govuk-body"><%= t(".current_file", file_name: t("helpers.label.brand.favicon_file"), path: brand_asset_path(@brand.favicon)) %></p>
+      <% end %>
+      <%= f.govuk_file_field :favicon_file, label: { size: 'm' } %>
+
+      <% if @brand.opengraph_image.attached? %>
+        <p class="govuk-body"><%= t(".current_file", file_name: t("helpers.label.brand.opengraph_image_file"), path: brand_asset_path(@brand.opengraph_image)) %></p>
+      <% end %>
+      <%= f.govuk_file_field :opengraph_image_file, label: { size: 'm' } %>
+
       <%= f.govuk_submit t("save_and_continue") %>
     <% end %>
   </div>

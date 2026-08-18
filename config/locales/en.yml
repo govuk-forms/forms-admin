@@ -324,6 +324,7 @@ en:
     heading: Choose a brand for your form
   brands:
     edit:
+      current_file: 'Current %{file_name}: %{path}'
       title: Edit brand
     index:
       create_brand: Create a brand
@@ -338,9 +339,13 @@ en:
         border_colour: Header and footer border colour
         copyright_holder: Copyright holder
         created_at: Created
+        favicon: Favicon
         header_background_colour: Header background colour
+        logo: Logo
         logo_alt_text: Logo alt text
         logo_link: Logo link
+        not_uploaded: Not uploaded
+        opengraph_image: Opengraph image
         slug: Slug
     success_messages:
       create: The brand has been created
@@ -1021,10 +1026,13 @@ en:
       brand:
         border_colour: 'Enter a hex colour code. For example, #206c49'
         copyright_holder: Shown in the copyright notice in the form’s footer.
+        favicon_file: Upload an ICO or PNG file. Shown in the browser tab.
         header_background_colour: 'Enter a hex colour code. For example, #206c49'
         logo_alt_text: Describes the logo for people using screen readers. Usually the organisation’s name.
+        logo_file: Upload a PNG or JPEG file. Shown in the header of the form.
         logo_link: The web address people go to when they select the logo. Usually the organisation’s website.
         name: Used to identify the brand. Not shown to people filling in forms.
+        opengraph_image_file: Upload a PNG or JPEG file. Shown when a link to the form is shared on social media.
       forms_copy_input:
         name: The form name will be shown at the top of each page of the form. Use a name that describes what the form will help people to do. For example ‘Apply for a juggling licence’.
       page:
@@ -1095,10 +1103,13 @@ en:
       brand:
         border_colour: Header and footer border colour
         copyright_holder: Copyright holder
+        favicon_file: Favicon
         header_background_colour: Header background colour
         logo_alt_text: Logo alt text
+        logo_file: Logo
         logo_link: Logo link
         name: Brand name
+        opengraph_image_file: Opengraph image
       forms_batch_submissions_input:
         batch_frequencies_options:
           daily: Get a daily CSV of submissions
