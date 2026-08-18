@@ -235,7 +235,7 @@ class Form < ApplicationRecord
     live_document = latest_live_or_archived_form_document(language:)
     return false if live_document.blank?
 
-    ignored_keys = %w[live_at available_languages updated_at]
+    ignored_keys = %w[live_at available_languages updated_at tag created_at version]
     return false if live_document.content.except(*ignored_keys) == as_form_document(language:).except(*ignored_keys)
 
     true

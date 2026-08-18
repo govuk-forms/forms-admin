@@ -14,7 +14,7 @@ RSpec.describe FormDocumentSyncService do
           service.synchronize_live_form
         }.to change(FormDocument, :count).by(1)
 
-        expect(FormDocument.last).to have_attributes(form:, tag: "live", content: form.as_form_document(live_at: expected_live_at), version: 1)
+        expect(form.latest_form_document).to have_attributes(form:, tag: "live", content: form.as_form_document(live_at: expected_live_at), version: 1)
       end
 
       it "sets the latest_form_document_id on the form" do
@@ -26,22 +26,34 @@ RSpec.describe FormDocumentSyncService do
     context "when there is an existing live form document" do
       let!(:form_document) { create :form_document, :live, form:, content: form.as_form_document, version: 1 }
 
-      it "updates the live form document" do
+      before do
+        form.latest_form_document = form_document
+        form.save!
+      end
+
+      it "increments the latest form document with a new version" do
+        expect {
+          service.synchronize_live_form
+        }.to change { form.reload.latest_form_document.version }.from(1).to(2)
+      end
+
+      it "creates a new live form document with the new content" do
         new_name = "new name"
         form.name = new_name
         expect {
           service.synchronize_live_form
-        }.to change { form_document.reload.content["name"] }.to(new_name)
+        }.to change { form.reload.latest_form_document.content["name"] }.to(new_name)
       end
 
-      it "updates the live_at date in the form document" do
+      it "sets the live_at date in the new form document" do
         service.synchronize_live_form
-        expect(FormDocument.last["content"]).to include("live_at" => form.reload.updated_at.as_json)
+        expect(form.reload.latest_form_document.content).to include("live_at" => form.reload.updated_at.as_json)
       end
 
-      it "maintains the version as 1" do
-        service.synchronize_live_form
-        expect(form_document.reload.version).to eq(1)
+      it "does not change the version of the existing form document" do
+        expect {
+          service.synchronize_live_form
+        }.not_to(change { form_document.reload.version })
       end
     end
 
@@ -90,8 +102,8 @@ RSpec.describe FormDocumentSyncService do
 
       it "creates live form documents with version 1" do
         service.synchronize_live_form
-        english_doc = FormDocument.find_by(form:, tag: "live", language: "en")
-        welsh_doc = FormDocument.find_by(form:, tag: "live", language: "cy")
+        english_doc = form.reload.latest_form_document
+        welsh_doc = form.reload.latest_welsh_form_document
         expect(english_doc.version).to eq(1)
         expect(welsh_doc.version).to eq(1)
       end
@@ -282,34 +294,48 @@ RSpec.describe FormDocumentSyncService do
           service.synchronize_only_live_english_form
         }.to change(FormDocument, :count).by(1)
 
-        expect(FormDocument.last).to have_attributes(form:, tag: "live", content: form.as_form_document(live_at: expected_live_at), version: 1)
+        expect(FormDocument.order(version: :desc).last).to have_attributes(form:, tag: "live", content: form.as_form_document(live_at: expected_live_at), version: 1)
       end
 
       it "sets the latest_form_document_id on the form" do
         service.synchronize_only_live_english_form
-        expect(form.reload.latest_form_document_id).to eq(FormDocument.find_by(form:, tag: "live", language: "en").id)
+        expect(form.reload.latest_form_document_id).to eq(FormDocument.order(version: :desc).find_by(form:, tag: "live", language: "en").id)
       end
     end
 
     context "when there is an existing live form document" do
       let!(:form_document) { create :form_document, :live, form:, content: form.as_form_document }
 
+      before do
+        form.latest_form_document = form_document
+        form.save!
+      end
+
       it "updates the live form document" do
         new_name = "new name"
         form.name = new_name
+        form.save!
+
         expect {
           service.synchronize_only_live_english_form
-        }.to change { form_document.reload.content["name"] }.to(new_name)
+        }.to change { form.reload.latest_form_document.content["name"] }.to(new_name)
       end
 
-      it "updates the live_at date in the form document" do
+      it "sets the live_at date in the new form document" do
         service.synchronize_only_live_english_form
         expect(FormDocument.last["content"]).to include("live_at" => form.reload.updated_at.as_json)
       end
 
-      it "maintains the version as 1" do
-        service.synchronize_only_live_english_form
-        expect(form_document.reload.version).to eq(1)
+      it "creates a new English form document with an incremented version" do
+        expect {
+          service.synchronize_only_live_english_form
+        }.to change { form.reload.latest_form_document.version }.by(1)
+      end
+
+      it "does not change the existing form document's version" do
+        expect {
+          service.synchronize_only_live_english_form
+        }.not_to(change { form_document.reload.version })
       end
     end
 
@@ -360,8 +386,8 @@ RSpec.describe FormDocumentSyncService do
 
       context "and the English form fails to save" do
         before do
-          allow(service).to receive(:update_or_create_form_document)
-            .with("live", anything, "en")
+          allow(service).to receive(:create_new_versioned_form_document)
+            .with("live", anything, "en", anything)
             .and_raise(ActiveRecord::RecordInvalid.new(form), "simulated FormDocument saving error")
         end
 
@@ -437,7 +463,7 @@ RSpec.describe FormDocumentSyncService do
           expect(FormDocument.last["content"]).to include("live_at" => form.reload.updated_at.as_json)
         end
 
-        it "maintains the version as 1" do
+        it "increments the version by 1" do
           service.synchronize_only_live_welsh_form
           expect(form_document.reload.version).to eq(1)
         end

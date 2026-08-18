@@ -49,14 +49,14 @@ class FormDocumentSyncService
   def synchronize_only_live_english_form
     FormDocument.transaction do
       # If we've already made the Welsh version live, changes to the Welsh version must be made live at the same time by calling a different method
-      raise ActiveRecord::RecordNotFound, "Cannot make changes to only the live English form if there is already a live Welsh version." if FormDocument.where(form:, tag: LIVE_TAG, language: "cy").exists?
+      raise ActiveRecord::RecordNotFound, "Cannot make changes to only the live English form if there is already a live Welsh version." if form.has_live_welsh_translation?
 
       # A new live version replaces any previous archived version
       delete_form_documents_by_tag(ARCHIVED_TAG)
 
       content = form_content("en", live_at: form.updated_at)
       content["available_languages"] = %w[en] # don't include Welsh in available languages
-      update_or_create_form_document(LIVE_TAG, content, "en")
+      create_new_versioned_form_document(LIVE_TAG, content, "en", version_number_of_existing_form_document + 1)
     end
   end
 
@@ -100,13 +100,32 @@ private
   end
 
   def update_or_create_form_document(tag, content, language)
+    if tag == DRAFT_TAG
+      update_or_create_draft_form_document(content, language)
+    else
+      create_new_versioned_form_document(tag, content, language, version_number_of_existing_form_document + 1)
+    end
+  end
+
+  def update_or_create_draft_form_document(content, language)
     form_document = FormDocument.find_or_initialize_by(
       form_id: form.id,
-      tag:,
+      tag: DRAFT_TAG,
       language:,
     )
     form_document.content = content
-    form_document.version = 1 if tag == LIVE_TAG
+
+    form_document.save!
+  end
+
+  def create_new_versioned_form_document(tag, content, language, version)
+    form_document = FormDocument.new(
+      form_id: form.id,
+      tag:,
+      language:,
+      content:,
+      version:,
+    )
 
     form_document.save!
 
@@ -136,5 +155,9 @@ private
     Mobility.with_locale(language) do
       form.as_form_document(language:, **options)
     end
+  end
+
+  def version_number_of_existing_form_document
+    form.latest_form_document&.version || 0
   end
 end
