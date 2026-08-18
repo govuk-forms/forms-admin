@@ -1,4 +1,4 @@
-class Api::FormDocumentsController < ApplicationController
+class Api::V2FormDocumentsController < ApplicationController
   def show
     render json: form_document.content
   end

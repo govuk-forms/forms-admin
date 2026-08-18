@@ -313,8 +313,8 @@ Rails.application.routes.draw do
 
   scope "api/v2", as: "api_v2" do
     scope "forms/:form_id" do
-      get "/:tag", to: "api/form_documents#show", as: :form_document, constraints: { tag: /draft|live|archived/ }
-      get "/group", to: "api/form_documents#group", as: :form_group
+      get "/:tag", to: "api/v2_form_documents#show", as: :form_document, constraints: { tag: /draft|live|archived/ }
+      get "/group", to: "api/v2_form_documents#group", as: :form_group
     end
 
     get "brands/:brand_id", to: "api/brands#show", as: :brand
