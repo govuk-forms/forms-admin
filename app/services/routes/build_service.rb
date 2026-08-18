@@ -2,7 +2,7 @@
 # Takes a form (with pages and conditions) and builds an array of RouteInput objects
 # based on the pages and conditions.
 class Routes::BuildService
-  END_OF_FORM_OPTION = [I18n.t("page_conditions.end_of_form"), Forms::RouteInput::END_OF_FORM_VALUE].freeze
+  END_OF_FORM_OPTION = [I18n.t("page_conditions.end_of_form"), GotoValue::EndOfFormValue.new].freeze
   NONE_OF_THE_ABOVE_OPTION = DataStruct.new(value: Condition::NONE_OF_THE_ABOVE, name: I18n.t("page_conditions.none_of_the_above"))
 
   attr_reader :form
@@ -31,13 +31,14 @@ class Routes::BuildService
     # If there's no next page then it's the last page of the form.
     # We only need options for this page if there's an error that needs correcting.
     if next_page.nil?
-      selected_page = if selected && selected != Forms::RouteInput::DEFAULT_VALUE
-                        option_for_select(form.pages.find { |page| page.id == selected })
+      selected_page = if selected.is_a?(GotoValue::Page)
+                        matching_page = form.pages.find { |p| selected.page_id == p.id }
+                        option_for_select(matching_page) if matching_page
                       end
 
       return [
         selected_page,
-        [END_OF_FORM_OPTION.first, Forms::RouteInput::DEFAULT_VALUE],
+        [END_OF_FORM_OPTION.first, GotoValue::DefaultValue.new],
       ].compact
     end
 
@@ -52,9 +53,9 @@ class Routes::BuildService
       _, value = option
 
       if drop
-        if value == next_page_id
+        if value == GotoValue::Page.new(next_page_id)
           drop = false
-          ["#{page.position.next}. #{next_page.question_text}", Forms::RouteInput::DEFAULT_VALUE]
+          ["#{page.position.next}. #{next_page.question_text}", GotoValue::DefaultValue.new]
         elsif selected && value == selected
           option
         end
@@ -93,6 +94,7 @@ private
     key = [page.id, nil]
     condition = conditions_by_key[key]
 
+    selected = GotoValue::Page.new(condition&.goto_page_id) if condition&.goto_page_id.present?
     [
       Forms::RouteInput.new(
         id: condition&.id,
@@ -100,13 +102,13 @@ private
         page:,
         goto: goto_value_for(condition),
         goto_page: condition&.goto_page,
-        goto_options: options_for_goto_page(page, condition&.goto_page_id),
+        goto_options: options_for_goto_page(page, selected),
       ),
     ]
   end
 
   def option_for_select(page)
-    ["#{page.position}. #{page.question_text}", page.id]
+    ["#{page.position}. #{page.question_text}", GotoValue::Page.new(page.id)]
   end
 
   def all_goto_options
@@ -117,12 +119,12 @@ private
   end
 
   def goto_value_for(condition)
-    return Forms::RouteInput::DEFAULT_VALUE unless condition
+    return GotoValue::DefaultValue.new unless condition
 
     if condition.skip_to_end?
-      Forms::RouteInput::END_OF_FORM_VALUE
+      GotoValue::EndOfFormValue.new
     else
-      condition.goto_page_id
+      GotoValue::Page.new(condition.goto_page_id)
     end
   end
 end
