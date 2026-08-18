@@ -137,8 +137,6 @@ class ReportsController < WebController
     render template: "reports/add_another_answer", locals: { data: }
   end
 
-  def last_signed_in_at; end
-
   def selection_questions_summary
     tag = params[:tag]
     forms = Reports::FormDocumentsService.form_documents(tag:)
