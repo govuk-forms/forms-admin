@@ -204,12 +204,6 @@ class ReportsController < WebController
     render locals: { data: }
   end
 
-  def organisation_domains
-    data = Reports::OrganisationsReportService.new.organisation_domains_report
-
-    render locals: { data: }
-  end
-
 private
 
   def questions_feature_report(tag, report, questions, type: :questions)
