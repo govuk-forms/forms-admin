@@ -332,12 +332,12 @@ RSpec.describe FormCopyService do
       end
 
       it "copies the Welsh-translated content from the source form" do
-        source_welsh = source_form.form_documents.find_by(language: "cy", tag: "live")
+        source_welsh = source_form.form_documents.order(version: :desc).find_by(language: "cy", tag: "live")
         expect(source_welsh).to be_present
         expect(source_welsh.content["name"]).to eq("Ffurflen Gymraeg")
 
         # Copied form should have Welsh FormDocument with translated content
-        copied_welsh = copied_form.form_documents.find_by(language: "cy", tag: "draft")
+        copied_welsh = copied_form.form_documents.order(version: :desc).find_by(language: "cy", tag: "draft")
         expect(copied_welsh).to be_present
         expect(copied_welsh.content["name"]).to eq("Copy of Ffurflen Gymraeg")
         expect(copied_welsh.content["privacy_policy_url"]).to eq("https://example.com/preifatrwydd")
@@ -401,9 +401,9 @@ RSpec.describe FormCopyService do
       context "when there are multiple versions of the live form" do
         before do
           welsh_content = source_form.latest_welsh_form_document.content.merge({ "what_happens_next_markdown" => "New Welsh content" })
-          create(:form_document, :live, form: source_form, version: 2, language: "cy", content: welsh_content)
+          create(:form_document, :live, form: source_form, version: 3, language: "cy", content: welsh_content)
 
-          new_english_form_document = create(:form_document, :live, form: source_form, version: 2, language: "en", content: source_form.as_form_document)
+          new_english_form_document = create(:form_document, :live, form: source_form, version: 3, language: "en", content: source_form.as_form_document)
           source_form.update!(latest_form_document: new_english_form_document)
         end
 

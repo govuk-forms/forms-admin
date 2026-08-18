@@ -40,6 +40,7 @@ RSpec.describe FormDocumentSyncService do
       it "creates a new live form document with the new content" do
         new_name = "new name"
         form.name = new_name
+        form.save!
         expect {
           service.synchronize_live_form
         }.to change { form.reload.latest_form_document.content["name"] }.to(new_name)
@@ -88,29 +89,20 @@ RSpec.describe FormDocumentSyncService do
       end
     end
 
-    context "when the form has welsh translations" do
-      let(:form) { create(:form, state: "live", available_languages: %w[en cy]) }
+    context "when the form has Welsh translations" do
+      let(:form) { create(:form, :live, :with_welsh_translation) }
 
-      it "creates a draft form document for each language" do
+      it "creates live form documents with an incremented version number" do
         expect {
           service.synchronize_live_form
         }.to change(FormDocument, :count).by(2)
-
-        expect(FormDocument.where(form:, tag: "draft", language: "en")).to exist
-        expect(FormDocument.where(form:, tag: "draft", language: "cy")).to exist
-      end
-
-      it "creates live form documents with version 1" do
-        service.synchronize_live_form
-        english_doc = form.reload.latest_form_document
-        welsh_doc = form.reload.latest_welsh_form_document
-        expect(english_doc.version).to eq(1)
-        expect(welsh_doc.version).to eq(1)
+        .and change { form.reload.latest_form_document.version }.by(1)
+        .and change { form.reload.latest_welsh_form_document.version }.by(1)
       end
 
       it "sets the latest_form_document_id on the form to the English form document" do
         service.synchronize_live_form
-        expect(form.reload.latest_form_document_id).to eq(FormDocument.find_by(form:, tag: "live", language: "en").id)
+        expect(form.reload.latest_form_document_id).to eq(FormDocument.order(version: :desc).find_by(form:, tag: "live", language: "en").id)
       end
 
       context "and the Welsh form fails to save" do
@@ -118,7 +110,7 @@ RSpec.describe FormDocumentSyncService do
           allow(service).to receive(:update_or_create_form_document).and_call_original
           # saving welsh form fails
           allow(service).to receive(:update_or_create_form_document)
-            .with("live", anything, "cy")
+            .with("live", anything, "cy", anything)
             .and_raise(ActiveRecord::RecordInvalid.new(form), "simulated FormDocument saving error")
         end
 
@@ -413,7 +405,7 @@ RSpec.describe FormDocumentSyncService do
   end
 
   describe "#synchronize_only_live_welsh_form" do
-    let!(:form) { create(:form, :with_welsh_translation, :ready_for_live, state: "live") }
+    let!(:form) { create(:form, :with_welsh_translation, :ready_for_live, state: "live", available_languages: %w[en]) }
     let(:expected_live_at) { form.reload.updated_at.as_json }
     let(:welsh_form_content) do
       Mobility.with_locale(:cy) do
@@ -423,49 +415,67 @@ RSpec.describe FormDocumentSyncService do
 
     context "when there is a live English form document" do
       before do
-        form_document = create :form_document, :live, form:, language: "en", content: { "available_languages" => %w[en] }
+        form_document = create :form_document, :live, form:, language: "en", content: form.as_form_document
         form.latest_form_document_id = form_document.id
+        form.available_languages = %w[en cy]
+        form.save!
       end
 
       context "when there is no existing Welsh form document" do
-        it "only creates a live Welsh form document" do
+        it "creates a live Welsh form document" do
           expect {
             service.synchronize_only_live_welsh_form
-          }.to change { FormDocument.where(form:, tag: "live", language: "cy").count }.by(1)
-          .and(not_change { FormDocument.where(form:, tag: "live", language: "en").count })
+          }.to change { FormDocument.exists?(form:, tag: "live", language: "cy") }.from(false).to(true)
 
-          welsh_form_document = FormDocument.where(form:, tag: "live", language: "cy").first
+          welsh_form_document = form.reload.latest_welsh_form_document
           expect(welsh_form_document.content["available_languages"]).to eq %w[en cy]
-          expect(welsh_form_document.version).to eq 1
+          expect(welsh_form_document.version).to eq 2
           expect(welsh_form_document).to have_attributes(form:, tag: "live", content: welsh_form_content)
         end
 
-        it "does not change the latest_live_form_document_id" do
+        it "creates a new English form document with only the available_languages field changed from the previous live document" do
+          new_name = "New name"
+          form.name = new_name
+          form.save!
+
           expect {
             service.synchronize_only_live_welsh_form
-          }.to(not_change { form.reload.latest_form_document_id })
+          }.to change { FormDocument.where(form:, tag: "live", language: "en").count }.by(1)
+          .and change { form.reload.latest_form_document.version }.by(1)
+          .and change { form.reload.latest_form_document.content["available_languages"] }.to(%w[en cy])
+          .and not_change { form.reload.latest_form_document.content["name"] }
+          .and(not_change { form.reload.latest_form_document.content["live_at"] })
+        end
+
+        it "updates the latest_live_form_document_id" do
+          expect {
+            service.synchronize_only_live_welsh_form
+          }.to(change { form.reload.latest_form_document_id })
         end
       end
 
       context "when there is an existing live Welsh form document" do
         let!(:form_document) { create :form_document, :live, form:, language: "cy", content: welsh_form_content, version: 1 }
 
-        it "updates the live form document" do
+        it "creates a new live Welsh form document with the new content" do
           new_name = "new name"
           form.name_cy = new_name
+          form.save!
+
           expect {
             service.synchronize_only_live_welsh_form
-          }.to change { form_document.reload.content["name"] }.to(new_name)
+          }.to change { form.reload.latest_welsh_form_document.content["name"] }.to(new_name)
         end
 
-        it "updates the live_at date in the form document" do
+        it "sets the live_at date in the new form document" do
           service.synchronize_only_live_welsh_form
-          expect(FormDocument.last["content"]).to include("live_at" => form.reload.updated_at.as_json)
+          expect(form.reload.latest_welsh_form_document.content).to include("live_at" => form.reload.updated_at.as_json)
         end
 
-        it "increments the version by 1" do
+        it "increments the English and Welsh versions by 1" do
           service.synchronize_only_live_welsh_form
-          expect(form_document.reload.version).to eq(1)
+          expect(form.reload.latest_form_document.version).to eq(2)
+          expect(form.reload.latest_welsh_form_document.version).to eq(2)
         end
       end
 

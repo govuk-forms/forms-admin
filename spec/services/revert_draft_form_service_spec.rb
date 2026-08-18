@@ -294,7 +294,7 @@ describe RevertDraftFormService do
 
         it "restores the Welsh FormDocument to match the live version" do
           # Get the original live Welsh FormDocument content
-          original_welsh_doc = FormDocument.find_by(form_id: live_form.id, tag: "live", language: "cy")
+          original_welsh_doc = FormDocument.order(version: :desc).find_by(form_id: live_form.id, tag: "live", language: "cy")
           expect(original_welsh_doc).to be_present
           original_welsh_name = original_welsh_doc.content["name"]
           expect(original_welsh_name).to eq("Ffurflen Gymraeg")
@@ -312,10 +312,10 @@ describe RevertDraftFormService do
 
       context "when there are multiple live form documents" do
         before do
-          welsh_content = live_form.latest_welsh_form_document.content.merge("name" => "Welsh form v2")
-          create(:form_document, :live, form: live_form, version: 2, language: "cy", content: welsh_content)
+          welsh_content = live_form.latest_welsh_form_document.content.merge("name" => "New Welsh form")
+          create(:form_document, :live, form: live_form, version: 3, language: "cy", content: welsh_content)
 
-          new_live_english_document = create(:form_document, :live, form: live_form, version: 2, language: "en", content: live_form.latest_form_document.content)
+          new_live_english_document = create(:form_document, :live, form: live_form, version: 3, language: "en", content: live_form.latest_form_document.content)
           live_form.update!(latest_form_document: new_live_english_document)
         end
 
@@ -325,7 +325,7 @@ describe RevertDraftFormService do
           live_form.reload
           restored_welsh_doc = live_form.draft_welsh_form_document
           expect(restored_welsh_doc).to be_present
-          expect(restored_welsh_doc.content["name"]).to eq("Welsh form v2")
+          expect(restored_welsh_doc.content["name"]).to eq("New Welsh form")
         end
       end
 

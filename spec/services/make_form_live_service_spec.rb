@@ -90,7 +90,7 @@ describe MakeFormLiveService do
           expect {
             make_form_live_service.make_language_live
           }.to change(FormDocument.where(form: current_form, tag: "live", language: "cy"), :count).by(1)
-          .and not_change(FormDocument.where(form: current_form, tag: "live", language: "en"), :count)
+          .and change(FormDocument.where(form: current_form, tag: "live", language: "en"), :count).by(1)
         end
 
         it "does not call the SubmissionEmailMailer" do
