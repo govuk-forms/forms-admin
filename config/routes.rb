@@ -310,7 +310,6 @@ Rails.application.routes.draw do
     get "add_another_answer", to: "reports#add_another_answer", as: :report_add_another_answer
     get "last-signed-in-at", to: "reports#last_signed_in_at", as: :report_last_signed_in_at
     get "contact-for-research", to: "reports#contact_for_research", as: :report_contact_for_research
-    get "organisation-email-domains", to: "reports#organisation_domains", as: :report_organisation_domains
   end
 
   scope "api/v2", as: "api_v2" do

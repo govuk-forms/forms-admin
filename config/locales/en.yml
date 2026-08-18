@@ -2146,7 +2146,6 @@ en:
     index:
       download_form_data_as_a_csv_file: Download form data as a CSV file
       feature_and_answer_type_usage: Feature and answer type usage
-      organisation_reports: Organisation reports
       title: Reports
       user_reports: User reports
     last_signed_in_at:
@@ -2155,13 +2154,6 @@ en:
       not_since_auth0_enabled: People who last signed in before 3 November 2023
       not_since_last_signed_in_at_added: People who last signed in sometime between 3 November 2023 and 4 November 2024
       title: When users last signed in
-    organisation_domains:
-      heading: Organisations
-      table_headings:
-        domains: Email domains
-        organisation: Organisation
-        slug: Slug
-      title: Email domains used by organisations
     questions_with_add_another_answer:
       download_csv: Download all questions with add another answer in %{tag} forms as a CSV file
       empty: There are no questions with add another answer in %{tag} forms
