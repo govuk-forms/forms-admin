@@ -46,7 +46,6 @@ RSpec.describe ReportsController, type: :request do
           "Feature and answer type usage in draft forms",
           "Download data about all live or archived forms",
           "Download all questions in live or archived forms",
-          "When users last signed in",
           "Users interested in research",
         ]
         expect(response.body).to include(*reports_list)
@@ -458,32 +457,6 @@ RSpec.describe ReportsController, type: :request do
         expect(response.body).to include "All forms with add another answer"
         expect(response.body).to include question_text
       end
-    end
-  end
-
-  describe "#last_signed_in_at" do
-    let!(:users) do
-      [
-        create(:user, provider: :auth0, last_signed_in_at: (1.year + 2.months).ago),
-        create(:user, provider: :auth0, last_signed_in_at: nil),
-        create(:user, provider: :gds, last_signed_in_at: nil),
-      ]
-    end
-
-    before do
-      login_as_super_admin_user
-
-      get report_last_signed_in_at_path
-    end
-
-    it "returns http code 200 and renders the last signed in at report" do
-      expect(response).to have_http_status(:ok)
-      expect(response).to render_template("reports/last_signed_in_at")
-
-      expect(response.body).to include "When users last signed in"
-      expect(response.body).to include users.first.email
-      expect(response.body).to include users.second.email
-      expect(response.body).to include users.third.email
     end
   end
 

@@ -308,7 +308,6 @@ Rails.application.routes.draw do
     get "/forms/:tag/questions/csv", constraints: { tag: /(draft|live|live-or-archived)/ }, to: "reports#questions_csv", as: :report_questions_csv
 
     get "add_another_answer", to: "reports#add_another_answer", as: :report_add_another_answer
-    get "last-signed-in-at", to: "reports#last_signed_in_at", as: :report_last_signed_in_at
     get "contact-for-research", to: "reports#contact_for_research", as: :report_contact_for_research
   end
 
