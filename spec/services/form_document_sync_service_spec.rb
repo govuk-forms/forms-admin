@@ -158,34 +158,47 @@ RSpec.describe FormDocumentSyncService do
       let!(:live_form_document_cy) { create :form_document, :live, form:, language: "cy", content: { "available_languages" => %w[en cy] } }
       let!(:live_form_document_en) { create :form_document, :live, form:, language: "en", content: { "available_languages" => %w[en cy] } }
 
-      it "updates the live welsh form document to be archived" do
+      before do
+        form.latest_form_document = live_form_document_en
+        form.save!
+      end
+
+      it "updates the live Welsh form document to be archived" do
         expect {
           service.synchronize_archived_form
         }.to(change { live_form_document_cy.reload.tag }.from("live").to("archived"))
       end
 
-      it "changes the available languages in form to only include English" do
+      it "changes the available languages in the form to only include English" do
         expect {
           service.synchronize_archived_welsh_form
         }.to(change(form, :available_languages).from(%w[en cy]).to(%w[en]))
       end
 
-      it "changes the welsh completed in form to false" do
+      it "changes the Welsh completed status in the form to false" do
         expect {
           service.synchronize_archived_welsh_form
         }.to(change(form, :welsh_completed).from(true).to(false))
       end
 
-      it "changes the available languages in the draft english form document to only include English" do
+      it "changes the available languages in the draft English form document to only include English" do
         expect {
           service.synchronize_archived_welsh_form
         }.to(change { form.draft_form_document.reload.content["available_languages"] }.from(%w[en cy]).to(%w[en]))
       end
 
-      it "changes the available languages in the live english form document to only include English" do
+      it "creates a new live English form document with an updated available languages field" do
         expect {
           service.synchronize_archived_welsh_form
-        }.to(change { live_form_document_en.reload.content["available_languages"] }.from(%w[en cy]).to(%w[en]))
+        }.to change { form.reload.latest_form_document.content["available_languages"] }.from(%w[en cy]).to(%w[en])
+        .and change { form.reload.form_documents.count }.by(1)
+        .and change { form.reload.latest_form_document.version }.by(1)
+      end
+
+      it "does not change the available languages in the existing live English form document" do
+        expect {
+          service.synchronize_archived_welsh_form
+        }.to not_change { live_form_document_en.reload.content["available_languages"] }.from(%w[en cy])
       end
     end
   end
