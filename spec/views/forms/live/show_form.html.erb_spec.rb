@@ -2,7 +2,7 @@ require "rails_helper"
 
 describe "forms/live/show_form.html.erb" do
   let(:form_metadata) { create :form, :live }
-  let(:form_document) { FormDocument::Content.from_form_document(form_metadata.live_form_document) }
+  let(:form_document) { FormDocument::Content.from_form_document(form_metadata.latest_form_document) }
   let(:welsh_form_document) { nil }
 
   before do
@@ -33,7 +33,7 @@ describe "forms/live/show_form.html.erb" do
   context "when the form has a Welsh translation" do
     let(:form_metadata) { create :form, :live, :with_welsh_translation, declaration_markdown: "Declaration" }
     let(:welsh_form_document) do
-      form_document_content = FormDocument::Content.from_form_document(form_metadata.live_welsh_form_document)
+      form_document_content = FormDocument::Content.from_form_document(form_metadata.latest_welsh_form_document)
       form_document_content.first_made_live_at = 1.week.ago
       form_document_content
     end

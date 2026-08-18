@@ -15,16 +15,12 @@ class ArchiveFormService
   end
 
   def archive_welsh_only
-    return unless has_live_welsh_form?
+    return unless form.has_live_welsh_translation?
 
     archive_welsh_form_document
   end
 
 private
-
-  def has_live_welsh_form?
-    form.live_welsh_form_document.present?
-  end
 
   def archive_welsh_form_document
     FormDocumentSyncService.new(form).synchronize_archived_welsh_form

@@ -13,33 +13,31 @@ RSpec.describe Form, type: :model do
     it "has a live trait" do
       form = create :form, :live
       expect(form.state).to eq "live"
-      expect(form.live_form_document).to be_present
-      expect(form.live_form_document.version).to eq(1)
-      expect(form.latest_form_document_id).to eq(form.live_form_document.id)
+      expect(form.latest_form_document).to be_present
+      expect(form.latest_form_document.version).to eq(1)
     end
 
     it "has a live with draft trait" do
       form = create :form, :live_with_draft
       expect(form.state).to eq "live_with_draft"
-      expect(form.live_form_document).to be_present
+      expect(form.latest_form_document).to be_present
       expect(form.draft_form_document).to be_present
-      expect(form.latest_form_document_id).to eq(form.live_form_document.id)
     end
 
     it "has an archived trait" do
       form = create :form, :archived
       expect(form.state).to eq "archived"
-      expect(form.archived_form_document).to be_present
-      expect(form.archived_form_document.version).to eq(1)
-      expect(form.latest_form_document_id).to eq(form.archived_form_document.id)
+      expect(form.latest_form_document).to be_present
+      expect(form.latest_form_document.tag).to eq "archived"
+      expect(form.latest_form_document.version).to eq(1)
     end
 
     it "has an archived with draft trait" do
       form = create :form, :archived_with_draft
       expect(form.state).to eq "archived_with_draft"
-      expect(form.archived_form_document).to be_present
+      expect(form.latest_form_document).to be_present
+      expect(form.latest_form_document.tag).to eq "archived"
       expect(form.draft_form_document).to be_present
-      expect(form.latest_form_document_id).to eq(form.archived_form_document.id)
     end
 
     it "has a ready for routing trait" do
@@ -362,106 +360,6 @@ RSpec.describe Form, type: :model do
     end
   end
 
-  describe "live_form_document" do
-    context "when there is no live form document" do
-      it "returns nil" do
-        expect(form.live_form_document).to be_nil
-      end
-    end
-
-    context "when there is a live form document" do
-      subject(:form) { create :form, :live }
-
-      it "returns the live form document" do
-        expect(form.live_form_document).to be_a(FormDocument)
-      end
-    end
-
-    context "when there only an archived form document" do
-      subject(:form) { create :form, :archived }
-
-      it "returns nil" do
-        expect(form.live_form_document).to be_nil
-      end
-    end
-  end
-
-  describe "live_welsh_form_document" do
-    context "when there is no live Welsh form document" do
-      subject(:form) { create :form, :live }
-
-      it "returns nil" do
-        expect(form.live_welsh_form_document).to be_nil
-      end
-    end
-
-    context "when there is a live Welsh form document" do
-      subject(:form) { create :form, :live, :with_welsh_translation }
-
-      it "returns the live form document" do
-        expect(form.live_welsh_form_document).to be_a(FormDocument)
-      end
-    end
-
-    context "when there only an archived Welsh form document" do
-      subject(:form) { create :form, :archived, :with_welsh_translation }
-
-      it "returns nil" do
-        expect(form.live_welsh_form_document).to be_nil
-      end
-    end
-  end
-
-  describe "archived_form_document" do
-    context "when there is no archived form document" do
-      it "returns nil" do
-        expect(form.archived_form_document).to be_nil
-      end
-    end
-
-    context "when there is an archived form document" do
-      subject(:form) { create :form, :archived }
-
-      it "returns nil" do
-        expect(form.archived_form_document).to be_a(FormDocument)
-      end
-    end
-
-    context "when there is only a live form document" do
-      subject(:form) { create :form, :live }
-
-      it "returns nil" do
-        expect(form.archived_form_document).to be_nil
-      end
-    end
-  end
-
-  describe "archived_welsh_form_document" do
-    context "when there is no archived Welsh form document" do
-      subject(:form) { create :form, :archived }
-
-      it "returns nil" do
-        expect(form.archived_welsh_form_document).to be_nil
-      end
-    end
-
-    context "when there is an archived Welsh form document" do
-      subject(:form) { create :form, :archived, :with_welsh_translation }
-
-      it "returns nil" do
-        expect(form.archived_welsh_form_document).to be_a(FormDocument)
-      end
-    end
-
-    context "when there is only a live Welsh form document" do
-      subject(:form) { create :form, :live, :with_welsh_translation }
-
-      it "returns nil" do
-        expect(form.archived_welsh_form_document).to be_nil
-      end
-    end
-  end
-
   describe "draft_welsh_form_document" do
     context "when there is no draft Welsh form document" do
       subject(:form) { create :form }
@@ -520,6 +418,42 @@ RSpec.describe Form, type: :model do
     end
   end
 
+  describe "latest_welsh_form_document" do
+    context "when there is no live Welsh form document" do
+      subject(:form) { create :form, :live }
+
+      it "returns nil" do
+        expect(form.latest_welsh_form_document).to be_nil
+      end
+    end
+
+    context "when there are multiple live Welsh form documents" do
+      subject(:form) { create :form, :live, :with_welsh_translation }
+
+      before do
+        create :form_document, :live, form: form, language: "cy", version: 2
+      end
+
+      it "returns the latest live Welsh form document" do
+        expect(form.latest_welsh_form_document).to be_a(FormDocument)
+        expect(form.latest_welsh_form_document.version).to eq(2)
+      end
+    end
+
+    context "when the latest Welsh form document is archived" do
+      subject(:form) { create :form, :live, :with_welsh_translation }
+
+      before do
+        create :form_document, :archived, form: form, language: "cy", version: 2
+      end
+
+      it "returns the latest archived Welsh form document" do
+        expect(form.latest_welsh_form_document).to be_a(FormDocument)
+        expect(form.latest_welsh_form_document.version).to eq(2)
+      end
+    end
+  end
+
   describe "FormStateMachine" do
     before do
       form.set_task_status_service(TaskStatusService.new(form: form))
@@ -537,7 +471,7 @@ RSpec.describe Form, type: :model do
       end
 
       it "creates a live form document" do
-        expect { form.make_live! }.to change { form.reload.live_form_document }.from(nil)
+        expect { form.make_live! }.to change { form.reload.latest_form_document }.from(nil)
       end
 
       context "when first_made_live_at is not already set" do
@@ -551,7 +485,7 @@ RSpec.describe Form, type: :model do
         it "populates first_made_live_at in the live FormDocument" do
           freeze_time do
             form.make_live!
-            expect(form.reload.live_form_document.reload.content["first_made_live_at"]).to eq(Time.zone.now.iso8601(6))
+            expect(form.reload.latest_form_document.reload.content["first_made_live_at"]).to eq(Time.zone.now.iso8601(6))
           end
         end
 
@@ -584,8 +518,9 @@ RSpec.describe Form, type: :model do
         form.archive_live_form!
       end
 
-      it "creates a archived form document" do
-        expect { form.archive_live_form! }.to change { form.reload.archived_form_document }.from(nil)
+      it "archives the form document" do
+        form.archive_live_form!
+        expect(form.reload.latest_form_document.tag).to eq("archived")
       end
     end
 
@@ -1642,7 +1577,8 @@ RSpec.describe Form, type: :model do
 
         context "when the form already has a live English form document" do
           before do
-            create :form_document, :live, form:, language: "en", content: form.as_form_document
+            form_document = create :form_document, :live, form:, language: "en", content: form.as_form_document
+            form.update!(latest_form_document: form_document)
           end
 
           context "when the form does not have a live Welsh form document" do
@@ -1710,6 +1646,20 @@ RSpec.describe Form, type: :model do
           end
         end
       end
+    end
+  end
+
+  describe "#latest_live_or_archived_form_document" do
+    let(:form) { create(:form, :live, :with_welsh_translation) }
+
+    before do
+      allow(FormDocument).to receive(:latest_live_or_archived).and_call_original
+    end
+
+    it "calls FormDocument.latest_live_or_archived with the language" do
+      form_document = form.latest_live_or_archived_form_document(language: "cy")
+      expect(form_document).to eq(FormDocument.find_by(form_id: form.id, language: "cy", tag: "live"))
+      expect(FormDocument).to have_received(:latest_live_or_archived).with(form_id: form.id, language: "cy")
     end
   end
 end

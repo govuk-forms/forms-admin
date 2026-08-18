@@ -8,7 +8,7 @@ describe "forms/_made_live_form.html.erb" do
     create(:form, :live, declaration_markdown:, what_happens_next_markdown:, send_copy_of_answers:)
   end
   let(:form_document) do
-    form_document_content = FormDocument::Content.from_form_document(form_metadata.live_form_document)
+    form_document_content = FormDocument::Content.from_form_document(form_metadata.latest_form_document)
     form_document_content.first_made_live_at = 1.week.ago
     form_document_content
   end
@@ -276,7 +276,7 @@ describe "forms/_made_live_form.html.erb" do
 
   context "with no support information set" do
     let(:form_document) do
-      form_document_content = FormDocument::Content.from_form_document(form_metadata.live_form_document)
+      form_document_content = FormDocument::Content.from_form_document(form_metadata.latest_form_document)
       form_document_content.support_email = nil
       form_document_content.support_url_text = nil
       form_document_content.support_url = nil
@@ -346,7 +346,7 @@ describe "forms/_made_live_form.html.erb" do
       let(:status) { :archived }
       let(:form_metadata) { create :form, :archived }
       let(:form_document) do
-        form_document_content = FormDocument::Content.from_form_document(form_metadata.archived_form_document)
+        form_document_content = FormDocument::Content.from_form_document(form_metadata.latest_form_document)
         form_document_content.live_at = 1.week.ago
         form_document_content
       end
@@ -364,7 +364,7 @@ describe "forms/_made_live_form.html.erb" do
       let(:status) { :archived }
       let(:form_metadata) { create :form, :archived_with_draft }
       let(:form_document) do
-        form_document_content = FormDocument::Content.from_form_document(form_metadata.archived_form_document)
+        form_document_content = FormDocument::Content.from_form_document(form_metadata.latest_form_document)
         form_document_content.live_at = 1.week.ago
         form_document_content
       end
@@ -387,7 +387,7 @@ describe "forms/_made_live_form.html.erb" do
     context "when the form is live and the form has a welsh translation" do
       let(:form_metadata) { create :form, :live, :with_welsh_translation }
       let(:welsh_form_document) do
-        FormDocument::Content.from_form_document(form_metadata.live_welsh_form_document)
+        FormDocument::Content.from_form_document(form_metadata.latest_welsh_form_document)
       end
 
       it "template contains a link to archive the welsh version of the form" do
@@ -439,7 +439,7 @@ describe "forms/_made_live_form.html.erb" do
     let(:what_happens_next_markdown_cy) { "Os nad ydych wedi derbyn ymateb o fewn 5 diwrnod gwaith, [cysylltwch â’n tîm cymorth defnyddwyr](https://example.com)." }
     let(:form_metadata) { create :form, :live, :with_welsh_translation, what_happens_next_markdown:, what_happens_next_markdown_cy: }
     let(:welsh_form_document) do
-      form_document_content = FormDocument::Content.from_form_document(form_metadata.live_welsh_form_document)
+      form_document_content = FormDocument::Content.from_form_document(form_metadata.latest_welsh_form_document)
       form_document_content.first_made_live_at = 1.week.ago
       form_document_content
     end

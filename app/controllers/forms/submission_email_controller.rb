@@ -59,11 +59,7 @@ module Forms
     def live_submission_email_updated?
       return false unless current_form.is_live?
 
-      current_live_form.submission_email != current_form.submission_email
-    end
-
-    def current_live_form
-      @current_live_form ||= FormDocument::Content.from_form_document(current_form.live_form_document)
+      current_live_or_archived_form.submission_email != current_form.submission_email
     end
   end
 end

@@ -12,7 +12,7 @@ RSpec.describe Reports::FormsCsvReportService do
   let(:form_documents) do
     forms.map do |form|
       # FormDocumentsService adds in the organisation and group details as part of the database query
-      form.live_form_document.as_json
+      form.latest_form_document.as_json
           .merge({
             "organisation_name" => organisation_name,
             "organisation_id" => organisation_id,

@@ -251,7 +251,7 @@ private
   end
 
   def display_make_languages_live_tasks?
-    @form.live_welsh_form_document.blank? && @form.has_welsh_translation?
+    !@form.has_live_welsh_translation? && @form.has_welsh_translation?
   end
 
   def live_title_name

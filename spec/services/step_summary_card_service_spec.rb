@@ -5,7 +5,7 @@ describe StepSummaryCardService do
     described_class.new(step: form_document_step, steps: form_document_steps, multiple_branches_enabled:)
   end
 
-  let(:form_document_content) { FormDocument::Content.from_form_document(form.live_form_document) }
+  let(:form_document_content) { FormDocument::Content.from_form_document(form.latest_form_document) }
   let(:form_document_steps) { form_document_content.steps }
   let(:form_document_step) { FormDocument::Step.new(page.as_form_document_step(nil)) }
   let(:multiple_branches_enabled) { false }

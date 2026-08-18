@@ -3,10 +3,8 @@ module Forms
     def copy
       authorize current_form, :copy?
 
-      form = if tag == "live"
-               current_live_form
-             elsif tag == "archived"
-               current_archived_form
+      form = if %w[live archived].include? tag
+               current_live_or_archived_form
              else
                current_form
              end

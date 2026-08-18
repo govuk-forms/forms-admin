@@ -164,7 +164,7 @@ RSpec.describe Forms::MakeLiveController, type: :request do
           it "does not change the live form document" do
             expect {
               post(make_live_path(form_id: form.id), params: form_params)
-            }.not_to(change { form.reload.live_form_document.updated_at })
+            }.not_to(change { form.reload.latest_form_document.updated_at })
           end
 
           it "does not send an email to the organisation admins" do
@@ -188,7 +188,7 @@ RSpec.describe Forms::MakeLiveController, type: :request do
           it "updates the form document" do
             expect {
               post(make_live_path(form_id: form.id), params: form_params)
-            }.to(change { form.reload.live_form_document.updated_at })
+            }.to(change { form.reload.latest_form_document.updated_at })
           end
         end
       end

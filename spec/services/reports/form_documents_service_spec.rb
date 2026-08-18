@@ -14,14 +14,14 @@ RSpec.describe Reports::FormDocumentsService do
     create(:condition, :with_exit_page, routing_page_id: form.pages[0].id, check_page_id: form.pages[0].id, answer_value: "Option 1")
     create(:condition, routing_page_id: form.pages[1].id, check_page_id: form.pages[1].id, answer_value: "Option 1", goto_page_id: form.pages[3].id)
     create(:condition, routing_page_id: form.pages[2].id, check_page_id: form.pages[1].id, goto_page_id: form.pages[4].id)
-    form.live_form_document.update!(content: form.reload.as_form_document(live_at: form.updated_at))
+    form.latest_form_document.update!(content: form.reload.as_form_document(live_at: form.updated_at))
     form
   end
 
   let(:basic_route_form) do
     form = create(:form, :live, :ready_for_routing)
     create(:condition, routing_page_id: form.pages.first.id, check_page_id: form.pages.first.id, answer_value: "Option 1", skip_to_end: true)
-    form.live_form_document.update!(content: form.reload.as_form_document(live_at: form.updated_at))
+    form.latest_form_document.update!(content: form.reload.as_form_document(live_at: form.updated_at))
     form
   end
 
@@ -31,7 +31,7 @@ RSpec.describe Reports::FormDocumentsService do
     create(:condition, routing_page_id: form.pages[2].id, check_page_id: form.pages[1].id, answer_value: "Option 2", goto_page_id: form.pages[4].id)
     create(:condition, routing_page_id: form.pages[6].id, check_page_id: form.pages[6].id, answer_value: "Option 1", goto_page_id: form.pages[8].id)
     create(:condition, routing_page_id: form.pages[7].id, check_page_id: form.pages[6].id, answer_value: "Option 2", goto_page_id: form.pages[9].id)
-    form.live_form_document.update!(content: form.reload.as_form_document(live_at: form.updated_at))
+    form.latest_form_document.update!(content: form.reload.as_form_document(live_at: form.updated_at))
     form
   end
 
@@ -127,19 +127,19 @@ RSpec.describe Reports::FormDocumentsService do
     end
 
     context "when form has one step with one secondary skip condition" do
-      let(:form_document) { branch_route_form.live_form_document }
+      let(:form_document) { branch_route_form.latest_form_document }
 
       it { is_expected.to be true }
     end
 
     context "when form has two steps each with one secondary skip condition" do
-      let(:form_document) { form_with_2_branch_routes.live_form_document }
+      let(:form_document) { form_with_2_branch_routes.latest_form_document }
 
       it { is_expected.to be true }
     end
 
     context "when form has no secondary skip conditions" do
-      let(:form_document) { basic_route_form.live_form_document }
+      let(:form_document) { basic_route_form.latest_form_document }
 
       it { is_expected.to be false }
     end
@@ -151,19 +151,19 @@ RSpec.describe Reports::FormDocumentsService do
     end
 
     context "when form has one step with one secondary skip condition" do
-      let(:form_document) { branch_route_form.live_form_document }
+      let(:form_document) { branch_route_form.latest_form_document }
 
       it { is_expected.to eq 1 }
     end
 
     context "when form has two steps each with one secondary skip condition" do
-      let(:form_document) { form_with_2_branch_routes.live_form_document }
+      let(:form_document) { form_with_2_branch_routes.latest_form_document }
 
       it { is_expected.to eq 2 }
     end
 
     context "when form has no secondary skip conditions" do
-      let(:form_document) { basic_route_form.live_form_document }
+      let(:form_document) { basic_route_form.latest_form_document }
 
       it { is_expected.to eq 0 }
     end
@@ -171,7 +171,7 @@ RSpec.describe Reports::FormDocumentsService do
 
   describe ".step_has_secondary_skip_route?" do
     context "when step is check page for secondary skip condition" do
-      let(:form_document) { branch_route_form.live_form_document }
+      let(:form_document) { branch_route_form.latest_form_document }
       let(:step) { form_document["content"]["steps"][1] }
 
       it "returns true" do
@@ -180,7 +180,7 @@ RSpec.describe Reports::FormDocumentsService do
     end
 
     context "when step is not check page for secondary skip condition" do
-      let(:form_document) { branch_route_form.live_form_document }
+      let(:form_document) { branch_route_form.latest_form_document }
       let(:step) { form_document["content"]["steps"][3] }
 
       it "returns false" do
@@ -189,7 +189,7 @@ RSpec.describe Reports::FormDocumentsService do
     end
 
     context "when form has no secondary skip conditions" do
-      let(:form_document) { basic_route_form.live_form_document }
+      let(:form_document) { basic_route_form.latest_form_document }
       let(:step) { form_document["content"]["steps"][0] }
 
       it "returns false" do
@@ -204,13 +204,13 @@ RSpec.describe Reports::FormDocumentsService do
     end
 
     context "when form has one step with one exit page" do
-      let(:form_document) { branch_route_form.live_form_document }
+      let(:form_document) { branch_route_form.latest_form_document }
 
       it { is_expected.to be true }
     end
 
     context "when form has no exit pages" do
-      let(:form_document) { basic_route_form.live_form_document }
+      let(:form_document) { basic_route_form.latest_form_document }
 
       it { is_expected.to be false }
     end
@@ -222,7 +222,7 @@ RSpec.describe Reports::FormDocumentsService do
         create(:page, is_repeatable:),
       ])
     end
-    let(:form_document) { form.live_form_document }
+    let(:form_document) { form.latest_form_document }
 
     context "when the form has a question with add another answer" do
       let(:is_repeatable) { true }
@@ -249,7 +249,7 @@ RSpec.describe Reports::FormDocumentsService do
     context "when form has a daily delivery_configuration" do
       let(:form_document) do
         create(:form, :live, delivery_configurations: [create(:delivery_configuration, :daily_email)])
-          .live_form_document
+          .latest_form_document
       end
 
       it "returns true" do
@@ -258,7 +258,7 @@ RSpec.describe Reports::FormDocumentsService do
     end
 
     context "when form does not have a daily delivery_configuration" do
-      let(:form_document) { create(:form, :live).live_form_document }
+      let(:form_document) { create(:form, :live).latest_form_document }
 
       it "returns false" do
         expect(daily_submission_batch_enabled).to be false
@@ -274,7 +274,7 @@ RSpec.describe Reports::FormDocumentsService do
     context "when form has weekly delivery_configuration" do
       let(:form_document) do
         create(:form, :live, delivery_configurations: [create(:delivery_configuration, :weekly_email)])
-          .live_form_document
+          .latest_form_document
       end
 
       it "returns true" do
@@ -283,7 +283,7 @@ RSpec.describe Reports::FormDocumentsService do
     end
 
     context "when form does not have a weekly delivery_configuration" do
-      let(:form_document) { create(:form, :live).live_form_document }
+      let(:form_document) { create(:form, :live).latest_form_document }
 
       it "returns false" do
         expect(weekly_submission_batch_enabled).to be false

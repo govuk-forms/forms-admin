@@ -2,7 +2,7 @@ require "rails_helper"
 
 describe "forms/_made_live_form_pages.html.erb" do
   let(:form) { create :form, :live }
-  let(:form_document) { FormDocument::Content.from_form_document(form.live_form_document) }
+  let(:form_document) { FormDocument::Content.from_form_document(form.latest_form_document) }
   let(:welsh_form_document) { nil }
   let(:status) { :live }
   let(:show_form_path) { Faker::Internet.url }

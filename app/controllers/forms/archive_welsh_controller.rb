@@ -42,7 +42,7 @@ module Forms
     def has_live_welsh_translation?
       # We assume all forms have an English version, which must be live.
       # So we check the form is live as well as having a Welsh translation.
-      current_form.is_live? && current_form.live_welsh_form_document.present?
+      current_form.is_live? && current_form.has_live_welsh_translation?
     end
   end
 end

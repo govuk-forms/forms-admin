@@ -278,7 +278,7 @@
       <% if status == :live %>
         <%= govuk_button_link_to t(".archive_this_form"), archive_form_path(form_document.id), warning: true %>
         <%= govuk_button_link_to("Make a copy of this form", copy_form_path(form_metadata.id, "live"), secondary: true) %>
-        <% if form_metadata.live_welsh_form_document.present? %>
+        <% if form_metadata.has_live_welsh_translation? %>
           <%= govuk_button_link_to t(".archive_welsh"), archive_welsh_path(form_document.id), secondary: true %>
         <% end %>
       <% elsif status == :archived %>

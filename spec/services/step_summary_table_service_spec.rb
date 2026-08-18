@@ -9,12 +9,12 @@ describe StepSummaryTableService do
   let(:pages) { [page] }
   let(:page) { create(:page) }
 
-  let(:form_document_content) { FormDocument::Content.from_form_document(form.live_form_document) }
-  let(:welsh_form_document_content) { FormDocument::Content.from_form_document(form.live_welsh_form_document) }
+  let(:form_document_content) { FormDocument::Content.from_form_document(form.latest_form_document) }
+  let(:welsh_form_document_content) { FormDocument::Content.from_form_document(form.latest_welsh_form_document) }
   let(:form_document_steps) { form_document_content.steps }
   let(:welsh_form_document_steps) { welsh_form_document.steps }
   let(:form_document_step) { FormDocument::Step.new(page.as_form_document_step(nil)) }
-  let(:welsh_form_document) { FormDocument::Content.from_form_document(form.live_welsh_form_document) }
+  let(:welsh_form_document) { FormDocument::Content.from_form_document(form.latest_welsh_form_document) }
 
   before do
     form.set_task_status_service(TaskStatusService.new(form:))

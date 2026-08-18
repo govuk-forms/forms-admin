@@ -139,7 +139,7 @@ RSpec.describe "forms.rake", type: :task do
 
         form.reload
         expect(form.first_made_live_at).not_to be_nil
-        expect(form.archived_form_document).not_to be_nil
+        expect(form.latest_form_document).not_to be_nil
       end
 
       it "sets a draft form's state to archived_with_draft by transitioning through two intermediate states" do
@@ -375,9 +375,9 @@ RSpec.describe "forms.rake", type: :task do
         it "updates the live form documents delivery configurations" do
           task.invoke(form.id)
 
-          expect(form.reload.live_form_document.content["delivery_configurations"])
+          expect(form.reload.latest_form_document.content["delivery_configurations"])
             .to include(a_hash_including("delivery_method" => "email", "delivery_schedule" => "immediate"))
-          expect(form.reload.live_welsh_form_document.content["delivery_configurations"])
+          expect(form.reload.latest_welsh_form_document.content["delivery_configurations"])
             .to include(a_hash_including("delivery_method" => "email", "delivery_schedule" => "immediate"))
         end
       end
@@ -390,8 +390,8 @@ RSpec.describe "forms.rake", type: :task do
 
           delivery_configuration_count = form.reload.delivery_configurations.where(delivery_method: "email", delivery_schedule: "immediate").count
           draft_content = form.reload.draft_form_document.content.deep_dup
-          live_content = form.reload.live_form_document.content.deep_dup
-          live_welsh_content = form.reload.live_welsh_form_document.content.deep_dup
+          live_content = form.reload.latest_form_document.content.deep_dup
+          live_welsh_content = form.reload.latest_welsh_form_document.content.deep_dup
 
           task.invoke(form.id)
 
@@ -399,8 +399,8 @@ RSpec.describe "forms.rake", type: :task do
             .to eq(delivery_configuration_count)
 
           expect(form.reload.draft_form_document.content).to eq(draft_content)
-          expect(form.reload.live_form_document.content).to eq(live_content)
-          expect(form.reload.live_welsh_form_document&.content).to eq(live_welsh_content)
+          expect(form.reload.latest_form_document.content).to eq(live_content)
+          expect(form.reload.latest_welsh_form_document&.content).to eq(live_welsh_content)
         end
       end
     end
@@ -446,9 +446,9 @@ RSpec.describe "forms.rake", type: :task do
         it "updates the live form documents delivery configurations" do
           task.invoke(form.id)
 
-          expect(form.reload.live_form_document.content["delivery_configurations"])
+          expect(form.reload.latest_form_document.content["delivery_configurations"])
             .not_to include(a_hash_including("delivery_method" => "email", "delivery_schedule" => "immediate"))
-          expect(form.reload.live_welsh_form_document.content["delivery_configurations"])
+          expect(form.reload.latest_welsh_form_document.content["delivery_configurations"])
             .not_to include(a_hash_including("delivery_method" => "email", "delivery_schedule" => "immediate"))
         end
       end
@@ -532,16 +532,16 @@ RSpec.describe "forms.rake", type: :task do
         it "updates the live form documents" do
           task.invoke(form.id)
 
-          expect(form.reload.live_form_document.content["s3_bucket_name"]).to be_nil
-          expect(form.reload.live_form_document.content["s3_bucket_aws_account_id"]).to be_nil
-          expect(form.reload.live_form_document.content["s3_bucket_region"]).to be_nil
-          expect(form.reload.live_form_document.content["delivery_configurations"])
+          expect(form.reload.latest_form_document.content["s3_bucket_name"]).to be_nil
+          expect(form.reload.latest_form_document.content["s3_bucket_aws_account_id"]).to be_nil
+          expect(form.reload.latest_form_document.content["s3_bucket_region"]).to be_nil
+          expect(form.reload.latest_form_document.content["delivery_configurations"])
             .not_to include(a_hash_including("delivery_method" => "s3", "delivery_schedule" => "immediate"))
 
-          expect(form.reload.live_welsh_form_document.content["s3_bucket_name"]).to be_nil
-          expect(form.reload.live_welsh_form_document.content["s3_bucket_aws_account_id"]).to be_nil
-          expect(form.reload.live_welsh_form_document.content["s3_bucket_region"]).to be_nil
-          expect(form.reload.live_welsh_form_document.content["delivery_configurations"])
+          expect(form.reload.latest_welsh_form_document.content["s3_bucket_name"]).to be_nil
+          expect(form.reload.latest_welsh_form_document.content["s3_bucket_aws_account_id"]).to be_nil
+          expect(form.reload.latest_welsh_form_document.content["s3_bucket_region"]).to be_nil
+          expect(form.reload.latest_welsh_form_document.content["delivery_configurations"])
             .not_to include(a_hash_including("delivery_method" => "s3", "delivery_schedule" => "immediate"))
         end
       end
@@ -624,19 +624,19 @@ RSpec.describe "forms.rake", type: :task do
         expect(form.reload.draft_form_document.content["s3_bucket_aws_account_id"]).to eq(s3_bucket_aws_account_id)
         expect(form.reload.draft_form_document.content["s3_bucket_region"]).to eq(s3_bucket_region)
 
-        expect(form.reload.live_form_document.content["s3_bucket_name"]).to eq(s3_bucket_name)
-        expect(form.reload.live_form_document.content["s3_bucket_aws_account_id"]).to eq(s3_bucket_aws_account_id)
-        expect(form.reload.live_form_document.content["s3_bucket_region"]).to eq(s3_bucket_region)
+        expect(form.reload.latest_form_document.content["s3_bucket_name"]).to eq(s3_bucket_name)
+        expect(form.reload.latest_form_document.content["s3_bucket_aws_account_id"]).to eq(s3_bucket_aws_account_id)
+        expect(form.reload.latest_form_document.content["s3_bucket_region"]).to eq(s3_bucket_region)
 
-        expect(form.reload.live_welsh_form_document.content["s3_bucket_name"]).to eq(s3_bucket_name)
-        expect(form.reload.live_welsh_form_document.content["s3_bucket_aws_account_id"]).to eq(s3_bucket_aws_account_id)
-        expect(form.reload.live_welsh_form_document.content["s3_bucket_region"]).to eq(s3_bucket_region)
+        expect(form.reload.latest_welsh_form_document.content["s3_bucket_name"]).to eq(s3_bucket_name)
+        expect(form.reload.latest_welsh_form_document.content["s3_bucket_aws_account_id"]).to eq(s3_bucket_aws_account_id)
+        expect(form.reload.latest_welsh_form_document.content["s3_bucket_region"]).to eq(s3_bucket_region)
 
         expect(form.reload.draft_form_document.content["delivery_configurations"])
           .to include(a_hash_including("delivery_method" => "s3", "delivery_schedule" => "immediate", "formats" => [format]))
-        expect(form.reload.live_form_document.content["delivery_configurations"])
+        expect(form.reload.latest_form_document.content["delivery_configurations"])
           .to include(a_hash_including("delivery_method" => "s3", "delivery_schedule" => "immediate", "formats" => [format]))
-        expect(form.reload.live_welsh_form_document.content["delivery_configurations"])
+        expect(form.reload.latest_welsh_form_document.content["delivery_configurations"])
           .to include(a_hash_including("delivery_method" => "s3", "delivery_schedule" => "immediate", "formats" => [format]))
       end
 
@@ -655,9 +655,9 @@ RSpec.describe "forms.rake", type: :task do
 
           expect(form.reload.draft_form_document.content["delivery_configurations"])
             .to include(a_hash_including("delivery_method" => "s3", "delivery_schedule" => "immediate", "formats" => %w[csv]))
-          expect(form.reload.live_form_document.content["delivery_configurations"])
+          expect(form.reload.latest_form_document.content["delivery_configurations"])
             .to include(a_hash_including("delivery_method" => "s3", "delivery_schedule" => "immediate", "formats" => %w[csv]))
-          expect(form.reload.live_welsh_form_document.content["delivery_configurations"])
+          expect(form.reload.latest_welsh_form_document.content["delivery_configurations"])
             .to include(a_hash_including("delivery_method" => "s3", "delivery_schedule" => "immediate", "formats" => %w[csv]))
         end
       end
@@ -673,18 +673,18 @@ RSpec.describe "forms.rake", type: :task do
 
           expect(form.reload.draft_form_document.content["delivery_configurations"])
             .not_to include(a_hash_including("delivery_method" => "email", "delivery_schedule" => "immediate"))
-          expect(form.reload.live_form_document.content["delivery_configurations"])
+          expect(form.reload.latest_form_document.content["delivery_configurations"])
             .not_to include(a_hash_including("delivery_method" => "email", "delivery_schedule" => "immediate"))
-          expect(form.reload.live_welsh_form_document.content["delivery_configurations"])
+          expect(form.reload.latest_welsh_form_document.content["delivery_configurations"])
             .not_to include(a_hash_including("delivery_method" => "email", "delivery_schedule" => "immediate"))
 
-          expect(form.reload.live_form_document.content["s3_bucket_name"]).to eq(s3_bucket_name)
-          expect(form.reload.live_form_document.content["s3_bucket_aws_account_id"]).to eq(s3_bucket_aws_account_id)
-          expect(form.reload.live_form_document.content["s3_bucket_region"]).to eq(s3_bucket_region)
+          expect(form.reload.latest_form_document.content["s3_bucket_name"]).to eq(s3_bucket_name)
+          expect(form.reload.latest_form_document.content["s3_bucket_aws_account_id"]).to eq(s3_bucket_aws_account_id)
+          expect(form.reload.latest_form_document.content["s3_bucket_region"]).to eq(s3_bucket_region)
 
-          expect(form.reload.live_welsh_form_document.content["s3_bucket_name"]).to eq(s3_bucket_name)
-          expect(form.reload.live_welsh_form_document.content["s3_bucket_aws_account_id"]).to eq(s3_bucket_aws_account_id)
-          expect(form.reload.live_welsh_form_document.content["s3_bucket_region"]).to eq(s3_bucket_region)
+          expect(form.reload.latest_welsh_form_document.content["s3_bucket_name"]).to eq(s3_bucket_name)
+          expect(form.reload.latest_welsh_form_document.content["s3_bucket_aws_account_id"]).to eq(s3_bucket_aws_account_id)
+          expect(form.reload.latest_welsh_form_document.content["s3_bucket_region"]).to eq(s3_bucket_region)
         end
       end
     end

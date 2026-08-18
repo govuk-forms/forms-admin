@@ -9,7 +9,7 @@ class MakeFormLiveService
     @current_form = current_form
     @current_form_was_live = current_form.is_live?
     @current_form_was_archived = current_form.is_archived?
-    @current_live_form = FormDocument::Content.from_form_document(current_form.live_form_document) if current_form.is_live?
+    @current_live_or_archived_form = FormDocument::Content.from_form_document(current_form.latest_form_document) if current_form.is_live?
     @current_user = current_user
     @language = language
   end
@@ -19,8 +19,8 @@ class MakeFormLiveService
 
     if live_form_submission_email_has_changed
       SubmissionEmailMailer.alert_email_change(
-        live_email: @current_live_form.submission_email,
-        form_name: @current_live_form.name,
+        live_email: @current_live_or_archived_form.submission_email,
+        form_name: @current_live_or_archived_form.name,
         creator_name: @current_user.name,
         creator_email: @current_user.email,
       ).deliver_now
@@ -65,6 +65,6 @@ private
   end
 
   def live_form_submission_email_has_changed
-    @current_form_was_live && @current_live_form.submission_email != @current_form.submission_email
+    @current_form_was_live && @current_live_or_archived_form.submission_email != @current_form.submission_email
   end
 end
