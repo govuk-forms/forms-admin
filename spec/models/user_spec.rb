@@ -231,6 +231,31 @@ describe User, type: :model do
         end
       end
 
+      describe ".by_search" do
+        let!(:matched_by_name) { create(:user, name: "Sir Abcdefg Higjklmop", email: "sir.smith@example.com") }
+        let!(:matched_by_email) { create(:user, name: "Lord Smith", email: "lord.abcdefg@example.com") }
+
+        it "returns users with a partial name match, ignoring case" do
+          expect(described_class.by_search("higjklmop")).to contain_exactly(matched_by_name)
+        end
+
+        it "returns users with a partial email match, ignoring case" do
+          expect(described_class.by_search("Lord.Abcdefg")).to contain_exactly(matched_by_email)
+        end
+
+        it "matches names and emails with a single search term" do
+          expect(described_class.by_search("abcdefg")).to contain_exactly(matched_by_name, matched_by_email)
+        end
+
+        it "returns all users when the search term is nil" do
+          expect(described_class.by_search(nil).size).to eq 4
+        end
+
+        it "returns all users when the search term is blank" do
+          expect(described_class.by_search("").size).to eq 4
+        end
+      end
+
       describe ".by_organisation_id" do
         let!(:matched_user) { create(:user, organisation: organisation) }
 

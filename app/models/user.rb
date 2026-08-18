@@ -55,6 +55,13 @@ class User < ApplicationRecord
     end
   }
 
+  scope :by_search, lambda { |search|
+    if search.present?
+      where("lower(users.name) LIKE :search OR lower(users.email) LIKE :search",
+            search: "%#{sanitize_sql_like(search.downcase)}%")
+    end
+  }
+
   scope :by_organisation_id, lambda { |organisation_id|
     if organisation_id.present?
       joins(:organisation).where(organisation: { id: organisation_id })
