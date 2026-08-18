@@ -82,7 +82,7 @@ describe "routes/show.html.erb" do
       expect(rendered).to have_selector('.govuk-select[name="forms_routes_input[routes_attributes][0][goto]"]') do |field|
         expect(select_options(field)).to eq [
           ["default", "2. #{pages.second.question_text}"],
-          ["103", "3. #{pages.third.question_text}"],
+          ["page_103", "3. #{pages.third.question_text}"],
           ["end_of_form", "End of the form"],
         ]
       end
@@ -100,7 +100,7 @@ describe "routes/show.html.erb" do
 
       expect(rendered).to have_selector('.govuk-select[name="forms_routes_input[routes_attributes][0][goto]"]') do |field|
         expect(field).to have_selector("option[selected]") do |option|
-          expect(option["value"]).to eq "103"
+          expect(option["value"]).to eq "page_103"
         end
       end
 
@@ -167,7 +167,7 @@ describe "routes/show.html.erb" do
 
         expect(rendered).to have_selector('.govuk-select[name="forms_routes_input[routes_attributes][1][goto]"]') do |field|
           expect(field).to have_selector("option[selected]") do |option|
-            expect(option["value"]).to eq "101"
+            expect(option["value"]).to eq "page_101"
           end
         end
       end
@@ -203,7 +203,7 @@ describe "routes/show.html.erb" do
 
           expect(rendered).to have_selector('.govuk-select[name="forms_routes_input[routes_attributes][2][goto]"]') do |field|
             expect(field).to have_selector("option[selected]") do |option|
-              expect(option["value"]).to eq "101"
+              expect(option["value"]).to eq "page_101"
             end
           end
         end
