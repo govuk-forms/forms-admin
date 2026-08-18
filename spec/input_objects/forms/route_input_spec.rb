@@ -3,8 +3,8 @@ require "rails_helper"
 RSpec.describe Forms::RouteInput, type: :model do
   subject(:route_input) { described_class.new(attributes) }
 
-  let(:check_your_answers_value) { described_class::END_OF_FORM_VALUE }
-  let(:default_value) { described_class::DEFAULT_VALUE }
+  let(:check_your_answers_value) { GotoValue::EndOfFormValue.new }
+  let(:default_value) { GotoValue::DefaultValue.new }
 
   let(:page) { build_stubbed(:page, position: 1) }
   let(:goto_page) { build_stubbed(:page, position: 2) }
@@ -13,7 +13,7 @@ RSpec.describe Forms::RouteInput, type: :model do
     {
       id: 1,
       page_id: page.id,
-      goto: goto_page.id,
+      goto: "page_#{goto_page.id}",
       answer_value: "Yes",
       page: page,
       goto_page: goto_page,
@@ -28,7 +28,7 @@ RSpec.describe Forms::RouteInput, type: :model do
     it "can be initialized with a hash of attributes" do
       expect(route_input.id).to eq(1)
       expect(route_input.page_id).to eq(page.id)
-      expect(route_input.goto).to eq(goto_page.id)
+      expect(route_input.goto).to eq(GotoValue::Page.new(goto_page.id))
       expect(route_input.answer_value).to eq("Yes")
       expect(route_input.page).to eq(page)
     end
@@ -51,7 +51,7 @@ RSpec.describe Forms::RouteInput, type: :model do
 
     context "when goto is some other value" do
       it "returns false" do
-        route_input.goto = 123
+        route_input.goto = "page_123"
         expect(route_input.goes_to_default_next_page?).to be false
       end
     end
@@ -74,7 +74,7 @@ RSpec.describe Forms::RouteInput, type: :model do
 
     context "when goto is some other value" do
       it "returns false" do
-        route_input.goto = 456
+        route_input.goto = "page_456"
         expect(route_input.goes_to_end_of_form?).to be false
       end
     end
@@ -92,7 +92,7 @@ RSpec.describe Forms::RouteInput, type: :model do
     end
 
     it "returns the correct attributes if the route is to a different page" do
-      route_input.goto = 123
+      route_input.goto = GotoValue::Page.new(123)
       expect(route_input.condition_attributes).to eq(
         { goto_page_id: 123, skip_to_end: false, check_page_id: page.id },
       )

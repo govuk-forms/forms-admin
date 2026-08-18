@@ -1,12 +1,9 @@
 class Forms::RouteInput < BaseInput
   include ActiveModel::Attributes
 
-  END_OF_FORM_VALUE = "end_of_form".freeze
-  DEFAULT_VALUE = "default".freeze
-
   attribute :id # id of the Condition
   attribute :page_id, :integer
-  attribute :goto
+  attribute :goto, GotoValueType.new
   attribute :answer_value
 
   attr_accessor :page, :goto_page, :goto_options
@@ -14,20 +11,25 @@ class Forms::RouteInput < BaseInput
   validate :route_is_not_backwards
 
   def goes_to_default_next_page?
-    goto == DEFAULT_VALUE
+    goto.is_a?(GotoValue::DefaultValue)
   end
 
   def goes_to_end_of_form?
-    goto == END_OF_FORM_VALUE
+    goto.is_a?(GotoValue::EndOfFormValue)
+  end
+
+  def goes_to_page?
+    goto.is_a?(GotoValue::Page)
   end
 
   def condition_attributes
-    if goes_to_end_of_form?
-      { goto_page_id: nil, skip_to_end: true, check_page_id: page.id }
-    elsif goes_to_default_next_page?
+    case goto
+    when GotoValue::DefaultValue
       nil
-    else
-      { goto_page_id: goto, skip_to_end: false, check_page_id: page.id }
+    when GotoValue::EndOfFormValue
+      { goto_page_id: nil, skip_to_end: true, check_page_id: page.id }
+    when GotoValue::Page
+      { goto_page_id: goto.page_id, skip_to_end: false, check_page_id: page.id }
     end
   end
 
