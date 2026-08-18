@@ -8,7 +8,7 @@ FactoryBot.define do
     # Assign attributes based on the transient page object.
     page_id { page.id }
     answer_value { "Yes" }
-    goto { goto_page.id }
+    goto { GotoValue::Page.new(goto_page.id) }
 
     after(:build) do |route_input, evaluator|
       route_input.page = evaluator.page
@@ -16,12 +16,12 @@ FactoryBot.define do
     end
 
     trait :default do
-      goto { Forms::RouteInput::DEFAULT_VALUE }
+      goto { GotoValue::DefaultValue.new }
       goto_page { nil }
     end
 
     trait :check_your_answers do
-      goto { Forms::RouteInput::END_OF_FORM_VALUE }
+      goto { GotoValue::EndOfFormValue.new }
       goto_page { nil }
     end
   end
