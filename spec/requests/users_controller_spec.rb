@@ -41,8 +41,7 @@ RSpec.describe UsersController, type: :request do
         let(:params) do
           {
             filter: {
-              name: "Test",
-              email: "123",
+              search: "123",
               organisation_id: test_org.id,
               organisation_id_raw:,
               role: "standard",
@@ -69,8 +68,7 @@ RSpec.describe UsersController, type: :request do
 
         it "populates the filter input object" do
           filter_input = assigns[:filter_input]
-          expect(filter_input.name).to eq "Test"
-          expect(filter_input.email).to eq "123"
+          expect(filter_input.search).to eq "123"
           expect(filter_input.organisation_id).to eq test_org.id.to_s
           expect(filter_input.role).to eq "standard"
           expect(filter_input.has_access).to eq "true"
@@ -80,8 +78,7 @@ RSpec.describe UsersController, type: :request do
           path = assigns[:filtered_download_path]
           parsed_params = CGI.parse(URI.parse(path).query)
           expect(parsed_params).to match(
-            "filter[name]" => %w[Test],
-            "filter[email]" => %w[123],
+            "filter[search]" => %w[123],
             "filter[organisation_id]" => [test_org.id.to_s],
             "filter[role]" => %w[standard],
             "filter[has_access]" => %w[true],
@@ -104,8 +101,7 @@ RSpec.describe UsersController, type: :request do
             path = assigns[:filtered_download_path]
             parsed_params = CGI.parse(URI.parse(path).query)
             expect(parsed_params).to match(
-              "filter[name]" => %w[Test],
-              "filter[email]" => %w[123],
+              "filter[search]" => %w[123],
               "filter[organisation_id]" => [],
               "filter[role]" => %w[standard],
               "filter[has_access]" => %w[true],
@@ -159,8 +155,7 @@ RSpec.describe UsersController, type: :request do
         let(:params) do
           {
             filter: {
-              name: "Test",
-              email: "123",
+              search: "123",
               organisation_id: test_org.id,
               role: "standard",
               has_access: "true",

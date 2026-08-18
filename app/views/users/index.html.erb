@@ -6,14 +6,9 @@
   <%= form_with(model: @filter_input, scope: :filter, url: users_path, method: 'get', local: true, class: 'govuk-clearfix') do |f| %>
     <div class="govuk-grid-row govuk-!-padding-left-3 govuk-!-padding-right-3">
       <div class="govuk-grid-column-one-third">
-        <%= f.govuk_text_field :name,
-          label: { text: t('users.index.filter.name.label'), size: 's' },
-          hint: { text: t('users.index.filter.name.hint') } %>
-      </div>
-      <div class="govuk-grid-column-one-third">
-        <%= f.govuk_text_field :email,
-          label: { text: t('users.index.filter.email.label'), size: 's' },
-          hint: { text: t('users.index.filter.email.hint') } %>
+        <%= f.govuk_text_field :search,
+          label: { text: t('users.index.filter.search.label'), size: 's' },
+          hint: { text: t('users.index.filter.search.hint') } %>
       </div>
       <div class="govuk-grid-column-one-third">
         <%= render DfE::Autocomplete::View.new(
@@ -29,8 +24,6 @@
           ),
         ) %>
       </div>
-    </div>
-    <div class="govuk-grid-row govuk-!-padding-left-3 govuk-!-padding-right-3">
       <div class="govuk-grid-column-one-third">
         <%= f.govuk_collection_select :role,
           @filter_input.role_options,

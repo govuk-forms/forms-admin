@@ -102,6 +102,10 @@ describe "users/index.html.erb" do
   end
 
   describe "filter" do
+    it "has a single search field" do
+      expect(rendered).to have_field("filter[search]")
+    end
+
     it "has organisation select" do
       expect(rendered).to have_select(
         "Organisation",
@@ -120,7 +124,7 @@ describe "users/index.html.erb" do
     end
 
     context "when there are filters applied" do
-      let(:filter_input) { Users::FilterInput.new(name: "foo") }
+      let(:filter_input) { Users::FilterInput.new(search: "foo") }
 
       it "has a link to clear the filters" do
         expect(rendered).to have_link("Clear filter")
@@ -136,7 +140,7 @@ describe "users/index.html.erb" do
     end
 
     context "when there are filters applied" do
-      let(:filter_input) { Users::FilterInput.new(name: "foo") }
+      let(:filter_input) { Users::FilterInput.new(search: "foo") }
 
       it "has a link to download filtered users" do
         expect(rendered).to have_link(t("users.index.download_filtered"), href: filtered_download_path)

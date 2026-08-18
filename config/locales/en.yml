@@ -2397,15 +2397,9 @@ en:
       download_filtered: Download data about the filtered users as a CSV file
       filter:
         clear_filter: Clear filter
-        email:
-          hint: Enter full or partial email
-          label: Email
         has_access:
           hint: Select access permission
           label: Access
-        name:
-          hint: Enter full or partial name
-          label: Name
         organisation:
           hint: Select an organisation
           label: Organisation
@@ -2413,6 +2407,9 @@ en:
         role:
           hint: Select a role
           label: Role
+        search:
+          hint: Enter name or email address
+          label: Search
         submit: Filter
       name_blank: No name set
       organisation_blank: No organisation set

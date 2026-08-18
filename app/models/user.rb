@@ -43,18 +43,6 @@ class User < ApplicationRecord
       .order({ name: :asc })
   }
 
-  scope :by_name, lambda { |name|
-    if name.present?
-      where("lower(users.name) LIKE ?", "%#{sanitize_sql_like(name.downcase)}%")
-    end
-  }
-
-  scope :by_email, lambda { |email|
-    if email.present?
-      where("lower(email) LIKE ?", "%#{sanitize_sql_like(email.downcase)}%")
-    end
-  }
-
   scope :by_search, lambda { |search|
     if search.present?
       where("lower(users.name) LIKE :search OR lower(users.email) LIKE :search",

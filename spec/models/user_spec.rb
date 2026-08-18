@@ -185,52 +185,6 @@ describe User, type: :model do
         create_list(:user, 2, organisation: other_org)
       end
 
-      describe ".by_name" do
-        let!(:matched_user) { create(:user, name: "Sir Abcdefg Higjklmop") }
-        let!(:other_matched_user) { create(:user, name: "Lord Abcdefg Smith") }
-
-        it "returns users with partial match" do
-          expect(described_class.by_name("Abcdefg")).to contain_exactly(matched_user, other_matched_user)
-        end
-
-        it "returns users with case insensitive match" do
-          expect(described_class.by_name("Higjklmop")).to contain_exactly(matched_user)
-        end
-
-        it "returns all users when provided name is nil" do
-          expect(described_class.by_name(nil).size).to eq 4
-        end
-
-        it "returns all users when provided name is blank" do
-          expect(described_class.by_name("").size).to eq 4
-        end
-      end
-
-      describe ".by_email" do
-        let!(:matched_user) { create(:user, email: "sir.abcdefg.higjklmnop@example.com") }
-        let!(:other_matched_user) { create(:user, email: "lord.abcdefg.smith@example.com") }
-
-        it "returns users with partial match" do
-          expect(described_class.by_email(".abcdefg")).to contain_exactly(matched_user, other_matched_user)
-        end
-
-        it "returns the user with an exact match" do
-          expect(described_class.by_email("sir.abcdefg.higjklmnop@example.com")).to contain_exactly(matched_user)
-        end
-
-        it "returns users with case insensitive match" do
-          expect(described_class.by_email("HIGJKLMNOP")).to contain_exactly(matched_user)
-        end
-
-        it "returns all users when provided email is nil" do
-          expect(described_class.by_email(nil).size).to eq 4
-        end
-
-        it "returns all users when provided email is blank" do
-          expect(described_class.by_email("").size).to eq 4
-        end
-      end
-
       describe ".by_search" do
         let!(:matched_by_name) { create(:user, name: "Sir Abcdefg Higjklmop", email: "sir.smith@example.com") }
         let!(:matched_by_email) { create(:user, name: "Lord Smith", email: "lord.abcdefg@example.com") }
