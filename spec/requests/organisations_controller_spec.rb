@@ -77,6 +77,15 @@ RSpec.describe OrganisationsController, type: :request do
         expect(response.body).not_to include(organisation.name)
       end
 
+      it "filters organisations by email domain" do
+        create :organisation_domain, organisation: closed_organisation, domain: "example.gov.uk"
+
+        get path, params: { filter: { name: "example.gov.uk" } }
+
+        expect(response.body).to include(closed_organisation.name)
+        expect(response.body).not_to include(organisation.name)
+      end
+
       it "filters organisations with a Crown MOU" do
         get path, params: { filter: { agreement_type: "crown" } }
 

@@ -90,6 +90,20 @@ RSpec.describe Organisation, type: :model do
         expect(described_class.by_name("dft")).to contain_exactly(transport_org)
       end
 
+      it "matches a partial email domain, ignoring case" do
+        create :organisation_domain, organisation: justice_org, domain: "justice.gov.uk"
+        create :organisation_domain, organisation: transport_org, domain: "transport.gov.uk"
+
+        expect(described_class.by_name("Justice.gov")).to contain_exactly(justice_org)
+      end
+
+      it "does not return duplicates when multiple domains match" do
+        create :organisation_domain, organisation: justice_org, domain: "justice.gov.uk"
+        create :organisation_domain, organisation: justice_org, domain: "digital.justice.gov.uk"
+
+        expect(described_class.by_name("justice.gov")).to contain_exactly(justice_org)
+      end
+
       it "returns all organisations when the name is blank" do
         expect(described_class.by_name(nil)).to contain_exactly(justice_org, transport_org)
         expect(described_class.by_name("")).to contain_exactly(justice_org, transport_org)

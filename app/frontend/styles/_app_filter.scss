@@ -5,6 +5,28 @@
     background: govuk-colour("black", $variant: "tint-95");
   }
 
+  // Bottom-align the inputs in a row of filters, so that they line up even
+  // when one filter's hint text wraps onto more lines than its neighbours'
+  .govuk-grid-row {
+    display: flex;
+    flex-wrap: wrap;
+
+    > * {
+      display: flex;
+      flex-direction: column;
+    }
+  }
+
+  .govuk-form-group {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+
+    > :last-child {
+      margin-top: auto;
+    }
+  }
+
   .govuk-hint {
     color: govuk-functional-colour(text);
   }
