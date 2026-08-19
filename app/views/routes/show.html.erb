@@ -49,6 +49,9 @@
                             @routes_input.class.too_many_selection_options?(page) %>
                     <%= t(".too_many_options_html") %>
                   <% end %>
+                  <% if Forms::RoutesInput::route_with_selection_options?(page) %>
+                    <%= f.govuk_submit t(".add_exit_page_html", question_number: page.position), secondary: true, name: 'new_exit_page', value: page.id %>
+                  <% end %>
                 <% end %>
               <% end %>
             <% end %>

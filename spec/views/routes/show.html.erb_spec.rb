@@ -244,6 +244,12 @@ describe "routes/show.html.erb" do
         end
       end
 
+      it "has a button for adding exit pages" do
+        render_page
+        expect(rendered).to have_button("Add a new exit page")
+        expect(rendered).to have_selector("button[name='new_exit_page'][value='#{pages.first.id}']")
+      end
+
       context "with more than 10 options" do
         let(:selection_options) do
           (1..11).map do |i|
