@@ -163,16 +163,22 @@ en:
               invalid: 'Header and footer border colour must be a hex colour code, like #206c49'
             copyright_holder:
               blank: Enter the copyright holder
+            favicon_file:
+              invalid_file_type: The favicon must be an ICO or PNG file
             header_background_colour:
               blank: Enter the header background colour
               invalid: 'Header background colour must be a hex colour code, like #206c49'
             logo_alt_text:
               blank: Enter the logo alt text
+            logo_file:
+              invalid_file_type: The logo must be a PNG or JPEG file
             logo_link:
               blank: Enter the logo link
               invalid: Enter the logo link in the correct format, starting with https://
             name:
               blank: Enter a brand name
+            opengraph_image_file:
+              invalid_file_type: The opengraph image must be a PNG or JPEG file
             slug:
               blank: Enter a slug
               invalid: Slug must only include lowercase letters a to z, numbers and hyphens
