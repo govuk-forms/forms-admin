@@ -320,6 +320,13 @@ Rails.application.routes.draw do
     get "brands/:brand_id", to: "api/brands#show", as: :brand
   end
 
+  scope "api/v3", as: "api_v3" do
+    scope "forms/:form_id/versions" do
+      get "/draft", to: "api/v3_form_documents#draft", as: :draft_version
+      get "/:version", to: "api/v3_form_documents#show", as: :form_document_version, constraints: { version: /\d+/ }
+    end
+  end
+
   get "/maintenance" => "errors#maintenance", as: :maintenance_page
 
   constraints ->(request) { request.format == :json } do
