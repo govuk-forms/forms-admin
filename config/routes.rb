@@ -322,6 +322,8 @@ Rails.application.routes.draw do
 
   scope "api/v3", as: "api_v3" do
     scope "forms/:form_id/versions" do
+      get "/live", to: "api/v3_form_documents#live", as: :live_version
+      get "/archived", to: "api/v3_form_documents#archived", as: :archived_version
       get "/draft", to: "api/v3_form_documents#draft", as: :draft_version
       get "/:version", to: "api/v3_form_documents#show", as: :form_document_version, constraints: { version: /\d+/ }
     end

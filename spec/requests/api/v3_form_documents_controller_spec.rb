@@ -123,4 +123,77 @@ RSpec.describe Api::V3FormDocumentsController, type: :request do
       end
     end
   end
+
+  describe "#live" do
+    context "when the form is live" do
+      let(:form) { create(:form, :live) }
+
+      before do
+        form_document = create :form_document, :live, form: form, version: 2
+        form.update!(latest_form_document: form_document)
+      end
+
+      it "redirects to the latest form document version" do
+        get("/api/v3/forms/#{form.id}/versions/live", headers:)
+        expect(response).to redirect_to(api_v3_form_document_version_url(form_id: form.id, version: 2))
+      end
+    end
+
+    context "when the form is archived" do
+      let(:form) { create(:form, :archived) }
+
+      it "returns http gone" do
+        get("/api/v3/forms/#{form.id}/versions/live", headers:)
+        expect(response).to have_http_status(:gone)
+      end
+    end
+
+    context "when the form is not live" do
+      let(:form) { create(:form, :draft) }
+
+      it "returns http not found" do
+        get("/api/v3/forms/#{form.id}/versions/live", headers:)
+        expect(response).to have_http_status(:not_found)
+      end
+    end
+
+    context "when a form with the given ID does not exist" do
+      it "returns http not found" do
+        get("/api/v3/forms/non-existent/versions/live", headers:)
+        expect(response).to have_http_status(:not_found)
+      end
+    end
+  end
+
+  describe "#archived" do
+    context "when the form is archived" do
+      let(:form) { create(:form, :archived) }
+
+      before do
+        form_document = create :form_document, :archived, form: form, version: 2
+        form.update!(latest_form_document: form_document)
+      end
+
+      it "redirects to the latest form document version" do
+        get("/api/v3/forms/#{form.id}/versions/archived", headers:)
+        expect(response).to redirect_to(api_v3_form_document_version_url(form_id: form.id, version: 2))
+      end
+    end
+
+    context "when the form is live" do
+      let(:form) { create(:form, :live) }
+
+      it "returns http not found" do
+        get("/api/v3/forms/#{form.id}/versions/archived", headers:)
+        expect(response).to have_http_status(:not_found)
+      end
+    end
+
+    context "when a form with the given ID does not exist" do
+      it "returns http not found" do
+        get("/api/v3/forms/non-existent/versions/archived", headers:)
+        expect(response).to have_http_status(:not_found)
+      end
+    end
+  end
 end
