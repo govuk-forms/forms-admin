@@ -80,6 +80,22 @@ RSpec.describe Forms::RouteInput, type: :model do
     end
   end
 
+  describe "#goes_to_exit?" do
+    context "when goto is an exit page" do
+      it "returns true" do
+        route_input.goto = "exit_page_123"
+        expect(route_input.goes_to_exit?).to be true
+      end
+    end
+
+    context "when goto is not an exit page" do
+      it "returns false" do
+        route_input.goto = "page_123"
+        expect(route_input.goes_to_exit?).to be false
+      end
+    end
+  end
+
   describe "#condition_attributes" do
     it "returns nil if the route is to the default next page" do
       route_input.goto = default_value
@@ -95,6 +111,13 @@ RSpec.describe Forms::RouteInput, type: :model do
       route_input.goto = GotoValue::Page.new(123)
       expect(route_input.condition_attributes).to eq(
         { goto_page_id: 123, skip_to_end: false, check_page_id: page.id },
+      )
+    end
+
+    it "returns attributes for an exit page" do
+      route_input.goto = GotoValue::ExitPage.new(999)
+      expect(route_input.condition_attributes).to eq(
+        { goto_page_id: nil, skip_to_end: false, check_page_id: page.id, exit_page_id: 999 },
       )
     end
   end

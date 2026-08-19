@@ -18,6 +18,10 @@ class Forms::RouteInput < BaseInput
     goto.is_a?(GotoValue::EndOfFormValue)
   end
 
+  def goes_to_exit?
+    goto.is_a?(GotoValue::ExitPage)
+  end
+
   def goes_to_page?
     goto.is_a?(GotoValue::Page)
   end
@@ -30,6 +34,8 @@ class Forms::RouteInput < BaseInput
       { goto_page_id: nil, skip_to_end: true, check_page_id: page.id }
     when GotoValue::Page
       { goto_page_id: goto.page_id, skip_to_end: false, check_page_id: page.id }
+    when GotoValue::ExitPage
+      { goto_page_id: nil, skip_to_end: false, check_page_id: page.id, exit_page_id: goto.exit_page_id }
     end
   end
 
