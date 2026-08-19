@@ -45,15 +45,11 @@ class Forms::RouteInput < BaseInput
 private
 
   def route_is_not_backwards
-    return if skippable_for_backwards_validation?
+    return if !goes_to_page? || goto_page.nil?
 
     return if goto_page.position > page.position
 
     errors.add(:goto, :backwards_route, message: error_message_for_backwards_route)
-  end
-
-  def skippable_for_backwards_validation?
-    goes_to_default_next_page? || goes_to_end_of_form? || goto_page.nil?
   end
 
   def error_message_for_backwards_route
