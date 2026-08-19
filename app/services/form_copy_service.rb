@@ -18,7 +18,7 @@ class FormCopyService
 
   def copy(tag: "draft")
     # Copy the main form structure from English FormDocument first
-    form_doc = FormDocument.find_by(form_id: @form.id, tag:, language: :en)
+    form_doc = tag == "draft" ? @form.draft_form_document : @form.latest_form_document
     return false if form_doc.blank?
 
     content = form_doc.content
@@ -37,8 +37,8 @@ class FormCopyService
       copy_group
 
       # Copy Welsh translations if available
-      if @form.available_languages.include?("cy")
-        copy_welsh_translations(tag:)
+      if content["available_languages"].include?("cy")
+        copy_welsh_translations(tag:, version: form_doc.version)
       end
     rescue ActiveRecord::RecordInvalid => e
       Rails.logger.error("Failed to copy form #{@form.id}: #{e.message}")
@@ -94,8 +94,9 @@ private
     end
   end
 
-  def copy_welsh_translations(tag:)
-    welsh_doc = FormDocument.find_by(form_id: @form.id, tag:, language: :cy)
+  def copy_welsh_translations(tag:, version:)
+    # Get the Welsh version corresponding to the English version
+    welsh_doc = FormDocument.find_by(form_id: @form.id, tag:, version:, language: :cy)
     return unless welsh_doc
 
     welsh_content = welsh_doc.content

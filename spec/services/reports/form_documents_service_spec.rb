@@ -95,12 +95,35 @@ RSpec.describe Reports::FormDocumentsService do
     context "when the tag is live" do
       let(:tag) { "live" }
 
-      it "only includes live form documents from external organisations" do
+      before do
+        new_form_document = create(:form_document, :live, form: form_with_no_routes, version: 2)
+        form_with_no_routes.update!(latest_form_document: new_form_document)
+      end
+
+      it "only includes the latest version of live form documents for forms from external organisations" do
         form_documents = described_class.form_documents(tag:)
-        expect(form_documents.map { |form_document| form_document["form_id"] }.to_a)
+        expect(form_documents.map { |form_document| [form_document["form_id"], form_document["version"]] }.to_a)
           .to contain_exactly(
-            form_with_no_routes.id,
-            live_with_draft_form.id,
+            [form_with_no_routes.id, 2],
+            [live_with_draft_form.id, 1],
+          )
+      end
+    end
+
+    context "when the tag is archived" do
+      let(:tag) { "archived" }
+
+      before do
+        new_form_document = create(:form_document, :archived, form: archived_form, version: 2)
+        archived_form.update!(latest_form_document: new_form_document)
+      end
+
+      it "only includes the latest version of archived form documents for forms from external organisations" do
+        form_documents = described_class.form_documents(tag:)
+        expect(form_documents.map { |form_document| [form_document["form_id"], form_document["version"]] }.to_a)
+          .to contain_exactly(
+            [archived_form.id, 2],
+            [archived_with_draft_form.id, 1],
           )
       end
     end
@@ -108,14 +131,19 @@ RSpec.describe Reports::FormDocumentsService do
     context "when the tag is live-or-archived" do
       let(:tag) { "live-or-archived" }
 
-      it "only includes live or archived form documents from external organisations" do
+      before do
+        new_form_document = create(:form_document, :live, form: form_with_no_routes, version: 2)
+        form_with_no_routes.update!(latest_form_document: new_form_document)
+      end
+
+      it "only includes the latest version of live or archived form documents for forms from external organisations" do
         form_documents = described_class.form_documents(tag:)
-        expect(form_documents.map { |form_document| form_document["form_id"] }.to_a)
+        expect(form_documents.map { |form_document| [form_document["form_id"], form_document["version"]] }.to_a)
           .to contain_exactly(
-            form_with_no_routes.id,
-            live_with_draft_form.id,
-            archived_form.id,
-            archived_with_draft_form.id,
+            [form_with_no_routes.id, 2],
+            [live_with_draft_form.id, 1],
+            [archived_form.id, 1],
+            [archived_with_draft_form.id, 1],
           )
       end
     end
