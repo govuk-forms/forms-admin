@@ -51,7 +51,7 @@ RSpec.describe RoutesController, type: :request do
               id: "",
               page_id: pages.first.id,
               answer_value: "",
-              goto: pages.third.id,
+              goto: "page_#{pages.third.id}",
             },
           },
         },

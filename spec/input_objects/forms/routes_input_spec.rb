@@ -74,8 +74,8 @@ RSpec.describe Forms::RoutesInput do
     context "with valid attributes for existing pages" do
       let(:attributes) do
         {
-          "0" => { "page_id" => pages.first.id.to_s, "goto" => pages.second.id.to_s },
-          "1" => { "page_id" => pages.second.id.to_s, "goto" => "1" },
+          "0" => { "page_id" => pages.first.id.to_s, "goto" => "page_#{pages.second.id}" },
+          "1" => { "page_id" => pages.second.id.to_s, "goto" => "page_1" },
         }
       end
 
@@ -90,14 +90,14 @@ RSpec.describe Forms::RoutesInput do
         expect(Forms::RouteInput).to have_received(:new).with(
           page_id: pages.first.id.to_s,
           goto_page: pages.second,
-          goto: pages.second.id.to_s,
+          goto: GotoValue::Page.new(pages.second.id),
           page: pages.first,
           goto_options:,
         )
         expect(Forms::RouteInput).to have_received(:new).with(
           page_id: pages.second.id.to_s,
           goto_page: nil,
-          goto: "1",
+          goto: GotoValue::Page.new(1),
           page: pages.second,
           goto_options:,
         )
@@ -126,6 +126,7 @@ RSpec.describe Forms::RoutesInput do
         expect(Forms::RouteInput).to have_received(:new).with(
           page_id: pages.first.id.to_s,
           page: pages.first,
+          goto: nil,
           goto_page: nil,
           goto_options:,
         )

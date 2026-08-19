@@ -21,7 +21,7 @@ RSpec.describe Routes::SyncService do
     context "when creating a new condition" do
       let(:routes) do
         [
-          build(:route_input, page: pages.first, answer_value: "Yes", goto: pages.third.id),
+          build(:route_input, page: pages.first, answer_value: "Yes", goto: GotoValue::Page.new(pages.third.id)),
         ]
       end
 
@@ -35,7 +35,7 @@ RSpec.describe Routes::SyncService do
       end
 
       it "does not create a condition for a default route" do
-        routes.first.goto = Forms::RouteInput::DEFAULT_VALUE
+        routes.first.goto = GotoValue::DefaultValue.new
 
         expect { service.sync_conditions_from_routes }.not_to change(Condition, :count)
         expect(form.conditions.reload).to be_empty
@@ -51,7 +51,7 @@ RSpec.describe Routes::SyncService do
       # Provide a route that matches the key of the existing condition but has a new destination.
       let(:routes) do
         [
-          build(:route_input, page: pages.first, answer_value: "Yes", goto: pages.third.id),
+          build(:route_input, page: pages.first, answer_value: "Yes", goto: GotoValue::Page.new(pages.third.id)),
         ]
       end
 
@@ -82,7 +82,7 @@ RSpec.describe Routes::SyncService do
           # Route for the first page, which is default so conditions are removed
           build(:route_input, :default, page: pages.first, answer_value: "Yes"),
           # Two routes for the second page, which should not be removed
-          build(:route_input, page: pages.second, goto: pages.third.id, answer_value: "Yes"),
+          build(:route_input, page: pages.second, goto: GotoValue::Page.new(pages.third.id), answer_value: "Yes"),
           # This is default but has no conditions to remove
           build(:route_input, :default, page: pages.second, answer_value: "No"),
         ]
@@ -131,16 +131,16 @@ RSpec.describe Routes::SyncService do
       let(:routes) do
         [
           # 1. Update: Matches condition_to_update, but changes goto_page_id to pages.third
-          build(:route_input, page: pages.first, answer_value: "Update Me", goto: pages.third.id),
+          build(:route_input, page: pages.first, answer_value: "Update Me", goto: GotoValue::Page.new(pages.third.id)),
 
           # 2. Delete: Matches condition_to_delete, but marks it as default
           build(:route_input, :default, page: pages.first, answer_value: "Delete Me"),
 
           # 3. Create: A brand new condition
-          build(:route_input, page: pages.second, answer_value: "Option B", goto: pages.first.id),
+          build(:route_input, page: pages.second, answer_value: "Option B", goto: GotoValue::Page.new(pages.first.id)),
 
           # 4. No-Op: Matches condition_to_keep exactly, no change needed
-          build(:route_input, page: pages.second, answer_value: "Option A", goto: pages.third.id),
+          build(:route_input, page: pages.second, answer_value: "Option A", goto: GotoValue::Page.new(pages.third.id)),
 
           # 5. No-Op: A default route with no existing condition
           build(:route_input, :default, page: pages.third, answer_value: "Default"),
@@ -172,7 +172,7 @@ RSpec.describe Routes::SyncService do
       let!(:condition_to_delete) { create(:condition, routing_page_id: pages.first.id, answer_value: "An Existing Answer", goto_page_id: pages.second.id) }
 
       let(:route_to_succeed) { build(:route_input, :default, page: pages.first, answer_value: "An Existing Answer") }
-      let(:route_to_fail) { build(:route_input, page: pages.first, answer_value: "A New Answer", goto: pages.third.id) }
+      let(:route_to_fail) { build(:route_input, page: pages.first, answer_value: "A New Answer", goto: GotoValue::Page.new(pages.third.id)) }
       let(:routes) { [route_to_succeed, route_to_fail] }
 
       let(:failing_condition_double) { instance_double(Condition) }

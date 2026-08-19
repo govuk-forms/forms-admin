@@ -37,18 +37,24 @@ class Forms::RoutesInput < BaseInput
     pages_by_id = form.pages.where(id: page_ids).index_by(&:id)
 
     route_build_service = Routes::BuildService.new(form:)
+    goto_type = GotoValueType.new
 
     @routes = attributes.values.map { |route_attrs|
       page = pages_by_id[route_attrs["page_id"].to_i]
       next unless page # Skip if page not found or doesn't belong to form
 
-      goto_page = pages_by_id[route_attrs["goto"].to_i]
+      # Cast route_attrs["goto"] to a GotoValue object before using it
+      # If goto is poitning to a page, we pass it in to the RouteInput now,
+      # rather than needed to look it up later
+      goto = goto_type.cast(route_attrs["goto"])
+      goto_page = pages_by_id[goto.page_id] if goto.is_a?(GotoValue::Page)
 
       Forms::RouteInput.new(
         route_attrs.symbolize_keys.merge(
           page:,
+          goto:,
           goto_page:,
-          goto_options: route_build_service.options_for_goto_page(page, route_attrs["goto"]),
+          goto_options: route_build_service.options_for_goto_page(page, goto),
         ),
       )
     }.compact
