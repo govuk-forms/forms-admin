@@ -290,6 +290,28 @@ describe "routes/show.html.erb" do
     end
   end
 
+  context "when the page has an exit page" do
+    let!(:pages) do
+      [
+        create(
+          :page,
+          id: 101,
+        ),
+        create(:page, id: 102),
+        create(:page, id: 103),
+      ]
+    end
+    let!(:exit_page) { create(:exit_page, id: 884, question_page_id: pages.first.id, heading: "Can't continue", markdown: "You can't continue") }
+    let!(:another_exit_page) { create(:exit_page, id: 999, question_page_id: pages.first.id, heading: "Stop using this form", markdown: "You can't continue") }
+
+    it "has links to the exit pages" do
+      render_page
+      expect(rendered).to have_selector("h2", text: "Question 1’s exit pages", normalize_ws: true)
+      expect(rendered).to have_link("Exit page 1: Can't continue", href: edit_exit_page_path(form.id, pages.first.id, exit_page.id))
+      expect(rendered).to have_link("Exit page 2: Stop using this form", href: edit_exit_page_path(form.id, pages.first.id, another_exit_page.id))
+    end
+  end
+
   context "when there are not enough pages" do
     let(:pages) do
       [
