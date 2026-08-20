@@ -22,14 +22,14 @@ RSpec.describe "form_documents.rake", type: :task do
       expect {
         task.invoke(form.id)
       }.to raise_error(SystemExit)
-             .and output(/usage: rake form_documents:show\[<form_id>, <tag>, <language>\]/).to_stderr
+             .and output(/usage: rake form_documents:show\[<form_id>, <ref>, <language>\]/).to_stderr
     end
 
     it "aborts when the tag is invalid" do
       expect {
         task.invoke(form.id, "invalid", "en")
       }.to raise_error(SystemExit)
-             .and output(/tag must be one of draft, live or archived/).to_stderr
+             .and output(/ref must be version number or one of draft, live or archived/).to_stderr
     end
 
     it "aborts when the language is invalid" do
@@ -44,6 +44,52 @@ RSpec.describe "form_documents.rake", type: :task do
         task.invoke(form.id, "draft", "cy")
       }.to raise_error(SystemExit)
              .and output(/form #{form.id} \("#{form.name}"\) does not have a draft cy form document/).to_stderr
+    end
+
+    context "when a form has a live form document" do
+      let(:form) { create(:form, :live) }
+
+      it "prints the latest live form document as JSON" do
+        expect { task.invoke(form.id, "live") }
+          .to output(/"id": #{form.latest_form_document.id}/).to_stdout
+      end
+
+      it "aborts if the archived form document was requested" do
+        expect {
+          task.invoke(form.id, "archived", "en")
+        }.to raise_error(SystemExit)
+               .and output(/form #{form.id} \("#{form.name}"\) does not have a archived en form document/).to_stderr
+      end
+
+      context "when the ref argument is a version number" do
+        it "prints the requested form document as JSON" do
+          expect { task.invoke(form.id, "1") }
+            .to output(/"id": #{form.latest_form_document.id}/).to_stdout
+        end
+      end
+    end
+
+    context "when a form has an archived form document" do
+      let(:form) { create(:form, :archived) }
+
+      it "prints the latest archived form document as JSON" do
+        expect { task.invoke(form.id, "archived") }
+          .to output(/"id": #{form.latest_form_document.id}/).to_stdout
+      end
+
+      it "aborts if the live form document was requested" do
+        expect {
+          task.invoke(form.id, "live", "en")
+        }.to raise_error(SystemExit)
+               .and output(/form #{form.id} \("#{form.name}"\) does not have a live en form document/).to_stderr
+      end
+
+      context "when the ref argument is a version number" do
+        it "prints the requested form document as JSON" do
+          expect { task.invoke(form.id, "1") }
+            .to output(/"id": #{form.latest_form_document.id}/).to_stdout
+        end
+      end
     end
 
     context "when a form has a Welsh translation" do
