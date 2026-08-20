@@ -1,6 +1,22 @@
 # frozen_string_literal: true
 
 namespace :form_documents do
+  desc "List form documents for form"
+  task :list, %i[form_id] => :environment do |_, args|
+    usage_message = "usage: rake forms:list[<form_id>]"
+
+    abort usage_message if args.extras.present?
+    form_id = args[:form_id].presence
+
+    form_documents = FormDocument.all
+    form_documents = FormDocument.where(form_id:) if form_id
+
+    puts "form_id,tag,version,language,created_at,updated_at"
+    form_documents.each do
+      puts "#{it.form_id},#{it.tag},#{it.version},#{it.language},#{it.created_at.iso8601},#{it.updated_at.iso8601}"
+    end
+  end
+
   desc "Show form document as JSON"
   task :show, %i[form_id ref language] => :environment do |_, args|
     usage_message = "usage: rake form_documents:show[<form_id>, <ref>, <language>]"

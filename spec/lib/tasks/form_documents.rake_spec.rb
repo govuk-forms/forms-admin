@@ -1,6 +1,55 @@
 require "rails_helper"
 
 RSpec.describe "form_documents.rake", type: :task do
+  describe "form_documents:list" do
+    subject(:task) do
+      Rake::Task["form_documents:list"]
+    end
+
+    before do
+      freeze_time(Time.utc(2026, 8, 20, 14, 58)) do
+        create(:form, :live_with_draft, id: 57)
+        create(:form, :archived_with_draft, id: 90)
+        create(:form, :with_welsh_translation, id: 101)
+        create(:form, :live_with_draft, :with_welsh_translation, id: 1009)
+      end
+    end
+
+    it "prints a table of form documents" do
+      expect { task.invoke }
+        .to output(
+          <<~TEXT,
+            form_id,tag,version,language,created_at,updated_at
+            57,draft,,en,2026-08-20T14:58:00Z,2026-08-20T14:58:00Z
+            57,live,1,en,2026-08-20T14:58:00Z,2026-08-20T14:58:00Z
+            90,draft,,en,2026-08-20T14:58:00Z,2026-08-20T14:58:00Z
+            90,archived,1,en,2026-08-20T14:58:00Z,2026-08-20T14:58:00Z
+            101,draft,,en,2026-08-20T14:58:00Z,2026-08-20T14:58:00Z
+            101,draft,,cy,2026-08-20T14:58:00Z,2026-08-20T14:58:00Z
+            1009,draft,,en,2026-08-20T14:58:00Z,2026-08-20T14:58:00Z
+            1009,draft,,cy,2026-08-20T14:58:00Z,2026-08-20T14:58:00Z
+            1009,live,1,en,2026-08-20T14:58:00Z,2026-08-20T14:58:00Z
+            1009,live,1,cy,2026-08-20T14:58:00Z,2026-08-20T14:58:00Z
+          TEXT
+        ).to_stdout
+    end
+
+    context "when given a form id argument" do
+      it "prints a table of form documents for that form" do
+        expect { task.invoke(1009) }
+          .to output(
+            <<~TEXT,
+              form_id,tag,version,language,created_at,updated_at
+              1009,draft,,en,2026-08-20T14:58:00Z,2026-08-20T14:58:00Z
+              1009,draft,,cy,2026-08-20T14:58:00Z,2026-08-20T14:58:00Z
+              1009,live,1,en,2026-08-20T14:58:00Z,2026-08-20T14:58:00Z
+              1009,live,1,cy,2026-08-20T14:58:00Z,2026-08-20T14:58:00Z
+            TEXT
+          ).to_stdout
+      end
+    end
+  end
+
   describe "form_documents:show" do
     subject(:task) do
       Rake::Task["form_documents:show"]
