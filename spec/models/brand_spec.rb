@@ -104,6 +104,21 @@ RSpec.describe Brand, type: :model do
     end
   end
 
+  describe "asset paths" do
+    %i[logo favicon opengraph_image].each do |asset_name|
+      it "returns nil when no #{asset_name.to_s.humanize.downcase} is attached" do
+        expect(brand.public_send(:"#{asset_name}_path")).to be_nil
+      end
+    end
+
+    it "returns the attached asset's key as an absolute path" do
+      brand = create :brand, slug: "testshire", logo_file: Rack::Test::UploadedFile.new(file_fixture("logo.png"))
+      BrandAssetsService.new(brand:).attach_assets
+
+      expect(brand.logo_path).to match %r{\A/assets/brands/testshire/logo-\h{6}\.png\z}
+    end
+  end
+
   it "is an error to insert a brand with an existing slug" do
     existing_brand = create(:brand)
 
