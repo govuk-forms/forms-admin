@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 namespace :organisations do
   desc "Update organisations table using data from GOV.UK"
   task fetch: :environment do
@@ -23,7 +25,7 @@ namespace :organisations do
 
   desc "Add organisation that is not in GOV.UK organisation database"
   task :create, %i[name] => :environment do |_, args|
-    usage_message = "usage: rails organisations:create[<name>]".freeze
+    usage_message = "usage: rails organisations:create[<name>]"
     abort usage_message if args[:name].blank?
 
     organisation = Organisation.find_by(name: args[:name])
@@ -41,7 +43,7 @@ namespace :organisations do
   task :rename, %i[old_name new_name] => :environment do |_, args|
     old_name = args[:old_name]
     new_name = args[:new_name]
-    usage = "usage: rails organisations:rename[<old_name>,<new_name>]".freeze
+    usage = "usage: rails organisations:rename[<old_name>,<new_name>]"
     abort usage if old_name.blank? || new_name.blank?
 
     org = Organisation.find_by(name: old_name)
@@ -94,7 +96,7 @@ namespace :organisations do
       organisation_slug = args[:organisation_slug]
       domains = args.to_a[1..]
 
-      usage_message = "usage: rake organisations:domains:add[<organisation_slug>, <domain1>, <domain2>, ...]".freeze
+      usage_message = "usage: rake organisations:domains:add[<organisation_slug>, <domain1>, <domain2>, ...]"
       abort usage_message if organisation_slug.blank? || domains.blank?
 
       organisation = Organisation.find_by(slug: organisation_slug)
@@ -111,7 +113,7 @@ namespace :organisations do
       organisation_slug = args[:organisation_slug]
       domains = args.to_a[1..]
 
-      usage_message = "usage: rake organisations:domains:remove[<organisation_slug>, <domain1>, <domain2>, ...]".freeze
+      usage_message = "usage: rake organisations:domains:remove[<organisation_slug>, <domain1>, <domain2>, ...]"
       abort usage_message if organisation_slug.blank? || domains.blank?
 
       organisation = Organisation.find_by(slug: organisation_slug)
@@ -129,7 +131,7 @@ namespace :organisations do
     task :list, %i[organisation_slug] => :environment do |_task, args|
       organisation_slug = args[:organisation_slug]
 
-      usage_message = "usage: rake organisations:domains:list[<organisation_slug>]".freeze
+      usage_message = "usage: rake organisations:domains:list[<organisation_slug>]"
       abort usage_message if organisation_slug.blank?
 
       organisation = Organisation.find_by(slug: organisation_slug)
@@ -163,7 +165,7 @@ namespace :organisations do
     task :populate_from_list, [] => :environment do |_, args|
       organisations_and_domains = args.to_a
 
-      usage_message = "usage: rake organisations:domains:populate_from_list[Department for testing:dftest.gov.uk\,testing.gov.uk,Example Org:example.gov.uk]".freeze
+      usage_message = "usage: rake organisations:domains:populate_from_list[Department for testing:dftest.gov.uk\,testing.gov.uk,Example Org:example.gov.uk]"
       abort usage_message if organisations_and_domains.empty?
 
       organisations_successfully_populated = []
@@ -206,7 +208,7 @@ def run_organisation_fetch(dry_run:)
 end
 
 def merge_organisations(task:, source_organisation_slug: nil, target_organisation_slug: nil, dry_run: false)
-  usage = "usage: rails #{task.name}[<source_organisation_slug>, <target_organisation_slug>]".freeze
+  usage = "usage: rails #{task.name}[<source_organisation_slug>, <target_organisation_slug>]"
   abort usage if source_organisation_slug.blank? || target_organisation_slug.blank?
 
   source_organisation = Organisation.find_by_slug!(source_organisation_slug)
@@ -246,7 +248,7 @@ def merge_organisations(task:, source_organisation_slug: nil, target_organisatio
 end
 
 def change_organisation_internal_status(task:, organisation_slug: nil, status: nil, dry_run: false)
-  usage = "usage: rails #{task.name}[<organisation_slug>]".freeze
+  usage = "usage: rails #{task.name}[<organisation_slug>]"
   abort usage if organisation_slug.blank?
 
   status_string = status ? "internal" : "external"

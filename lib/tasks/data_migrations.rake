@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 namespace :data_migrations do
   desc "backfill version for existing live and archived form documents"
   task set_version_on_form_documents: :environment do
