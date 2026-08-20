@@ -25,7 +25,7 @@
               row.with_value do
                 capture do %>
                 <p> <%= page.question_text %> </p>
-                <% if @routes_input.form.next_page_after(page).present? || routes.any?(&:invalid?) %>
+                <% if @routes_input.form.next_page_after(page).present? || routes.any?(&:invalid?) || @routes_input.class.route_with_selection_options?(page) %>
                   <ul class="govuk-list">
                     <% routes.each do |route| %>
                       <li>
