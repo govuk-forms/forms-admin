@@ -24,6 +24,12 @@
 
       <%= f.govuk_text_field :copyright_holder, label: { size: 'm' } %>
 
+      <%= f.govuk_file_field :logo_file, label: { size: 'm' } %>
+
+      <%= f.govuk_file_field :favicon_file, label: { size: 'm' } %>
+
+      <%= f.govuk_file_field :opengraph_image_file, label: { size: 'm' } %>
+
       <%= f.govuk_submit t("save_and_continue") %>
     <% end %>
   </div>

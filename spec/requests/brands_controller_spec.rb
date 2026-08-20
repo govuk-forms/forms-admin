@@ -79,6 +79,25 @@ RSpec.describe BrandsController, type: :request do
         expect(response.body).to include(brand.border_colour)
         expect(response.body).to include(brand.copyright_holder)
       end
+
+      it "shows that no assets have been uploaded" do
+        expect(response.body).to include(I18n.t("brands.show.summary.not_uploaded"))
+      end
+    end
+
+    context "when the user is a super admin and the brand has assets" do
+      before do
+        brand.logo_file = fixture_file_upload("logo.png", "image/png")
+        BrandAssetsService.new(brand:).attach_assets
+
+        login_as_super_admin_user
+
+        get path
+      end
+
+      it "shows the public path of each uploaded asset" do
+        expect(response.body).to include("/#{brand.logo.blob.key}")
+      end
     end
   end
 
@@ -101,9 +120,14 @@ RSpec.describe BrandsController, type: :request do
 
       it "has a labelled field for each brand attribute" do
         page = Capybara.string(response.body)
-        ["Brand name", "Slug", "Logo alt text", "Logo link", "Header background colour", "Header and footer border colour", "Copyright holder"].each do |label|
+        ["Brand name", "Slug", "Logo alt text", "Logo link", "Header background colour", "Header and footer border colour", "Copyright holder", "Logo", "Favicon", "Opengraph image"].each do |label|
           expect(page).to have_field(label)
         end
+      end
+
+      it "renders a multipart form so that files can be uploaded" do
+        page = Capybara.string(response.body)
+        expect(page).to have_css("form[enctype='multipart/form-data']")
       end
     end
   end
@@ -196,6 +220,41 @@ RSpec.describe BrandsController, type: :request do
 
           expect(response).to have_http_status(:unprocessable_content)
           expect(response).to render_template("brands/new")
+        end
+      end
+
+      context "when asset files are uploaded" do
+        before do
+          params[:brand][:logo_file] = fixture_file_upload("logo.png", "image/png")
+          params[:brand][:favicon_file] = fixture_file_upload("favicon.ico", "image/vnd.microsoft.icon")
+          params[:brand][:opengraph_image_file] = fixture_file_upload("logo.jpeg", "image/jpeg")
+        end
+
+        it "creates the brand with the assets attached under public asset keys" do
+          expect {
+            post path, params: params
+          }.to change(Brand, :count).by(1)
+
+          brand = Brand.last
+          expect(brand.logo.blob.key).to match(%r{\Aassets/brands/testshire/logo-\h{6}\.png\z})
+          expect(brand.favicon.blob.key).to match(%r{\Aassets/brands/testshire/favicon-\h{6}\.ico\z})
+          expect(brand.opengraph_image.blob.key).to match(%r{\Aassets/brands/testshire/opengraph-image-\h{6}\.jpg\z})
+        end
+      end
+
+      context "when an asset file has a disallowed file type" do
+        before do
+          params[:brand][:logo_file] = fixture_file_upload("invalid.txt", "text/plain")
+        end
+
+        it "does not create a brand and re-renders the new view with an error" do
+          expect {
+            post path, params: params
+          }.not_to change(Brand, :count)
+
+          expect(response).to have_http_status(:unprocessable_content)
+          expect(response).to render_template("brands/new")
+          expect(response.body).to include(I18n.t("activerecord.errors.models.brand.attributes.logo_file.invalid_file_type"))
         end
       end
     end
@@ -297,6 +356,30 @@ RSpec.describe BrandsController, type: :request do
 
           expect(response).to have_http_status(:unprocessable_content)
           expect(response).to render_template("brands/edit")
+        end
+      end
+
+      context "when the brand already has assets" do
+        before do
+          brand.logo_file = fixture_file_upload("logo.png", "image/png")
+          brand.favicon_file = fixture_file_upload("favicon.ico", "image/vnd.microsoft.icon")
+          BrandAssetsService.new(brand:).attach_assets
+        end
+
+        it "replaces an asset when a new file is uploaded" do
+          original_key = brand.logo.blob.key
+
+          params[:brand][:logo_file] = fixture_file_upload("logo.jpeg", "image/jpeg")
+          put path, params: params
+
+          expect(brand.reload.logo.blob.key).to match(%r{\Aassets/brands/testshire/logo-\h{6}\.jpg\z})
+          expect(brand.logo.blob.key).not_to eq original_key
+        end
+
+        it "keeps the existing assets when no files are uploaded" do
+          expect {
+            put path, params: params
+          }.not_to(change { [brand.reload.logo.blob.key, brand.favicon.blob.key] })
         end
       end
     end

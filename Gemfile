@@ -71,6 +71,7 @@ gem "paper_trail"
 # For AWS interactions
 gem "aws-sdk-cloudwatch", "~> 1.145"
 gem "aws-sdk-codepipeline", "~> 1.118"
+gem "aws-sdk-s3", "~> 1.229", require: false
 
 # For Mailchimp audience integration
 gem "MailchimpMarketing", "~> 3.0"

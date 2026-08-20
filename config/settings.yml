@@ -113,5 +113,9 @@ act_as_user_enabled: false
 
 cloudwatch_metrics_enabled: true
 
+aws:
+  # Name of the S3 bucket that brand assets are uploaded to
+  assets_s3_bucket_name:
+
 reports:
   forms_api_forms_per_request_page: 100

@@ -77,6 +77,33 @@ RSpec.describe Brand, type: :model do
     expect(brand).to be_valid
   end
 
+  describe "asset file validation" do
+    {
+      logo_file: %w[logo.png logo.jpeg],
+      favicon_file: %w[favicon.ico logo.png],
+      opengraph_image_file: %w[logo.png logo.jpeg],
+    }.each do |attribute, fixtures|
+      fixtures.each do |fixture|
+        it "is valid when the #{attribute.to_s.humanize.downcase} is #{File.extname(fixture).delete('.').upcase}" do
+          brand.public_send("#{attribute}=", Rack::Test::UploadedFile.new(file_fixture(fixture)))
+          expect(brand).to be_valid
+        end
+      end
+
+      it "is invalid when the #{attribute.to_s.humanize.downcase} is not an allowed file type" do
+        brand.public_send("#{attribute}=", Rack::Test::UploadedFile.new(file_fixture("invalid.txt"), "text/plain"))
+        expect(brand).to be_invalid
+        expect(brand.errors).to be_of_kind(attribute, :invalid_file_type)
+      end
+    end
+
+    it "is invalid when the opengraph image is an ICO file" do
+      brand.opengraph_image_file = Rack::Test::UploadedFile.new(file_fixture("favicon.ico"))
+      expect(brand).to be_invalid
+      expect(brand.errors).to be_of_kind(:opengraph_image_file, :invalid_file_type)
+    end
+  end
+
   it "is an error to insert a brand with an existing slug" do
     existing_brand = create(:brand)
 
