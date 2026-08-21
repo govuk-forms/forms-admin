@@ -21,7 +21,7 @@ describe Organisations::DomainInput do
     it "is invalid without a domain" do
       domain_input.organisation = organisation
       expect(domain_input).not_to be_valid
-      expect(domain_input.errors[:domain]).to include("can't be blank")
+      expect(domain_input.errors[:domain]).to include("Enter a domain name")
     end
   end
 
@@ -53,25 +53,22 @@ describe Organisations::DomainInput do
     end
 
     context "when the domain is already associated with the organisation" do
-      before do
+      it "raises an ActiveRecord::RecordInvalid error" do
         create(:organisation_domain, organisation:, domain: "example.com")
         domain_input.organisation = organisation
         domain_input.domain = "example.com"
-      end
 
-      it "raises an ActiveRecord::RecordInvalid error" do
         expect { domain_input.submit }.to raise_error(ActiveRecord::RecordInvalid)
       end
     end
 
     context "when the domain is not a valid format" do
-      before do
+      it "raises a validation error" do
         domain_input.organisation = organisation
         domain_input.domain = "not a domain"
-      end
+        domain_input.submit
 
-      it "raises an ActiveRecord::RecordInvalid error" do
-        expect { domain_input.submit }.to raise_error(ActiveRecord::RecordInvalid)
+        expect(domain_input.errors[:domain]).to include("Enter a domain name in the correct format, like subdomain.gov.uk")
       end
     end
   end
