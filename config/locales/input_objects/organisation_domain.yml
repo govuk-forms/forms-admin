@@ -1,0 +1,10 @@
+---
+en:
+  activemodel:
+    errors:
+      models:
+        organisations/domain_input:
+          attributes:
+            domain:
+              blank: Enter a domain name
+              invalid_domain: Enter a domain name in the correct format, like subdomain.gov.uk
