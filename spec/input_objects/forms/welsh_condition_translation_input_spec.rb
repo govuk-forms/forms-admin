@@ -4,7 +4,7 @@ RSpec.describe Forms::WelshConditionTranslationInput, type: :model do
   subject(:welsh_condition_translation_input) { described_class.new(new_input_data) }
 
   let(:condition) { create_condition }
-  let(:page) { create :page }
+  let(:page) { create :page, position: 1 }
 
   let(:new_input_data) do
     {
@@ -16,12 +16,12 @@ RSpec.describe Forms::WelshConditionTranslationInput, type: :model do
 
   def create_condition(attributes = {})
     default_attributes = {
-      id: 1,
       answer_value: "Yes",
       exit_page_markdown: "You are ineligible",
       exit_page_heading: "Sorry, you are ineligible for this service.",
       exit_page_markdown_cy: "",
       exit_page_heading_cy: "",
+      routing_page: page,
     }
     create(:condition, default_attributes.merge(attributes))
   end
@@ -178,13 +178,68 @@ RSpec.describe Forms::WelshConditionTranslationInput, type: :model do
     end
   end
 
-  describe "#assign_page_values" do
+  describe "#assign_condition_values" do
     it "loads the existing welsh attributes from the page" do
       welsh_condition_translation_input = described_class.new(condition:)
       welsh_condition_translation_input.assign_condition_values
 
       expect(welsh_condition_translation_input.exit_page_markdown_cy).to eq(condition.exit_page_markdown_cy)
       expect(welsh_condition_translation_input.exit_page_heading_cy).to eq(condition.exit_page_heading_cy)
+    end
+  end
+
+  describe "#assign_from_spreadsheet" do
+    subject(:welsh_condition_translation_input) { described_class.new(condition:) }
+
+    context "when the spreadsheet data contains Welsh translations for all fields" do
+      let(:spreadsheet_data) do
+        {
+          "Question 1 - exit page heading" => "Welsh heading from spreadsheet",
+          "Question 1 - exit page content" => "Welsh markdown from spreadsheet",
+          "Question 2 - exit page heading" => "Another condition translation (ignored)",
+          "Question 1 - question text" => "Page field translation (ignored)",
+        }
+      end
+
+      it "assigns the welsh attributes from the spreadsheet data" do
+        welsh_condition_translation_input.assign_from_spreadsheet(spreadsheet_data)
+
+        expect(welsh_condition_translation_input.exit_page_heading_cy).to eq("Welsh heading from spreadsheet")
+        expect(welsh_condition_translation_input.exit_page_markdown_cy).to eq("Welsh markdown from spreadsheet")
+      end
+    end
+
+    context "when the spreadsheet data does not include keys for all fields" do
+      let(:condition) { create_condition(exit_page_markdown_cy: "Welsh markdown on form") }
+      let(:spreadsheet_data) do
+        {
+          "Question 1 - exit page heading" => "Welsh heading from spreadsheet",
+        }
+      end
+
+      it "uses the Welsh already set on the condition for fields not present in the spreadsheet data" do
+        welsh_condition_translation_input.assign_from_spreadsheet(spreadsheet_data)
+
+        expect(welsh_condition_translation_input.exit_page_heading_cy).to eq("Welsh heading from spreadsheet")
+        expect(welsh_condition_translation_input.exit_page_markdown_cy).to eq("Welsh markdown on form")
+      end
+    end
+
+    context "when the spreadsheet data includes blank values" do
+      let(:condition) { create_condition(exit_page_markdown_cy: "Welsh markdown on form", exit_page_heading_cy: "Welsh heading on form") }
+      let(:spreadsheet_data) do
+        {
+          "Question 1 - exit page heading" => "Welsh heading from spreadsheet",
+          "Question 1 - exit page content" => "",
+        }
+      end
+
+      it "uses the Welsh already set on the condition for fields with blank values in the spreadsheet data" do
+        welsh_condition_translation_input.assign_from_spreadsheet(spreadsheet_data)
+
+        expect(welsh_condition_translation_input.exit_page_heading_cy).to eq("Welsh heading from spreadsheet")
+        expect(welsh_condition_translation_input.exit_page_markdown_cy).to eq("Welsh markdown on form")
+      end
     end
   end
 

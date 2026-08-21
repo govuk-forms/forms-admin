@@ -1,6 +1,7 @@
 class Forms::WelshTranslationInput < Forms::MarkCompleteInput
   include TextInputHelper
   include ActiveModel::Attributes
+  include WelshTranslationContentLabels
 
   attr_accessor :form, :page_translations
 
@@ -117,6 +118,30 @@ class Forms::WelshTranslationInput < Forms::MarkCompleteInput
 
     self.page_translations = form.pages.map do |page|
       Forms::WelshPageTranslationInput.new(page:).assign_page_values
+    end
+
+    self
+  end
+
+  def assign_from_spreadsheet(data)
+    # assign values from the form first, and override only those that are set in the spreadsheet
+    assign_form_values
+
+    %i[name
+       privacy_policy_url
+       support_email
+       support_phone
+       support_url
+       support_url_text
+       declaration_markdown
+       what_happens_next_markdown
+       payment_url].each do |attr|
+      content_label = FORM_ATTRIBUTE_LABELS.fetch(attr)
+      send(:"#{attr}_cy=", data[content_label]) if data.key?(content_label) && data[content_label].present?
+    end
+
+    self.page_translations = form.pages.map do |page|
+      Forms::WelshPageTranslationInput.new(page:).assign_from_spreadsheet(data)
     end
 
     self

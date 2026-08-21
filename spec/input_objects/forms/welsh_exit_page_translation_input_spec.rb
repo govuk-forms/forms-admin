@@ -4,7 +4,7 @@ RSpec.describe Forms::WelshExitPageTranslationInput, type: :model do
   subject(:welsh_exit_page_translation_input) { described_class.new(new_input_data) }
 
   let(:exit_page) { create_exit_page }
-  let(:page) { create :page }
+  let(:page) { create :page, position: 3 }
 
   let(:new_input_data) do
     {
@@ -17,7 +17,6 @@ RSpec.describe Forms::WelshExitPageTranslationInput, type: :model do
 
   def create_exit_page(attributes = {})
     default_attributes = {
-      id: 1,
       question_page: page,
       markdown: "You are ineligible",
       heading: "Sorry, you are ineligible for this service.",
@@ -36,7 +35,7 @@ RSpec.describe Forms::WelshExitPageTranslationInput, type: :model do
 
         it "is not valid" do
           expect(welsh_exit_page_translation_input).not_to be_valid(validation_context)
-          expect(welsh_exit_page_translation_input.errors.full_messages_for(:heading_cy)).to include "Heading cy #{I18n.t('activemodel.errors.models.forms/welsh_condition_translation_input.attributes.exit_page_heading_cy.blank', question_number: exit_page.question_page.position)}"
+          expect(welsh_exit_page_translation_input.errors.full_messages_for(:heading_cy)).to include "Heading cy #{I18n.t('activemodel.errors.models.forms/welsh_exit_page_translation_input.attributes.heading_cy.blank', question_number: exit_page.question_page.position)}"
         end
       end
 
@@ -46,7 +45,7 @@ RSpec.describe Forms::WelshExitPageTranslationInput, type: :model do
 
           it "is not valid" do
             expect(welsh_exit_page_translation_input).not_to be_valid(validation_context)
-            expect(welsh_exit_page_translation_input.errors.full_messages_for(:heading_cy)).to include "Heading cy #{I18n.t('activemodel.errors.models.forms/welsh_condition_translation_input.attributes.exit_page_heading_cy.too_long', question_number: exit_page.question_page.position, count: 250)}"
+            expect(welsh_exit_page_translation_input.errors.full_messages_for(:heading_cy)).to include "Heading cy #{I18n.t('activemodel.errors.models.forms/welsh_exit_page_translation_input.attributes.heading_cy.too_long', question_number: exit_page.question_page.position, count: 250)}"
           end
         end
 
@@ -65,7 +64,7 @@ RSpec.describe Forms::WelshExitPageTranslationInput, type: :model do
 
         it "is not valid" do
           expect(welsh_exit_page_translation_input).not_to be_valid(validation_context)
-          expect(welsh_exit_page_translation_input.errors.full_messages_for(:markdown_cy)).to include "Markdown cy #{I18n.t('activemodel.errors.models.forms/welsh_condition_translation_input.attributes.exit_page_markdown_cy.blank', question_number: exit_page.question_page.position)}"
+          expect(welsh_exit_page_translation_input.errors.full_messages_for(:markdown_cy)).to include "Markdown cy #{I18n.t('activemodel.errors.models.forms/welsh_exit_page_translation_input.attributes.markdown_cy.blank', question_number: exit_page.question_page.position)}"
         end
       end
 
@@ -95,7 +94,7 @@ RSpec.describe Forms::WelshExitPageTranslationInput, type: :model do
 
           it "is not valid" do
             expect(welsh_exit_page_translation_input).not_to be_valid(validation_context)
-            expect(welsh_exit_page_translation_input.errors.full_messages_for(:heading_cy)).to include "Heading cy #{I18n.t('activemodel.errors.models.forms/welsh_condition_translation_input.attributes.exit_page_heading_cy.too_long', question_number: exit_page.question_page.position, count: 250)}"
+            expect(welsh_exit_page_translation_input.errors.full_messages_for(:heading_cy)).to include "Heading cy #{I18n.t('activemodel.errors.models.forms/welsh_exit_page_translation_input.attributes.heading_cy.too_long', question_number: exit_page.question_page.position, count: 250)}"
           end
         end
 
@@ -157,6 +156,62 @@ RSpec.describe Forms::WelshExitPageTranslationInput, type: :model do
     end
   end
 
+  describe "#assign_from_spreadsheet" do
+    subject(:welsh_exit_page_translation_input) { described_class.new(exit_page: exit_page, position: 1) }
+
+    context "when the spreadsheet data contains Welsh translations for all fields" do
+      let(:spreadsheet_data) do
+        {
+          "Question 3 - exit page 1 heading" => "Welsh heading from spreadsheet",
+          "Question 3 - exit page 1 content" => "Welsh markdown from spreadsheet",
+          "Question 3 - exit page 2 heading" => "Another exit page heading translation (ignored)",
+          "Question 2 - exit page 1 heading" => "Another page's exit page heading translation (ignored)",
+          "Question 1 - question text" => "Page field translation (ignored)",
+        }
+      end
+
+      it "assigns the welsh attributes from the spreadsheet data" do
+        welsh_exit_page_translation_input.assign_from_spreadsheet(spreadsheet_data)
+
+        expect(welsh_exit_page_translation_input.heading_cy).to eq("Welsh heading from spreadsheet")
+        expect(welsh_exit_page_translation_input.markdown_cy).to eq("Welsh markdown from spreadsheet")
+      end
+    end
+
+    context "when the spreadsheet data does not include keys for all fields" do
+      let(:exit_page) { create_exit_page(markdown_cy: "Welsh markdown on form") }
+      let(:spreadsheet_data) do
+        {
+          "Question 3 - exit page 1 heading" => "Welsh heading from spreadsheet",
+        }
+      end
+
+      it "uses the Welsh already set on the exit page for fields not present in the spreadsheet data" do
+        welsh_exit_page_translation_input.assign_from_spreadsheet(spreadsheet_data)
+
+        expect(welsh_exit_page_translation_input.heading_cy).to eq("Welsh heading from spreadsheet")
+        expect(welsh_exit_page_translation_input.markdown_cy).to eq("Welsh markdown on form")
+      end
+    end
+
+    context "when the spreadsheet data includes blank values" do
+      let(:exit_page) { create_exit_page(markdown_cy: "Welsh markdown on form", heading_cy: "Welsh heading on form") }
+      let(:spreadsheet_data) do
+        {
+          "Question 3 - exit page 1 heading" => "Welsh heading from spreadsheet",
+          "Question 3 - exit page 1 content" => "",
+        }
+      end
+
+      it "uses the Welsh already set on the exit page for fields with blank values in the spreadsheet data" do
+        welsh_exit_page_translation_input.assign_from_spreadsheet(spreadsheet_data)
+
+        expect(welsh_exit_page_translation_input.heading_cy).to eq("Welsh heading from spreadsheet")
+        expect(welsh_exit_page_translation_input.markdown_cy).to eq("Welsh markdown on form")
+      end
+    end
+  end
+
   describe "#form_field_id" do
     let(:exit_page) do
       create_exit_page(id: 999)
@@ -175,7 +230,7 @@ RSpec.describe Forms::WelshExitPageTranslationInput, type: :model do
       end
     end
 
-    context "when the welsh condition fields are all empty" do
+    context "when the welsh exit page fields are all empty" do
       let(:new_input_data) { { exit_page:, markdown_cy: "", heading_cy: "" } }
 
       it "returns true" do

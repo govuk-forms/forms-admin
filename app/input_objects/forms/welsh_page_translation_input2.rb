@@ -2,6 +2,7 @@ class Forms::WelshPageTranslationInput2 < BaseInput
   include TextInputHelper
   include ActionView::Helpers::FormTagHelper
   include ActiveModel::Attributes
+  include WelshTranslationContentLabels
 
   attr_accessor :exit_page_translations, :selection_options_cy
   attr_reader :page
@@ -79,6 +80,27 @@ class Forms::WelshPageTranslationInput2 < BaseInput
 
     self.selection_options_cy = welsh_answer_settings&.selection_options&.map&.with_index do |selection_option, index|
       Forms::WelshSelectionOptionTranslationInput.new(selection_option:, page:, id: index).assign_selection_option_values
+    end
+
+    self
+  end
+
+  def assign_from_spreadsheet(data)
+    # assign values from the form first, and override only those that are set in the spreadsheet
+    assign_page_values
+
+    %i[question_text hint_text page_heading guidance_markdown none_of_the_above_question].each do |attr|
+      content_label = page_label(page, attr)
+      send(:"#{attr}_cy=", data[content_label]) if data.key?(content_label) && data[content_label].present?
+    end
+
+    selection_options_cy&.each_with_index do |option, index|
+      content_label = selection_option_label(page, index)
+      option.name_cy = data[content_label] if data.key?(content_label) && data[content_label].present?
+    end
+
+    exit_page_translations&.each do |exit_page_translation|
+      exit_page_translation.assign_from_spreadsheet(data)
     end
 
     self

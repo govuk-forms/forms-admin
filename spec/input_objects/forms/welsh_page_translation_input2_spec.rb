@@ -585,6 +585,101 @@ RSpec.describe Forms::WelshPageTranslationInput2, type: :model do
     end
   end
 
+  describe "#assign_from_spreadsheet" do
+    let(:page) do
+      create_page(attributes_for(:page, :selection_with_none_of_the_above_question, position: 3))
+    end
+
+    before do
+      page.exit_pages = [exit_page, another_exit_page]
+    end
+
+    context "when the spreadsheet data contains Welsh translations for all fields" do
+      let(:spreadsheet_data) do
+        {
+          "Question 3 - question text" => "Welsh question text from spreadsheet",
+          "Question 3 - hint text" => "Welsh hint text from spreadsheet",
+          "Question 3 - page heading" => "Welsh page heading from spreadsheet",
+          "Question 3 - guidance text" => "Welsh guidance markdown from spreadsheet",
+          "Question 3 - option 1" => "Welsh Option 1 from spreadsheet",
+          "Question 3 - option 2" => "Welsh Option 2 from spreadsheet",
+          "Question 3 - question or label if 'None of the above' is selected" => "Welsh None of the above question? from spreadsheet",
+          "Question 3 - exit page 1 heading" => "Welsh exit page heading from spreadsheet",
+          "Question 3 - exit page 1 content" => "Welsh exit page markdown from spreadsheet",
+          "Question 3 - exit page 2 heading" => "Another exit page heading from spreadsheet",
+          "Question 3 - exit page 2 content" => "Another exit page markdown from spreadsheet",
+          "Question 1 - page heading" => "Translation for a different page (ignored)",
+          "Declaration" => "Translation for a form field (ignored)",
+        }
+      end
+
+      it "sets the welsh attributes from the spreadsheet data" do
+        welsh_page_translation_input = described_class.new(page:)
+        welsh_page_translation_input.assign_from_spreadsheet(spreadsheet_data)
+
+        expect(welsh_page_translation_input.question_text_cy).to eq("Welsh question text from spreadsheet")
+        expect(welsh_page_translation_input.hint_text_cy).to eq("Welsh hint text from spreadsheet")
+        expect(welsh_page_translation_input.page_heading_cy).to eq("Welsh page heading from spreadsheet")
+        expect(welsh_page_translation_input.guidance_markdown_cy).to eq("Welsh guidance markdown from spreadsheet")
+        expect(welsh_page_translation_input.none_of_the_above_question_cy).to eq("Welsh None of the above question? from spreadsheet")
+
+        selection_options_cy = welsh_page_translation_input.selection_options_cy.map(&:as_selection_option)
+
+        expect(selection_options_cy).to eq([
+          { name: "Welsh Option 1 from spreadsheet", value: "Option 1" },
+          { name: "Welsh Option 2 from spreadsheet", value: "Option 2" },
+        ])
+
+        exit_page_translation = welsh_page_translation_input.exit_page_translations.find { |ct| ct.id == exit_page.id }
+        expect(exit_page_translation.heading_cy).to eq("Welsh exit page heading from spreadsheet")
+        expect(exit_page_translation.markdown_cy).to eq("Welsh exit page markdown from spreadsheet")
+
+        another_exit_page_translation = welsh_page_translation_input.exit_page_translations.find { |ct| ct.id == another_exit_page.id }
+        expect(another_exit_page_translation.heading_cy).to eq("Another exit page heading from spreadsheet")
+        expect(another_exit_page_translation.markdown_cy).to eq("Another exit page markdown from spreadsheet")
+      end
+    end
+
+    context "when the spreadsheet data does not include keys for all fields" do
+      let(:page) { create_page(hint_text_cy: "Page Welsh hint text", position: 3) }
+      let(:spreadsheet_data) do
+        {
+          "Question 3 - question text" => "Welsh question text from spreadsheet",
+        }
+      end
+
+      it "uses the Welsh already set on the page for fields not present in the spreadsheet data" do
+        welsh_page_translation_input = described_class.new(page:)
+        welsh_page_translation_input.assign_from_spreadsheet(spreadsheet_data)
+
+        expect(welsh_page_translation_input.question_text_cy).to eq("Welsh question text from spreadsheet")
+        expect(welsh_page_translation_input.hint_text_cy).to eq("Page Welsh hint text")
+      end
+    end
+
+    context "when the spreadsheet data includes blank values" do
+      let(:page) do
+        create_page(question_text_cy: "Page Welsh question text",
+                    hint_text_cy: "Page Welsh hint text",
+                    position: 3)
+      end
+      let(:spreadsheet_data) do
+        {
+          "Question 3 - question text" => "Welsh question text from spreadsheet",
+          "Question 3 - hint text" => "",
+        }
+      end
+
+      it "uses the Welsh already set on the page for fields with blank values in the spreadsheet data" do
+        welsh_page_translation_input = described_class.new(page:)
+        welsh_page_translation_input.assign_from_spreadsheet(spreadsheet_data)
+
+        expect(welsh_page_translation_input.question_text_cy).to eq("Welsh question text from spreadsheet")
+        expect(welsh_page_translation_input.hint_text_cy).to eq("Page Welsh hint text")
+      end
+    end
+  end
+
   describe "#page_has_hint_text?" do
     context "when the page has hint_text" do
       let(:page) { create_page(hint_text: "Choose 'Yes' if you already have a valid licence.") }

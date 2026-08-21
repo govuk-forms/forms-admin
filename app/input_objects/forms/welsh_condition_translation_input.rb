@@ -1,6 +1,7 @@
 class Forms::WelshConditionTranslationInput < BaseInput
   include ActionView::Helpers::FormTagHelper
   include ActiveModel::Attributes
+  include WelshTranslationContentLabels
 
   attr_accessor :condition
 
@@ -35,6 +36,17 @@ class Forms::WelshConditionTranslationInput < BaseInput
 
     self.exit_page_markdown_cy = condition.exit_page_markdown_cy
     self.exit_page_heading_cy = condition.exit_page_heading_cy
+
+    self
+  end
+
+  def assign_from_spreadsheet(data)
+    assign_condition_values
+
+    %i[exit_page_heading exit_page_markdown].each do |attr|
+      content_label = condition_label(condition.routing_page, attr)
+      send(:"#{attr}_cy=", data[content_label]) if data.key?(content_label) && data[content_label].present?
+    end
 
     self
   end
