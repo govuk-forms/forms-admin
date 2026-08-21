@@ -1567,6 +1567,11 @@ en:
     update_default:
       success: "%{brand_name} is now the default brand for new forms in this organisation"
       success_govuk: New forms in this organisation will use GOV.UK branding
+  organisation_domains:
+    new:
+      label: Domain
+      submit: Add domain
+      title: Add a domain
   organisations:
     boolean:
       'false': 'No'
