@@ -5,11 +5,7 @@ RSpec.describe "WelshCsvService", feature_multiple_branches: false do
     let(:form) { build :form }
 
     it "contains the header row" do
-      expect(csv_rows(form)[0]).to contain_exactly(
-        "",
-        "English content",
-        "Welsh content",
-      )
+      expect(csv_rows(form)[0]).to eq(["Content ID", "English content", "Welsh content"])
     end
 
     it "contains the form name" do
@@ -49,7 +45,7 @@ RSpec.describe "WelshCsvService", feature_multiple_branches: false do
 
       it "contains the payment URL" do
         expect(csv_rows(form)).to include([
-          "GOV⁠.⁠UK Pay payment link",
+          "GOV.UK Pay payment link",
           "https://www.gov.uk/payment",
           "https://www.gov.uk/payment_cy",
         ])
@@ -201,7 +197,7 @@ RSpec.describe "WelshCsvService", feature_multiple_branches: false do
 
       it "contains the none of the above question" do
         expect(csv_rows(form)).to include([
-          "Question 1 - question or label if ‘None of the above’ is selected",
+          "Question 1 - question or label if 'None of the above' is selected",
           "None of the above question?",
           "Welsh None of the above question?",
         ])
@@ -347,12 +343,12 @@ RSpec.describe "WelshCsvService", feature_multiple_branches: false do
       it "returns a CSV with a header row and the expected rows" do
         csv = csv_rows(form)
 
-        expected_csv = [["", "English content", "Welsh content"],
+        expected_csv = [["Content ID", "English content", "Welsh content"],
                         ["Form name", "A form", "Welsh A form"],
                         ["Question 1 - question text", "None of the above question?", "Welsh None of the above question?"],
                         ["Question 1 - option 1", "Option 1", "Option 1"],
                         ["Question 1 - option 2", "Option 2", "Option 2"],
-                        ["Question 1 - question or label if ‘None of the above’ is selected", "None of the above question?", "Welsh None of the above question?"],
+                        ["Question 1 - question or label if 'None of the above' is selected", "None of the above question?", "Welsh None of the above question?"],
                         ["Question 1 - exit page heading", "Exit page heading", "Welsh exit page heading"],
                         ["Question 1 - exit page content", "Exit page markdown", "Welsh exit page markdown"],
                         ["Question 2 - page heading", "Page heading", "Welsh Page heading"],
@@ -360,7 +356,7 @@ RSpec.describe "WelshCsvService", feature_multiple_branches: false do
                         ["Question 2 - question text", "What?", "Welsh What?"],
                         ["Declaration", "Declaration text", ""],
                         ["Information about what happens next", "English what happens next", "Welsh what happens next"],
-                        ["GOV⁠.⁠UK Pay payment link", "https://www.gov.uk/payment", "https://www.gov.uk/payment_cy"],
+                        ["GOV.UK Pay payment link", "https://www.gov.uk/payment", "https://www.gov.uk/payment_cy"],
                         ["Link to privacy information for this form", "https://www.gov.uk/privacy", ""],
                         ["Contact details for support - email address", "support@example.gov.uk", "support@example.gov.uk"],
                         ["Contact details for support - phone number and opening times", "English support phone", "Welsh support phone"],
