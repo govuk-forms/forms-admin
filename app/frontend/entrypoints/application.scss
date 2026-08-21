@@ -3,6 +3,7 @@ $govuk-global-styles: true;
 
 @import "pkg:govuk-frontend";
 @import "pkg:dfe-autocomplete";
+@import "../styles/app_button_group";
 @import "../styles/app_filter";
 @import "../styles/app_form_states";
 @import "../styles/app_lists";
