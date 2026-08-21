@@ -33,7 +33,29 @@ RSpec.describe Api::BrandsController, type: :request do
           "logo_alt_text" => "Golden Zephyr Council",
           "logo_link" => "https://www.goldenzephyr.example.com",
           "copyright_holder" => "Golden Zephyr Council",
+          "logo_path" => nil,
+          "favicon_path" => nil,
+          "opengraph_image_path" => nil,
         })
+      end
+
+      context "when the brand has assets attached" do
+        let(:brand) do
+          create(:brand, slug: "golden-zephyr").tap do |brand|
+            brand.logo_file = fixture_file_upload("logo.png", "image/png")
+            brand.favicon_file = fixture_file_upload("favicon.ico", "image/vnd.microsoft.icon")
+            brand.opengraph_image_file = fixture_file_upload("logo.jpeg", "image/jpeg")
+            BrandAssetsService.new(brand:).attach_assets
+          end
+        end
+
+        it "returns the asset paths" do
+          expect(response.parsed_body).to include({
+            "logo_path" => match(%r{\A/assets/brands/golden-zephyr/logo-\h{6}\.png\z}),
+            "favicon_path" => match(%r{\A/assets/brands/golden-zephyr/favicon-\h{6}\.ico\z}),
+            "opengraph_image_path" => match(%r{\A/assets/brands/golden-zephyr/opengraph-image-\h{6}\.jpg\z}),
+          })
+        end
       end
 
       it "sets the response to be cached for 5 minutes" do

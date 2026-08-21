@@ -21,4 +21,24 @@ class Brand < ApplicationRecord
   validates :logo_file, file_content_type: { in: ASSET_CONTENT_TYPES[:logo] }
   validates :favicon_file, file_content_type: { in: ASSET_CONTENT_TYPES[:favicon] }
   validates :opengraph_image_file, file_content_type: { in: ASSET_CONTENT_TYPES[:opengraph_image] }
+
+  def logo_path
+    asset_path(logo)
+  end
+
+  def favicon_path
+    asset_path(favicon)
+  end
+
+  def opengraph_image_path
+    asset_path(opengraph_image)
+  end
+
+private
+
+  # blob keys are paths under /assets/, which CloudFront serves from the
+  # assets bucket
+  def asset_path(attachment)
+    "/#{attachment.blob.key}" if attachment.attached?
+  end
 end
