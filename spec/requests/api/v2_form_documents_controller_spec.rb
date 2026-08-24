@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe Api::FormDocumentsController, type: :request do
+RSpec.describe Api::V2FormDocumentsController, type: :request do
   let(:headers) { { "ACCEPT": "application/json" } }
 
   describe "#show" do
