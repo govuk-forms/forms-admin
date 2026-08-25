@@ -69,6 +69,7 @@ RSpec.describe Reports::FormsCsvReportService do
         form.created_at.iso8601(6),
         form.first_made_live_at.iso8601(6),
         form_documents.first["content"]["live_at"],
+        "1",
         "9",
         "false",
         "false",
