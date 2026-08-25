@@ -668,6 +668,69 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
   multiple_branch_form.set_task_status_service(TaskStatusService.new(form: multiple_branch_form))
   multiple_branch_form.make_live!
 
+  multiple_exit_pages_form = Form.create!(
+    name: "Multiple exit pages form",
+    pages: [
+      Page.build(
+        question_text: "Selection question with multiple exit pages",
+        answer_type: "selection",
+        answer_settings: {
+          only_one_option: "true",
+          selection_options: [
+            { "name": "Option 1", "value": "Option 1" },
+            { "name": "Go to exit page 1", "value": "Go to exit page 1" },
+            { "name": "Go to exit page 2", "value": "Go to exit page 2" },
+          ],
+        },
+      ),
+    ],
+    question_section_completed: true,
+    declaration_markdown: "",
+    declaration_section_completed: true,
+    privacy_policy_url: "https://www.gov.uk/help/privacy-notice",
+    submission_email:,
+    support_email: "your.email+fakedata84701@gmail.com.gov.uk",
+    support_phone: "08000800",
+    what_happens_next_markdown: "Test",
+    share_preview_completed: true,
+    send_copy_of_answers: "enabled",
+    delivery_configurations: [
+      DeliveryConfiguration.create(
+        delivery_method: :email,
+        delivery_schedule: :immediate,
+        formats: [],
+      ),
+    ],
+  )
+  Condition.create!(
+    check_page: multiple_exit_pages_form.pages.first,
+    routing_page: multiple_exit_pages_form.pages.first,
+    goto_page: nil,
+    answer_value: "Go to exit page 1",
+    exit_page: ExitPage.create!(
+      question_page: multiple_exit_pages_form.pages.first,
+      heading: "Exit page 1",
+      markdown: "This is exit page 1.",
+    ),
+    exit_page_heading: ExitPage.last.heading,
+    exit_page_markdown: ExitPage.last.markdown,
+  )
+  Condition.create!(
+    check_page: multiple_exit_pages_form.pages.first,
+    routing_page: multiple_exit_pages_form.pages.first,
+    goto_page: nil,
+    answer_value: "Go to exit page 2",
+    exit_page: ExitPage.create!(
+      question_page: multiple_exit_pages_form.pages.first,
+      heading: "Exit page 2",
+      markdown: "This is exit page 2.",
+    ),
+    exit_page_heading: ExitPage.last.heading,
+    exit_page_markdown: ExitPage.last.markdown,
+  )
+  multiple_exit_pages_form.set_task_status_service(TaskStatusService.new(form: multiple_exit_pages_form))
+  multiple_exit_pages_form.reload.make_live!
+
   copy_of_answers_form = Form.create!(
     name: "Copy of answers form",
     pages: [
@@ -709,5 +772,6 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
   GroupForm.create! group: test_group, form_id: none_of_the_above_form.id
   GroupForm.create! group: test_group, form_id: welsh_form.id
   GroupForm.create! group: multiple_branches_test_group, form_id: multiple_branch_form.id
+  GroupForm.create! group: multiple_branches_test_group, form_id: multiple_exit_pages_form.id
   GroupForm.create! group: test_group, form_id: copy_of_answers_form.id
 end
