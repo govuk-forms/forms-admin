@@ -10,6 +10,6 @@ class Api::BrandsController < ApplicationController
 private
 
   def brand
-    Brand.find_by!(id: params[:brand_id])
+    Brand.find_by!(slug: params[:slug])
   end
 end
