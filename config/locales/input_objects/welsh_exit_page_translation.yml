@@ -1,0 +1,22 @@
+---
+en:
+  activemodel:
+    errors:
+      models:
+        forms/welsh_exit_page_translation_input:
+          attributes:
+            heading_cy:
+              blank: Enter an exit page heading in Welsh for question %{question_number}
+              too_long: The exit page heading for question %{question_number} cannot be longer than %{count} characters
+            markdown_cy:
+              blank: Enter exit page content in Welsh for question %{question_number}
+              too_long: The exit page content for question %{question_number} cannot be longer than %{count} characters
+              unsupported_markdown_syntax: Exit page content for question %{question_number} can only contain formatting for links, subheadings (##), bulleted lists (*), or numbered lists (1.)
+  helpers:
+    hints:
+      forms_welsh_exit_page_translation_input:
+        markdown_cy: Enter Welsh exit page content
+    label:
+      forms_welsh_exit_page_translation_input:
+        heading_cy_html: Enter Welsh exit page %{exit_page_number} heading<span class="govuk-visually-hidden"> for question %{question_number}</span>
+        markdown_cy_html: Enter Welsh exit page %{exit_page_number} content<span class="govuk-visually-hidden"> for question %{question_number}</span>
