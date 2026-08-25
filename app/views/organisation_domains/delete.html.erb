@@ -1,0 +1,13 @@
+<% set_page_title(title_with_error_prefix(t(".title"), @delete_confirmation_input.errors.any?)) %>
+<% content_for :back_link, govuk_back_link_to(organisation_path(@organisation)) %>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <%= render(
+      @delete_confirmation_input,
+      url: organisation_domain_path(@organisation, @organisation_domain),
+      caption_text: @organisation.name_with_abbreviation,
+      legend_text: t(".title", domain: @organisation_domain.domain),
+    ) %>
+  </div>
+</div>

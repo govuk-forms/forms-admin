@@ -237,6 +237,11 @@ Rails.application.routes.draw do
 
   resources :organisations, only: %i[index show] do
     resources :brands, controller: :organisation_brands, only: %i[new create destroy]
+    resources :domains, controller: :organisation_domains, only: %i[new create destroy] do
+      member do
+        get "delete", to: "organisation_domains#delete"
+      end
+    end
     patch "default-brand", to: "organisation_brands#update_default", as: :default_brand
   end
 

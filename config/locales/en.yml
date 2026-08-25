@@ -109,6 +109,8 @@ en:
         groups/delete_confirmation_input:
           blank: Select ‘Yes’ to delete the group
           group_has_forms: This group cannot be deleted because it has forms in it
+        organisations/delete_confirmation_input:
+          blank: Select ‘Yes’ to remove the domain
         pages/change_order_input:
           attributes:
             confirm:
@@ -1567,6 +1569,13 @@ en:
     update_default:
       success: "%{brand_name} is now the default brand for new forms in this organisation"
       success_govuk: New forms in this organisation will use GOV.UK branding
+  organisation_domains:
+    delete:
+      title: Are you sure you want to remove %{domain} from this organisation?
+    new:
+      label: Domain
+      submit: Add domain
+      title: Add a domain
   organisations:
     boolean:
       'false': 'No'
@@ -1623,6 +1632,10 @@ en:
       domains:
         heading: Email domains
         none: This organisation does not have any email domains.
+        remove: Remove
+        table_headings:
+          actions: Actions
+          domain: Domain
       mou_signatures:
         heading: MOUs and agreements
         none: No one has agreed an MOU or agreement for this organisation.
