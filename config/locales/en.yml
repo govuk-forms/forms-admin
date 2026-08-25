@@ -714,6 +714,13 @@ en:
         csv_download: Download content as CSV
         delete_welsh_version: Delete Welsh version
         english_header: English content
+        exit_page:
+          heading: Exit page %{exit_page_number} heading
+          markdown: Exit page %{exit_page_number} content
+          name: Exit page %{exit_page_number}
+          page_heading:
+            one: Question %{question_number}’s exit page
+            other: Question %{question_number}’s exit pages
         exit_page_heading: Exit page heading
         exit_page_markdown: Exit page content
         guidance_markdown: Guidance text

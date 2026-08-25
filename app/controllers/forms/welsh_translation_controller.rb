@@ -3,14 +3,25 @@ module Forms
     def new
       authorize current_form, :can_edit_form?
 
-      @welsh_translation_input = WelshTranslationInput.new(form: form_with_pages_and_conditions).assign_form_values
+      @welsh_translation_input = if FeatureService.new(group: current_form.group).enabled?(:multiple_branches)
+                                   WelshTranslationInput2.new(form: form_with_pages_and_exit_pages).assign_form_values
+                                 else
+                                   WelshTranslationInput.new(form: form_with_pages_and_conditions).assign_form_values
+                                 end
+
       @table_presenter = Forms::TranslationTablePresenter.new
+      @current_form = current_form
     end
 
     def create
       authorize current_form, :can_edit_form?
 
-      @welsh_translation_input = WelshTranslationInput.new(welsh_translation_params)
+      @welsh_translation_input = if FeatureService.new(group: current_form.group).enabled?(:multiple_branches)
+                                   WelshTranslationInput2.new(welsh_translation_params2)
+                                 else
+                                   WelshTranslationInput.new(welsh_translation_params)
+                                 end
+
       @table_presenter = Forms::TranslationTablePresenter.new
 
       if @welsh_translation_input.blanked?
@@ -89,12 +100,27 @@ module Forms
       ).merge(form: current_form)
     end
 
+    def welsh_translation_params2
+      params.require(:forms_welsh_translation_input2).permit(
+        *WelshTranslationInput2.attribute_names,
+        page_translations_attributes: [
+          *WelshPageTranslationInput2.attribute_names,
+          { selection_options_cy_attributes: %i[id name_cy] },
+          { exit_page_translations_attributes: WelshExitPageTranslationInput.attribute_names },
+        ],
+      ).merge(form: current_form)
+    end
+
     def delete_welsh_translation_params
       params.require(:forms_delete_welsh_translation_input).permit(:confirm).merge(form: current_form)
     end
 
     def form_with_pages_and_conditions
       Form.includes(pages: [:routing_conditions]).find(current_form.id)
+    end
+
+    def form_with_pages_and_exit_pages
+      Form.includes(pages: [:exit_pages]).find(current_form.id)
     end
   end
 end
