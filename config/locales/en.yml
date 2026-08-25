@@ -2333,8 +2333,8 @@ en:
         </p>
       s3_details:
         summary_content_html: |
-          <p>You can get completed forms sent to an AWS S3 bucket instead of an email address.</p>
-          <p>You need to set an email address here to mark this task complete, even if you want to receive completed forms in an AWS S3 bucket.</p>
+          <p>You can get completed forms sent to an AWS S3 bucket as well as, or instead of, an email address.</p>
+          <p>You need to set an email address here to mark this task complete, even if you want to use an S3 bucket and stop getting email submissions.</p>
           <p>To find out how to set up an AWS S3 bucket, <a href="https://www.forms.service.gov.uk/processing-completed-form-submissions">read our guidance on processing completed form submissions</a>.</p>
         summary_text: Get completed forms sent to an AWS S3 bucket
   share_preview:
