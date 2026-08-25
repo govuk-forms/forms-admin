@@ -110,6 +110,7 @@
     <% else %>
       <p class="govuk-body"><%= t("organisations.show.domains.none") %></p>
     <% end %>
+    <%= govuk_button_link_to "Add a domain", new_organisation_domain_path(@organisation), secondary: true %>
 
     <h2 class="govuk-heading-m"><%= t("organisations.show.brands.heading") %></h2>
     <p class="govuk-body"><%= t("organisations.show.brands.guidance") %></p>
