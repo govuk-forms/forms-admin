@@ -12,7 +12,7 @@ namespace :form_documents do
     form_documents = FormDocument.where(form_id:) if form_id
 
     puts "form_id,tag,version,language,created_at,updated_at"
-    form_documents.each do
+    form_documents.order(:form_id, :id).each do
       puts "#{it.form_id},#{it.tag},#{it.version},#{it.language},#{it.created_at.iso8601},#{it.updated_at.iso8601}"
     end
   end
