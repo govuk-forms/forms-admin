@@ -59,33 +59,25 @@ RSpec.describe FormDocumentSyncService do
     end
 
     context "when there is an existing archived form document" do
+      let(:form) { create(:form, state: "archived") }
+      let(:form_document) { create :form_document, :archived, form:, version: 1 }
+
       before do
-        create :form_document, :archived, form:
+        form.latest_form_document_id = form_document.id
+        form.save!
       end
 
-      it "destroys the archived form document" do
+      it "retains the archived form document" do
         expect {
           service.synchronize_live_form
-        }.to(change { FormDocument.exists?(form:, tag: "archived") }.from(true).to(false))
+        }.not_to(change { FormDocument.where(form:, tag: "archived").count })
       end
 
-      it "creates the live form document" do
+      it "creates a new live form document" do
         expect {
           service.synchronize_live_form
-        }.to(change { FormDocument.exists?(form:, tag: "live") }.from(false).to(true))
-      end
-
-      context "and deleting the archived FormDocument fails" do
-        before do
-          allow(service).to receive(:delete_form_documents_by_tag).with(FormDocumentSyncService::ARCHIVED_TAG)
-            .and_raise(ActiveRecord::StatementInvalid)
-        end
-
-        it "does not create the live FormDocument" do
-          expect {
-            service.synchronize_live_form
-          }.to raise_error(ActiveRecord::StatementInvalid).and not_change(FormDocument, :count)
-        end
+        }.to change { FormDocument.where(form:, tag: "live").count }.from(0).to(1)
+        .and change { form.reload.latest_form_document.version }.from(1).to(2)
       end
     end
 
@@ -345,33 +337,25 @@ RSpec.describe FormDocumentSyncService do
     end
 
     context "when there is an existing archived form document" do
+      let(:form) { create(:form, state: "archived") }
+      let(:form_document) { create :form_document, :archived, form:, content: form.as_form_document, version: 1 }
+
       before do
-        create :form_document, :archived, form:
+        form.latest_form_document_id = form_document.id
+        form.save!
       end
 
-      it "destroys the archived form document" do
+      it "retains the archived form document" do
         expect {
           service.synchronize_only_live_english_form
-        }.to(change { FormDocument.exists?(form:, tag: "archived") }.from(true).to(false))
+        }.not_to(change { FormDocument.where(form:, tag: "archived").count })
       end
 
-      it "creates the live form document" do
+      it "creates a new live form document" do
         expect {
           service.synchronize_only_live_english_form
-        }.to(change { FormDocument.exists?(form:, tag: "live", version: 1) }.from(false).to(true))
-      end
-
-      context "and deleting the archived FormDocument fails" do
-        before do
-          allow(service).to receive(:delete_form_documents_by_tag).with(FormDocumentSyncService::ARCHIVED_TAG)
-            .and_raise(ActiveRecord::StatementInvalid)
-        end
-
-        it "does not create the live FormDocument" do
-          expect {
-            service.synchronize_only_live_english_form
-          }.to raise_error(ActiveRecord::StatementInvalid).and not_change(FormDocument, :count)
-        end
+        }.to change { FormDocument.where(form:, tag: "live").count }.from(0).to(1)
+        .and change { form.reload.latest_form_document.version }.from(1).to(2)
       end
     end
 
@@ -468,7 +452,9 @@ RSpec.describe FormDocumentSyncService do
       end
 
       context "when there is an existing live Welsh form document" do
-        let!(:form_document) { create :form_document, :live, form:, language: "cy", content: welsh_form_content, version: 1 }
+        before do
+          create :form_document, :live, form:, language: "cy", content: welsh_form_content, version: 1
+        end
 
         it "creates a new live Welsh form document with the new content" do
           new_name = "new name"
@@ -486,40 +472,37 @@ RSpec.describe FormDocumentSyncService do
         end
 
         it "increments the English and Welsh versions by 1" do
-          service.synchronize_only_live_welsh_form
-          expect(form.reload.latest_form_document.version).to eq(2)
-          expect(form.reload.latest_welsh_form_document.version).to eq(2)
+          expect {
+            service.synchronize_only_live_welsh_form
+          }.to change { form.reload.latest_form_document.version }.by(1)
+          .and change { form.reload.latest_welsh_form_document.version }.by(1)
         end
       end
 
       context "when there is an existing archived Welsh form document" do
+        let!(:form) { create(:form, state: "live_with_draft") }
+
         before do
-          create :form_document, :archived, form:, language: "cy"
+          live_english_form_document = create(:form_document, :live, form:, content: form.as_form_document, language: "en", version: 2)
+          create :form_document, :archived, form:, content: form.as_form_document, language: "cy", version: 2
+
+          form.latest_form_document_id = live_english_form_document.id
+          form.save!
         end
 
-        it "destroys the archived form document" do
+        it "retains the archived form document" do
           expect {
             service.synchronize_only_live_welsh_form
-          }.to(change { FormDocument.exists?(form:, tag: "archived", language: "cy") }.from(true).to(false))
+          }.not_to(change { FormDocument.where(form:, tag: "archived").count })
         end
 
-        it "creates the live form document" do
+        it "creates new live English and Welsh form documents" do
           expect {
             service.synchronize_only_live_welsh_form
-          }.to(change { FormDocument.exists?(form:, tag: "live", language: "cy") }.from(false).to(true))
-        end
-
-        context "and deleting the archived FormDocument fails" do
-          before do
-            allow(service).to receive(:delete_form_documents_by_tag).with(FormDocumentSyncService::ARCHIVED_TAG)
-              .and_raise(ActiveRecord::StatementInvalid)
-          end
-
-          it "does not create the live FormDocument" do
-            expect {
-              service.synchronize_only_live_welsh_form
-            }.to raise_error(ActiveRecord::StatementInvalid).and not_change(FormDocument, :count)
-          end
+          }.to change { FormDocument.where(form:, tag: "live", language: "en").count }.from(2).to(3)
+          .and change { FormDocument.where(form:, tag: "live", language: "cy").count }.from(0).to(1)
+          .and change { form.reload.latest_form_document.version }.by(1)
+          .and change { form.reload.latest_welsh_form_document&.version }.by(1)
         end
       end
     end

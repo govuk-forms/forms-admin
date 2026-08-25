@@ -11,9 +11,6 @@ class FormDocumentSyncService
 
   def synchronize_live_form
     FormDocument.transaction do
-      # A new live version replaces any previous archived version
-      delete_form_documents_by_tag(ARCHIVED_TAG)
-
       synchronize_documents_for_tag(LIVE_TAG, live_at: form.updated_at)
     end
   end
@@ -52,9 +49,6 @@ class FormDocumentSyncService
       # If we've already made the Welsh version live, changes to the Welsh version must be made live at the same time by calling a different method
       raise ActiveRecord::RecordNotFound, "Cannot make changes to only the live English form if there is already a live Welsh version." if form.has_live_welsh_translation?
 
-      # A new live version replaces any previous archived version
-      delete_form_documents_by_tag(ARCHIVED_TAG)
-
       content = form_content("en", live_at: form.updated_at)
       content["available_languages"] = %w[en] # don't include Welsh in available languages
       create_new_versioned_form_document(LIVE_TAG, content, "en", version_number_of_existing_form_document + 1)
@@ -67,9 +61,6 @@ class FormDocumentSyncService
 
       # Ensure we only make Welsh version live if there is already an existing live English version
       raise ActiveRecord::RecordNotFound, "Cannot make Welsh version live unless there is already a live English version." unless english_form_document&.tag == LIVE_TAG
-
-      # A new live version replaces the archived version
-      delete_form_documents_by_tag(ARCHIVED_TAG)
 
       content = form_content("cy", live_at: form.updated_at)
       new_version_number = english_form_document.version + 1
@@ -100,8 +91,8 @@ private
         update_or_create_form_document(tag, content, language, version)
       end
 
-      # Clean up any documents for languages no longer used by the form
-      delete_form_documents_for_unused_languages(tag)
+      # Delete any draft documents for languages no longer used by the form
+      delete_draft_form_documents_for_unused_languages
     end
   end
 
@@ -139,12 +130,8 @@ private
     form.update_column(:latest_form_document_id, form_document.id) if language == "en" && tag == LIVE_TAG
   end
 
-  def delete_form_documents_by_tag(tag)
-    form_documents_by_tag(tag).delete_all
-  end
-
-  def delete_form_documents_for_unused_languages(tag)
-    form_documents_by_tag(tag)
+  def delete_draft_form_documents_for_unused_languages
+    form_documents_by_tag(DRAFT_TAG)
       .where.not(language: form.available_languages)
       .delete_all
   end
