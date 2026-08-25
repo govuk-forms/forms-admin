@@ -322,7 +322,7 @@ Rails.application.routes.draw do
       get "/group", to: "api/forms_metadata#group", as: :form_group
     end
 
-    get "brands/:brand_id", to: "api/brands#show", as: :brand
+    get "brands/:slug", to: "api/brands#show", as: :brand
   end
 
   scope "api/v3", as: "api_v3" do

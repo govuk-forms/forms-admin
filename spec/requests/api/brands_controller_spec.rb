@@ -17,7 +17,7 @@ RSpec.describe Api::BrandsController, type: :request do
       end
 
       before do
-        get "/api/v2/brands/#{brand.id}", headers:
+        get "/api/v2/brands/#{brand.slug}", headers:
       end
 
       it "returns http success" do
@@ -65,7 +65,7 @@ RSpec.describe Api::BrandsController, type: :request do
 
     context "when the brand does not exist" do
       before do
-        get "/api/v2/brands/0", headers:
+        get "/api/v2/brands/unknown-brand", headers:
       end
 
       it "returns http not found" do
