@@ -290,7 +290,7 @@ describe "routes/show.html.erb" do
 
       it "has a button for adding exit pages" do
         render_page
-        expect(rendered).to have_button("Add a new exit page")
+        expect(rendered).to have_button("Add an exit page")
         expect(rendered).to have_selector("button[name='new_exit_page'][value='#{pages.first.id}']")
       end
 
