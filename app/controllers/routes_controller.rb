@@ -14,7 +14,11 @@ class RoutesController < FormsController
     @routes_input = Forms::RoutesInput.new(routes_params)
 
     if @routes_input.submit
-      redirect_to form_pages_path(@routes_input.form), success: t("banner.success.form.routing_saved")
+      if redirect_params.key?(:new_exit_page)
+        redirect_to new_exit_page_path(@routes_input.form, redirect_params[:new_exit_page])
+      else
+        redirect_to form_pages_path(@routes_input.form), success: t("banner.success.form.routing_saved")
+      end
     else
       render :show, status: :unprocessable_content
     end
@@ -34,6 +38,10 @@ private
 
   def routes_params
     params.require(:forms_routes_input).permit(routes_attributes: %i[id page_id answer_value goto]).merge(form: form_with_pages_and_conditions)
+  end
+
+  def redirect_params
+    params.permit(:new_exit_page)
   end
 
   def form_with_pages_and_conditions

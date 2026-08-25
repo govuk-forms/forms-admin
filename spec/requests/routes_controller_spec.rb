@@ -77,6 +77,19 @@ RSpec.describe RoutesController, type: :request do
         post routes_path(form.id), params: valid_params
         expect(flash[:success]).to eq I18n.t("banner.success.form.routing_saved")
       end
+
+      context "when new_exit_page is passed in the params" do
+        let(:valid_params) do
+          super().merge(
+            new_exit_page: pages.first.id,
+          )
+        end
+
+        it "redirects to the new exit page path" do
+          post routes_path(form.id), params: valid_params
+          expect(response).to redirect_to(new_exit_page_path(form, pages.first.id))
+        end
+      end
     end
 
     context "when the user is not in the form's group" do

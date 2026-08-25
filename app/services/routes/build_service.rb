@@ -36,10 +36,10 @@ class Routes::BuildService
                         option_for_select(matching_page) if matching_page
                       end
 
-      return [
+      return (exit_pages(page) + [
         selected_page,
         [END_OF_FORM_OPTION.first, GotoValue::DefaultValue.new],
-      ].compact
+      ]).compact
     end
 
     # Don't include the current page or pages before in the options,
@@ -49,7 +49,7 @@ class Routes::BuildService
     next_page_id = next_page.id
     drop = true
 
-    all_goto_options.filter_map do |option|
+    options = all_goto_options.filter_map do |option|
       _, value = option
 
       if drop
@@ -63,6 +63,16 @@ class Routes::BuildService
       else
         option
       end
+    end
+
+    exit_pages(page) + options
+  end
+
+  def exit_pages(page)
+    exit_pages_positions = ExitPage.positions_for_page(page)
+
+    page.exit_pages.in_order_of(:id, exit_pages_positions.keys, filter: false).map do |exit_page|
+      ["Exit page #{exit_pages_positions[exit_page.id]}: #{exit_page.heading}", GotoValue::ExitPage.new(exit_page.id)]
     end
   end
 
@@ -123,6 +133,8 @@ private
 
     if condition.skip_to_end?
       GotoValue::EndOfFormValue.new
+    elsif condition.exit_page_id.present?
+      GotoValue::ExitPage.new(condition.exit_page_id)
     else
       GotoValue::Page.new(condition.goto_page_id)
     end

@@ -210,6 +210,50 @@ describe "routes/show.html.erb" do
       end
     end
 
+    context "when the final page is a selection page" do
+      let(:pages) do
+        [
+          build_stubbed(:page, id: 101),
+          build_stubbed(:page, id: 102),
+          build_stubbed(
+            :page,
+            :with_selection_settings,
+            id: 103,
+            routing_conditions: [
+              build_stubbed(
+                :condition,
+                routing_page_id: 103,
+                goto_page_id: 101,
+                answer_value: "Option 1",
+              ),
+            ],
+          ),
+        ]
+      end
+
+      let(:routes_input) do
+        build(:routes_input, form:).assign_form_values.tap do |routes_input|
+          routes_input.routes.each { |route| allow(route).to receive(:invalid?).and_return(true) }
+        end
+      end
+
+      it "shows the selected goto page for the route" do
+        render_page
+
+        expect(rendered).to have_selector('.govuk-select[name="forms_routes_input[routes_attributes][1][goto]"]') do |field|
+          expect(field).to have_selector("option[selected]") do |option|
+            expect(option["value"]).to eq "default"
+          end
+        end
+      end
+
+      it "has a button for adding exit pages" do
+        render_page
+        expect(rendered).to have_button("Add a new exit page")
+        expect(rendered).to have_selector("button[name='new_exit_page'][value='#{pages.last.id}']")
+      end
+    end
+
     context "when a page is a select from a list question" do
       let(:pages) do
         [
@@ -242,6 +286,12 @@ describe "routes/show.html.erb" do
 
           expect(rows[2]).not_to have_selector(".govuk-select")
         end
+      end
+
+      it "has a button for adding exit pages" do
+        render_page
+        expect(rendered).to have_button("Add a new exit page")
+        expect(rendered).to have_selector("button[name='new_exit_page'][value='#{pages.first.id}']")
       end
 
       context "with more than 10 options" do
@@ -281,6 +331,28 @@ describe "routes/show.html.erb" do
           end
         end
       end
+    end
+  end
+
+  context "when the page has an exit page" do
+    let!(:pages) do
+      [
+        create(
+          :page,
+          id: 101,
+        ),
+        create(:page, id: 102),
+        create(:page, id: 103),
+      ]
+    end
+    let!(:exit_page) { create(:exit_page, id: 884, question_page_id: pages.first.id, heading: "Can't continue", markdown: "You can't continue") }
+    let!(:another_exit_page) { create(:exit_page, id: 999, question_page_id: pages.first.id, heading: "Stop using this form", markdown: "You can't continue") }
+
+    it "has links to the exit pages" do
+      render_page
+      expect(rendered).to have_selector("h2", text: "Question 1’s exit pages", normalize_ws: true)
+      expect(rendered).to have_link("Exit page 1: Can't continue", href: edit_exit_page_path(form.id, pages.first.id, exit_page.id))
+      expect(rendered).to have_link("Exit page 2: Stop using this form", href: edit_exit_page_path(form.id, pages.first.id, another_exit_page.id))
     end
   end
 

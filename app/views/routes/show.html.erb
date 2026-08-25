@@ -25,7 +25,7 @@
               row.with_value do
                 capture do %>
                 <p> <%= page.question_text %> </p>
-                <% if @routes_input.form.next_page_after(page).present? || routes.any?(&:invalid?) %>
+                <% if @routes_input.form.next_page_after(page).present? || routes.any?(&:invalid?) || @routes_input.class.route_with_selection_options?(page) %>
                   <ul class="govuk-list">
                     <% routes.each do |route| %>
                       <li>
@@ -48,6 +48,21 @@
                           page.answer_settings.only_one_option == "true" &&
                             @routes_input.class.too_many_selection_options?(page) %>
                     <%= t(".too_many_options_html") %>
+                  <% end %>
+                  <% if Forms::RoutesInput::route_with_selection_options?(page) %>
+                    <%= f.govuk_submit t(".add_exit_page_html", question_number: page.position), secondary: true, name: 'new_exit_page', value: page.id %>
+                  <% end %>
+                  <% if page.exit_pages.any? %>
+                    <h2 class="govuk-heading-s">
+                      <%= t(".exit_pages_list", question_number: page.position) %>
+                    </h2>
+                      <%= govuk_list(
+                        page.exit_pages.order(:created_at).map do |exit_page|
+                          link_to(t(".exit_page_list_entry", exit_page_number: exit_page.position, heading: exit_page.heading), edit_exit_page_path(form_id: @current_form.id, page_id: page.id, id: exit_page.id))
+                        end,
+                        type: ""
+                      ) %>
+                    </ul>
                   <% end %>
                 <% end %>
               <% end %>

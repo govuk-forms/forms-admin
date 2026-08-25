@@ -16,6 +16,10 @@ RSpec.describe GotoValueType do
       expect(type.cast("page_5")).to eq(GotoValue::Page.new(5))
     end
 
+    it "casts an 'exit_page_<id>' string to an ExitPage" do
+      expect(type.cast("exit_page_9")).to eq(GotoValue::ExitPage.new(9))
+    end
+
     it "returns already-cast values unchanged" do
       value = GotoValue::Page.new(5)
       expect(type.cast(value)).to equal(value)
