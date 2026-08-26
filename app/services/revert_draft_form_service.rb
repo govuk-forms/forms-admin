@@ -62,6 +62,8 @@ private
 
     revert_pages(steps_data)
 
+    revert_exit_pages(steps_data)
+
     # revert conditions after pages are created to make sure conditions don't
     # have validation errors if the page hasn't been created yet
     revert_routing_conditions(steps_data)
@@ -80,6 +82,26 @@ private
       assign_page_attributes(page, step_data)
 
       page.save!
+    end
+  end
+
+  def revert_exit_pages(steps_data)
+    form.exit_pages.reload
+
+    form_document_exit_page_ids = steps_data.flat_map { |step| step["exit_pages"] || [] }.map { |ep| ep["id"] }
+    form.exit_pages.where.not(id: form_document_exit_page_ids).destroy_all
+
+    steps_data.each do |step_data|
+      page = form.pages.find_by(external_id: step_data["id"])
+      next if page.blank?
+
+      (step_data["exit_pages"] || []).each do |exit_page_data|
+        exit_page = ExitPage.find_or_initialize_by(id: exit_page_data["id"])
+        exit_page.question_page = page
+        exit_page.heading = exit_page_data["heading"]
+        exit_page.markdown = exit_page_data["markdown"]
+        exit_page.save!
+      end
     end
   end
 
@@ -116,11 +138,21 @@ private
 
   def assign_condition_attributes(condition, condition_data)
     condition.answer_value = condition_data["answer_value"]
-    condition.routing_page = Page.find_by!(external_id: condition_data["routing_page_id"]) if condition_data["routing_page_id"]
-    condition.check_page = Page.find_by!(external_id: condition_data["check_page_id"]) if condition_data["check_page_id"]
-    condition.goto_page = Page.find_by!(external_id: condition_data["goto_page_id"]) if condition_data["goto_page_id"]
+    condition.routing_page = if condition_data["routing_page_id"]
+                               Page.find_by!(external_id: condition_data["routing_page_id"])
+                             end
+
+    condition.check_page = if condition_data["check_page_id"]
+                             Page.find_by!(external_id: condition_data["check_page_id"])
+                           end
+
+    condition.goto_page = if condition_data["goto_page_id"].present?
+                            Page.find_by!(external_id: condition_data["goto_page_id"])
+                          end
+
     condition.exit_page_heading = condition_data["exit_page_heading"]
     condition.exit_page_markdown = condition_data["exit_page_markdown"]
+    condition.exit_page_id = condition_data["exit_page_id"]
   end
 
   def revert_welsh_translations(welsh_form_document)
