@@ -38,7 +38,7 @@ class BrandsController < WebController
   def update
     authorize Brand, :can_edit_brands?
 
-    if @brand.update(update_brand_params)
+    if @brand.update(brand_params)
       BrandAssetsService.new(brand: @brand).attach_assets
       redirect_to @brand, success: t("brands.success_messages.update"), status: :see_other
     else
@@ -53,10 +53,6 @@ private
   end
 
   def brand_params
-    params.require(:brand).permit(:name, :slug, :header_background_colour, :border_colour, :logo_alt_text, :logo_link, :copyright_holder, :logo_file, :favicon_file, :opengraph_image_file)
-  end
-
-  def update_brand_params
     params.require(:brand).permit(:name, :header_background_colour, :border_colour, :logo_alt_text, :logo_link, :copyright_holder, :logo_file, :favicon_file, :opengraph_image_file)
   end
 end
