@@ -326,7 +326,7 @@ en:
     heading: Choose a brand for your form
   brands:
     edit:
-      current_file: 'Current %{file_name}: %{path}'
+      current_file_html: 'Current %{file_name}: %{link}'
       title: Edit brand
     index:
       create_brand: Create a brand

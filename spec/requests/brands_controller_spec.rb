@@ -286,6 +286,23 @@ RSpec.describe BrandsController, type: :request do
         end
       end
     end
+
+    context "when the user is a super admin and the brand has assets" do
+      before do
+        brand.logo_file = fixture_file_upload("logo.png", "image/png")
+        BrandAssetsService.new(brand:).attach_assets
+
+        login_as_super_admin_user
+
+        get path
+      end
+
+      it "links to the current file for each uploaded asset" do
+        page = Capybara.string(response.body)
+        expect(page).to have_text("Current Logo:")
+        expect(page).to have_link("/#{brand.logo.blob.key}", href: "/#{brand.logo.blob.key}")
+      end
+    end
   end
 
   describe "#update" do
