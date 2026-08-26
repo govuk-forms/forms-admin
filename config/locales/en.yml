@@ -2235,7 +2235,7 @@ en:
       live-or-archived: live or archived
   routes:
     show:
-      add_exit_page_html: Add a new exit page <span class="govuk-visually-hidden">to question %{question_number}</span>
+      add_exit_page_html: Add an exit page <span class="govuk-visually-hidden">to question %{question_number}</span>
       exit_page_list_entry: 'Exit page %{exit_page_number}: %{heading}'
       exit_pages_list: Question %{question_number}’s exit pages
       not_enough_pages_html: |
