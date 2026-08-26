@@ -43,7 +43,11 @@ class Forms::SubmissionEmailInput < BaseInput
 
     # Update the submission email in the form
     form.submission_email = temporary_submission_email
-    form.delivery_configurations.find_or_create_by!(delivery_method: :email, delivery_schedule: :immediate)
+
+    unless form.immediate_email_delivery_configuration.present? || form.s3_delivery_configuration.present?
+      form.delivery_configurations.create!(delivery_method: :email, delivery_schedule: :immediate)
+    end
+
     form.save_draft!
     mark_submission_email_as_confirmed
   end

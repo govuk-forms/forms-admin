@@ -202,7 +202,6 @@ RSpec.describe Forms::SubmissionEmailInput, type: :model do
         before do
           # create some DeliveryConfigurations with different delivery_method/delivery_schedule
           create(:delivery_configuration, :daily_email, form:)
-          create(:delivery_configuration, :s3, form:)
           form.reload.save!
         end
 
@@ -229,11 +228,6 @@ RSpec.describe Forms::SubmissionEmailInput, type: :model do
               "formats" => [],
             },
             {
-              "delivery_method" => "s3",
-              "delivery_schedule" => "immediate",
-              "formats" => %w[csv],
-            },
-            {
               "delivery_method" => "email",
               "delivery_schedule" => "daily",
               "formats" => %w[csv],
@@ -245,6 +239,18 @@ RSpec.describe Forms::SubmissionEmailInput, type: :model do
       context "when a DeliveryConfiguration already exists for delivery_method: 'email', delivery_schedule: 'immediate'" do
         before do
           create :delivery_configuration, form: form, formats: %w[csv json]
+        end
+
+        it "does not create a DeliveryConfiguration" do
+          expect {
+            submission_email_input_with_user.confirm_confirmation_code
+          }.not_to(change { form.delivery_configurations.count })
+        end
+      end
+
+      context "when the form already has S3 enabled and not email enabled" do
+        before do
+          create :delivery_configuration, :s3, form: form
         end
 
         it "does not create a DeliveryConfiguration" do
