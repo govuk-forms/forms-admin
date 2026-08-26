@@ -179,12 +179,12 @@ en:
               invalid: Enter the logo link in the correct format, starting with https://
             name:
               blank: Enter a brand name
+              no_letters_or_numbers: Brand name must include at least one letter or number
+              taken: There is already a brand with this name
             opengraph_image_file:
               invalid_file_type: The opengraph image must be a PNG or JPEG file
             slug:
-              blank: Enter a slug
               invalid: Slug must only include lowercase letters a to z, numbers and hyphens
-              taken: There is already a brand with this slug
         draft_question:
           attributes:
             hint_text:

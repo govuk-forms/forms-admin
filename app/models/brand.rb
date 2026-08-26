@@ -13,8 +13,11 @@ class Brand < ApplicationRecord
 
   attr_accessor :logo_file, :favicon_file, :opengraph_image_file
 
-  validates :slug, presence: true, uniqueness: true, format: { with: /\A[a-z0-9]+(?:-[a-z0-9]+)*\z/, allow_blank: true }
+  before_validation :set_slug, on: :create
+
+  validates :slug, format: { with: /\A[a-z0-9]+(?:-[a-z0-9]+)*\z/, allow_blank: true }
   validates :name, presence: true
+  validate :name_must_generate_available_slug, on: :create
   validates :header_background_colour, :border_colour, presence: true, format: { with: /\A#[0-9a-f]{6}\z/, allow_blank: true }
   validates :logo_link, presence: true, format: { with: %r{\Ahttps?://.*\z}, allow_blank: true }
   validates :logo_alt_text, :copyright_holder, presence: true
@@ -35,6 +38,22 @@ class Brand < ApplicationRecord
   end
 
 private
+
+  def set_slug
+    self.slug = name.parameterize if slug.blank? && name.present?
+  end
+
+  # the slug is derived from the name, so errors are added to name rather
+  # than slug, which has no field in the new brand form
+  def name_must_generate_available_slug
+    return if name.blank?
+
+    if slug.blank?
+      errors.add(:name, :no_letters_or_numbers)
+    elsif Brand.exists?(slug:)
+      errors.add(:name, :taken)
+    end
+  end
 
   # blob keys are paths under /assets/, which CloudFront serves from the
   # assets bucket
