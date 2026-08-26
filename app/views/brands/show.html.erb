@@ -38,17 +38,17 @@
 
       summary_list.with_row do |row|
         row.with_key { t('brands.show.summary.logo') }
-        row.with_value { @brand.logo_path || t('brands.show.summary.not_uploaded') }
+        row.with_value { @brand.logo_path ? govuk_link_to(@brand.logo_path, @brand.logo_path) : t('brands.show.summary.not_uploaded') }
       end
 
       summary_list.with_row do |row|
         row.with_key { t('brands.show.summary.favicon') }
-        row.with_value { @brand.favicon_path || t('brands.show.summary.not_uploaded') }
+        row.with_value { @brand.favicon_path ? govuk_link_to(@brand.favicon_path, @brand.favicon_path) : t('brands.show.summary.not_uploaded') }
       end
 
       summary_list.with_row do |row|
         row.with_key { t('brands.show.summary.opengraph_image') }
-        row.with_value { @brand.opengraph_image_path || t('brands.show.summary.not_uploaded') }
+        row.with_value { @brand.opengraph_image_path ? govuk_link_to(@brand.opengraph_image_path, @brand.opengraph_image_path) : t('brands.show.summary.not_uploaded') }
       end
 
       summary_list.with_row do |row|

@@ -95,8 +95,9 @@ RSpec.describe BrandsController, type: :request do
         get path
       end
 
-      it "shows the public path of each uploaded asset" do
-        expect(response.body).to include("/#{brand.logo.blob.key}")
+      it "links to the public path of each uploaded asset" do
+        page = Capybara.string(response.body)
+        expect(page).to have_link("/#{brand.logo.blob.key}", href: "/#{brand.logo.blob.key}")
       end
     end
   end
