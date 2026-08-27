@@ -36,7 +36,7 @@
                             route_form.govuk_select(
                               :goto,
                               options_for_select(route_form.object.goto_options, route_form.object.goto),
-                              label: route_form.object.label,
+                              label: { text: route_form.object.label_text, for: route_form.field_id(:goto) },
                               id: route_form.field_id(:goto),
                               class: ["govuk-!-width-full"],
                             )
