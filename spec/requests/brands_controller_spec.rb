@@ -95,8 +95,9 @@ RSpec.describe BrandsController, type: :request do
         get path
       end
 
-      it "shows the public path of each uploaded asset" do
-        expect(response.body).to include("/#{brand.logo.blob.key}")
+      it "links to the public path of each uploaded asset" do
+        page = Capybara.string(response.body)
+        expect(page).to have_link("/#{brand.logo.blob.key}", href: "/#{brand.logo.blob.key}")
       end
     end
   end
@@ -283,6 +284,23 @@ RSpec.describe BrandsController, type: :request do
         ["Brand name", "Logo alt text", "Logo link", "Header background colour", "Header and footer border colour", "Copyright holder"].each do |label|
           expect(page).to have_field(label)
         end
+      end
+    end
+
+    context "when the user is a super admin and the brand has assets" do
+      before do
+        brand.logo_file = fixture_file_upload("logo.png", "image/png")
+        BrandAssetsService.new(brand:).attach_assets
+
+        login_as_super_admin_user
+
+        get path
+      end
+
+      it "links to the current file for each uploaded asset" do
+        page = Capybara.string(response.body)
+        expect(page).to have_text("Current Logo:")
+        expect(page).to have_link("/#{brand.logo.blob.key}", href: "/#{brand.logo.blob.key}")
       end
     end
   end

@@ -25,20 +25,23 @@
 
       <%= f.govuk_text_field :copyright_holder, label: { size: 'm' } %>
 
-      <% if @brand.logo.attached? %>
-        <p class="govuk-body"><%= t(".current_file", file_name: t("helpers.label.brand.logo_file"), path: @brand.logo_path) %></p>
+      <%= f.govuk_file_field :logo_file, label: { size: 'm' } do %>
+        <% if @brand.logo.attached? %>
+          <p class="govuk-body"><%= t(".current_file_html", file_name: t("helpers.label.brand.logo_file"), link: govuk_link_to(@brand.logo_path, @brand.logo_path)) %></p>
+        <% end %>
       <% end %>
-      <%= f.govuk_file_field :logo_file, label: { size: 'm' } %>
 
-      <% if @brand.favicon.attached? %>
-        <p class="govuk-body"><%= t(".current_file", file_name: t("helpers.label.brand.favicon_file"), path: @brand.favicon_path) %></p>
+      <%= f.govuk_file_field :favicon_file, label: { size: 'm' } do %>
+        <% if @brand.favicon.attached? %>
+          <p class="govuk-body"><%= t(".current_file_html", file_name: t("helpers.label.brand.favicon_file"), link: govuk_link_to(@brand.favicon_path, @brand.favicon_path)) %></p>
+        <% end %>
       <% end %>
-      <%= f.govuk_file_field :favicon_file, label: { size: 'm' } %>
 
-      <% if @brand.opengraph_image.attached? %>
-        <p class="govuk-body"><%= t(".current_file", file_name: t("helpers.label.brand.opengraph_image_file"), path: @brand.opengraph_image_path) %></p>
+      <%= f.govuk_file_field :opengraph_image_file, label: { size: 'm' } do %>
+        <% if @brand.opengraph_image.attached? %>
+          <p class="govuk-body"><%= t(".current_file_html", file_name: t("helpers.label.brand.opengraph_image_file"), link: govuk_link_to(@brand.opengraph_image_path, @brand.opengraph_image_path)) %></p>
+        <% end %>
       <% end %>
-      <%= f.govuk_file_field :opengraph_image_file, label: { size: 'm' } %>
 
       <%= f.govuk_submit t("save_and_continue") %>
     <% end %>
