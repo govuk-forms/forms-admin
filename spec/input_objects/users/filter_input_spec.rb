@@ -2,16 +2,8 @@ require "rails_helper"
 
 RSpec.describe Users::FilterInput, type: :model do
   describe "#has_filters?" do
-    context "when the name filter is set" do
-      subject(:input) { described_class.new(name: "foo") }
-
-      it "returns true" do
-        expect(input.has_filters?).to be true
-      end
-    end
-
-    context "when the email filter is set" do
-      subject(:input) { described_class.new(email: "foo") }
+    context "when the search filter is set" do
+      subject(:input) { described_class.new(search: "foo") }
 
       it "returns true" do
         expect(input.has_filters?).to be true

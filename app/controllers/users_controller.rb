@@ -44,8 +44,7 @@ private
 
   def filtered_users
     policy_scope(User)
-      .by_name(filter_params[:name])
-      .by_email(filter_params[:email])
+      .by_search(filter_params[:search])
       .by_organisation_id(filter_params[:organisation_id])
       .by_role(filter_params[:role])
       .by_has_access(filter_params[:has_access])
@@ -63,7 +62,7 @@ private
   end
 
   def filter_params
-    params[:filter]&.permit(:name, :email, :organisation_id, :role, :has_access)&.tap do |filters|
+    params[:filter]&.permit(:search, :organisation_id, :role, :has_access)&.tap do |filters|
       clear_param_if_autocomplete_empty(filters, :organisation_id, params.dig(:filter, :organisation_id_raw))
     end || {}
   end

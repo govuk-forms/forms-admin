@@ -2,10 +2,10 @@ module Users
   class FilterInput < BaseInput
     include UsersHelper
 
-    attr_accessor :email, :name, :organisation_id, :role, :has_access
+    attr_accessor :search, :organisation_id, :role, :has_access
 
     def has_filters?
-      [email, name, organisation_id, role, has_access].any?(&:present?)
+      [search, organisation_id, role, has_access].any?(&:present?)
     end
 
     def access_options
