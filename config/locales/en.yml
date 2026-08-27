@@ -1686,6 +1686,7 @@ en:
     exit_page_label: An ‘exit page’ to leave the form
     go_to_page: 'Go to %{goto_page_question_number}, ‘%{goto_page_question_text}’ if the answer is:'
     go_to_the_end: 'Go to the end of the form if the answer is:'
+    go_to_exit_page: 'Go to exit page %{exit_page_index}, ‘%{exit_page_heading}’ if the answer is:'
     none_of_the_above: None of the above
     route: Route
     route2:
