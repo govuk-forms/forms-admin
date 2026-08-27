@@ -3,12 +3,6 @@ require "rails_helper"
 RSpec.describe Brand, type: :model do
   subject(:brand) { build :brand }
 
-  it "is invalid without a slug" do
-    brand.slug = nil
-    expect(brand).to be_invalid
-    expect(brand.errors).to be_of_kind(:slug, :blank)
-  end
-
   it "is invalid without a name" do
     brand.name = nil
     expect(brand).to be_invalid
@@ -28,11 +22,39 @@ RSpec.describe Brand, type: :model do
     expect(brand).to be_valid
   end
 
-  it "is invalid with a duplicate slug" do
-    create(:brand, slug: "duplicate-brand")
-    brand.slug = "duplicate-brand"
+  it "is invalid with a duplicate name" do
+    create(:brand, name: "Duplicate Brand")
+    brand.name = "Duplicate Brand"
+    brand.slug = nil
     expect(brand).to be_invalid
-    expect(brand.errors).to be_of_kind(:slug, :taken)
+    expect(brand.errors).to be_of_kind(:name, :taken)
+  end
+
+  it "is invalid when the name contains no letters or numbers" do
+    brand.name = "!!!"
+    brand.slug = nil
+    expect(brand).to be_invalid
+    expect(brand.errors).to be_of_kind(:name, :no_letters_or_numbers)
+  end
+
+  describe "slug generation" do
+    it "generates the slug from the name" do
+      brand = build :brand, name: "Testshire & Wold Council!", slug: nil
+      expect(brand).to be_valid
+      expect(brand.slug).to eq "testshire-wold-council"
+    end
+
+    it "does not replace a slug that is already set" do
+      brand = build :brand, name: "Testshire Council", slug: "custom-slug"
+      expect(brand).to be_valid
+      expect(brand.slug).to eq "custom-slug"
+    end
+
+    it "does not change the slug when the name changes" do
+      brand = create :brand, name: "Testshire Council", slug: nil
+      brand.update!(name: "Greater Testshire Council")
+      expect(brand.reload.slug).to eq "testshire-council"
+    end
   end
 
   %i[header_background_colour border_colour logo_alt_text logo_link copyright_holder].each do |attribute|

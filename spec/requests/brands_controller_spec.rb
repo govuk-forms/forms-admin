@@ -121,9 +121,14 @@ RSpec.describe BrandsController, type: :request do
 
       it "has a labelled field for each brand attribute" do
         page = Capybara.string(response.body)
-        ["Brand name", "Slug", "Logo alt text", "Logo link", "Header background colour", "Header and footer border colour", "Copyright holder", "Logo", "Favicon", "Opengraph image"].each do |label|
+        ["Brand name", "Logo alt text", "Logo link", "Header background colour", "Header and footer border colour", "Copyright holder", "Logo", "Favicon", "Opengraph image"].each do |label|
           expect(page).to have_field(label)
         end
+      end
+
+      it "does not have a field for the slug" do
+        page = Capybara.string(response.body)
+        expect(page).not_to have_field("Slug")
       end
 
       it "renders a multipart form so that files can be uploaded" do
@@ -139,7 +144,6 @@ RSpec.describe BrandsController, type: :request do
       {
         brand: {
           name: "Testshire Council",
-          slug: "testshire",
           header_background_colour: "#ffffff",
           border_colour: "#206c49",
           logo_alt_text: "Testshire Council",
@@ -170,7 +174,7 @@ RSpec.describe BrandsController, type: :request do
         login_as_super_admin_user
       end
 
-      it "creates a brand with the given attributes" do
+      it "creates a brand with the given attributes and a slug generated from the name" do
         expect {
           post path, params: params
         }.to change(Brand, :count).by(1)
@@ -178,7 +182,7 @@ RSpec.describe BrandsController, type: :request do
         brand = Brand.last
         expect(brand).to have_attributes(
           name: "Testshire Council",
-          slug: "testshire",
+          slug: "testshire-council",
           header_background_colour: "#ffffff",
           border_colour: "#206c49",
           logo_alt_text: "Testshire Council",
@@ -224,6 +228,22 @@ RSpec.describe BrandsController, type: :request do
         end
       end
 
+      context "when a brand with the same name already exists" do
+        before do
+          create :brand, name: "Testshire Council"
+        end
+
+        it "does not create a brand and re-renders the new view with an error" do
+          expect {
+            post path, params: params
+          }.not_to change(Brand, :count)
+
+          expect(response).to have_http_status(:unprocessable_content)
+          expect(response).to render_template("brands/new")
+          expect(response.body).to include(I18n.t("activerecord.errors.models.brand.attributes.name.taken"))
+        end
+      end
+
       context "when asset files are uploaded" do
         before do
           params[:brand][:logo_file] = fixture_file_upload("logo.png", "image/png")
@@ -237,9 +257,9 @@ RSpec.describe BrandsController, type: :request do
           }.to change(Brand, :count).by(1)
 
           brand = Brand.last
-          expect(brand.logo.blob.key).to match(%r{\Aassets/brands/testshire/logo-\h{6}\.png\z})
-          expect(brand.favicon.blob.key).to match(%r{\Aassets/brands/testshire/favicon-\h{6}\.ico\z})
-          expect(brand.opengraph_image.blob.key).to match(%r{\Aassets/brands/testshire/opengraph-image-\h{6}\.jpg\z})
+          expect(brand.logo.blob.key).to match(%r{\Aassets/brands/testshire-council/logo-\h{6}\.png\z})
+          expect(brand.favicon.blob.key).to match(%r{\Aassets/brands/testshire-council/favicon-\h{6}\.ico\z})
+          expect(brand.opengraph_image.blob.key).to match(%r{\Aassets/brands/testshire-council/opengraph-image-\h{6}\.jpg\z})
         end
       end
 

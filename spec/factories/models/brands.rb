@@ -1,7 +1,7 @@
 FactoryBot.define do
   factory :brand do
-    sequence(:slug) { |n| "brand-#{n}" }
-    name { slug.titleize }
+    sequence(:name) { |n| "Brand #{n}" }
+    slug { name.parameterize }
     header_background_colour { "#ffffff" }
     border_colour { "#206c49" }
     logo_alt_text { name }
