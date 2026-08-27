@@ -46,8 +46,8 @@ RSpec.describe Forms::WelshTranslationController, type: :request do
           expect {
             post(welsh_translation_create_path(id), params:)
           }.to change { form.reload.welsh_completed }.to(true)
-          .and change { form.pages.first.reload.question_text_cy }.to("Ydych chi'n adnewyddu trwydded?")
-          .and change { condition.reload.exit_page_heading_cy }.to("Nid ydych yn gymwys")
+                                                     .and change { form.pages.first.reload.question_text_cy }.to("Ydych chi'n adnewyddu trwydded?")
+                                                                                                             .and change { condition.reload.exit_page_heading_cy }.to("Nid ydych yn gymwys")
         end
 
         it "redirects to the form task list and displays a success banner including text about being marked complete" do
@@ -81,8 +81,8 @@ RSpec.describe Forms::WelshTranslationController, type: :request do
           expect {
             post(welsh_translation_create_path(id), params:)
           }.to not_change { form.reload.welsh_completed }
-          .and not_change { form.pages.first.reload.question_text_cy }
-          .and(not_change { condition.reload.exit_page_markdown_cy })
+                 .and not_change { form.pages.first.reload.question_text_cy }
+                        .and(not_change { condition.reload.exit_page_markdown_cy })
         end
 
         it "returns a 422, re-renders the page with an error, and does not display a success banner" do
@@ -149,8 +149,8 @@ RSpec.describe Forms::WelshTranslationController, type: :request do
           expect {
             post(welsh_translation_create_path(id), params:)
           }.to not_change { form.reload.welsh_completed }
-          .and not_change { form.pages.first.reload.question_text_cy }
-          .and(not_change { condition.reload.exit_page_markdown_cy })
+                 .and not_change { form.pages.first.reload.question_text_cy }
+                        .and(not_change { condition.reload.exit_page_markdown_cy })
         end
 
         it "returns 403" do
@@ -172,8 +172,8 @@ RSpec.describe Forms::WelshTranslationController, type: :request do
           expect {
             post(welsh_translation_create_path(id), params:)
           }.to change { form.reload.welsh_completed }.to(true)
-          .and change { form.pages.first.reload.question_text_cy }.to("Ydych chi'n adnewyddu trwydded?")
-          .and change { exit_page.reload.heading_cy }.to("Nid ydych yn gymwys")
+                                                     .and change { form.pages.first.reload.question_text_cy }.to("Ydych chi'n adnewyddu trwydded?")
+                                                                                                             .and change { exit_page.reload.heading_cy }.to("Nid ydych yn gymwys")
         end
 
         it "redirects to the form task list and displays a success banner including text about being marked complete" do
@@ -207,8 +207,8 @@ RSpec.describe Forms::WelshTranslationController, type: :request do
           expect {
             post(welsh_translation_create_path(id), params:)
           }.to not_change { form.reload.welsh_completed }
-          .and not_change { form.pages.first.reload.question_text_cy }
-          .and(not_change { exit_page.reload.markdown_cy })
+                 .and not_change { form.pages.first.reload.question_text_cy }
+                        .and(not_change { exit_page.reload.markdown_cy })
         end
 
         it "returns a 422, re-renders the page with an error, and does not display a success banner" do
@@ -275,8 +275,8 @@ RSpec.describe Forms::WelshTranslationController, type: :request do
           expect {
             post(welsh_translation_create_path(id), params:)
           }.to not_change { form.reload.welsh_completed }
-          .and not_change { form.pages.first.reload.question_text_cy }
-          .and(not_change { exit_page.reload.markdown_cy })
+                 .and not_change { form.pages.first.reload.question_text_cy }
+                        .and(not_change { exit_page.reload.markdown_cy })
         end
 
         it "returns 403" do
@@ -423,8 +423,163 @@ RSpec.describe Forms::WelshTranslationController, type: :request do
     it "returns a CSV with a header row and and content" do
       csv = CSV.parse(response.body)
 
-      expect(csv.first).to eq(["", "English content", "Welsh content"])
+      expect(csv.first).to eq(["Content ID", "English content", "Welsh content"])
       expect(csv.second).to eq(["Form name", "A form with Welsh", "Welsh A form with Welsh"])
+    end
+  end
+
+  describe "#show_upload" do
+    before do
+      get welsh_translation_show_upload_path(id)
+    end
+
+    it "renders the template" do
+      expect(response).to have_http_status(:ok)
+      expect(response).to render_template(:show_upload)
+    end
+
+    context "when the user is not authorized" do
+      let(:current_user) { build :user }
+
+      it "returns 403" do
+        expect(response).to have_http_status(:forbidden)
+      end
+    end
+  end
+
+  describe "#upload" do
+    let(:form) { create(:form, :ready_for_live, welsh_completed: false) }
+    let(:csv_data) { "foo,bar" }
+    let(:file) do
+      file = Tempfile.new(["translations", ".csv"])
+      file.write(csv_data)
+      file.rewind
+      Rack::Test::UploadedFile.new(file.path, "text/csv", original_filename: "translations.csv")
+    end
+
+    after do
+      file.unlink
+    end
+
+    context "when a valid CSV is uploaded" do
+      context "when the multiple branches feature is disabled", feature_multiple_branches: false do
+        let(:condition) do
+          create(:condition, routing_page: form.pages.first, answer_value: "No",
+                             exit_page_heading: "You are ineligible",
+                             exit_page_markdown: "Sorry, you are ineligible for this service.")
+        end
+
+        let(:csv_data) do
+          CSV.generate do |csv|
+            csv << ["Content ID", "English content", "Welsh content"]
+            csv << ["Form name", form.name, "Fy Ffurflen"]
+            csv << ["Question 1 - exit page heading", "You are ineligible", "Welsh exit page heading"]
+            csv << ["Question 1 - exit page content", "Sorry, you are ineligible for this service.", "Welsh exit page content"]
+          end
+        end
+
+        before do
+          condition
+          post welsh_translation_upload_path(id), params: { forms_welsh_translation_upload_input: { file: } }
+        end
+
+        it "renders the new template" do
+          expect(response).to have_http_status(:ok)
+          expect(response).to render_template(:new)
+        end
+
+        it "pre-populates fields from CSV" do
+          expect(response.body).not_to include(I18n.t("error_summary.heading"))
+          expect(response.body).to include("Fy Ffurflen")
+          expect(response.body).to include("Welsh exit page heading")
+          expect(response.body).to include("Welsh exit page content")
+        end
+
+        context "when there are invalid translations" do
+          let(:csv_data) do
+            CSV.generate do |csv|
+              csv << ["Content ID", "English content", "Welsh content"]
+              csv << ["Link to privacy information for this form", form.privacy_policy_url, "this is not a URL"]
+            end
+          end
+
+          it "pre-validates the fields and shows errors for invalid data" do
+            expect(response.body).to include(I18n.t("error_summary.heading"))
+            expect(response.body).to include(I18n.t("activemodel.errors.models.forms/welsh_translation_input.attributes.privacy_policy_url_cy.url"))
+            expect(response.body).to include("this is not a URL")
+          end
+        end
+      end
+
+      context "when the multiple branches feature is enabled", :feature_multiple_branches do
+        let(:exit_page) { create :exit_page, question_page: form.pages.first }
+
+        let(:csv_data) do
+          CSV.generate do |csv|
+            csv << ["Content ID", "English content", "Welsh content"]
+            csv << ["Form name", form.name, "Fy Ffurflen"]
+            csv << ["Question 1 - exit page 1 heading", "You are ineligible", "Welsh exit page heading"]
+            csv << ["Question 1 - exit page 1 content", "Sorry, you are ineligible for this service.", "Welsh exit page content"]
+          end
+        end
+
+        before do
+          exit_page
+          post welsh_translation_upload_path(id), params: { forms_welsh_translation_upload_input: { file: } }
+        end
+
+        it "renders the new template" do
+          expect(response).to have_http_status(:ok)
+          expect(response).to render_template(:new)
+        end
+
+        it "pre-populates fields from CSV" do
+          expect(response.body).not_to include(I18n.t("error_summary.heading"))
+          expect(response.body).to include("Fy Ffurflen")
+          expect(response.body).to include("Welsh exit page heading")
+          expect(response.body).to include("Welsh exit page content")
+        end
+
+        context "when there are invalid translations" do
+          let(:csv_data) do
+            CSV.generate do |csv|
+              csv << ["Content ID", "English content", "Welsh content"]
+              csv << ["Link to privacy information for this form", form.privacy_policy_url, "this is not a URL"]
+            end
+          end
+
+          it "pre-validates the fields and shows errors for invalid data" do
+            expect(response.body).to include(I18n.t("error_summary.heading"))
+            expect(response.body).to include(I18n.t("activemodel.errors.models.forms/welsh_translation_input.attributes.privacy_policy_url_cy.url"))
+            expect(response.body).to include("this is not a URL")
+          end
+        end
+      end
+
+      context "when no file is provided" do
+        before do
+          post welsh_translation_upload_path(id), params: { forms_welsh_translation_upload_input: { file: nil } }
+        end
+
+        it "renders the upload file page with an error" do
+          expect(response).to have_http_status(:unprocessable_content)
+          expect(response).to render_template(:show_upload)
+          expect(response.body).to include(I18n.t("activemodel.errors.models.forms/welsh_translation_upload_input.attributes.file.blank"))
+          expect(flash).to be_empty
+        end
+      end
+    end
+
+    context "when the user is not authorized" do
+      let(:current_user) { build :user }
+
+      before do
+        post welsh_translation_upload_path(id), params: { file: }
+      end
+
+      it "returns 403" do
+        expect(response).to have_http_status(:forbidden)
+      end
     end
   end
 end

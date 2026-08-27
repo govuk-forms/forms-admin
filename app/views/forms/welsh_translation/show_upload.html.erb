@@ -1,0 +1,32 @@
+<% set_page_title(t("page_titles.welsh_translation_upload")) %>
+<% content_for :back_link, govuk_back_link_to(welsh_translation_path(current_form)) %>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <%= form_with(model: welsh_translation_upload_input, url: welsh_translation_upload_path(current_form), method: 'POST') do |f| %>
+      <% if welsh_translation_upload_input&.errors.any? %>
+        <%= f.govuk_error_summary %>
+      <% end %>
+
+      <h1 class="govuk-heading-l">
+        <span class="govuk-caption-l"><%= current_form.name %></span>
+        <%= t("page_titles.welsh_translation_upload") %>
+      </h1>
+
+      <%= govuk_warning_text(text: t(".warning")) %>
+
+      <%= govuk_details(summary_text: t(".details_summary")) do %>
+        <%= t(".details_html")%>
+      <% end %>
+
+      <%= f.govuk_file_field :file,
+        label: { tag: 'h2', size: 'm' },
+        accept: Forms::WelshTranslationUploadInput::FILE_TYPES.join(", "),
+        javascript: true
+      %>
+
+      <%= f.govuk_submit t("save_and_continue") %>
+    <% end %>
+  </div>
+</div>
+
