@@ -122,10 +122,10 @@ RSpec.describe Forms::RouteInput, type: :model do
     end
   end
 
-  describe "#label" do
+  describe "#label_text" do
     context "when the route is to the next page" do
       it "returns the correct label" do
-        expect(route_input.label).to eq({ text: "After question 1, go to:" })
+        expect(route_input.label_text).to eq("After question 1, go to:")
       end
     end
 
@@ -134,7 +134,7 @@ RSpec.describe Forms::RouteInput, type: :model do
       let(:goto_page) { build_stubbed(:page, position: 3) }
 
       it "sets the label correctly for a generic page" do
-        expect(route_input.label).to eq({ text: "After question 1, go to:" })
+        expect(route_input.label_text).to eq("After question 1, go to:")
       end
     end
 
@@ -144,7 +144,7 @@ RSpec.describe Forms::RouteInput, type: :model do
       let(:attributes) { super().merge(answer_value: "Option 1") }
 
       it "sets the label correctly for a selection page" do
-        expect(route_input.label).to eq({ text: "If option 1 (Option 1), go to:" })
+        expect(route_input.label_text).to eq("If option 1 (Option 1), go to:")
       end
     end
 
@@ -154,7 +154,7 @@ RSpec.describe Forms::RouteInput, type: :model do
       let(:attributes) { super().merge(answer_value: Condition::NONE_OF_THE_ABOVE) }
 
       it "sets the label correctly for a selection page with a none of the above option" do
-        expect(route_input.label).to eq({ text: "If option 3 (None of the above), go to:" })
+        expect(route_input.label_text).to eq("If option 3 (None of the above), go to:")
       end
     end
   end

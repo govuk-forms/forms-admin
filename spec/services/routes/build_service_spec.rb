@@ -137,7 +137,7 @@ RSpec.describe Routes::BuildService do
 
             none_of_the_above_route = routes_for_page1.find { |r| r.answer_value == "none_of_the_above" }
             expect(none_of_the_above_route).not_to be_nil
-            expect(none_of_the_above_route.label[:text]).to eq("If option 3 (None of the above), go to:")
+            expect(none_of_the_above_route.label_text).to eq("If option 3 (None of the above), go to:")
           end
         end
 
@@ -216,7 +216,7 @@ RSpec.describe Routes::BuildService do
           expect(route_for_page1).to be_a(Forms::RouteInput)
           expect(route_for_page1.page_id).to eq(pages.first.id)
           expect(route_for_page1.answer_value).to be_nil
-          expect(route_for_page1.label).to eq({ text: "After question #{pages.first.position}, go to:" })
+          expect(route_for_page1.label_text).to eq("After question #{pages.first.position}, go to:")
         end
       end
     end

@@ -39,13 +39,13 @@ class Forms::RouteInput < BaseInput
     end
   end
 
-  def label
+  def label_text
     if Forms::RoutesInput.route_with_selection_options?(page)
       answer_value_label = answer_value == Condition::NONE_OF_THE_ABOVE ? I18n.t("page_conditions.none_of_the_above") : answer_value
-      return { text: "If option #{option_index} (#{answer_value_label}), go to:" }
+      return "If option #{option_index} (#{answer_value_label}), go to:"
     end
 
-    { text: "After question #{page.position}, go to:" }
+    "After question #{page.position}, go to:"
   end
 
 private
