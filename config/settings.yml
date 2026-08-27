@@ -35,6 +35,7 @@ govuk_notify:
   group_upgraded_template_id: b5d0d3d4-fc24-403e-aba6-b421fdcebd55
   group_upgrade_requested_template_id: e2251c92-9365-429a-9857-56780263718f
   group_upgrade_rejected_template_id: f494999a-1a38-4b01-a3c8-dbb2d60e6e5f
+  user_research_invitation_template_id: 48988e1d-d6e3-4b4e-8bc8-3a4e4e63e1c0
   admin_alerts:
     new_draft_form_made_live_template_id: 95065d23-e7ad-4af7-9a2f-7209276d74d0
     live_form_changes_made_live_template_id: 02c38f9b-197e-480d-8031-bba9498d5907

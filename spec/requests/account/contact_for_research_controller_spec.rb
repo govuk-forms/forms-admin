@@ -35,6 +35,12 @@ describe Account::ContactForResearchController do
         put account_contact_for_research_path, params: valid_params
         expect(response).to redirect_to("/next-path")
       end
+
+      it "sends the user research invitation email" do
+        expect {
+          put account_contact_for_research_path, params: valid_params
+        }.to change { ActionMailer::Base.deliveries.count }.by(1)
+      end
     end
 
     context "with invalid params" do
