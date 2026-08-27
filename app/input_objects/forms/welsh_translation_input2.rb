@@ -1,4 +1,4 @@
-class Forms::WelshTranslationInput2 < Forms::MarkCompleteInput
+class Forms::WelshTranslationInput2 < BaseInput
   include TextInputHelper
   include ActiveModel::Attributes
   include WelshTranslationContentLabels
@@ -16,6 +16,10 @@ class Forms::WelshTranslationInput2 < Forms::MarkCompleteInput
   attribute :declaration_markdown_cy
   attribute :what_happens_next_markdown_cy
   attribute :payment_url_cy
+
+  with_options except_on: :upload do
+    validates :mark_complete, presence: true
+  end
 
   validates :name_cy, presence: true, if: -> { marked_complete? }
   validates :name_cy, length: { maximum: 500 }, if: -> { name_cy.present? }
@@ -145,6 +149,10 @@ class Forms::WelshTranslationInput2 < Forms::MarkCompleteInput
     end
 
     self
+  end
+
+  def marked_complete?
+    ["true", true].include?(mark_complete)
   end
 
   def blanked?

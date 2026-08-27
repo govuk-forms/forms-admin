@@ -89,6 +89,13 @@ RSpec.describe Forms::WelshTranslationInput, type: :model do
       expect(welsh_translation_input.errors.full_messages_for(:mark_complete)).to include "Mark complete #{I18n.t('activemodel.errors.models.forms/welsh_translation_input.attributes.mark_complete.blank')}"
     end
 
+    it "is valid if mark complete is blank and the scope is :upload" do
+      form = OpenStruct.new(welsh_completed: false, name: "Apply for a juggling licence")
+      welsh_translation_input = described_class.new(mark_complete: nil, form:)
+
+      expect(welsh_translation_input.valid?(:upload)).to be true
+    end
+
     context "when the form is marked complete" do
       let(:mark_complete) { "true" }
 

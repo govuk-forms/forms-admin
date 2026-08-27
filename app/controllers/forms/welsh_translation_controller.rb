@@ -103,7 +103,7 @@ module Forms
                                    WelshTranslationInput.new(form: form_with_pages_and_conditions)
                                  end
 
-      @welsh_translation_input.assign_from_spreadsheet(data).validate
+      @welsh_translation_input.assign_from_spreadsheet(data).validate(:upload)
       @table_presenter = Forms::TranslationTablePresenter.new
 
       render :new
