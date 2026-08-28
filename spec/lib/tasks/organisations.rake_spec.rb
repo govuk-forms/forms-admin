@@ -318,6 +318,74 @@ RSpec.describe "organisations.rake", type: :task do
     end
   end
 
+  describe "organisations:open" do
+    subject(:task) do
+      Rake::Task["organisations:open"]
+    end
+
+    it "sets an organisation's 'closed' flag to false" do
+      test_org = create :organisation, name: "Department for Testing", slug: "dft", closed: true
+      test_org.clear_changes_information
+
+      expect {
+        task.invoke("dft")
+        test_org.reload
+      }
+        .to change(test_org, :closed).from(true).to(false)
+    end
+
+    it "aborts if the organisation is already open" do
+      test_org = create :organisation, name: "Department for Testing", slug: "dft", closed: false
+      test_org.clear_changes_information
+
+      expect { task.invoke("dft") }
+        .to output(/Organisation 'Department for Testing' is already open/).to_stderr
+        .and raise_error(SystemExit) { |e| expect(e).not_to be_success }
+
+      expect(test_org.previous_changes).to be_empty
+    end
+
+    it "returns an error for non-existent organisations" do
+      expect { task.invoke("dft") }
+        .to output(/not found/).to_stderr
+        .and raise_error(SystemExit) { |e| expect(e).not_to be_success }
+    end
+  end
+
+  describe "organisations:close" do
+    subject(:task) do
+      Rake::Task["organisations:close"]
+    end
+
+    it "sets an organisation's 'closed' flag to true" do
+      test_org = create :organisation, name: "Department for Testing", slug: "dft", closed: false
+      test_org.clear_changes_information
+
+      expect {
+        task.invoke("dft")
+        test_org.reload
+      }
+        .to change(test_org, :closed).from(false).to(true)
+    end
+
+    it "aborts if the organisation is already closed" do
+      test_org = create :organisation, name: "Department for Testing", slug: "dft", closed: true
+      test_org.clear_changes_information
+
+      expect { task.invoke("dft") }
+        .to output(/Organisation 'Department for Testing' is already closed/).to_stderr
+        .and raise_error(SystemExit) { |e| expect(e).not_to be_success }
+
+      expect(test_org.previous_changes).to be_empty
+    end
+
+    it "returns an error for non-existent organisations" do
+      expect { task.invoke("dft") }
+        .to output(/not found/).to_stderr
+        .and raise_error(SystemExit) { |e| expect(e).not_to be_success }
+    end
+  end
+
   describe "organisations:domains:add" do
     subject(:task) do
       Rake::Task["organisations:domains:add"]

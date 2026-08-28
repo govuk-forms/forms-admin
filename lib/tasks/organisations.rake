@@ -90,6 +90,30 @@ namespace :organisations do
     end
   end
 
+  desc "Make organisation open"
+  task :open, %i[organisation_slug] => :environment do |task, args|
+    change_organisation_closed_status(**args, closed: false, task:, dry_run: false)
+  end
+
+  namespace :open do
+    desc "Make organisation open - dry run"
+    task :dry_run, %i[organisation_slug] => :environment do |task, args|
+      change_organisation_closed_status(**args, closed: false, task:, dry_run: true)
+    end
+  end
+
+  desc "Make organisation closed"
+  task :close, %i[organisation_slug] => :environment do |task, args|
+    change_organisation_closed_status(**args, closed: true, task:, dry_run: false)
+  end
+
+  namespace :close do
+    desc "Make organisation closed - dry run"
+    task :dry_run, %i[organisation_slug] => :environment do |task, args|
+      change_organisation_closed_status(**args, closed: true, task:, dry_run: true)
+    end
+  end
+
   namespace :domains do
     desc "Add domains to an organisation"
     task :add, %i[organisation_slug domains] => :environment do |_task, args|
@@ -280,6 +304,32 @@ def change_organisation_internal_status(task:, organisation_slug: nil, status: n
     Rails.logger.info("#{task.name}: Making organisation '#{organisation.name}' #{status_string}")
 
     organisation.internal = status
+    organisation.save!
+
+    Rails.logger.info("#{task.name}: Made organisation '#{organisation.name}' #{status_string}")
+  end
+end
+
+def change_organisation_closed_status(task:, organisation_slug: nil, closed: nil, dry_run: false)
+  usage = "usage: rails #{task.name}[<organisation_slug>]"
+  abort usage if organisation_slug.blank?
+
+  status_string = closed ? "closed" : "open"
+
+  organisation = Organisation.find_by_slug(organisation_slug)
+
+  abort "Organisation not found" if organisation.blank?
+  abort "Organisation '#{organisation.name}' is already #{status_string}" if organisation.closed == closed
+
+  ActiveRecord::Base.transaction do
+    if dry_run
+      Rails.logger.info("#{task.name}: Would make organisation '#{organisation.name}' #{status_string}")
+      return
+    end
+
+    Rails.logger.info("#{task.name}: Making organisation '#{organisation.name}' #{status_string}")
+
+    organisation.closed = closed
     organisation.save!
 
     Rails.logger.info("#{task.name}: Made organisation '#{organisation.name}' #{status_string}")
