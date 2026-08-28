@@ -171,7 +171,8 @@ RSpec.describe "organisations.rake", type: :task do
 
     context "when old organisation has signed mou but new organisation has not" do
       before do
-        create :mou_signature_for_organisation, organisation: source_org
+        user = create :user, organisation: source_org
+        create :mou_signature_for_organisation, organisation: source_org, user:
       end
 
       let(:invoked_task) do
@@ -182,6 +183,42 @@ RSpec.describe "organisations.rake", type: :task do
       end
 
       include_examples "it does not move users, groups or domains"
+
+      context "when merge_mous is true" do
+        it "moves users from one organisation to another" do
+          create_list :user, 4, organisation: source_org
+
+          expect {
+            task.invoke("old-organisation", "shiny-new-organisation", "true")
+          }.to change(User.where(organisation: target_org), :count).by(5)
+            .and change(User.where(organisation: source_org), :count).from(5).to(0)
+        end
+
+        it "moves groups from one organisation to another" do
+          create_list :group, 5, organisation: source_org
+
+          expect {
+            task.invoke("old-organisation", "shiny-new-organisation", "true")
+          }.to change(Group.where(organisation: target_org), :count).by(5)
+            .and change(Group.where(organisation: source_org), :count).from(5).to(0)
+        end
+
+        it "moves domains from one organisation to another" do
+          create_list :organisation_domain, 5, organisation: source_org
+
+          expect {
+            task.invoke("old-organisation", "shiny-new-organisation", "true")
+          }.to change(OrganisationDomain.where(organisation: target_org), :count).by(5)
+            .and change(OrganisationDomain.where(organisation: source_org), :count).from(5).to(0)
+        end
+
+        it "moves MOU signatures from one organisation to another" do
+          expect {
+            task.invoke("old-organisation", "shiny-new-organisation", "true")
+          }.to change(MouSignature.where(organisation: target_org), :count).by(1)
+            .and change(MouSignature.where(organisation: source_org), :count).from(1).to(0)
+        end
+      end
     end
 
     context "when old organisation and new organisation have groups with the same name" do
