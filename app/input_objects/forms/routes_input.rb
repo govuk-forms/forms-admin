@@ -10,7 +10,11 @@ class Forms::RoutesInput < BaseInput
   end
 
   def self.route_with_selection_options?(page)
-    page.answer_type == "selection" && page.answer_settings.only_one_option == "true" && !Forms::RoutesInput.too_many_selection_options?(page)
+    page.answer_type == "selection" && page.answer_settings.only_one_option == "true" && !too_many_selection_options?(page)
+  end
+
+  def self.can_have_exit_pages?(page)
+    route_with_selection_options?(page)
   end
 
   def initialize(attributes = {})

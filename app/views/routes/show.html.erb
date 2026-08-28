@@ -25,7 +25,7 @@
               row.with_value do
                 capture do %>
                 <p> <%= page.question_text %> </p>
-                <% if @routes_input.form.next_page_after(page).present? || routes.any?(&:invalid?) || @routes_input.class.route_with_selection_options?(page) %>
+                <% if @routes_input.form.next_page_after(page).present? || routes.any?(&:invalid?) || @routes_input.class.can_have_exit_pages?(page) %>
                   <ul class="govuk-list">
                     <% routes.each do |route| %>
                       <li>
@@ -49,7 +49,7 @@
                             @routes_input.class.too_many_selection_options?(page) %>
                     <%= t(".too_many_options_html") %>
                   <% end %>
-                  <% if Forms::RoutesInput::route_with_selection_options?(page) %>
+                  <% if Forms::RoutesInput::can_have_exit_pages?(page) %>
                     <%= f.govuk_submit t(".add_exit_page_html", question_number: page.position), secondary: true, name: 'new_exit_page', value: page.id, class: page.exit_pages.any? ? "" : "govuk-!-margin-bottom-6" %>
                   <% end %>
                   <% if page.exit_pages.any? %>

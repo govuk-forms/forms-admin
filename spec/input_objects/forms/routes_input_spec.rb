@@ -156,7 +156,7 @@ RSpec.describe Forms::RoutesInput do
     end
   end
 
-  describe "#route_with_selection_options" do
+  describe "#route_with_selection_options?" do
     context "when given a page with less than 10 selection options, only one option" do
       let(:page) { build(:page, :with_selection_settings) }
 
@@ -186,6 +186,40 @@ RSpec.describe Forms::RoutesInput do
 
       it "returns false" do
         expect(described_class.route_with_selection_options?(page)).to be false
+      end
+    end
+  end
+
+  describe "#can_have_exit_pages?" do
+    context "when given a page with less than 10 selection options, only one option" do
+      let(:page) { build(:page, :with_selection_settings) }
+
+      it "returns true" do
+        expect(described_class.can_have_exit_pages?(page)).to be true
+      end
+    end
+
+    context "when given a page with more than 10 selection options, only one option" do
+      let(:page) { build(:page, :with_selection_settings, selection_options: (1..11).to_a.map { |i| { name: i.to_s, value: i.to_s } }) }
+
+      it "returns false" do
+        expect(described_class.can_have_exit_pages?(page)).to be false
+      end
+    end
+
+    context "when given a selection page with checkboxes" do
+      let(:page) { build(:page, :selection_with_checkboxes) }
+
+      it "returns false" do
+        expect(described_class.can_have_exit_pages?(page)).to be false
+      end
+    end
+
+    context "when given a page which isn't a selection type" do
+      let(:page) { build(:page, :with_text_settings) }
+
+      it "returns false" do
+        expect(described_class.can_have_exit_pages?(page)).to be false
       end
     end
   end
