@@ -225,8 +225,10 @@ def merge_organisations(task:, source_organisation_slug: nil, target_organisatio
   ActiveRecord::Base.transaction do
     users = User.where(organisation: source_organisation)
     groups = Group.where(organisation: source_organisation)
+    domains = OrganisationDomain.where(organisation: source_organisation)
 
     users.lock.load
+    domains.lock.load
     groups.lock.load
 
     if groups.pluck(:name).to_set.intersect?(Group.where(organisation: target_organisation).pluck(:name))
@@ -234,16 +236,18 @@ def merge_organisations(task:, source_organisation_slug: nil, target_organisatio
     end
 
     if dry_run
-      Rails.logger.info("#{task.name}: Would move #{users.count} users and #{groups.count} groups from #{source_organisation.name} to #{target_organisation.name}")
+      Rails.logger.info("#{task.name}: Would move #{users.count} users, #{groups.count} groups, and #{domains.count} domains from #{source_organisation.name} to #{target_organisation.name}")
       return
     end
 
-    Rails.logger.info("#{task.name}: Moving #{users.count} users and #{groups.count} groups from #{source_organisation.name} to #{target_organisation.name}")
+    Rails.logger.info("#{task.name}: Moving #{users.count} users, #{groups.count} groups, and #{domains.count} domains from #{source_organisation.name} to #{target_organisation.name}")
 
     users.update_all(organisation_id: target_organisation.id)
     users.touch_all
     groups.update_all(organisation_id: target_organisation.id)
     groups.touch_all
+    domains.update_all(organisation_id: target_organisation.id)
+    domains.touch_all
   end
 end
 

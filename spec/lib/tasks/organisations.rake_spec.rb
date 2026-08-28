@@ -116,7 +116,16 @@ RSpec.describe "organisations.rake", type: :task do
         .and change(Group.where(organisation: source_org), :count).from(5).to(0)
     end
 
-    shared_examples "it does not move users or groups" do
+    it "moves domains from one organisation to another" do
+      create_list :organisation_domain, 5, organisation: source_org
+
+      expect {
+        task.invoke("old-organisation", "shiny-new-organisation")
+      }.to change(OrganisationDomain.where(organisation: target_org), :count).by(5)
+        .and change(OrganisationDomain.where(organisation: source_org), :count).from(5).to(0)
+    end
+
+    shared_examples "it does not move users, groups or domains" do
       RSpec::Matchers.define_negated_matcher :not_change, :change
 
       it "does not move users from one organisation to another" do
@@ -136,9 +145,18 @@ RSpec.describe "organisations.rake", type: :task do
         }.to not_change(Group.where(organisation: target_org), :count)
           .and not_change(Group.where(organisation: source_org), :count)
       end
+
+      it "does not move domains from one organisation to another" do
+        create_list :organisation_domain, 5, organisation: source_org
+
+        expect {
+          invoked_task
+        }.to not_change(OrganisationDomain.where(organisation: target_org), :count)
+          .and not_change(OrganisationDomain.where(organisation: source_org), :count)
+      end
     end
 
-    context "when organisation to move users and groups from is not closed" do
+    context "when old organisation is not closed" do
       let!(:source_org) { create :organisation, slug: "old-organisation", closed: false }
 
       let(:invoked_task) do
@@ -148,7 +166,7 @@ RSpec.describe "organisations.rake", type: :task do
           .and output(/Old Organisation is not yet closed/).to_stderr
       end
 
-      include_examples "it does not move users or groups"
+      include_examples "it does not move users, groups or domains"
     end
 
     context "when old organisation has signed mou but new organisation has not" do
@@ -163,7 +181,7 @@ RSpec.describe "organisations.rake", type: :task do
           .and output(/Old Organisation has signed MOU but Shiny New Organisation has not/).to_stderr
       end
 
-      include_examples "it does not move users or groups"
+      include_examples "it does not move users, groups or domains"
     end
 
     context "when old organisation and new organisation have groups with the same name" do
@@ -179,7 +197,7 @@ RSpec.describe "organisations.rake", type: :task do
           .and output(/there are some duplicate group names/).to_stderr
       end
 
-      include_examples "it does not move users or groups"
+      include_examples "it does not move users, groups or domains"
     end
 
     describe ":dry_run" do
@@ -191,7 +209,7 @@ RSpec.describe "organisations.rake", type: :task do
         task.invoke(source_org.slug, target_org.slug)
       end
 
-      include_examples "it does not move users or groups"
+      include_examples "it does not move users, groups or domains"
     end
   end
 
