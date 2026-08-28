@@ -380,9 +380,8 @@ describe "routes/show.html.erb" do
           render_page
 
           expected_content = <<~TEXT
-            This question has a list with more than 10 options.
-
-            You cannot add routes from answers if the question has more than 10 options.
+            You cannot add routes from answers if the question has more than 10 options. \
+            We hope to add this ability soon.
           TEXT
 
           expect(rendered).to have_selector(".govuk-summary-list") do |summary_list|
