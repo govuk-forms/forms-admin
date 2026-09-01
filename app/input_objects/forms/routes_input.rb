@@ -5,12 +5,20 @@ class Forms::RoutesInput < BaseInput
 
   validate :routes_are_valid
 
-  def self.too_many_selection_options?(page)
-    page.answer_settings["selection_options"].length > 10
+  def self.routes_type(page)
+    if page.answer_type == "selection" && page.answer_settings.only_one_option == "true" && !too_many_selection_options?(page)
+      :selection_options_routes
+    else
+      :generic_route
+    end
   end
 
   def self.route_with_selection_options?(page)
-    page.answer_type == "selection" && page.answer_settings.only_one_option == "true" && !too_many_selection_options?(page)
+    routes_type(page) == :selection_options_routes
+  end
+
+  def self.too_many_selection_options?(page)
+    page.answer_settings["selection_options"].length > 10
   end
 
   def self.can_have_exit_pages?(page)

@@ -17,10 +17,14 @@ class Routes::BuildService
     end
 
     form.pages.flat_map do |page|
-      if Forms::RoutesInput.route_with_selection_options?(page)
+      routes_type = Forms::RoutesInput.routes_type(page)
+      case routes_type
+      when :selection_options_routes
         build_routes_for_selection_page(page, conditions_by_key)
-      else
+      when :generic_route
         build_route_for_generic_page(page, conditions_by_key)
+      else
+        raise "Unexpected routes type :#{routes_type}"
       end
     end
   end
