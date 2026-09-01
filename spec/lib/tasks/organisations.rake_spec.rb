@@ -125,6 +125,28 @@ RSpec.describe "organisations.rake", type: :task do
         .and change(OrganisationDomain.where(organisation: source_org), :count).from(5).to(0)
     end
 
+    context "when the two organisations contain the same domain" do
+      before do
+        create_list :organisation_domain, 5, organisation: source_org
+        create_list :organisation_domain, 5, organisation: target_org
+        create :organisation_domain, organisation: source_org, domain: "example.gov.uk"
+        create :organisation_domain, organisation: target_org, domain: "example.gov.uk"
+      end
+
+      it "deletes the shared domain from the source organisation" do
+        expect {
+          task.invoke("old-organisation", "shiny-new-organisation")
+        }.to change { OrganisationDomain.exists?(organisation: source_org, domain: "example.gov.uk") }.from(true).to(false)
+      end
+
+      it "moves the other domains from one organisation to another" do
+        expect {
+          task.invoke("old-organisation", "shiny-new-organisation")
+        }.to change(OrganisationDomain.where(organisation: target_org), :count).by(5)
+          .and change(OrganisationDomain.where(organisation: source_org), :count).from(6).to(0)
+      end
+    end
+
     shared_examples "it does not move users, groups or domains" do
       RSpec::Matchers.define_negated_matcher :not_change, :change
 
