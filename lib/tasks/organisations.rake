@@ -251,7 +251,8 @@ def merge_organisations(task:, source_organisation_slug: nil, target_organisatio
   ActiveRecord::Base.transaction do
     users = User.where(organisation: source_organisation)
     groups = Group.where(organisation: source_organisation)
-    domains = OrganisationDomain.where(organisation: source_organisation)
+    shared_domains = OrganisationDomain.where(organisation: source_organisation, domain: target_organisation.organisation_domains.pluck(:domain))
+    domains = OrganisationDomain.where(organisation: source_organisation).excluding(shared_domains)
     mou_signatures = MouSignature.where(organisation: source_organisation)
 
     users.lock.load
@@ -277,6 +278,7 @@ def merge_organisations(task:, source_organisation_slug: nil, target_organisatio
     users.touch_all
     groups.update_all(organisation_id: target_organisation.id)
     groups.touch_all
+    shared_domains.delete_all
     domains.update_all(organisation_id: target_organisation.id)
     domains.touch_all
     mou_signatures.update_all(organisation_id: target_organisation.id)
