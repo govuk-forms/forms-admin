@@ -116,7 +116,16 @@ RSpec.describe "organisations.rake", type: :task do
         .and change(Group.where(organisation: source_org), :count).from(5).to(0)
     end
 
-    shared_examples "it does not move users or groups" do
+    it "moves domains from one organisation to another" do
+      create_list :organisation_domain, 5, organisation: source_org
+
+      expect {
+        task.invoke("old-organisation", "shiny-new-organisation")
+      }.to change(OrganisationDomain.where(organisation: target_org), :count).by(5)
+        .and change(OrganisationDomain.where(organisation: source_org), :count).from(5).to(0)
+    end
+
+    shared_examples "it does not move users, groups or domains" do
       RSpec::Matchers.define_negated_matcher :not_change, :change
 
       it "does not move users from one organisation to another" do
@@ -136,9 +145,18 @@ RSpec.describe "organisations.rake", type: :task do
         }.to not_change(Group.where(organisation: target_org), :count)
           .and not_change(Group.where(organisation: source_org), :count)
       end
+
+      it "does not move domains from one organisation to another" do
+        create_list :organisation_domain, 5, organisation: source_org
+
+        expect {
+          invoked_task
+        }.to not_change(OrganisationDomain.where(organisation: target_org), :count)
+          .and not_change(OrganisationDomain.where(organisation: source_org), :count)
+      end
     end
 
-    context "when organisation to move users and groups from is not closed" do
+    context "when old organisation is not closed" do
       let!(:source_org) { create :organisation, slug: "old-organisation", closed: false }
 
       let(:invoked_task) do
@@ -148,12 +166,13 @@ RSpec.describe "organisations.rake", type: :task do
           .and output(/Old Organisation is not yet closed/).to_stderr
       end
 
-      include_examples "it does not move users or groups"
+      include_examples "it does not move users, groups or domains"
     end
 
     context "when old organisation has signed mou but new organisation has not" do
       before do
-        create :mou_signature_for_organisation, organisation: source_org
+        user = create :user, organisation: source_org
+        create :mou_signature_for_organisation, organisation: source_org, user:
       end
 
       let(:invoked_task) do
@@ -163,7 +182,43 @@ RSpec.describe "organisations.rake", type: :task do
           .and output(/Old Organisation has signed MOU but Shiny New Organisation has not/).to_stderr
       end
 
-      include_examples "it does not move users or groups"
+      include_examples "it does not move users, groups or domains"
+
+      context "when merge_mous is true" do
+        it "moves users from one organisation to another" do
+          create_list :user, 4, organisation: source_org
+
+          expect {
+            task.invoke("old-organisation", "shiny-new-organisation", "true")
+          }.to change(User.where(organisation: target_org), :count).by(5)
+            .and change(User.where(organisation: source_org), :count).from(5).to(0)
+        end
+
+        it "moves groups from one organisation to another" do
+          create_list :group, 5, organisation: source_org
+
+          expect {
+            task.invoke("old-organisation", "shiny-new-organisation", "true")
+          }.to change(Group.where(organisation: target_org), :count).by(5)
+            .and change(Group.where(organisation: source_org), :count).from(5).to(0)
+        end
+
+        it "moves domains from one organisation to another" do
+          create_list :organisation_domain, 5, organisation: source_org
+
+          expect {
+            task.invoke("old-organisation", "shiny-new-organisation", "true")
+          }.to change(OrganisationDomain.where(organisation: target_org), :count).by(5)
+            .and change(OrganisationDomain.where(organisation: source_org), :count).from(5).to(0)
+        end
+
+        it "moves MOU signatures from one organisation to another" do
+          expect {
+            task.invoke("old-organisation", "shiny-new-organisation", "true")
+          }.to change(MouSignature.where(organisation: target_org), :count).by(1)
+            .and change(MouSignature.where(organisation: source_org), :count).from(1).to(0)
+        end
+      end
     end
 
     context "when old organisation and new organisation have groups with the same name" do
@@ -179,7 +234,7 @@ RSpec.describe "organisations.rake", type: :task do
           .and output(/there are some duplicate group names/).to_stderr
       end
 
-      include_examples "it does not move users or groups"
+      include_examples "it does not move users, groups or domains"
     end
 
     describe ":dry_run" do
@@ -191,7 +246,7 @@ RSpec.describe "organisations.rake", type: :task do
         task.invoke(source_org.slug, target_org.slug)
       end
 
-      include_examples "it does not move users or groups"
+      include_examples "it does not move users, groups or domains"
     end
   end
 
@@ -251,6 +306,74 @@ RSpec.describe "organisations.rake", type: :task do
 
       expect { task.invoke("dft") }
         .to output(/Organisation 'Department for Testing' is already external/).to_stderr
+        .and raise_error(SystemExit) { |e| expect(e).not_to be_success }
+
+      expect(test_org.previous_changes).to be_empty
+    end
+
+    it "returns an error for non-existent organisations" do
+      expect { task.invoke("dft") }
+        .to output(/not found/).to_stderr
+        .and raise_error(SystemExit) { |e| expect(e).not_to be_success }
+    end
+  end
+
+  describe "organisations:open" do
+    subject(:task) do
+      Rake::Task["organisations:open"]
+    end
+
+    it "sets an organisation's 'closed' flag to false" do
+      test_org = create :organisation, name: "Department for Testing", slug: "dft", closed: true
+      test_org.clear_changes_information
+
+      expect {
+        task.invoke("dft")
+        test_org.reload
+      }
+        .to change(test_org, :closed).from(true).to(false)
+    end
+
+    it "aborts if the organisation is already open" do
+      test_org = create :organisation, name: "Department for Testing", slug: "dft", closed: false
+      test_org.clear_changes_information
+
+      expect { task.invoke("dft") }
+        .to output(/Organisation 'Department for Testing' is already open/).to_stderr
+        .and raise_error(SystemExit) { |e| expect(e).not_to be_success }
+
+      expect(test_org.previous_changes).to be_empty
+    end
+
+    it "returns an error for non-existent organisations" do
+      expect { task.invoke("dft") }
+        .to output(/not found/).to_stderr
+        .and raise_error(SystemExit) { |e| expect(e).not_to be_success }
+    end
+  end
+
+  describe "organisations:close" do
+    subject(:task) do
+      Rake::Task["organisations:close"]
+    end
+
+    it "sets an organisation's 'closed' flag to true" do
+      test_org = create :organisation, name: "Department for Testing", slug: "dft", closed: false
+      test_org.clear_changes_information
+
+      expect {
+        task.invoke("dft")
+        test_org.reload
+      }
+        .to change(test_org, :closed).from(false).to(true)
+    end
+
+    it "aborts if the organisation is already closed" do
+      test_org = create :organisation, name: "Department for Testing", slug: "dft", closed: true
+      test_org.clear_changes_information
+
+      expect { task.invoke("dft") }
+        .to output(/Organisation 'Department for Testing' is already closed/).to_stderr
         .and raise_error(SystemExit) { |e| expect(e).not_to be_success }
 
       expect(test_org.previous_changes).to be_empty

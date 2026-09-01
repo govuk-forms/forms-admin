@@ -55,13 +55,13 @@ namespace :organisations do
   end
 
   desc "Merge an organisation into another"
-  task :merge, %i[source_organisation_slug target_organisation_slug] => :environment do |task, args|
+  task :merge, %i[source_organisation_slug target_organisation_slug merge_mous] => :environment do |task, args|
     merge_organisations(**args, task:, dry_run: false)
   end
 
   namespace :merge do
     desc "Merge an organisation into another - dry run"
-    task :dry_run, %i[source_organisation_slug target_organisation_slug] => :environment do |task, args|
+    task :dry_run, %i[source_organisation_slug target_organisation_slug merge_mous] => :environment do |task, args|
       merge_organisations(**args, task:, dry_run: true)
     end
   end
@@ -87,6 +87,30 @@ namespace :organisations do
     desc "Make an organisation external - dry run"
     task :dry_run, %i[organisation_slug] => :environment do |task, args|
       change_organisation_internal_status(**args, status: false, task:, dry_run: true)
+    end
+  end
+
+  desc "Make organisation open"
+  task :open, %i[organisation_slug] => :environment do |task, args|
+    change_organisation_closed_status(**args, closed: false, task:, dry_run: false)
+  end
+
+  namespace :open do
+    desc "Make organisation open - dry run"
+    task :dry_run, %i[organisation_slug] => :environment do |task, args|
+      change_organisation_closed_status(**args, closed: false, task:, dry_run: true)
+    end
+  end
+
+  desc "Make organisation closed"
+  task :close, %i[organisation_slug] => :environment do |task, args|
+    change_organisation_closed_status(**args, closed: true, task:, dry_run: false)
+  end
+
+  namespace :close do
+    desc "Make organisation closed - dry run"
+    task :dry_run, %i[organisation_slug] => :environment do |task, args|
+      change_organisation_closed_status(**args, closed: true, task:, dry_run: true)
     end
   end
 
@@ -207,14 +231,16 @@ def run_organisation_fetch(dry_run:)
   end
 end
 
-def merge_organisations(task:, source_organisation_slug: nil, target_organisation_slug: nil, dry_run: false)
-  usage = "usage: rails #{task.name}[<source_organisation_slug>, <target_organisation_slug>]"
+def merge_organisations(task:, source_organisation_slug: nil, target_organisation_slug: nil, merge_mous: false, dry_run: false)
+  usage = "usage: rails #{task.name}[<source_organisation_slug>, <target_organisation_slug>, <merge_mous>]"
   abort usage if source_organisation_slug.blank? || target_organisation_slug.blank?
+  abort usage if merge_mous.present? && !merge_mous.in?(%w[true false])
+  merge_mous_boolean = merge_mous == "true"
 
   source_organisation = Organisation.find_by_slug!(source_organisation_slug)
   target_organisation = Organisation.find_by_slug!(target_organisation_slug)
 
-  if source_organisation.mou_signatures.any? != target_organisation.mou_signatures.any?
+  if !merge_mous_boolean && source_organisation.mou_signatures.any? != target_organisation.mou_signatures.any?
     abort "Can not merge organisations, as #{source_organisation.name} #{source_organisation.mou_signatures.any? ? 'has' : 'has not'} signed MOU but #{target_organisation.name} #{target_organisation.mou_signatures.any? ? 'has' : 'has not'}"
   end
 
@@ -225,25 +251,36 @@ def merge_organisations(task:, source_organisation_slug: nil, target_organisatio
   ActiveRecord::Base.transaction do
     users = User.where(organisation: source_organisation)
     groups = Group.where(organisation: source_organisation)
+    domains = OrganisationDomain.where(organisation: source_organisation)
+    mou_signatures = MouSignature.where(organisation: source_organisation)
 
     users.lock.load
+    domains.lock.load
     groups.lock.load
+    mou_signatures.lock.load
 
     if groups.pluck(:name).to_set.intersect?(Group.where(organisation: target_organisation).pluck(:name))
       abort "Can not merge #{source_organisation.name} into #{target_organisation.name}, as there are some duplicate group names"
     end
 
     if dry_run
-      Rails.logger.info("#{task.name}: Would move #{users.count} users and #{groups.count} groups from #{source_organisation.name} to #{target_organisation.name}")
+      Rails.logger.info("#{task.name}: Would move #{users.count} users, #{groups.count} groups, and #{domains.count} domains from #{source_organisation.name} to #{target_organisation.name}") unless merge_mous_boolean
+      Rails.logger.info("#{task.name}: Would move #{users.count} users, #{groups.count} groups, #{domains.count} domains and #{mou_signatures.count} MOU signatures from #{source_organisation.name} to #{target_organisation.name}") if merge_mous_boolean
+
       return
     end
 
-    Rails.logger.info("#{task.name}: Moving #{users.count} users and #{groups.count} groups from #{source_organisation.name} to #{target_organisation.name}")
+    Rails.logger.info("#{task.name}: Moving #{users.count} users, #{groups.count} groups, and #{domains.count} domains from #{source_organisation.name} to #{target_organisation.name}") unless merge_mous_boolean
+    Rails.logger.info("#{task.name}: Moving #{users.count} users, #{groups.count} groups, #{domains.count} domains and #{mou_signatures.count} MOU signatures from #{source_organisation.name} to #{target_organisation.name}") if merge_mous_boolean
 
     users.update_all(organisation_id: target_organisation.id)
     users.touch_all
     groups.update_all(organisation_id: target_organisation.id)
     groups.touch_all
+    domains.update_all(organisation_id: target_organisation.id)
+    domains.touch_all
+    mou_signatures.update_all(organisation_id: target_organisation.id)
+    mou_signatures.touch_all
   end
 end
 
@@ -267,6 +304,32 @@ def change_organisation_internal_status(task:, organisation_slug: nil, status: n
     Rails.logger.info("#{task.name}: Making organisation '#{organisation.name}' #{status_string}")
 
     organisation.internal = status
+    organisation.save!
+
+    Rails.logger.info("#{task.name}: Made organisation '#{organisation.name}' #{status_string}")
+  end
+end
+
+def change_organisation_closed_status(task:, organisation_slug: nil, closed: nil, dry_run: false)
+  usage = "usage: rails #{task.name}[<organisation_slug>]"
+  abort usage if organisation_slug.blank?
+
+  status_string = closed ? "closed" : "open"
+
+  organisation = Organisation.find_by_slug(organisation_slug)
+
+  abort "Organisation not found" if organisation.blank?
+  abort "Organisation '#{organisation.name}' is already #{status_string}" if organisation.closed == closed
+
+  ActiveRecord::Base.transaction do
+    if dry_run
+      Rails.logger.info("#{task.name}: Would make organisation '#{organisation.name}' #{status_string}")
+      return
+    end
+
+    Rails.logger.info("#{task.name}: Making organisation '#{organisation.name}' #{status_string}")
+
+    organisation.closed = closed
     organisation.save!
 
     Rails.logger.info("#{task.name}: Made organisation '#{organisation.name}' #{status_string}")
