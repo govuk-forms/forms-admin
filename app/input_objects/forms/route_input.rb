@@ -40,7 +40,7 @@ class Forms::RouteInput < BaseInput
   end
 
   def label_text
-    if Forms::RoutesInput.route_with_selection_options?(page)
+    if selection_options_route?
       answer_value_label = answer_value == Condition::NONE_OF_THE_ABOVE ? I18n.t("page_conditions.none_of_the_above") : answer_value
       return "If option #{option_index} (#{answer_value_label}), go to:"
     end
@@ -49,6 +49,14 @@ class Forms::RouteInput < BaseInput
   end
 
 private
+
+  def generic_route?
+    answer_value.nil?
+  end
+
+  def selection_options_route?
+    !generic_route?
+  end
 
   def route_is_not_backwards
     return if !goes_to_page? || goto_page.nil?
@@ -59,7 +67,7 @@ private
   end
 
   def error_message_for_backwards_route
-    if Forms::RoutesInput.route_with_selection_options?(page)
+    if selection_options_route?
       I18n.t("errors.routes.cannot_route_backwards_from_selection_page", question_number: page.position, option_number: option_index)
     else
       I18n.t("errors.routes.cannot_route_backwards_from_generic_page", question_number: page.position)
