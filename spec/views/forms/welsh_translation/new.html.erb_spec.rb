@@ -309,9 +309,9 @@ describe "forms/welsh_translation/new.html.erb", feature_multiple_branches: fals
 
             it "shows the English and Welsh text for the exit page fields" do
               expect(rendered).to have_css("td", text: exit_page.heading)
-              expect(rendered).to have_field("Enter Welsh exit page 1 heading for question #{page.position}", type: "text", id: welsh_exit_page_translation_input.form_field_id(:heading_cy))
+              expect(rendered).to have_field("Enter question #{page.position}’s Welsh exit page 1 heading", type: "text", id: welsh_exit_page_translation_input.form_field_id(:heading_cy))
               expect(rendered).to have_css("td", text: exit_page.markdown)
-              expect(rendered).to have_field("Enter Welsh exit page 1 content for question #{page.position}", type: "textarea", id: welsh_exit_page_translation_input.form_field_id(:markdown_cy))
+              expect(rendered).to have_field("Enter question #{page.position}’s Welsh exit page 1 content", type: "textarea", id: welsh_exit_page_translation_input.form_field_id(:markdown_cy))
             end
           end
 
@@ -326,14 +326,14 @@ describe "forms/welsh_translation/new.html.erb", feature_multiple_branches: fals
 
             it "shows the English and Welsh text for the exit pages’ fields" do
               expect(rendered).to have_css("td", text: exit_page.heading)
-              expect(rendered).to have_field("Enter Welsh exit page 1 heading for question #{page.position}", type: "text", id: welsh_exit_page_translation_input.form_field_id(:heading_cy))
+              expect(rendered).to have_field("Enter question #{page.position}’s Welsh exit page 1 heading", type: "text", id: welsh_exit_page_translation_input.form_field_id(:heading_cy))
               expect(rendered).to have_css("td", text: exit_page.markdown)
-              expect(rendered).to have_field("Enter Welsh exit page 1 content for question #{page.position}", type: "textarea", id: welsh_exit_page_translation_input.form_field_id(:markdown_cy))
+              expect(rendered).to have_field("Enter question #{page.position}’s Welsh exit page 1 content", type: "textarea", id: welsh_exit_page_translation_input.form_field_id(:markdown_cy))
 
               expect(rendered).to have_css("td", text: another_exit_page.heading)
-              expect(rendered).to have_field("Enter Welsh exit page 2 heading for question #{page.position}", type: "text", id: another_welsh_exit_page_translation_input.form_field_id(:heading_cy))
+              expect(rendered).to have_field("Enter question #{page.position}’s Welsh exit page 2 heading", type: "text", id: another_welsh_exit_page_translation_input.form_field_id(:heading_cy))
               expect(rendered).to have_css("td", text: another_exit_page.markdown)
-              expect(rendered).to have_field("Enter Welsh exit page 2 content for question #{page.position}", type: "textarea", id: another_welsh_exit_page_translation_input.form_field_id(:markdown_cy))
+              expect(rendered).to have_field("Enter question #{page.position}’s Welsh exit page 2 content", type: "textarea", id: another_welsh_exit_page_translation_input.form_field_id(:markdown_cy))
             end
           end
         end

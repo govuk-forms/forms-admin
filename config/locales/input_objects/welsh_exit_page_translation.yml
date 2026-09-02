@@ -18,5 +18,5 @@ en:
         markdown_cy: Enter Welsh exit page content
     label:
       forms_welsh_exit_page_translation_input:
-        heading_cy_html: Enter Welsh exit page %{exit_page_number} heading<span class="govuk-visually-hidden"> for question %{question_number}</span>
-        markdown_cy_html: Enter Welsh exit page %{exit_page_number} content<span class="govuk-visually-hidden"> for question %{question_number}</span>
+        heading_cy_html: Enter <span class="govuk-visually-hidden">question %{question_number}’s</span> Welsh exit page %{exit_page_number} heading
+        markdown_cy_html: Enter <span class="govuk-visually-hidden">question %{question_number}’s</span> Welsh exit page %{exit_page_number} content
