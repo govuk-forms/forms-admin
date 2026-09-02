@@ -91,7 +91,7 @@ private
   end
 
   def check_page_can_have_exit_pages
-    return if Forms::RoutesInput.route_with_selection_options?(page)
+    return if Forms::RoutesInput.can_have_exit_pages?(page)
 
     render "errors/not_found", status: :not_found, formats: :html
   end

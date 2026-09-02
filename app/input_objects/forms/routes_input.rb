@@ -5,12 +5,39 @@ class Forms::RoutesInput < BaseInput
 
   validate :routes_are_valid
 
+  def self.routes_type(page)
+    if page.answer_type == "selection" && page.answer_settings.only_one_option == "true"
+      if too_many_selection_options?(page)
+        if existing_selection_options_routes?(page)
+          :existing_selection_options_routes
+        else
+          :generic_route
+        end
+      else
+        :selection_options_routes
+      end
+    else
+      :generic_route
+    end
+  end
+
+  def self.route_with_selection_options?(page)
+    %i[
+      selection_options_routes
+      existing_selection_options_routes
+    ].include? routes_type(page)
+  end
+
   def self.too_many_selection_options?(page)
     page.answer_settings["selection_options"].length > 10
   end
 
-  def self.route_with_selection_options?(page)
-    page.answer_type == "selection" && page.answer_settings.only_one_option == "true" && !Forms::RoutesInput.too_many_selection_options?(page)
+  def self.existing_selection_options_routes?(page)
+    page.routing_conditions.any? { it.answer_value.present? }
+  end
+
+  def self.can_have_exit_pages?(page)
+    route_with_selection_options?(page)
   end
 
   def initialize(attributes = {})

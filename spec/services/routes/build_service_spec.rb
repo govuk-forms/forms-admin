@@ -120,6 +120,39 @@ RSpec.describe Routes::BuildService do
             expect(routes).to all be_a(Forms::RouteInput)
             expect(routes.filter { it.page_id == pages.first.id }.length).to eq(1)
           end
+
+          context "and has a generic route" do
+            before do
+              pages.first.routing_conditions << create(:condition, routing_page_id: pages.first.id, goto_page_id: pages.third.id, answer_value: nil)
+            end
+
+            it "builds a single route input for the selection page" do
+              routes = service.build_routes
+
+              expect(routes.length).to eq(3)
+              expect(routes).to all be_a(Forms::RouteInput)
+              expect(routes.filter { it.page_id == pages.first.id }.length).to eq(1)
+            end
+          end
+
+          context "and has existing routing conditions" do
+            before do
+              pages.first.routing_conditions << [
+                create(:condition, routing_page_id: pages.first.id, answer_value: "Option 1", goto_page_id: pages.third.id),
+                create(:condition, routing_page_id: pages.first.id, answer_value: "Option 11", skip_to_end: true),
+              ]
+            end
+
+            it "builds a route input for each option with a condition" do
+              pages.each(&:reload)
+
+              routes = service.build_routes
+
+              expect(routes.length).to eq(4)
+              expect(routes).to all be_a(Forms::RouteInput)
+              expect(routes.filter { it.page_id == pages.first.id }.length).to eq(2)
+            end
+          end
         end
 
         context "when the selection page is optional" do

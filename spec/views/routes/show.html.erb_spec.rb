@@ -257,7 +257,7 @@ describe "routes/show.html.erb" do
     context "when a page is a select from a list question" do
       let(:pages) do
         [
-          build_stubbed(:page, :with_selection_settings, id: 101, selection_options:),
+          build_stubbed(:page, :with_selection_settings, id: 101, selection_options:, routing_conditions:),
           build_stubbed(:page, id: 102),
           build_stubbed(:page, id: 103),
         ]
@@ -265,6 +265,10 @@ describe "routes/show.html.erb" do
 
       let(:selection_options) do
         [{ name: "Yes", value: "Yes" }, { name: "No", value: "No" }]
+      end
+
+      let(:routing_conditions) do
+        []
       end
 
       it "has inputs for each answer option" do
@@ -313,13 +317,71 @@ describe "routes/show.html.erb" do
           end
         end
 
+        it "does not have a button for adding exit pages" do
+          render_page
+          expect(rendered).not_to have_button("Add an exit page")
+          expect(rendered).not_to have_selector("button[name='new_exit_page'][value='#{pages.first.id}']")
+        end
+
+        context "with a generic routing condition" do
+          let(:routing_conditions) do
+            [
+              build_stubbed(:condition, routing_page_id: 101, goto_page_id: 103, answer_value: nil),
+            ]
+          end
+
+          it "has one route input for that question" do
+            render_page
+
+            expect(rendered).to have_selector(".govuk-summary-list") do |summary_list|
+              rows = summary_list.find_all(".govuk-summary-list__row")
+
+              expect(rows[0]).to have_selector(".govuk-select", count: 1)
+              expect(rows[1]).to have_selector(".govuk-select", count: 1)
+              expect(rows[2]).not_to have_selector(".govuk-select")
+            end
+          end
+
+          it "does not have a button for adding exit pages" do
+            render_page
+            expect(rendered).not_to have_button("Add an exit page")
+            expect(rendered).not_to have_selector("button[name='new_exit_page'][value='#{pages.first.id}']")
+          end
+        end
+
+        context "with existing routing conditions" do
+          let(:routing_conditions) do
+            [
+              build_stubbed(:condition, routing_page_id: 101, goto_page_id: 103, answer_value: "Option 5"),
+              build_stubbed(:condition, routing_page_id: 101, skip_to_end: true, answer_value: "Option 10"),
+            ]
+          end
+
+          it "has inputs for each selection option with a condition" do
+            render_page
+
+            expect(rendered).to have_selector(".govuk-summary-list") do |summary_list|
+              rows = summary_list.find_all(".govuk-summary-list__row")
+
+              expect(rows[0]).to have_selector(".govuk-select", count: 2)
+              expect(rows[1]).to have_selector(".govuk-select", count: 1)
+              expect(rows[2]).not_to have_selector(".govuk-select")
+            end
+          end
+
+          it "has a button for adding exit pages" do
+            render_page
+            expect(rendered).to have_button("Add an exit page")
+            expect(rendered).to have_selector("button[name='new_exit_page'][value='#{pages.first.id}']")
+          end
+        end
+
         it "has content explaining that routes cannot be added" do
           render_page
 
           expected_content = <<~TEXT
-            This question has a list with more than 10 options.
-
-            You cannot add routes from answers if the question has more than 10 options.
+            You cannot add routes from answers if the question has more than 10 options. \
+            We hope to add this ability soon.
           TEXT
 
           expect(rendered).to have_selector(".govuk-summary-list") do |summary_list|
