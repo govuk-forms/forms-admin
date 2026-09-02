@@ -11,53 +11,36 @@ describe Account::OrganisationsController do
   describe "GET #edit" do
     context "when there is more than one organisation the user can select" do
       context "when the user does not have an organisation" do
-        context "when the show_relevant_organisations feature is enabled", :feature_show_relevant_organisations do
-          it "assign the input object with allowed organisations limited by the user's domain" do
-            matching_orgs = [
-              create(:organisation, organisation_domains: [create(:organisation_domain, domain: domain)]),
-              create(:organisation, organisation_domains: [create(:organisation_domain, domain: domain)]),
-            ]
-            create(:organisation, organisation_domains: [create(:organisation_domain, domain: "example.com")])
-            create(:organisation, closed: true, organisation_domains: [create(:organisation_domain, domain: domain)])
+        it "assign the input object with allowed organisations limited by the user's domain" do
+          matching_orgs = [
+            create(:organisation, organisation_domains: [create(:organisation_domain, domain: domain)]),
+            create(:organisation, organisation_domains: [create(:organisation_domain, domain: domain)]),
+          ]
+          create(:organisation, organisation_domains: [create(:organisation_domain, domain: "example.com")])
+          create(:organisation, closed: true, organisation_domains: [create(:organisation_domain, domain: domain)])
 
+          get edit_account_organisation_path
+
+          expect(response).to render_template(:edit)
+
+          input_object = assigns(:organisation_input)
+          expect(input_object).to be_a(Account::OrganisationInput)
+          expect(input_object.allowed_organisations).to match_array(matching_orgs)
+        end
+
+        context "when there are no organisations the user can select" do
+          it "renders the no_matches template" do
             get edit_account_organisation_path
-
-            expect(response).to render_template(:edit)
-
-            input_object = assigns(:organisation_input)
-            expect(input_object).to be_a(Account::OrganisationInput)
-            expect(input_object.allowed_organisations).to match_array(matching_orgs)
-          end
-
-          context "when there are no organisations the user can select" do
-            it "renders the no_matches template" do
-              get edit_account_organisation_path
-              expect(response).to render_template(:no_matches)
-            end
-          end
-
-          context "when there is only one organisation the user can select" do
-            it "redirects to the confirm organisation path" do
-              create(:organisation, organisation_domains: [create(:organisation_domain, domain: domain)])
-
-              get edit_account_organisation_path
-              expect(response).to redirect_to(show_confirm_account_organisation_path)
-            end
+            expect(response).to render_template(:no_matches)
           end
         end
 
-        context "when the show_relevant_organisations feature is disabled", feature_show_relevant_organisations: false do
-          it "assigns the input object with all not closed organisations" do
-            orgs = create_list(:organisation, 2)
-            create(:organisation, closed: true)
+        context "when there is only one organisation the user can select" do
+          it "redirects to the confirm organisation path" do
+            create(:organisation, organisation_domains: [create(:organisation_domain, domain: domain)])
 
             get edit_account_organisation_path
-
-            expect(response).to render_template(:edit)
-
-            input_object = assigns(:organisation_input)
-            expect(input_object).to be_a(Account::OrganisationInput)
-            expect(input_object.allowed_organisations).to match_array(orgs)
+            expect(response).to redirect_to(show_confirm_account_organisation_path)
           end
         end
       end
@@ -134,42 +117,24 @@ describe Account::OrganisationsController do
       end
     end
 
-    context "when the show_relevant_organisations feature is enabled", :feature_show_relevant_organisations do
-      context "when the selected organisation does not match the user's email domain" do
-        let(:organisation) { create(:organisation, organisation_domains: [create(:organisation_domain, domain: "other.gov.uk")]) }
-        let(:invalid_params) { { account_organisation_input: { organisation_id: organisation.id } } }
+    context "when the selected organisation does not match the user's email domain" do
+      let(:organisation) { create(:organisation, organisation_domains: [create(:organisation_domain, domain: "other.gov.uk")]) }
+      let(:invalid_params) { { account_organisation_input: { organisation_id: organisation.id } } }
 
-        before do
-          create(:organisation, organisation_domains: [create(:organisation_domain, domain: domain)])
-        end
-
-        it "does not update the user's organisation" do
-          expect {
-            put account_organisation_path, params: invalid_params
-          }.not_to(change { user.reload.organisation })
-        end
-
-        it "re-renders the edit template" do
-          put account_organisation_path, params: invalid_params
-          expect(response).to have_http_status(:unprocessable_content)
-          expect(response).to render_template(:edit)
-        end
+      before do
+        create(:organisation, organisation_domains: [create(:organisation_domain, domain: domain)])
       end
-    end
 
-    context "when the show_relevant_organisations feature is disabled", feature_show_relevant_organisations: false do
-      context "when the selected organisation does not match the user's email domain" do
-        let(:organisation) { create(:organisation, organisation_domains: [create(:organisation_domain, domain: "other.gov.uk")]) }
-        let(:params) { { account_organisation_input: { organisation_id: organisation.id } } }
+      it "does not update the user's organisation" do
+        expect {
+          put account_organisation_path, params: invalid_params
+        }.not_to(change { user.reload.organisation })
+      end
 
-        before do
-          create(:organisation, organisation_domains: [create(:organisation_domain, domain: domain)])
-        end
-
-        it "updates the user's organisation" do
-          put account_organisation_path, params: params
-          expect(user.reload.organisation).to eq(organisation)
-        end
+      it "re-renders the edit template" do
+        put account_organisation_path, params: invalid_params
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(response).to render_template(:edit)
       end
     end
 
@@ -181,7 +146,7 @@ describe Account::OrganisationsController do
     end
   end
 
-  describe "GET #show_confirm", :feature_show_relevant_organisations do
+  describe "GET #show_confirm" do
     context "when there is only one organisation the user can select" do
       let!(:organisation) { create(:organisation, organisation_domains: [create(:organisation_domain, domain: domain)]) }
 
@@ -215,7 +180,7 @@ describe Account::OrganisationsController do
     end
   end
 
-  describe "POST #confirm", :feature_show_relevant_organisations do
+  describe "POST #confirm" do
     let(:params) { { account_confirm_organisation_input: { confirm: "yes" } } }
 
     context "when there is only one organisation the user can select" do

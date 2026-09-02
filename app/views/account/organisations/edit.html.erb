@@ -6,14 +6,11 @@
         <%= f.govuk_error_summary %>
       <% end %>
 
-      <% show_relevant_organisations_enabled = FeatureService.enabled?(:show_relevant_organisations) %>
-      <% if show_relevant_organisations_enabled %>
-        <h1 class="govuk-heading-l">
-          <%= t("page_titles.account_organisation") %>
-        </h1>
+      <h1 class="govuk-heading-l">
+        <%= t("page_titles.account_organisation") %>
+      </h1>
 
-        <p><%= t(".you_created_account_with", email_domain: @organisation_input.user.email_domain) %></p>
-      <% end %>
+      <p><%= t(".you_created_account_with", email_domain: @organisation_input.user.email_domain) %></p>
 
       <% if @organisation_input.radios? %>
         <%= f.govuk_radio_buttons_fieldset(:organisation_id, legend: { size: 'm', tag: 'h2' }) do %>
@@ -34,12 +31,6 @@
               ) %>
         <% end %>
       <% else %>
-        <% label_options = if show_relevant_organisations_enabled
-                             { size: 'm', tag: 'h2', text: t("helpers.legend.account_organisation_input.organisation_id") }
-                           else
-                             { size: 'xl', tag: 'h1' }
-                           end %>
-
         <%= render DfE::Autocomplete::View.new(
           f,
           attribute_name: :organisation_id,
@@ -50,7 +41,7 @@
             :name_with_abbreviation,
             class: ['govuk-!-width-three-quarters'],
             options: { prompt: t('users.edit.organisation_prompt') },
-            label: label_options,
+            label: { size: 'm', tag: 'h2', text: t("helpers.legend.account_organisation_input.organisation_id") },
           ),
           html_attributes: { 'data-show-all-values' => 'true' },
         ) %>

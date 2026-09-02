@@ -22,8 +22,6 @@ describe "Settings" do
   describe ".features" do
     features = settings[:features]
 
-    include_examples expected_value_test, :show_relevant_organisations, features, false
-
     describe "group-scoped feature flags" do
       group_features = features.select { |_, config| config.is_a?(Hash) && config["enabled_by_group"] }
 

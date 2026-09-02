@@ -22,7 +22,7 @@ class Account::OrganisationInput < BaseInput
   end
 
   def radios?
-    FeatureService.enabled?(:show_relevant_organisations) && allowed_organisations.size <= 30
+    allowed_organisations.size <= 30
   end
 
   def not_listed_selected?

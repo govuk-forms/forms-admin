@@ -73,11 +73,7 @@ module Account
     end
 
     def allowed_organisations
-      @allowed_organisations ||= if FeatureService.enabled?(:show_relevant_organisations)
-                                   Organisation.not_closed.for_domain(current_user.email_domain).order(:name)
-                                 else
-                                   Organisation.not_closed.order(:name)
-                                 end
+      @allowed_organisations ||= Organisation.not_closed.for_domain(current_user.email_domain).order(:name)
     end
   end
 end

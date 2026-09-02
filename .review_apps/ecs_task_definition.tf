@@ -31,7 +31,6 @@ locals {
     { name = "SETTINGS__AWS__ASSETS_S3_BUCKET_NAME", value = local.assets_bucket_name },
     { name = "SETTINGS__FORMS_ENV", value = "review" },
     { name = "SETTINGS__FORMS_RUNNER__URL", value = "https://forms.service.gov.uk" },
-    { name = "SETTINGS__FEATURES__SHOW_RELEVANT_ORGANISATIONS", value = "true" }
   ]
 }
 
