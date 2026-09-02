@@ -171,6 +171,40 @@ RSpec.describe Forms::RoutesInput do
       it "returns :generic_route" do
         expect(described_class.routes_type(page)).to eq :generic_route
       end
+
+      context "with existing conditions" do
+        context "with selection options routes" do
+          before do
+            page.routing_conditions << build(
+              :condition,
+              routing_page: page,
+              check_page: page,
+              goto_page: build(:page, form: page.form),
+              answer_value: "1",
+            )
+          end
+
+          it "returns :existing_selection_options_routes" do
+            expect(described_class.routes_type(page)).to eq :existing_selection_options_routes
+          end
+        end
+
+        context "with generic route" do
+          before do
+            page.routing_conditions << build(
+              :condition,
+              routing_page: page,
+              check_page: page,
+              goto_page: build(:page, form: page.form),
+              answer_value: nil,
+            )
+          end
+
+          it "returns :generic_route" do
+            expect(described_class.routes_type(page)).to eq :generic_route
+          end
+        end
+      end
     end
 
     context "when given a selection page with checkboxes" do
@@ -205,6 +239,40 @@ RSpec.describe Forms::RoutesInput do
       it "returns false" do
         expect(described_class.route_with_selection_options?(page)).to be false
       end
+
+      context "with existing conditions" do
+        context "with selection options routes" do
+          before do
+            page.routing_conditions << build(
+              :condition,
+              routing_page: page,
+              check_page: page,
+              goto_page: build(:page, form: page.form),
+              answer_value: "1",
+            )
+          end
+
+          it "returns true" do
+            expect(described_class.route_with_selection_options?(page)).to be true
+          end
+        end
+
+        context "with generic route" do
+          before do
+            page.routing_conditions << build(
+              :condition,
+              routing_page: page,
+              check_page: page,
+              goto_page: build(:page, form: page.form),
+              answer_value: nil,
+            )
+          end
+
+          it "returns false" do
+            expect(described_class.route_with_selection_options?(page)).to be false
+          end
+        end
+      end
     end
 
     context "when given a selection page with checkboxes" do
@@ -238,6 +306,40 @@ RSpec.describe Forms::RoutesInput do
 
       it "returns false" do
         expect(described_class.can_have_exit_pages?(page)).to be false
+      end
+
+      context "with existing conditions" do
+        context "with selection options routes" do
+          before do
+            page.routing_conditions << build(
+              :condition,
+              routing_page: page,
+              check_page: page,
+              goto_page: build(:page, form: page.form),
+              answer_value: "1",
+            )
+          end
+
+          it "returns true" do
+            expect(described_class.can_have_exit_pages?(page)).to be true
+          end
+        end
+
+        context "with generic route" do
+          before do
+            page.routing_conditions << build(
+              :condition,
+              routing_page: page,
+              check_page: page,
+              goto_page: build(:page, form: page.form),
+              answer_value: nil,
+            )
+          end
+
+          it "returns false" do
+            expect(described_class.can_have_exit_pages?(page)).to be false
+          end
+        end
       end
     end
 

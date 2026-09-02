@@ -21,6 +21,8 @@ class Routes::BuildService
       case routes_type
       when :selection_options_routes
         build_routes_for_selection_page(page, conditions_by_key)
+      when :existing_selection_options_routes
+        build_routes_for_existing_conditions_for_selection_page(page, conditions_by_key)
       when :generic_route
         build_route_for_generic_page(page, conditions_by_key)
       else
@@ -100,6 +102,30 @@ private
         goto: goto_value_for(condition),
         goto_page: condition&.goto_page,
         goto_options: options_for_goto_page(page, condition&.goto_page_id),
+      )
+    end
+  end
+
+  def build_routes_for_existing_conditions_for_selection_page(page, conditions_by_key)
+    options = page.answer_settings&.selection_options&.dup || []
+
+    options << NONE_OF_THE_ABOVE_OPTION if page.is_optional
+
+    options.filter_map do |option|
+      answer_value = option["value"]
+      key = [page.id, answer_value]
+      condition = conditions_by_key[key]
+
+      next unless condition
+
+      Forms::RouteInput.new(
+        id: condition.id,
+        page_id: page.id,
+        page:,
+        answer_value:,
+        goto: goto_value_for(condition),
+        goto_page: condition.goto_page,
+        goto_options: options_for_goto_page(page, condition.goto_page_id),
       )
     end
   end
