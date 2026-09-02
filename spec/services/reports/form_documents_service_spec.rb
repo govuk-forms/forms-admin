@@ -231,14 +231,88 @@ RSpec.describe Reports::FormDocumentsService do
       described_class.has_exit_pages?(form_document)
     end
 
-    context "when form has one step with one exit page" do
-      let(:form_document) { branch_route_form.latest_form_document }
+    context "when a step has one exit page via the ExitPage model" do
+      let(:form_with_exit_page) do
+        form = create(:form, :live)
+        create(:exit_page, question_page: form.pages.first)
+        form.latest_form_document.update!(content: form.reload.as_form_document(live_at: form.updated_at))
+        form
+      end
+      let(:form_document) { form_with_exit_page.latest_form_document }
+
+      it { is_expected.to be true }
+    end
+
+    context "when a step has multiple exit pages via the ExitPage model" do
+      let(:form_with_multiple_exit_pages) do
+        form = create(:form, :live)
+        create(:exit_page, question_page: form.pages.first)
+        create(:exit_page, question_page: form.pages.first)
+        form.latest_form_document.update!(content: form.reload.as_form_document(live_at: form.updated_at))
+        form
+      end
+      let(:form_document) { form_with_multiple_exit_pages.latest_form_document }
 
       it { is_expected.to be true }
     end
 
     context "when form has no exit pages" do
       let(:form_document) { basic_route_form.latest_form_document }
+
+      it { is_expected.to be false }
+    end
+
+    context "when the form document is a legacy snapshot with exit_page_markdown on a routing condition" do
+      let(:form_document) do
+        {
+          "content" => {
+            "steps" => [
+              {
+                "routing_conditions" => [
+                  { "exit_page_markdown" => "Exit page markdown" },
+                ],
+              },
+            ],
+          },
+        }
+      end
+
+      it { is_expected.to be true }
+    end
+
+    context "when the form document is a legacy snapshot with an empty exit_pages array and exit_page_markdown on a routing condition" do
+      let(:form_document) do
+        {
+          "content" => {
+            "steps" => [
+              {
+                "exit_pages" => [],
+                "routing_conditions" => [
+                  { "exit_page_markdown" => "Exit page markdown" },
+                ],
+              },
+            ],
+          },
+        }
+      end
+
+      it { is_expected.to be true }
+    end
+
+    context "when the form document is a legacy snapshot with no exit pages" do
+      let(:form_document) do
+        {
+          "content" => {
+            "steps" => [
+              {
+                "routing_conditions" => [
+                  { "exit_page_markdown" => nil },
+                ],
+              },
+            ],
+          },
+        }
+      end
 
       it { is_expected.to be false }
     end
