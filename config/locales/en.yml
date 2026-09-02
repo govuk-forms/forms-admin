@@ -162,14 +162,14 @@ en:
           attributes:
             border_colour:
               blank: Enter the header and footer border colour
-              invalid: 'Header and footer border colour must be a hex colour code, like #206c49'
+              invalid: Header and footer border colour must be a hex colour code, like 206c49
             copyright_holder:
               blank: Enter the copyright holder
             favicon_file:
               invalid_file_type: The favicon must be an ICO or PNG file
             header_background_colour:
               blank: Enter the header background colour
-              invalid: 'Header background colour must be a hex colour code, like #206c49'
+              invalid: Header background colour must be a hex colour code, like 206c49
             logo_alt_text:
               blank: Enter the logo alt text
             logo_file:
@@ -1026,10 +1026,10 @@ en:
       account_name_input:
         name: You do not need to include a title or any middle names.
       brand:
-        border_colour: 'Enter a hex colour code. For example, #206c49'
+        border_colour: Enter a hex colour code. For example, 206c49
         copyright_holder: Shown in the copyright notice in the form’s footer.
         favicon_file: Upload an ICO or PNG file. Shown in the browser tab.
-        header_background_colour: 'Enter a hex colour code. For example, #206c49'
+        header_background_colour: Enter a hex colour code. For example, 206c49
         logo_alt_text: Describes the logo for people using screen readers. Usually the organisation’s name.
         logo_file: Upload a PNG or JPEG file. Shown in the header of the form.
         logo_link: The web address people go to when they select the logo. Usually the organisation’s website.

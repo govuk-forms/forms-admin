@@ -16,9 +16,9 @@
 
       <%= f.govuk_text_field :logo_link, label: { size: 'm' } %>
 
-      <%= f.govuk_text_field :header_background_colour, label: { size: 'm' }, width: 5 %>
+      <%= f.govuk_text_field :header_background_colour, label: { size: 'm' }, width: 5, prefix_text: "#", value: @brand.header_background_colour&.delete_prefix("#") %>
 
-      <%= f.govuk_text_field :border_colour, label: { size: 'm' }, width: 5 %>
+      <%= f.govuk_text_field :border_colour, label: { size: 'm' }, width: 5, prefix_text: "#", value: @brand.border_colour&.delete_prefix("#") %>
 
       <%= f.govuk_text_field :copyright_holder, label: { size: 'm' } %>
 
