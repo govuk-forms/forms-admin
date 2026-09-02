@@ -6,15 +6,24 @@ RSpec.describe Forms::RouteInput, type: :model do
   let(:check_your_answers_value) { GotoValue::EndOfFormValue.new }
   let(:default_value) { GotoValue::DefaultValue.new }
 
-  let(:page) { build_stubbed(:page, position: 1) }
+  let(:page) do
+    build_stubbed(
+      :page,
+      :with_selection_settings,
+      position: 1,
+      selection_options: [{ name: "Yes", value: "Yes" }, { name: "No", value: "No" }],
+    )
+  end
+
   let(:goto_page) { build_stubbed(:page, position: 2) }
+  let(:answer_value) { "Yes" }
 
   let(:attributes) do
     {
       id: 1,
       page_id: page.id,
       goto: "page_#{goto_page.id}",
-      answer_value: "Yes",
+      answer_value:,
       page: page,
       goto_page: goto_page,
     }
@@ -123,15 +132,10 @@ RSpec.describe Forms::RouteInput, type: :model do
   end
 
   describe "#label_text" do
-    context "when the route is to the next page" do
-      it "returns the correct label" do
-        expect(route_input.label_text).to eq("After question 1, go to:")
-      end
-    end
-
     context "when the route is for a generic page" do
       let(:middle_page) { build_stubbed(:page, position: 2) }
       let(:goto_page) { build_stubbed(:page, position: 3) }
+      let(:answer_value) { nil }
 
       it "sets the label correctly for a generic page" do
         expect(route_input.label_text).to eq("After question 1, go to:")
@@ -141,7 +145,7 @@ RSpec.describe Forms::RouteInput, type: :model do
     context "when the route is for a selection page" do
       let(:page) { build_stubbed(:page, :with_selection_settings, position: 1) }
       let(:goto_page) { build_stubbed(:page, position: 2) }
-      let(:attributes) { super().merge(answer_value: "Option 1") }
+      let(:answer_value) { "Option 1" }
 
       it "sets the label correctly for a selection page" do
         expect(route_input.label_text).to eq("If option 1 (Option 1), go to:")
@@ -151,7 +155,7 @@ RSpec.describe Forms::RouteInput, type: :model do
     context "when the route is for a selection page with a none of the above option" do
       let(:page) { build_stubbed(:page, :with_selection_settings, position: 1) }
       let(:goto_page) { build_stubbed(:page, position: 2) }
-      let(:attributes) { super().merge(answer_value: Condition::NONE_OF_THE_ABOVE) }
+      let(:answer_value) { Condition::NONE_OF_THE_ABOVE }
 
       it "sets the label correctly for a selection page with a none of the above option" do
         expect(route_input.label_text).to eq("If option 3 (None of the above), go to:")
@@ -172,6 +176,7 @@ RSpec.describe Forms::RouteInput, type: :model do
     context "when the route is backwards" do
       let(:page) { build_stubbed(:page, position: 2) }
       let(:goto_page) { build_stubbed(:page, position: 1) }
+      let(:answer_value) { nil }
 
       it "adds the correct error" do
         expect(route_input).to be_invalid
@@ -180,7 +185,7 @@ RSpec.describe Forms::RouteInput, type: :model do
 
       context "when the route is for a selection question" do
         let(:page) { build_stubbed(:page, :with_selection_settings, position: 2) }
-        let(:attributes) { super().merge(answer_value: "Option 1") }
+        let(:answer_value) { "Option 1" }
 
         it "adds the correct error" do
           expect(route_input).to be_invalid
