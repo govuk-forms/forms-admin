@@ -50,7 +50,7 @@
                     <%= t(".too_many_options_html") %>
                   <% end %>
                   <% if Forms::RoutesInput::route_with_selection_options?(page) %>
-                    <%= f.govuk_submit t(".add_exit_page_html", question_number: page.position), secondary: true, name: 'new_exit_page', value: page.id %>
+                    <%= f.govuk_submit t(".add_exit_page_html", question_number: page.position), secondary: true, name: 'new_exit_page', value: page.id, class: page.exit_pages.any? ? "" : "govuk-!-margin-bottom-6" %>
                   <% end %>
                   <% if page.exit_pages.any? %>
                     <h2 class="govuk-heading-s">
