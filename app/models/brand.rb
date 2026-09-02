@@ -14,6 +14,7 @@ class Brand < ApplicationRecord
   attr_accessor :logo_file, :favicon_file, :opengraph_image_file
 
   before_validation :set_slug, on: :create
+  before_validation :normalise_colours
 
   validates :slug, format: { with: /\A[a-z0-9]+(?:-[a-z0-9]+)*\z/, allow_blank: true }
   validates :name, presence: true
@@ -41,6 +42,17 @@ private
 
   def set_slug
     self.slug = name.parameterize if slug.blank? && name.present?
+  end
+
+  def normalise_colours
+    self.header_background_colour = normalise_colour(header_background_colour)
+    self.border_colour = normalise_colour(border_colour)
+  end
+
+  def normalise_colour(value)
+    return value if value.blank?
+
+    "##{value.strip.downcase.delete_prefix('#')}"
   end
 
   # the slug is derived from the name, so errors are added to name rather
