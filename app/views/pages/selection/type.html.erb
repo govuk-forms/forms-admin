@@ -7,12 +7,13 @@
     <% if @page.present? && @page.routing_conditions.any? %>
       <% if @selection_type_input.need_to_reduce_options? %>
         <%= govuk_notification_banner(title_text: t("banner.default.title")) do |banner| %>
-          <% banner.with_heading(text: t("selection_type.routing_and_reduce_your_options_combined_warning.heading"), tag: "h3") %>
+          <% routes = t("selection_type.routes", count: @page.routing_conditions.count) %>
+          <% banner.with_heading(text: t("selection_type.routing_and_reduce_your_options_combined_warning.heading", routes:), tag: "h3") %>
           <p><%= t("selection_type.routing_and_reduce_your_options_combined_warning.body", pages_link_url: form_pages_path(current_form.id)) %></p>
         <% end %>
       <% elsif @selection_type_input.show_routing_warning? %>
         <%= govuk_notification_banner(title_text: t("banner.default.title")) do |banner| %>
-          <% banner.with_heading(text: t("selection_type.routing_warning")) %>
+          <% banner.with_heading(text: t("selection_type.routing_warning", count: @page.routing_conditions.count)) %>
         <% end %>
       <% end %>
     <% elsif @selection_type_input.need_to_reduce_options? %>
