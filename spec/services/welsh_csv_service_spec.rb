@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe "WelshCsvService" do
+RSpec.describe "WelshCsvService", feature_multiple_branches: false do
   describe "#as_csv" do
     let(:form) { build :form }
 
@@ -208,17 +208,103 @@ RSpec.describe "WelshCsvService" do
       end
     end
 
-    context "when the page has an exit condition" do
-      let(:form) { build :form, :with_pages, pages: [page] }
-      let(:page) { create :page, position: 1, routing_conditions: [condition] }
-      let(:condition) { create :condition, :with_exit_page, exit_page_heading: "Exit page heading", exit_page_markdown: "Exit page markdown", exit_page_heading_cy: "Welsh exit page heading", exit_page_markdown_cy: "Welsh exit page markdown" }
+    context "when the page has an exit page" do
+      context "when the multiple branches feature is enabled", :feature_multiple_branches do
+        let(:form) do
+          create(
+            :form,
+            :with_pages,
+            pages: [
+              build(
+                :page,
+                position: 1,
+                exit_pages: [
+                  build(
+                    :exit_page,
+                    heading: "Exit page 1 for question 1 heading",
+                    markdown: "Exit page 1 for question 1 markdown.",
+                    heading_cy: "Welsh exit page 1 for question 1 heading",
+                    markdown_cy: "Welsh exit page 1 for question 1 markdown.",
+                  ),
+                ],
+              ),
+              build(
+                :page,
+                position: 2,
+                exit_pages: [
+                  build(
+                    :exit_page,
+                    heading: "Exit page 1 for question 2 heading",
+                    markdown: "Exit page 1 for question 2 markdown.",
+                    heading_cy: "Welsh exit page 1 for question 2 heading",
+                    markdown_cy: "Welsh exit page 1 for question 2 markdown.",
+                  ),
+                  build(
+                    :exit_page,
+                    heading: "Exit page 2 for question 2 heading",
+                    markdown: "Exit page 2 for question 2 markdown.",
+                    heading_cy: "Welsh exit page 2 for question 2 heading",
+                    markdown_cy: "Welsh exit page 2 for question 2 markdown.",
+                  ),
+                ],
+              ),
+            ],
+          )
+        end
 
-      it "contains the exit page heading" do
-        expect(csv_rows(form)).to include([
-          "Question 1 - exit page heading",
-          "Exit page heading",
-          "Welsh exit page heading",
-        ])
+        it "contains the exit page headings" do
+          expect(csv_rows(form)).to include(
+            [
+              "Question 1 - exit page 1 heading",
+              "Exit page 1 for question 1 heading",
+              "Welsh exit page 1 for question 1 heading",
+            ],
+            [
+              "Question 2 - exit page 1 heading",
+              "Exit page 1 for question 2 heading",
+              "Welsh exit page 1 for question 2 heading",
+            ],
+            [
+              "Question 2 - exit page 2 heading",
+              "Exit page 2 for question 2 heading",
+              "Welsh exit page 2 for question 2 heading",
+            ],
+          )
+        end
+
+        it "contains the exit page markdown" do
+          expect(csv_rows(form)).to include(
+            [
+              "Question 1 - exit page 1 content",
+              "Exit page 1 for question 1 markdown.",
+              "Welsh exit page 1 for question 1 markdown.",
+            ],
+            [
+              "Question 2 - exit page 1 content",
+              "Exit page 1 for question 2 markdown.",
+              "Welsh exit page 1 for question 2 markdown.",
+            ],
+            [
+              "Question 2 - exit page 2 content",
+              "Exit page 2 for question 2 markdown.",
+              "Welsh exit page 2 for question 2 markdown.",
+            ],
+          )
+        end
+      end
+
+      context "when the multiple branches feature is not enabled", feature_multiple_branches: false do
+        let(:form) { build :form, :with_pages, pages: [page] }
+        let(:page) { create :page, position: 1, routing_conditions: [condition] }
+        let(:condition) { create :condition, :with_exit_page, exit_page_heading: "Exit page heading", exit_page_markdown: "Exit page markdown", exit_page_heading_cy: "Welsh exit page heading", exit_page_markdown_cy: "Welsh exit page markdown" }
+
+        it "contains the exit page heading" do
+          expect(csv_rows(form)).to include([
+            "Question 1 - exit page heading",
+            "Exit page heading",
+            "Welsh exit page heading",
+          ])
+        end
       end
     end
 
