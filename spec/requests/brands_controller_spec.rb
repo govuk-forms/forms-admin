@@ -228,6 +228,20 @@ RSpec.describe BrandsController, type: :request do
         end
       end
 
+      context "when a colour is uppercase and has no leading #" do
+        before do
+          params[:brand][:border_colour] = "206C49"
+        end
+
+        it "creates a brand with the colour normalised" do
+          expect {
+            post path, params: params
+          }.to change(Brand, :count).by(1)
+
+          expect(Brand.last.border_colour).to eq "#206c49"
+        end
+      end
+
       context "when a brand with the same name already exists" do
         before do
           create :brand, name: "Testshire Council"

@@ -66,17 +66,20 @@ RSpec.describe Brand, type: :model do
   end
 
   %i[header_background_colour border_colour].each do |attribute|
-    it "is invalid when the #{attribute.to_s.humanize.downcase} is not a lowercase 6-digit hex colour code" do
-      ["ffffff", "#FFFFFF", "#fff", "#gggggg", "white"].each do |colour|
+    it "is invalid when the #{attribute.to_s.humanize.downcase} is not a 6-digit hex colour code" do
+      ["#fff", "#gggggg", "white"].each do |colour|
         brand.public_send("#{attribute}=", colour)
         expect(brand).to be_invalid
         expect(brand.errors).to be_of_kind(attribute, :invalid)
       end
     end
 
-    it "is valid when the #{attribute.to_s.humanize.downcase} is a lowercase 6-digit hex colour code" do
-      brand.public_send("#{attribute}=", "#0b0c0c")
-      expect(brand).to be_valid
+    it "is valid when the #{attribute.to_s.humanize.downcase} is a 6-digit hex colour code" do
+      ["#0b0c0c", "0b0c0c", "#0B0C0C", "0B0C0C"].each do |colour|
+        brand.public_send("#{attribute}=", colour)
+        expect(brand).to be_valid
+        expect(brand.public_send(attribute)).to eq "#0b0c0c"
+      end
     end
   end
 
