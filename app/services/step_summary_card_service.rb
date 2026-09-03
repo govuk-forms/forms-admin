@@ -225,9 +225,13 @@ private
 
   def print_routes(conditions)
     answer_value_groups = answer_value_groups(conditions)
-    answer_value_groups.map { |goto_page_id, condition_group|
-      if goto_page_id.nil?
+    answer_value_groups.map { |group|
+      condition_group = group[:conditions]
+
+      if group[:group_type] == :skip_to_end
         caption = content_tag(:p, I18n.t("page_conditions.go_to_the_end"), class: "govuk-body-s")
+      elsif group[:group_type] == :exit_page
+        caption = content_tag(:p, I18n.t("page_conditions.go_to_exit_page", exit_page_index: group[:exit_page_index], exit_page_heading: group[:exit_page].heading), class: "govuk-body-s")
       else
         goto_question = @steps.find { |page| page.id == condition_group.first.goto_page_id }
         goto_page_question_text = ActionController::Base.helpers.sanitize(goto_question.question_text)
@@ -288,12 +292,50 @@ private
   end
 
   def answer_value_groups(conditions)
-    answer_order = @step.answer_settings.selection_options.map(&:value) || []
+    answer_order = @step.answer_settings&.selection_options&.map(&:value) || []
 
-    conditions.group_by(&:goto_page_id).map { |goto_page_id, condition_group|
-      goto_page_position = @steps.find_index { |page| page.id == goto_page_id } + 1 unless goto_page_id.nil?
-      sorted_condition_group = condition_group.in_order_of(:answer_value, answer_order, filter: false)
-      [goto_page_position, sorted_condition_group]
-    }.sort_by { |goto_page_position, _| goto_page_position || Float::INFINITY }
+    ordered_conditions = conditions.to_a
+      .in_order_of(:answer_value, answer_order, filter: false)
+
+    groups = []
+
+    goto_page_groups = ordered_conditions.select { |condition| condition.goto_page_id.present? }.group_by(&:goto_page_id)
+    goto_page_groups.each_value do |grouped_conditions|
+      groups << {
+        group_type: :goto_page,
+        conditions: grouped_conditions,
+      }
+    end
+
+    skip_to_end_conditions = ordered_conditions.select(&:skip_to_end)
+
+    if skip_to_end_conditions.any?
+      groups << {
+        group_type: :skip_to_end,
+        conditions: skip_to_end_conditions,
+      }
+    end
+
+    exit_page_groups = ordered_conditions.select { |condition| condition.exit_page_id.present? }
+      .group_by(&:exit_page_id)
+      .values
+      .sort_by { |grouped_conditions| grouped_conditions.first.exit_page_id }
+
+    exit_page_groups.each do |grouped_conditions|
+      exit_page = @step.exit_pages.detect { it.id == grouped_conditions.first.exit_page_id }
+
+      groups << {
+        group_type: :exit_page,
+        exit_page_index: exit_page_position_calc(exit_page),
+        conditions: grouped_conditions,
+        exit_page:,
+      }
+    end
+
+    groups
+  end
+
+  def exit_page_position_calc(exit_page)
+    @step.exit_pages.find_index(exit_page) + 1
   end
 end
