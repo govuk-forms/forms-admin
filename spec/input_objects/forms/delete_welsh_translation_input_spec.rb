@@ -86,6 +86,13 @@ RSpec.describe Forms::DeleteWelshTranslationInput, type: :model do
              exit_page_heading_cy: "Mae'n ddrwg gennym, nid ydych yn gymwys ar gyfer y gwasanaeth hwn."
     end
 
+    let(:exit_page) do
+      create :exit_page,
+             question_page: page,
+             markdown_cy: "Nid ydych yn gymwys",
+             heading_cy: "Mae'n ddrwg gennym, nid ydych yn gymwys ar gyfer y gwasanaeth hwn."
+    end
+
     context "when the input is invalid" do
       it "returns false" do
         expect(delete_welsh_translation_input.submit).to be false
@@ -142,6 +149,11 @@ RSpec.describe Forms::DeleteWelshTranslationInput, type: :model do
         it "deletes all of the welsh condition content" do
           expect { delete_welsh_translation_input.submit }.to change { condition.reload.exit_page_markdown_cy }.to(nil)
             .and change { condition.reload.exit_page_heading_cy }.to(nil)
+        end
+
+        it "deletes all of the welsh exit page content" do
+          expect { delete_welsh_translation_input.submit }.to change { exit_page.reload.markdown_cy }.to(nil)
+            .and change { exit_page.reload.heading_cy }.to(nil)
         end
 
         it "resets the available_languages field to only include English" do
@@ -266,6 +278,13 @@ RSpec.describe Forms::DeleteWelshTranslationInput, type: :model do
              exit_page_heading_cy: "Mae'n ddrwg gennym, nid ydych yn gymwys ar gyfer y gwasanaeth hwn."
     end
 
+    let(:exit_page) do
+      create :exit_page,
+             question_page: page,
+             markdown_cy: "Nid ydych yn gymwys",
+             heading_cy: "Mae'n ddrwg gennym, nid ydych yn gymwys ar gyfer y gwasanaeth hwn."
+    end
+
     context "when called" do
       it "returns true" do
         expect(delete_welsh_translation_input.submit_without_confirm).to be true
@@ -293,6 +312,11 @@ RSpec.describe Forms::DeleteWelshTranslationInput, type: :model do
       it "deletes all of the welsh condition content" do
         expect { delete_welsh_translation_input.submit_without_confirm }.to change { condition.reload.exit_page_markdown_cy }.to(nil)
           .and change { condition.reload.exit_page_heading_cy }.to(nil)
+      end
+
+      it "deletes all of the welsh exit page content" do
+        expect { delete_welsh_translation_input.submit_without_confirm }.to change { exit_page.reload.markdown_cy }.to(nil)
+          .and change { exit_page.reload.heading_cy }.to(nil)
       end
 
       it "resets the available_languages field to only include English" do

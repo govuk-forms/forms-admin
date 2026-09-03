@@ -19,6 +19,7 @@ private
     reset_form_translations
     reset_page_translations
     reset_condition_translations
+    reset_exit_page_translations
   end
 
   def reset_form_translations
@@ -35,6 +36,10 @@ private
 
   def reset_condition_translations
     Condition::Translation.where(locale: :cy, condition_id: form.condition_ids).delete_all
+  end
+
+  def reset_exit_page_translations
+    ExitPage::Translation.where(locale: :cy, exit_page_id: form.exit_page_ids).delete_all
   end
 
   def clear_translated_fields(model, object)

@@ -23,13 +23,43 @@ en:
               too_long: The question text for question %{question_number} cannot be longer than %{count} characters
             selection_options_cy:
               uniqueness: All of question %{question_number}’s options must be unique
+        forms/welsh_page_translation_input2:
+          attributes:
+            guidance_markdown_cy:
+              blank: Enter guidance text in Welsh for question %{question_number}
+              too_long: The guidance text for question %{question_number} cannot be longer than %{count} characters
+              unsupported_markdown_syntax: Guidance text for question %{question_number} can only contain formatting for links, subheadings (##), bulleted lists (*), or numbered lists (1.)
+            hint_text_cy:
+              blank: Enter hint text for question %{question_number} in Welsh
+              too_long: The hint text for question %{question_number} cannot be longer than %{count} characters
+            none_of_the_above_question_cy:
+              blank: Enter Welsh question or label if ‘None of the above’ is selected for question %{question_number}
+              too_long: Welsh question or label text for question %{question_number} must be shorter than %{count} characters
+            page_heading_cy:
+              blank: Enter a page heading in Welsh for question %{question_number}
+              too_long: The page heading for question %{question_number} cannot be longer than %{count} characters
+            question_text_cy:
+              blank: Enter question text for question %{question_number} in Welsh
+              too_long: The question text for question %{question_number} cannot be longer than %{count} characters
+            selection_options_cy:
+              uniqueness: All of question %{question_number}’s options must be unique
   helpers:
     hint:
       forms_welsh_page_translation_input:
         guidance_markdown_cy: Enter Welsh guidance text
         what_happens_next_markdown_cy: Enter information about what happens next in Welsh
+      forms_welsh_page_translation_input2:
+        guidance_markdown_cy: Enter Welsh guidance text
+        what_happens_next_markdown_cy: Enter information about what happens next in Welsh
     label:
       forms_welsh_page_translation_input:
+        guidance_markdown_cy_html: Enter Welsh guidance text <span class="govuk-visually-hidden">for question %{question_number}</span>
+        hint_text_cy_html: Enter Welsh hint text <span class="govuk-visually-hidden">for question %{question_number}</span>
+        none_of_the_above_question_cy_html: Enter Welsh question or label if ‘None of the above’ is selected <span class="govuk-visually-hidden">for question %{question_number}</span>
+        page_heading_cy_html: Enter Welsh page heading <span class="govuk-visually-hidden">for question %{question_number}</span>
+        question_text_cy_html: Enter Welsh question text <span class="govuk-visually-hidden">for question %{question_number}</span>
+        selection_options_cy_html: Enter Welsh option %{option_number} <span class="govuk-visually-hidden">for question %{question_number}</span>
+      forms_welsh_page_translation_input2:
         guidance_markdown_cy_html: Enter Welsh guidance text <span class="govuk-visually-hidden">for question %{question_number}</span>
         hint_text_cy_html: Enter Welsh hint text <span class="govuk-visually-hidden">for question %{question_number}</span>
         none_of_the_above_question_cy_html: Enter Welsh question or label if ‘None of the above’ is selected <span class="govuk-visually-hidden">for question %{question_number}</span>
