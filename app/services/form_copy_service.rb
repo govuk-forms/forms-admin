@@ -14,6 +14,7 @@ class FormCopyService
     @form = form
     @copied_form = Form.new
     @logged_in_user = logged_in_user
+    @exit_page_id_mapping = {}
   end
 
   def copy(tag: "draft")
@@ -28,6 +29,7 @@ class FormCopyService
       prepend_name_for_language(:en)
 
       copy_pages(content["steps"])
+      copy_exit_pages(content["steps"])
       copy_routing_conditions(content["steps"])
 
       @copied_form.copied_from_id = @form.id
@@ -68,6 +70,23 @@ private
       page = @copied_form.pages.build
       copy_page_attributes(page, step)
       page.save!
+    end
+  end
+
+  def copy_exit_pages(steps)
+    return if steps.blank?
+
+    steps.each_with_index do |step, index|
+      page = @copied_form.pages[index]
+
+      (step["exit_pages"] || []).each do |ep_data|
+        exit_page = page.exit_pages.build(
+          heading: ep_data["heading"],
+          markdown: ep_data["markdown"],
+        )
+        exit_page.save!
+        @exit_page_id_mapping[ep_data["id"]] = exit_page
+      end
     end
   end
 
@@ -139,6 +158,10 @@ private
       exit_page_markdown: condition_data["exit_page_markdown"],
     )
 
+    if condition_data["exit_page_id"].present?
+      condition.exit_page = @exit_page_id_mapping[condition_data["exit_page_id"]]
+    end
+
     condition.save!
   end
 
@@ -161,6 +184,7 @@ private
         page.send("#{attr}=", data[attr]) if data[attr].present?
       end
       copy_welsh_exit_page_conditions(step, page)
+      copy_welsh_exit_pages(step)
       page.save!(validate: false)
     end
   end
@@ -175,6 +199,21 @@ private
         end
         condition.save!
       end
+    end
+  end
+
+  def copy_welsh_exit_pages(step)
+    # Exit pages already linked to a condition are handled by copy_welsh_exit_page_conditions
+    # Here we are only copying exit pages that are not linked to a condition.
+    condition_exit_page_ids = (step["routing_conditions"] || []).filter_map { |c| c["exit_page_id"] }
+    standalone_exit_pages = (step["exit_pages"] || []).reject { |ep| condition_exit_page_ids.include?(ep["id"]) }
+
+    standalone_exit_pages.each do |ep_data|
+      exit_page = @exit_page_id_mapping[ep_data["id"]]
+
+      exit_page.heading  = ep_data["heading"]  if ep_data["heading"].present?
+      exit_page.markdown = ep_data["markdown"] if ep_data["markdown"].present?
+      exit_page.save!
     end
   end
 end
