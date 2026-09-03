@@ -10,7 +10,7 @@ en:
               too_long: Page heading must be %{count} characters or less
             markdown:
               blank: Enter page content
-              too_long: Page content must be 5000 characters or less
+              too_long: Page content must be 4,999 characters or less
               unsupported_markdown_syntax: Page content can only contain formatting for links, subheadings (##), bulleted lists (*), or numbered lists (1.)
   helpers:
     hint:
