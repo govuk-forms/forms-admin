@@ -279,6 +279,41 @@ RSpec.describe PagesController, type: :request do
               assert_select "p.govuk-body a", "View your question routes"
             end
           end
+
+          context "and has one exit page" do
+            before do
+              create(:exit_page, question_page: page)
+            end
+
+            it "renders a warning about deleting this page" do
+              get delete_page_path(form_id: form.id, page_id: page.id)
+
+              assert_select(".govuk-notification-banner", count: 1) do
+                assert_select "*", "Important"
+                assert_select "h3", "Question #{page.position} has a route"
+                assert_select "p.govuk-body", /If you delete this question, its route and exit page will also be deleted/
+                assert_select "p.govuk-body a", "View your question routes"
+              end
+            end
+          end
+
+          context "and has more than one exit page" do
+            before do
+              create(:exit_page, question_page: page)
+              create(:exit_page, question_page: page)
+            end
+
+            it "renders a warning about deleting this page" do
+              get delete_page_path(form_id: form.id, page_id: page.id)
+
+              assert_select(".govuk-notification-banner", count: 1) do
+                assert_select "*", "Important"
+                assert_select "h3", "Question #{page.position} has a route"
+                assert_select "p.govuk-body", /If you delete this question, its route and exit pages will also be deleted/
+                assert_select "p.govuk-body a", "View your question routes"
+              end
+            end
+          end
         end
 
         context "when page to delete is the start of mulltiple routes" do
@@ -296,6 +331,80 @@ RSpec.describe PagesController, type: :request do
               assert_select "*", "Important"
               assert_select "h3", "Question #{page.position} has routes"
               assert_select "p.govuk-body", /If you delete this question, its routes will also be deleted/
+              assert_select "p.govuk-body a", "View your question routes"
+            end
+          end
+
+          context "and has one exit page" do
+            before do
+              create(:exit_page, question_page: page)
+            end
+
+            it "renders a warning about deleting this page" do
+              get delete_page_path(form_id: form.id, page_id: page.id)
+
+              assert_select(".govuk-notification-banner", count: 1) do
+                assert_select "*", "Important"
+                assert_select "h3", "Question #{page.position} has routes"
+                assert_select "p.govuk-body", /If you delete this question, its routes and exit page will also be deleted/
+                assert_select "p.govuk-body a", "View your question routes"
+              end
+            end
+          end
+
+          context "and has more than one exit page" do
+            before do
+              create(:exit_page, question_page: page)
+              create(:exit_page, question_page: page)
+            end
+
+            it "renders a warning about deleting this page" do
+              get delete_page_path(form_id: form.id, page_id: page.id)
+
+              assert_select(".govuk-notification-banner", count: 1) do
+                assert_select "*", "Important"
+                assert_select "h3", "Question #{page.position} has routes"
+                assert_select "p.govuk-body", /If you delete this question, its routes and exit pages will also be deleted/
+                assert_select "p.govuk-body a", "View your question routes"
+              end
+            end
+          end
+        end
+
+        context "when page has no routes but does have one exit page" do
+          let(:page) { pages.first }
+
+          before do
+            create(:exit_page, question_page: page)
+          end
+
+          it "renders a warning about deleting this page" do
+            get delete_page_path(form_id: form.id, page_id: page.id)
+
+            assert_select(".govuk-notification-banner", count: 1) do
+              assert_select "*", "Important"
+              assert_select "h3", "Question #{page.position} has an exit page"
+              assert_select "p.govuk-body", /If you delete this question, its exit page will also be deleted/
+              assert_select "p.govuk-body a", "View your question routes"
+            end
+          end
+        end
+
+        context "when page has no routes but does have more than one exit page" do
+          let(:page) { pages.first }
+
+          before do
+            create(:exit_page, question_page: page)
+            create(:exit_page, question_page: page)
+          end
+
+          it "renders a warning about deleting this page" do
+            get delete_page_path(form_id: form.id, page_id: page.id)
+
+            assert_select(".govuk-notification-banner", count: 1) do
+              assert_select "*", "Important"
+              assert_select "h3", "Question #{page.position} has exit pages"
+              assert_select "p.govuk-body", /If you delete this question, its exit pages will also be deleted/
               assert_select "p.govuk-body a", "View your question routes"
             end
           end
@@ -356,6 +465,41 @@ RSpec.describe PagesController, type: :request do
               assert_select "h3", "There are routes to and from question #{page.position}"
               assert_select "p.govuk-body", /If you delete this question, its routes will also be deleted./
               assert_select "p.govuk-body a", "View your question routes"
+            end
+          end
+
+          context "and has one exit page" do
+            before do
+              create(:exit_page, question_page: page)
+            end
+
+            it "renders a warning about deleting this page" do
+              get delete_page_path(form_id: form.id, page_id: page.id)
+
+              assert_select(".govuk-notification-banner", count: 1) do
+                assert_select "*", "Important"
+                assert_select "h3", "There are routes to and from question #{page.position}"
+                assert_select "p.govuk-body", /If you delete this question, its routes and exit page will also be deleted/
+                assert_select "p.govuk-body a", "View your question routes"
+              end
+            end
+          end
+
+          context "and has more than one exit page" do
+            before do
+              create(:exit_page, question_page: page)
+              create(:exit_page, question_page: page)
+            end
+
+            it "renders a warning about deleting this page" do
+              get delete_page_path(form_id: form.id, page_id: page.id)
+
+              assert_select(".govuk-notification-banner", count: 1) do
+                assert_select "*", "Important"
+                assert_select "h3", "There are routes to and from question #{page.position}"
+                assert_select "p.govuk-body", /If you delete this question, its routes and exit pages will also be deleted/
+                assert_select "p.govuk-body a", "View your question routes"
+              end
             end
           end
         end

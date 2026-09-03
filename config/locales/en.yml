@@ -1886,6 +1886,13 @@ en:
         back_link: Back to question %{question_number}’s routes
       hint_html: "<p>You can skip people who select one specific answer to question %{question_number} to a later question or page. People who select any other answer will continue to question %{continue_to_question_number}.<p>"
     delete:
+      exit_pages_heading:
+        one: Question %{question_number} has an exit page
+        other: Question %{question_number} has exit pages
+      exit_pages_html: |
+        <p class="govuk-body">
+          If you delete this question, its %{exit_pages} will also be deleted. <a class="govuk-notification-banner__link" href="%{routes_href}">View your question routes</a>
+        </p>
       goto_heading:
         one: There’s a route to question %{question_number}
         other: There are routes to question %{question_number}
@@ -1930,20 +1937,15 @@ en:
       routing_and_goto_heading: There are routes to and from question %{question_number}
       routing_and_goto_html: |
         <p class="govuk-body">
-          If you delete this question, its routes will also be deleted. <a class="govuk-notification-banner__link" href="%{routes_href}">View your question routes</a>
+          If you delete this question, its %{routes_and_exit_pages} will also be deleted. <a class="govuk-notification-banner__link" href="%{routes_href}">View your question routes</a>
         </p>
       routing_heading:
         one: Question %{question_number} has a route
         other: Question %{question_number} has routes
-      routing_html:
-        one: |
-          <p class="govuk-body">
-            If you delete this question, its route will also be deleted. <a class="govuk-notification-banner__link" href="%{routes_href}">View your question routes</a>
-          </p>
-        other: |
-          <p class="govuk-body">
-            If you delete this question, its routes will also be deleted. <a class="govuk-notification-banner__link" href="%{routes_href}">View your question routes</a>
-          </p>
+      routing_html: |
+        <p class="govuk-body">
+          If you delete this question, its %{routes_and_exit_pages} will also be deleted. <a class="govuk-notification-banner__link" href="%{routes_href}">View your question routes</a>
+        </p>
       title: Are you sure you want to delete this question?
     delete_question: Delete question
     destroy:
