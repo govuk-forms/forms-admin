@@ -12,7 +12,7 @@ RSpec.describe Forms::WelshTranslationInput, type: :model do
            guidance_markdown: "This part of the form concerns licencing.",
            position: 1
   end
-  let(:another_page) { create :page }
+  let(:another_page) { create :page, position: 2 }
 
   let(:mark_complete) { "true" }
 
@@ -87,6 +87,13 @@ RSpec.describe Forms::WelshTranslationInput, type: :model do
 
       expect(welsh_translation_input).not_to be_valid
       expect(welsh_translation_input.errors.full_messages_for(:mark_complete)).to include "Mark complete #{I18n.t('activemodel.errors.models.forms/welsh_translation_input.attributes.mark_complete.blank')}"
+    end
+
+    it "is valid if mark complete is blank and the scope is :upload" do
+      form = OpenStruct.new(welsh_completed: false, name: "Apply for a juggling licence")
+      welsh_translation_input = described_class.new(mark_complete: nil, form:)
+
+      expect(welsh_translation_input.valid?(:upload)).to be true
     end
 
     context "when the form is marked complete" do
@@ -689,6 +696,93 @@ RSpec.describe Forms::WelshTranslationInput, type: :model do
       expect(welsh_translation_input.privacy_policy_url_cy).to eq(form.privacy_policy_url_cy)
       expect(welsh_translation_input.payment_url_cy).to eq(form.payment_url_cy)
       expect(welsh_translation_input.mark_complete).to eq(form.welsh_completed)
+    end
+  end
+
+  describe "#assign_from_spreadsheet" do
+    before do
+      form.pages = [page, another_page]
+    end
+
+    context "when the spreadsheet data contains Welsh translations for all fields" do
+      let(:spreadsheet_data) do
+        {
+          "Form name" => "Welsh A form from spreadsheet",
+          "Question 1 - question text" => "Welsh question text from spreadsheet",
+          "Question 1 - option 1" => "Welsh Option 1 from spreadsheet",
+          "Question 1 - option 2" => "Welsh Option 2 from spreadsheet",
+          "Question 1 - question or label if 'None of the above' is selected" => "Welsh None of the above question? from spreadsheet",
+          "Question 1 - exit page heading" => "Welsh exit page heading from spreadsheet",
+          "Question 1 - exit page content" => "Welsh exit page content from spreadsheet",
+          "Question 2 - exit page 1 heading" => "Welsh question 2 exit page heading from spreadsheet",
+          "Question 2 - exit page 1 content" => "Welsh question 2 exit page content from spreadsheet",
+          "Question 2 - page heading" => "Welsh question 2 page heading from spreadsheet",
+          "Question 2 - guidance text" => "Welsh question 2 guidance markdown from spreadsheet",
+          "Question 2 - question text" => "Welsh question 2 text from spreadsheet",
+          "Declaration" => "Welsh declaration text from spreadsheet",
+          "Information about what happens next" => "Welsh what happens next from spreadsheet",
+          "GOV.UK Pay payment link" => "https://www.gov.uk/payment_cy_spreadsheet",
+          "Link to privacy information for this form" => "https://www.gov.uk/privacy_cy_spreadsheet",
+          "Contact details for support - email address" => "support-spreadsheet@example.gov.wales",
+          "Contact details for support - phone number and opening times" => "Welsh support phone from spreadsheet",
+          "Contact details for support - online contact link" => "https://www.gov.uk/support_cy_spreadsheet",
+          "Contact details for support - online contact link text" => "Welsh Support URL text from spreadsheet",
+        }
+      end
+
+      it "sets the welsh attributes from the spreadsheet data" do
+        welsh_translation_input = described_class.new(form:)
+        welsh_translation_input.assign_from_spreadsheet(spreadsheet_data)
+
+        expect(welsh_translation_input.name_cy).to eq("Welsh A form from spreadsheet")
+        expect(welsh_translation_input.declaration_markdown_cy).to eq("Welsh declaration text from spreadsheet")
+        expect(welsh_translation_input.what_happens_next_markdown_cy).to eq("Welsh what happens next from spreadsheet")
+        expect(welsh_translation_input.payment_url_cy).to eq("https://www.gov.uk/payment_cy_spreadsheet")
+        expect(welsh_translation_input.privacy_policy_url_cy).to eq("https://www.gov.uk/privacy_cy_spreadsheet")
+        expect(welsh_translation_input.support_email_cy).to eq("support-spreadsheet@example.gov.wales")
+        expect(welsh_translation_input.support_phone_cy).to eq("Welsh support phone from spreadsheet")
+        expect(welsh_translation_input.support_url_cy).to eq("https://www.gov.uk/support_cy_spreadsheet")
+        expect(welsh_translation_input.support_url_text_cy).to eq("Welsh Support URL text from spreadsheet")
+
+        page_translation = welsh_translation_input.page_translations.find { |pt| pt.id == page.id }
+        expect(page_translation.question_text_cy).to eq("Welsh question text from spreadsheet")
+
+        another_page_translation = welsh_translation_input.page_translations.find { |pt| pt.id == another_page.id }
+        expect(another_page_translation.page_heading_cy).to eq("Welsh question 2 page heading from spreadsheet")
+      end
+    end
+
+    context "when the spreadsheet data does not include keys for all fields" do
+      let(:spreadsheet_data) do
+        {
+          "Form name" => "Welsh A form from spreadsheet",
+        }
+      end
+
+      it "uses the Welsh already set on the form for fields not present in the spreadsheet data" do
+        welsh_translation_input = described_class.new(form:)
+        welsh_translation_input.assign_from_spreadsheet(spreadsheet_data)
+
+        expect(welsh_translation_input.name_cy).to eq("Welsh A form from spreadsheet")
+        expect(welsh_translation_input.support_email_cy).to eq("welsh-support@example.gov.uk")
+      end
+    end
+
+    context "when the spreadsheet data includes blank values" do
+      let(:spreadsheet_data) do
+        {
+          "Form name" => "Welsh A form from spreadsheet",
+          "Contact details for support - email address" => "",
+        }
+      end
+
+      it "uses the Welsh already set on the form for fields with blank values in the spreadsheet data" do
+        welsh_translation_input = described_class.new(form:)
+        welsh_translation_input.assign_from_spreadsheet(spreadsheet_data)
+
+        expect(welsh_translation_input.name_cy).to eq("Welsh A form from spreadsheet")
+        expect(welsh_translation_input.support_email_cy).to eq("welsh-support@example.gov.uk")
+      end
     end
   end
 

@@ -77,8 +77,38 @@ module Forms
       form_content_service = WelshCsvService.new(form_with_pages_and_conditions)
 
       send_data form_content_service.as_csv,
-                type: "text/csv; charset=iso-8859-1",
-                disposition: "attachment; filename=#{form_content_service.filename}"
+                type: "text/csv; charset=utf-8",
+                filename: form_content_service.filename,
+                disposition: "attachment"
+    end
+
+    def show_upload
+      authorize current_form, :can_edit_form?
+      welsh_translation_upload_input = WelshTranslationUploadInput.new(form: current_form)
+      render :show_upload, locals: { current_form:, welsh_translation_upload_input: }
+    end
+
+    def upload
+      authorize current_form, :can_edit_form?
+
+      welsh_translation_upload_input = WelshTranslationUploadInput.new(**welsh_translation_upload_params)
+
+      data = welsh_translation_upload_input.read_file
+      unless data
+        return render :show_upload, status: :unprocessable_entity, locals: { current_form:, welsh_translation_upload_input: }
+      end
+
+      @welsh_translation_input = if FeatureService.new(group: current_form.group).enabled?(:multiple_branches)
+                                   WelshTranslationInput2.new(form: form_with_pages_and_exit_pages)
+                                 else
+                                   WelshTranslationInput.new(form: form_with_pages_and_conditions)
+                                 end
+
+      @welsh_translation_input.assign_from_spreadsheet(data).validate(:upload)
+      @table_presenter = Forms::TranslationTablePresenter.new
+
+      flash.now[:success] = t("banner.success.form.welsh_translation_uploaded")
+      render :new
     end
 
   private
@@ -121,6 +151,12 @@ module Forms
 
     def form_with_pages_and_exit_pages
       Form.includes(pages: [:exit_pages]).find(current_form.id)
+    end
+
+    def welsh_translation_upload_params
+      params.fetch(:forms_welsh_translation_upload_input, ActionController::Parameters.new)
+            .permit(:file)
+            .merge(form: current_form)
     end
   end
 end

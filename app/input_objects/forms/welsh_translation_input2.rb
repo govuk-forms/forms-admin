@@ -1,6 +1,7 @@
-class Forms::WelshTranslationInput2 < Forms::MarkCompleteInput
+class Forms::WelshTranslationInput2 < BaseInput
   include TextInputHelper
   include ActiveModel::Attributes
+  include WelshTranslationContentLabels
 
   attr_accessor :form, :page_translations
 
@@ -15,6 +16,10 @@ class Forms::WelshTranslationInput2 < Forms::MarkCompleteInput
   attribute :declaration_markdown_cy
   attribute :what_happens_next_markdown_cy
   attribute :payment_url_cy
+
+  with_options except_on: :upload do
+    validates :mark_complete, presence: true
+  end
 
   validates :name_cy, presence: true, if: -> { marked_complete? }
   validates :name_cy, length: { maximum: 500 }, if: -> { name_cy.present? }
@@ -120,6 +125,34 @@ class Forms::WelshTranslationInput2 < Forms::MarkCompleteInput
     end
 
     self
+  end
+
+  def assign_from_spreadsheet(data)
+    # assign values from the form first, and override only those that are set in the spreadsheet
+    assign_form_values
+
+    %i[name
+       privacy_policy_url
+       support_email
+       support_phone
+       support_url
+       support_url_text
+       declaration_markdown
+       what_happens_next_markdown
+       payment_url].each do |attr|
+      content_label = FORM_ATTRIBUTE_LABELS.fetch(attr)
+      send(:"#{attr}_cy=", data[content_label]) if data.key?(content_label) && data[content_label].present?
+    end
+
+    self.page_translations = form.pages.map do |page|
+      Forms::WelshPageTranslationInput2.new(page:).assign_from_spreadsheet(data)
+    end
+
+    self
+  end
+
+  def marked_complete?
+    ["true", true].include?(mark_complete)
   end
 
   def blanked?

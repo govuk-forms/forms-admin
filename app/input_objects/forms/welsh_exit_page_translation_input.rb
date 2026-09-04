@@ -1,6 +1,7 @@
 class Forms::WelshExitPageTranslationInput < BaseInput
   include ActionView::Helpers::FormTagHelper
   include ActiveModel::Attributes
+  include WelshTranslationContentLabels
 
   attr_accessor :exit_page, :position
 
@@ -37,6 +38,17 @@ class Forms::WelshExitPageTranslationInput < BaseInput
 
     self.markdown_cy = exit_page.markdown_cy
     self.heading_cy = exit_page.heading_cy
+
+    self
+  end
+
+  def assign_from_spreadsheet(data)
+    assign_exit_page_values
+
+    %i[heading markdown].each do |attr|
+      content_label = exit_page_label(exit_page.question_page, position, attr)
+      send(:"#{attr}_cy=", data[content_label]) if data.key?(content_label) && data[content_label].present?
+    end
 
     self
   end

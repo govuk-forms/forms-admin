@@ -1,0 +1,17 @@
+---
+en:
+  activemodel:
+    errors:
+      models:
+        forms/welsh_translation_upload_input:
+          attributes:
+            file:
+              blank: Select a file
+              invalid_file_type: The selected file must be a CSV
+              invalid_headers: We couldn’t upload the CSV because the column headings are wrong - check them and try uploading again
+              malformed: The CSV has invalid formatting - try downloading a new version, then uploading it again
+              too_big: The selected file must be smaller than 10MB
+  helpers:
+    label:
+      forms_welsh_translation_upload_input:
+        file: Upload CSV file
