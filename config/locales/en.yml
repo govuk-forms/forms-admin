@@ -2308,13 +2308,18 @@ en:
     up_to_3000_options: You can have up to 3,000 options.
     up_to_30_options: You can have up to 30 options.
   selection_type:
+    routes:
+      one: route
+      other: routes
     reduce_your_options_warning:
       body: You can only have up to 30 options in a list where people can select one or more options. If you make this change, you’ll be able to edit your list on the next page.
-      heading: If you change this to ‘one or more options’, you’ll need to edit your list
+      heading: If you change this to ‘One or more options’, you’ll need to edit your list
     routing_and_reduce_your_options_combined_warning:
       body: You can only have up to 30 options in a list where people can select one or more options. If you make this change, you’ll be able to edit your list on the next page.
-      heading: If you change this to ‘one or more options’, the route from this question will be deleted and you’ll need to edit the list
-    routing_warning: If you change this to ‘one or more options’, the route from this question will be deleted
+      heading: If you change this to ‘One or more options’, this question’s %{routes} will be deleted and you’ll need to edit the list
+    routing_warning:
+      one: If you change this to ‘One or more options’, this question’s route will be deleted
+      other: If you change this to ‘One or more options’, this question’s routes will be deleted
   set_email:
     new:
       body_html: |

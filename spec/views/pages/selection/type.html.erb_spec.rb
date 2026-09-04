@@ -91,7 +91,15 @@ describe "pages/selection/type.html.erb", type: :view do
 
             context "when show_routing_warning returns true" do
               it "displays a warning about routes being deleted" do
-                expect(rendered).to have_selector(".govuk-notification-banner__content", text: I18n.t("selection_type.routing_warning"))
+                expect(rendered).to have_selector(".govuk-notification-banner__content", text: I18n.t("selection_type.routing_warning", count: 1))
+              end
+
+              context "with more than one route from options" do
+                let(:routing_conditions) { build_list(:condition, 3) }
+
+                it "displays a warning about routes being deleted" do
+                  expect(rendered).to have_selector(".govuk-notification-banner__content", text: I18n.t("selection_type.routing_warning", count: 3))
+                end
               end
             end
 
@@ -111,7 +119,15 @@ describe "pages/selection/type.html.erb", type: :view do
             end
 
             it "displays a combined warning about routes being deleted and needing to reduce the options" do
-              expect(rendered).to have_selector(".govuk-notification-banner__content", text: I18n.t("selection_type.routing_and_reduce_your_options_combined_warning.heading"))
+              expect(rendered).to have_selector(".govuk-notification-banner__content", text: I18n.t("selection_type.routing_and_reduce_your_options_combined_warning.heading", routes: "route"))
+            end
+
+            context "with more than one route from options" do
+              let(:routing_conditions) { build_list(:condition, 3) }
+
+              it "displays a combined warning about routes being deleted and needing to reduce the options" do
+                expect(rendered).to have_selector(".govuk-notification-banner__content", text: I18n.t("selection_type.routing_and_reduce_your_options_combined_warning.heading", routes: "routes"))
+              end
             end
           end
         end
