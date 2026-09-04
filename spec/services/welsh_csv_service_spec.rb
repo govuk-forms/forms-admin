@@ -4,8 +4,8 @@ RSpec.describe "WelshCsvService", feature_multiple_branches: false do
   describe "#as_csv" do
     let(:form) { build :form }
 
-    it "contains the header row" do
-      expect(csv_rows(form)[0]).to eq(["Content ID", "English content", "Welsh content"])
+    it "contains the header row, including the UTF-8 BOM" do
+      expect(csv_rows(form)[0]).to eq(["\uFEFFContent ID", "English content", "Welsh content"])
     end
 
     it "contains the form name" do
@@ -343,7 +343,7 @@ RSpec.describe "WelshCsvService", feature_multiple_branches: false do
       it "returns a CSV with a header row and the expected rows" do
         csv = csv_rows(form)
 
-        expected_csv = [["Content ID", "English content", "Welsh content"],
+        expected_csv = [["\uFEFFContent ID", "English content", "Welsh content"],
                         ["Form name", "A form", "Welsh A form"],
                         ["Question 1 - question text", "None of the above question?", "Welsh None of the above question?"],
                         ["Question 1 - option 1", "Option 1", "Option 1"],

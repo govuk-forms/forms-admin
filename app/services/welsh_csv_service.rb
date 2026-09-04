@@ -7,6 +7,8 @@ class WelshCsvService
   ENGLISH_CONTENT_HEADER = "English content".freeze
   WELSH_CONTENT_HEADER = "Welsh content".freeze
 
+  UTF_8_BOM = "\uFEFF".freeze
+
   attr_reader :form
 
   def initialize(form)
@@ -14,12 +16,15 @@ class WelshCsvService
   end
 
   def as_csv
-    CSV.generate do |csv|
+    csv = CSV.generate do |csv|
       add_header(csv)
       add_form_name(csv)
       add_page_content(csv)
       add_form_metadata(csv)
     end
+
+    # Prepend UTF-8 BOM so Excel recognises the file as UTF-8 and preserves special characters
+    "#{UTF_8_BOM}#{csv}"
   end
 
   def filename

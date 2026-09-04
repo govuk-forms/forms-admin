@@ -77,8 +77,9 @@ module Forms
       form_content_service = WelshCsvService.new(form_with_pages_and_conditions)
 
       send_data form_content_service.as_csv,
-                type: "text/csv; charset=iso-8859-1",
-                disposition: "attachment; filename=#{form_content_service.filename}"
+                type: "text/csv; charset=utf-8",
+                filename: form_content_service.filename,
+                disposition: "attachment"
     end
 
     def show_upload
