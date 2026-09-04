@@ -106,6 +106,7 @@ module Forms
       @welsh_translation_input.assign_from_spreadsheet(data).validate(:upload)
       @table_presenter = Forms::TranslationTablePresenter.new
 
+      flash.now[:success] = t("banner.success.form.welsh_translation_uploaded")
       render :new
     end
 

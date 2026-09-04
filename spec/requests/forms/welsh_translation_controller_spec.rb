@@ -486,6 +486,7 @@ RSpec.describe Forms::WelshTranslationController, type: :request do
         it "renders the new template" do
           expect(response).to have_http_status(:ok)
           expect(response).to render_template(:new)
+          expect(response.body).to include(I18n.t("banner.success.form.welsh_translation_uploaded"))
         end
 
         it "pre-populates fields from CSV" do
@@ -531,6 +532,7 @@ RSpec.describe Forms::WelshTranslationController, type: :request do
         it "renders the new template" do
           expect(response).to have_http_status(:ok)
           expect(response).to render_template(:new)
+          expect(response.body).to include(I18n.t("banner.success.form.welsh_translation_uploaded"))
         end
 
         it "pre-populates fields from CSV" do
