@@ -3,7 +3,7 @@
 
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds">
-    <% if @page.present? && @page.routing_conditions.any? && @page.answer_settings.only_one_option == "true" %>
+    <% if @page.present? && @page.routing_conditions.any? { it.answer_value.present? } %>
       <%= govuk_notification_banner(title_text: t("banner.default.title")) do |banner| %>
         <% banner.with_heading(text: t("type_of_answer.routing_warning_changing_from_one_option_heading", count: @page.routing_conditions.count), tag: "h3") %>
       <% end %>

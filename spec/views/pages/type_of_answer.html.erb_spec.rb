@@ -90,5 +90,36 @@ describe "pages/type_of_answer.html.erb", type: :view do
         expect(rendered).not_to have_selector(".govuk-notification-banner__content")
       end
     end
+
+    context "with more than 10 selection options" do
+      let(:page) { build(:page, :with_selection_settings, routing_conditions:, selection_options:) }
+      let(:selection_options) { (1..11).map { |n| DataStruct.new(name: "Option #{n}", value: "Option #{n}") } }
+
+      context "and no routing conditions" do
+        let(:routing_conditions) { [] }
+
+        it "does not display a warning about routes being deleted if answer type changes" do
+          expect(rendered).not_to have_selector(".govuk-notification-banner__content")
+        end
+      end
+
+      context "and an unconditional route" do
+        let(:routing_conditions) { [build(:condition, answer_value: nil)] }
+
+        it "does not display a warning about routes being deleted if answer type changes" do
+          expect(rendered).not_to have_selector(".govuk-notification-banner__content")
+        end
+      end
+
+      context "and a route for a selection option" do
+        let(:routing_conditions) { [build(:condition, answer_value: "Option 1")] }
+
+        it "displays a warning about routes being deleted if answer type changes" do
+          expect(Capybara.string(rendered.html).find(".govuk-notification-banner__heading").text(normalize_ws: true))
+            .to include(Capybara.string(I18n.t("type_of_answer.routing_warning_changing_from_one_option_heading", count: 1))
+              .text(normalize_ws: true))
+        end
+      end
+    end
   end
 end
