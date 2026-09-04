@@ -1,18 +1,15 @@
 require "rails_helper"
 
 describe "pages/type_of_answer.html.erb", type: :view do
-  let(:form) { create :form, :with_group }
+  let(:form) { create :form, :with_group, pages: [page] }
   let(:type_of_answer_input) { build :type_of_answer_input }
-  let(:page) { OpenStruct.new(routing_conditions: [], answer_type: "number") }
+  let(:page) { build(:page, position: question_number) }
   let(:question_number) { 1 }
   let(:is_new_page) { true }
 
   before do
     # allow objects to use ids in form helper
     allow(type_of_answer_input).to receive(:persisted?).and_return(true)
-
-    # mock the form.page_number method
-    allow(form).to receive_messages(persisted?: true, page_number: question_number)
 
     without_partial_double_verification do
       allow(view).to receive_messages(current_form: form)
@@ -67,10 +64,8 @@ describe "pages/type_of_answer.html.erb", type: :view do
   end
 
   context "when editing an existing select one option question with a route set" do
-    let(:page) { OpenStruct.new(routing_conditions:, answer_type:, answer_settings:) }
-    let(:answer_settings) { OpenStruct.new(only_one_option: "true") }
-    let(:answer_type) { "selection" }
-    let(:routing_conditions) { [build(:condition)] }
+    let(:page) { build(:page, :with_selection_settings, routing_conditions:) }
+    let(:routing_conditions) { [build(:condition, answer_value: "Option 1")] }
 
     it "displays a warning about routes being deleted if answer type changes" do
       expect(Capybara.string(rendered.html).find(".govuk-notification-banner__heading").text(normalize_ws: true))
@@ -79,7 +74,7 @@ describe "pages/type_of_answer.html.erb", type: :view do
     end
 
     context "with multiple routes set" do
-      let(:routing_conditions) { [build(:condition), build(:condition)] }
+      let(:routing_conditions) { [build(:condition, answer_value: "Option 1"), build(:condition, answer_value: "Option 2")] }
 
       it "displays a warning about routes being deleted if answer type changes" do
         expect(Capybara.string(rendered.html).find(".govuk-notification-banner__heading").text(normalize_ws: true))
