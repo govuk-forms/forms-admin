@@ -18,6 +18,7 @@ class WelshCsvImportService
 
   def read
     file_content = file.read.force_encoding("UTF-8")
+    file_content.delete_prefix!("\xEF\xBB\xBF") # delete UTF-8 BOM if present
     csv = CSV.parse(file_content, headers: true)
 
     raise InvalidHeadersError unless headers_valid?(csv)

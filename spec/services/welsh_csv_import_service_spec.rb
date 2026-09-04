@@ -35,9 +35,11 @@ RSpec.describe WelshCsvImportService do
 
   context "when the CSV is valid" do
     context "when the rows in the CSV match the current form" do
+      let(:bom) { "" }
+
       before do
         rows = [
-          ["Content ID", "English content", "Welsh content"],
+          ["#{bom}Content ID", "English content", "Welsh content"],
           ["Form name", "A form", "Welsh A form ôÂŵéï"],
           ["Question 1 - question text", "None of the above question?", "Welsh None of the above question?"],
           ["Question 1 - option 1", "Option 1", "Welsh Option 1"],
@@ -82,6 +84,14 @@ RSpec.describe WelshCsvImportService do
           "Contact details for support - online contact link" => "https://www.gov.uk/support_cy",
           "Contact details for support - online contact link text" => "Welsh Support URL text",
         })
+      end
+
+      context "when the CSV has a BOM" do
+        let(:bom) { "\uFEFF" }
+
+        it "returns the translations data" do
+          expect(service.read).to include("Form name" => "Welsh A form ôÂŵéï")
+        end
       end
     end
   end
