@@ -200,6 +200,122 @@ describe RevertDraftFormService do
       end
     end
 
+    describe "with multiple branches and exit pages", :feature_multiple_branches do
+      let(:live_form) { create(:form, :live_with_draft, pages_count: 2) }
+      let(:exit_page) { create(:exit_page, heading: "Heading", markdown: "Markdown", question_page_id: live_form.pages.first.id) }
+
+      before do
+        live_form.pages.first.update!(answer_type: "selection", answer_settings: { "only_one_option" => "true", "selection_options" => [{ "name" => "Yes" }, { "name" => "No" }] })
+        live_form.pages.first.routing_conditions.create!(
+          answer_value: "No",
+          routing_page_id: live_form.pages.first.id,
+          check_page_id: live_form.pages.first.id,
+          exit_page_id: exit_page.id,
+        )
+        live_form.latest_form_document.update!(content: live_form.as_form_document(live_at: live_form.updated_at))
+      end
+
+      context "when the exit page is removed from the condition in the draft" do
+        before do
+          condition = live_form.pages.first.routing_conditions.first
+          condition.update!(goto_page_id: live_form.pages.second.id, exit_page_id: nil)
+        end
+
+        it "restores the original condition" do
+          revert_draft(live_tag)
+
+          live_form.reload
+          condition = live_form.pages.first.routing_conditions.first
+
+          expect(condition.exit_page.heading).to eq("Heading")
+          expect(condition.exit_page.markdown).to eq("Markdown")
+          expect(condition.goto_page).to be_nil
+        end
+      end
+
+      context "when the exit page is removed from the condition and the exit page is removed" do
+        before do
+          condition = live_form.pages.first.routing_conditions.first
+          condition.update!(goto_page_id: live_form.pages.second.id, exit_page_id: nil)
+          exit_page.destroy!
+        end
+
+        it "restores the original condition and exit page" do
+          revert_draft(live_tag)
+
+          live_form.reload
+          condition = live_form.pages.first.routing_conditions.first
+
+          expect(condition.exit_page.heading).to eq("Heading")
+          expect(condition.exit_page.markdown).to eq("Markdown")
+          expect(condition.goto_page).to be_nil
+        end
+      end
+    end
+
+    context "when there are exit pages not connected to any conditions" do
+      let(:live_form) { create(:form, :live_with_draft, pages_count: 2) }
+
+      before do
+        create(:exit_page, heading: "Heading", markdown: "Markdown", question_page_id: live_form.pages.first.id)
+        live_form.latest_form_document.update!(content: live_form.as_form_document(live_at: live_form.updated_at))
+      end
+
+      context "when the exit page is removed in the draft" do
+        before do
+          live_form.exit_pages.first.destroy!
+        end
+
+        it "restores the original exit page and its ExitPage record" do
+          revert_draft(live_tag)
+
+          live_form.reload
+          exit_page = live_form.exit_pages.first
+
+          expect(exit_page).to be_present
+          expect(exit_page.heading).to eq("Heading")
+          expect(exit_page.markdown).to eq("Markdown")
+          expect(exit_page.question_page_id).to eq(live_form.pages.first.id)
+        end
+      end
+    end
+
+    context "when exit pages not in conditions have been modified in the draft" do
+      let(:live_form) { create(:form, :live_with_draft, pages_count: 2) }
+
+      before do
+        create(:exit_page, heading: "Original heading", markdown: "Original markdown", question_page_id: live_form.pages.first.id)
+        live_form.latest_form_document.update!(content: live_form.as_form_document(live_at: live_form.updated_at))
+        live_form.exit_pages.first.update!(heading: "Modified heading", markdown: "Modified markdown")
+      end
+
+      it "reverts the modified exit page to the original content" do
+        revert_draft(live_tag)
+
+        live_form.reload
+        exit_page = live_form.exit_pages.first
+
+        expect(exit_page.heading).to eq("Original heading")
+        expect(exit_page.markdown).to eq("Original markdown")
+      end
+    end
+
+    context "when an exit page is added to the draft but not in the live form document" do
+      let(:live_form) { create(:form, :live_with_draft, pages_count: 2) }
+
+      before do
+        live_form.latest_form_document.update!(content: live_form.as_form_document(live_at: live_form.updated_at))
+        create(:exit_page, heading: "Draft only exit page", markdown: "Draft only markdown", question_page_id: live_form.pages.first.id)
+      end
+
+      it "removes the exit page added in the draft" do
+        revert_draft(live_tag)
+
+        live_form.reload
+        expect(live_form.exit_pages).to be_empty
+      end
+    end
+
     context "when the delivery configurations are changed in the draft" do
       let(:live_form) do
         create(:form, :live, delivery_configurations: [

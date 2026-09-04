@@ -444,6 +444,104 @@ RSpec.describe FormCopyService do
       end
     end
 
+    context "when source form has standalone exit pages not connected to conditions" do
+      let(:source_form) { create(:form, :live_with_draft, :with_pages, pages_count: 2) }
+      let!(:source_exit_page) do
+        create(:exit_page, heading: "Exit heading", markdown: "Exit markdown",
+                           question_page: source_form.pages.first)
+      end
+
+      before do
+        source_form.latest_form_document.update!(content: source_form.as_form_document)
+      end
+
+      it "copies all exit pages" do
+        expect(copied_form.exit_pages.count).to eq(1)
+      end
+
+      it "creates new exit page records with different IDs" do
+        expect(copied_form.exit_pages.pluck(:id)).not_to include(source_exit_page.id)
+      end
+
+      it "copies exit page content" do
+        copied_exit_page = copied_form.exit_pages.first
+
+        expect(copied_exit_page.heading).to eq("Exit heading")
+        expect(copied_exit_page.markdown).to eq("Exit markdown")
+      end
+
+      it "associates the exit page with the correct copied page" do
+        copied_exit_page = copied_form.exit_pages.first
+
+        expect(copied_exit_page.question_page).to eq(copied_form.pages.first)
+        expect(copied_exit_page.question_page).not_to eq(source_form.pages.first)
+      end
+    end
+
+    context "when a condition references an exit page via exit_page_id", :feature_multiple_branches do
+      let(:source_form) { create(:form, :live_with_draft, :ready_for_routing, pages_count: 2) }
+      let!(:source_exit_page) do
+        create(:exit_page, heading: "Condition exit heading", markdown: "Condition exit markdown",
+                           question_page: source_form.pages.first)
+      end
+
+      before do
+        create(:condition,
+               form: source_form,
+               routing_page: source_form.pages.first,
+               check_page: source_form.pages.first,
+               answer_value: "No",
+               exit_page: source_exit_page)
+        source_form.reload
+        source_form.latest_form_document.update!(content: source_form.as_form_document)
+      end
+
+      it "copies the exit page for the condition" do
+        expect(copied_form.pages.first.routing_conditions.first.exit_page).to be_present
+      end
+
+      it "copies the exit page content" do
+        copied_condition = copied_form.pages.first.routing_conditions.first
+
+        expect(copied_condition.exit_page.heading).to eq("Condition exit heading")
+        expect(copied_condition.exit_page.markdown).to eq("Condition exit markdown")
+      end
+
+      it "creates a new exit page record distinct from the source" do
+        copied_condition = copied_form.pages.first.routing_conditions.first
+
+        expect(copied_condition.exit_page_id).not_to eq(source_exit_page.id)
+      end
+
+      it "links the copied exit page to the copied page" do
+        copied_exit_page = copied_form.pages.first.routing_conditions.first.exit_page
+
+        expect(copied_exit_page.question_page).to eq(copied_form.pages.first)
+      end
+    end
+
+    context "when source form has standalone exit pages with Welsh translations" do
+      let(:source_form) do
+        form = create(:form, :live, :with_pages, pages_count: 2, available_languages: %w[en cy])
+        exit_page = create(:exit_page, heading: "Exit heading", markdown: "Exit markdown",
+                                       question_page: form.pages.first)
+        exit_page.heading_cy = "Pennaw ymadael"
+        exit_page.markdown_cy = "Markdown ymadael"
+        exit_page.save!
+        FormDocumentSyncService.new(form).synchronize_live_form
+        form.reload
+        form
+      end
+
+      it "copies Welsh heading for the exit page" do
+        expect(copied_form.exit_pages.first.heading_cy).to eq("Pennaw ymadael")
+      end
+
+      it "copies Welsh markdown for the exit page" do
+        expect(copied_form.exit_pages.first.markdown_cy).to eq("Markdown ymadael")
+      end
+    end
+
     context "when Welsh copy fails" do
       let(:source_form) do
         form = create(:form, :live, available_languages: %w[en cy])
