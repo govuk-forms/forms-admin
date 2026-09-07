@@ -63,14 +63,19 @@ describe "pages/type_of_answer.html.erb", type: :view do
     expect(rendered).not_to have_selector(".govuk-notification-banner__content")
   end
 
-  context "when editing an existing select one option question with a route set" do
-    let(:page) { build(:page, :with_selection_settings, routing_conditions:) }
-    let(:routing_conditions) { [build(:condition, answer_value: "Option 1")] }
+  context "when editing an existing select one option question" do
+    let(:page) { build(:page, :with_selection_settings, routing_conditions:, exit_pages:) }
+    let(:routing_conditions) { [] }
+    let(:exit_pages) { [] }
 
-    it "displays a warning about routes being deleted if answer type changes" do
-      expect(Capybara.string(rendered.html).find(".govuk-notification-banner__heading").text(normalize_ws: true))
-        .to include(Capybara.string(I18n.t("type_of_answer.routing_warning_changing_from_one_option_heading", count: 1))
-          .text(normalize_ws: true))
+    context "with a routing condition" do
+      let(:routing_conditions) { [build(:condition, answer_value: "Option 1")] }
+
+      it "displays a warning about routes being deleted if answer type changes" do
+        expect(Capybara.string(rendered.html).find(".govuk-notification-banner__heading").text(normalize_ws: true))
+          .to include(Capybara.string(I18n.t("type_of_answer.routing_warning_changing_from_one_option_heading", routes_and_exit_pages: "route"))
+            .text(normalize_ws: true))
+      end
     end
 
     context "with multiple routes set" do
@@ -78,7 +83,7 @@ describe "pages/type_of_answer.html.erb", type: :view do
 
       it "displays a warning about routes being deleted if answer type changes" do
         expect(Capybara.string(rendered.html).find(".govuk-notification-banner__heading").text(normalize_ws: true))
-          .to include(Capybara.string(I18n.t("type_of_answer.routing_warning_changing_from_one_option_heading", count: 2))
+          .to include(Capybara.string(I18n.t("type_of_answer.routing_warning_changing_from_one_option_heading", routes_and_exit_pages: "routes"))
             .text(normalize_ws: true))
       end
     end
@@ -116,9 +121,20 @@ describe "pages/type_of_answer.html.erb", type: :view do
 
         it "displays a warning about routes being deleted if answer type changes" do
           expect(Capybara.string(rendered.html).find(".govuk-notification-banner__heading").text(normalize_ws: true))
-            .to include(Capybara.string(I18n.t("type_of_answer.routing_warning_changing_from_one_option_heading", count: 1))
+            .to include(Capybara.string(I18n.t("type_of_answer.routing_warning_changing_from_one_option_heading", routes_and_exit_pages: "route"))
               .text(normalize_ws: true))
         end
+      end
+    end
+
+    context "with an exit page" do
+      let(:exit_pages) { build_list(:exit_page, 1) }
+
+      it "displays a warning about exit pages being deleted if answer type changes" do
+        expect(rendered).to have_selector(
+          ".govuk-notification-banner__content",
+          text: t("type_of_answer.routing_warning_changing_from_one_option_heading", routes_and_exit_pages: "exit page"),
+        )
       end
     end
   end

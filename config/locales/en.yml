@@ -2413,9 +2413,7 @@ en:
     not_started: Not started
     optional: Optional
   type_of_answer:
-    routing_warning_changing_from_one_option_heading:
-      one: If you change the answer type of this question, its route will be deleted
-      other: If you change the answer type of this question, its routes will be deleted
+    routing_warning_changing_from_one_option_heading: If you change the answer type of this question, its %{routes_and_exit_pages} will be deleted
   unarchive:
     new:
       body_html: |
