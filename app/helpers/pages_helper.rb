@@ -56,4 +56,24 @@ module PagesHelper
 
     { heading: "There are routes from some of these options", text: "If you remove or change an option with a route, the route will be deleted. #{edit_routes_link}" }
   end
+
+  def routes_and_exit_pages(page, count_goto_conditions: false)
+    exit_pages = page.exit_pages
+    routes = page.routing_conditions
+    routes += page.goto_conditions if count_goto_conditions
+
+    if routes.any? && exit_pages.any?
+      I18n.t(
+        "helpers.pages.routes_and_exit_pages",
+        routes: I18n.t("helpers.pages.routes", count: routes.size),
+        exit_pages: I18n.t("helpers.pages.exit_pages", count: exit_pages.size),
+      )
+    elsif routes.any?
+      I18n.t("helpers.pages.routes", count: routes.size)
+    elsif exit_pages.any?
+      I18n.t("helpers.pages.exit_pages", count: exit_pages.size)
+    else
+      ""
+    end
+  end
 end

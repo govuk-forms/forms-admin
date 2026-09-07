@@ -1315,6 +1315,14 @@ en:
         is_optional: Should this additional question be mandatory or optional?
       pages_selection_options_input:
         include_none_of_the_above: Should the list include an option for ‘None of the above’?
+    pages:
+      exit_pages:
+        one: exit page
+        other: exit pages
+      routes:
+        one: route
+        other: routes
+      routes_and_exit_pages: "%{routes} and %{exit_pages}"
   home:
     actions: Actions
     change_filter: Change
