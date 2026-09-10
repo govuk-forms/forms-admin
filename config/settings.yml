@@ -53,6 +53,11 @@ govuk_notify:
 # When set to true, any capybara tests will run chrome normally rather than in headless mode.
 show_browser_during_tests: false
 
+# Axe checks make feature specs significantly slower, so they can be skipped, e.g. for a
+# faster local test run. Set to true in config/settings/test.local.yml or via the
+# SETTINGS__SKIP_AXE_TESTS environment variable. Runs by default everywhere else, e.g. in CI.
+skip_axe_tests: false
+
 maintenance_mode:
   # When set to true, All pages will render 'Maintenance mode' message
   enabled: false
