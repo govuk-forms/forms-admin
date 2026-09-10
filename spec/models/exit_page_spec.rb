@@ -20,7 +20,7 @@ RSpec.describe ExitPage, type: :model do
   end
 
   describe "associations" do
-    let!(:question_page) { create(:page) }
+    let!(:question_page) { create(:page, :with_selection_settings) }
     let!(:exit_page) { create(:exit_page, question_page:) }
 
     it "has a question page" do
@@ -33,6 +33,27 @@ RSpec.describe ExitPage, type: :model do
 
     it "the page has exit pages" do
       expect(question_page.exit_pages).to eq([exit_page])
+    end
+
+    it "can have a condition" do
+      condition = create(:condition, routing_page: question_page, check_page: question_page, answer_value: "Option 1", exit_page:)
+
+      expect(exit_page.reload.conditions).to eq [
+        condition,
+      ]
+    end
+
+    it "can have more than one condition" do
+      create(:condition, routing_page: question_page, check_page: question_page, answer_value: "Option 1", exit_page:)
+      create(:condition, routing_page: question_page, check_page: question_page, answer_value: "Option 2", exit_page:)
+
+      expect(exit_page.reload.conditions.size).to eq 2
+    end
+
+    it "is not deleted when a condition is deleted" do
+      condition = create(:condition, routing_page: question_page, check_page: question_page, answer_value: "Option 1", exit_page:)
+
+      expect { condition.destroy! }.not_to change(described_class, :count)
     end
   end
 
