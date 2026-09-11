@@ -22,6 +22,16 @@ private
   end
 
   def update_user_memberships
-    Membership.destroy_invalid_organisation_memberships(@user)
+    memberships = Membership.destroy_invalid_organisation_memberships(@user)
+
+    Rails.logger.info(
+      "Deleted memberships for groups in previous organiation",
+      {
+        memberships_user_id: @user.id,
+        memberships: memberships.map { { group_external_id: it.group.external_id, role: it.role } },
+      },
+    )
+
+    memberships
   end
 end
