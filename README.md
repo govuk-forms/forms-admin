@@ -58,6 +58,18 @@ The app tests are written with [rspec-rails] and you can run them with:
 bundle exec rspec
 ```
 
+This skips the [axe-core] accessibility checks within the feature specs, as they are slow to run. To include them, set the `RUN_AXE_TESTS` environment variable:
+
+```bash
+RUN_AXE_TESTS=true bundle exec rspec
+```
+
+Accessibility checks always run as part of `bundle exec rake test`, which is what CI uses, or you can run just the feature specs with accessibility checks with:
+
+```bash
+bundle exec rake test:axe
+```
+
 There are also unit tests for JavaScript code (look for files named `*.test.js`), written with [Vitest]. You can run those with:
 
 ```bash
@@ -65,6 +77,7 @@ npm run test
 ```
 
 [rspec-rails]: https://github.com/rspec/rspec-rails
+[axe-core]: https://github.com/dequelabs/axe-core-gems
 [Vitest]: https://vitest.dev/
 
 ### Running the RSpec tests in parallel

@@ -57,6 +57,8 @@ jobs:
       # Add or replace test runners here
       - name: Run Ruby tests
         run: bundle exec rspec
+        env:
+          RUN_AXE_TESTS: "true"
       - name: Run JS tests
         run: npm test
       # Add or replace any other lints here
