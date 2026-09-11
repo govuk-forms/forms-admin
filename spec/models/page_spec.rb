@@ -481,7 +481,7 @@ RSpec.describe Page, type: :model do
     end
 
     context "when page has routing conditions and ExitPages" do
-      let(:routing_conditions) { [create(:condition)] }
+      let(:routing_conditions) { [create(:condition, answer_value: "Option 1")] }
       let(:check_conditions) { routing_conditions }
       let(:exit_page) { create :exit_page, question_page: page }
 
@@ -496,10 +496,11 @@ RSpec.describe Page, type: :model do
         expect(page.reload.exit_pages.to_a).to eq([exit_page])
       end
 
-      context "when answer type is updated to one doesn't support routing" do
+      context "when answer type is updated to one that doesn't support routing" do
         it "deletes any conditions" do
           page.answer_type = "number"
           page.save_and_update_form
+          expect(page.reload.routing_conditions).to be_empty
           expect(page.reload.check_conditions).to be_empty
         end
 
@@ -549,6 +550,106 @@ RSpec.describe Page, type: :model do
           page.answer_type = "number"
           page.save_and_update_form
           expect(page.reload.check_conditions).not_to be_empty
+        end
+      end
+    end
+
+    context "when page has secondary skip route" do
+      let(:check_page) { create :page, form: }
+      let(:routing_conditions) { [build(:condition, check_page:, answer_value: nil)] }
+      let(:check_conditions) { [] }
+
+      context "when answer type is updated to one that doesn't support routing" do
+        it "does not delete the secondary skip condition" do
+          page.answer_type = "number"
+          page.save_and_update_form
+          expect(page.reload.routing_conditions).to eq routing_conditions
+        end
+      end
+
+      context "when the page is saved without changing the answer type" do
+        it "does not delete the secondary skip condition" do
+          page.question_text = "test"
+          page.save_and_update_form
+          expect(page.reload.routing_conditions).to eq routing_conditions
+        end
+      end
+
+      context "when the answer settings no longer restrict to only one option" do
+        it "does not delete the secondary skip condition" do
+          page.answer_settings["only_one_option"] = "0"
+          page.save_and_update_form
+          expect(page.reload.routing_conditions).to eq routing_conditions
+        end
+      end
+
+      context "when the answer settings change while still restricting to only one option" do
+        it "does not delete the secondary skip condition" do
+          page.answer_settings["selection_options"].first["name"] = "New option name"
+          page.save_and_update_form
+          expect(page.reload.routing_conditions).to eq routing_conditions
+        end
+      end
+
+      context "when the answer type changes from selection with more than one option" do
+        subject(:page) { create :page, :selection_with_checkboxes, form:, routing_conditions:, check_conditions: }
+
+        it "does not delete the secondary skip condition" do
+          page.answer_type = "number"
+          page.save_and_update_form
+          expect(page.reload.routing_conditions).to eq routing_conditions
+        end
+      end
+    end
+
+    context "when page has an unconditional route" do
+      let(:routing_conditions) { [build(:condition, answer_value: nil)] }
+      let(:check_conditions) { routing_conditions }
+
+      context "when answer type is updated to one that doesn't support routing" do
+        it "does not delete the unconditional route" do
+          page.answer_type = "number"
+          page.save_and_update_form
+          expect(page.reload.routing_conditions).to eq(routing_conditions)
+          expect(page.reload.check_conditions).to eq(check_conditions)
+        end
+      end
+
+      context "when the page is saved without changing the answer type" do
+        it "does not delete the unconditional route" do
+          page.question_text = "test"
+          page.save_and_update_form
+          expect(page.reload.routing_conditions).to eq(routing_conditions)
+          expect(page.reload.check_conditions).to eq(check_conditions)
+        end
+      end
+
+      context "when the answer settings no longer restrict to only one option" do
+        it "does not delete the unconditional route" do
+          page.answer_settings["only_one_option"] = "0"
+          page.save_and_update_form
+          expect(page.reload.routing_conditions).to eq(routing_conditions)
+          expect(page.reload.check_conditions).to eq(check_conditions)
+        end
+      end
+
+      context "when the answer settings change while still restricting to only one option" do
+        it "does not delete the unconditional route" do
+          page.answer_settings["selection_options"].first["name"] = "New option name"
+          page.save_and_update_form
+          expect(page.reload.routing_conditions).to eq(routing_conditions)
+          expect(page.reload.check_conditions).to eq(check_conditions)
+        end
+      end
+
+      context "when the answer type changes from selection with more than one option" do
+        subject(:page) { create :page, :selection_with_checkboxes, form:, routing_conditions:, check_conditions: }
+
+        it "does not delete the unconditional route" do
+          page.answer_type = "number"
+          page.save_and_update_form
+          expect(page.reload.routing_conditions).to eq(routing_conditions)
+          expect(page.reload.check_conditions).to eq(check_conditions)
         end
       end
     end

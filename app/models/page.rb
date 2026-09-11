@@ -59,7 +59,7 @@ class Page < ApplicationRecord
       form.save_question_changes!
 
       if answer_type_changed_from_selection_only_one_option || answer_settings_changed_from_only_one_option
-        check_conditions.destroy_all
+        conditions_for_selection_options.destroy_all
         exit_pages.destroy_all
       end
     end
@@ -189,5 +189,9 @@ private
 
   def set_external_id
     self.external_id ||= ExternalIdProvider.generate_unique_id_for(Page)
+  end
+
+  def conditions_for_selection_options
+    routing_conditions.where.not(answer_value: nil)
   end
 end
