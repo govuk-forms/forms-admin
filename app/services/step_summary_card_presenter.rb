@@ -25,6 +25,15 @@ class StepSummaryCardPresenter
     }
   end
 
+  def build_exit_page_list(exit_page, number)
+    {
+      rows: [
+        { key: { text: I18n.t("step_summary_card.exit_page.heading", exit_page_number: number) }, value: { text: exit_page.heading } },
+        { key: { text: I18n.t("step_summary_card.exit_page.content", exit_page_number: number) }, value: { text: exit_page.markdown } },
+      ],
+    }
+  end
+
   def build_bilingual_table
     {
       classes: %w[app-translation-table],
