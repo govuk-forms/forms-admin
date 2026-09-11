@@ -14,7 +14,7 @@ class MarkdownConversionService
     HTMLFormatter.new.render_text_to_html(text)
   end
 
-  # This class renders simple text fields, like declaration_text to HTML.
+  # This class renders simple text fields, like declaration_markdown to HTML.
   # These fields can have limited HTML tags, like <p> and <br>.
   # It matches the code used in the runner.
 

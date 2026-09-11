@@ -14,7 +14,7 @@ RSpec.describe WelshCsvImportService do
            support_phone: "English support phone",
            support_url: "https://www.gov.uk/support",
            support_url_text: "Support URL text",
-           declaration_text: "Declaration text",
+           declaration_markdown: "Declaration text",
            pages: [page, another_page]
   end
   let(:page) do
