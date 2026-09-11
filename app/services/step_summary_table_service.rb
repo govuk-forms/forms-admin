@@ -136,11 +136,7 @@ private
   end
 
   def number_of_routes
-    if @step.routing_conditions.length == 1
-      1
-    else
-      answer_value_groups(@step.routing_conditions).length
-    end
+    @step.routing_conditions.length == 1 ? 1 : answer_value_groups(@step.routing_conditions).length
   end
 
   def routes_value(conditions)
@@ -160,40 +156,47 @@ private
   end
 
   def print_routes(conditions)
-    answer_value_groups = answer_value_groups(conditions)
-    answer_value_groups.map { |goto_page_id, condition_group|
-      if goto_page_id.nil?
-        caption = content_tag(:p, I18n.t("page_conditions.go_to_the_end"))
-      else
-        goto_question = @steps.find { |page| page.id == condition_group.first.goto_page_id }
-        goto_page_question_text = ActionController::Base.helpers.sanitize(goto_question.question_text)
-        goto_page_question_number = @steps.find_index(goto_question) + 1
+    answer_value_groups(conditions).map { |group|
+      condition_group = group[:conditions]
 
-        caption = content_tag(:p, I18n.t("page_conditions.go_to_page", goto_page_question_number:, goto_page_question_text:))
-      end
+      caption = case group[:group_type]
+                when :skip_to_end
+                  content_tag(:p, I18n.t("page_conditions.go_to_the_end"))
+                when :exit_page
+                  content_tag(:p, I18n.t("page_conditions.go_to_exit_page", exit_page_index: group[:exit_page_index], exit_page_heading: condition_group.first.exit_page_heading))
+                else
+                  goto_question = @steps.find { |page| page.id == condition_group.first.goto_page_id }
+                  goto_page_question_text = ActionController::Base.helpers.sanitize(goto_question.question_text)
+                  goto_page_question_number = @steps.find_index(goto_question) + 1
+                  content_tag(:p, I18n.t("page_conditions.go_to_page", goto_page_question_number:, goto_page_question_text:))
+                end
 
-      answer_values = condition_group.map { |condition| "‘#{format_answer_value(condition.answer_value)}’" }
+      answer_values = condition_group.map { |condition| "’#{format_answer_value(condition.answer_value)}’" }
       formatted_list = html_unordered_list2(answer_values)
       safe_join([caption, formatted_list])
     }.join.html_safe
   end
 
   def print_welsh_routes(conditions)
-    answer_value_groups = answer_value_groups(conditions)
-    answer_value_groups.map { |goto_page_id, condition_group|
-      if goto_page_id.nil?
-        caption = content_tag(:p, I18n.t("page_conditions.go_to_the_end"))
-      else
-        welsh_goto_question = welsh_step_from_id(condition_group.first.goto_page_id)
-        welsh_goto_page_question_text = ActionController::Base.helpers.sanitize(welsh_goto_question.question_text)
-        goto_page_question_number = @welsh_steps.find_index(welsh_goto_question) + 1
+    answer_value_groups(conditions).map { |group|
+      condition_group = group[:conditions]
 
-        caption = content_tag(:p, I18n.t("page_conditions.go_to_page", goto_page_question_number:, goto_page_question_text: welsh_goto_page_question_text))
-      end
+      caption = case group[:group_type]
+                when :skip_to_end
+                  content_tag(:p, I18n.t("page_conditions.go_to_the_end"))
+                when :exit_page
+                  welsh_condition = welsh_condition_from_id(condition_group.first.id)
+                  content_tag(:p, I18n.t("page_conditions.go_to_exit_page", exit_page_index: group[:exit_page_index], exit_page_heading: welsh_condition.exit_page_heading))
+                else
+                  welsh_goto_question = welsh_step_from_id(condition_group.first.goto_page_id)
+                  welsh_goto_page_question_text = ActionController::Base.helpers.sanitize(welsh_goto_question.question_text)
+                  goto_page_question_number = @welsh_steps.find_index(welsh_goto_question) + 1
+                  content_tag(:p, I18n.t("page_conditions.go_to_page", goto_page_question_number:, goto_page_question_text: welsh_goto_page_question_text))
+                end
 
       answer_values = condition_group.map do |condition|
         welsh_condition = welsh_condition_from_id(condition.id)
-        "‘#{format_answer_value(welsh_answer_value2(welsh_condition))}’"
+        "’#{format_answer_value(welsh_answer_value2(welsh_condition))}’"
       end
 
       formatted_list = html_unordered_list2(answer_values)
@@ -226,13 +229,39 @@ private
   end
 
   def answer_value_groups(conditions)
-    answer_order = @step.answer_settings&.selection_options&.map(&:value) || []
+    ordered = ordered_conditions_for(conditions)
 
-    conditions.group_by(&:goto_page_id).map { |goto_page_id, condition_group|
-      goto_page_position = @steps.find_index { |page| page.id == goto_page_id } + 1 unless goto_page_id.nil?
-      sorted_condition_group = condition_group.in_order_of(:answer_value, answer_order, filter: false)
-      [goto_page_position, sorted_condition_group]
-    }.sort_by { |goto_page_position, _| goto_page_position || Float::INFINITY }
+    goto_page_groups(ordered) + skip_to_end_groups(ordered) + exit_page_groups(ordered)
+  end
+
+  def ordered_conditions_for(conditions)
+    answer_order = @step.answer_settings&.selection_options&.map(&:value) || []
+    conditions.to_a.in_order_of(:answer_value, answer_order, filter: false)
+  end
+
+  def goto_page_groups(ordered_conditions)
+    ordered_conditions
+      .select { |c| c.goto_page_id.present? }
+      .group_by(&:goto_page_id)
+      .sort_by { |goto_page_id, _| @steps.find_index { |page| page.id == goto_page_id } || Float::INFINITY }
+      .map { |_, group| { group_type: :goto_page, conditions: group } }
+  end
+
+  def skip_to_end_groups(ordered_conditions)
+    skip_to_end_conditions = ordered_conditions.select(&:skip_to_end)
+    return [] unless skip_to_end_conditions.any?
+
+    [{ group_type: :skip_to_end, conditions: skip_to_end_conditions }]
+  end
+
+  def exit_page_groups(ordered_conditions)
+    ordered_conditions
+      .select { |c| c.exit_page_id.present? }
+      .group_by(&:exit_page_id)
+      .values
+      .sort_by { |group| group.first.exit_page_id }
+      .each_with_index
+      .map { |group, index| { group_type: :exit_page, exit_page_index: index + 1, conditions: group } }
   end
 
   def format_answer_value(answer_value)

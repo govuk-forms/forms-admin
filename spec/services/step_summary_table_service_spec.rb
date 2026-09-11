@@ -280,6 +280,10 @@ describe StepSummaryTableService do
                        name: "Skip the branches",
                        value: "Skip the branches",
                      },
+                     {
+                       name: "Exit page",
+                       value: "Exit page",
+                     },
                    ],
                  ),
                  answer_settings_cy: DataStruct.new(
@@ -300,6 +304,10 @@ describe StepSummaryTableService do
                      {
                        name: "Skip the branches (Welsh)",
                        value: "Skip the branches",
+                     },
+                     {
+                       name: "Exit page (Welsh)",
+                       value: "Exit page",
                      },
                    ],
                  ),
@@ -373,6 +381,17 @@ describe StepSummaryTableService do
 
       create(
         :condition,
+        :with_exit_page,
+        answer_value: "Exit page",
+        routing_page_id: pages[1].id,
+        check_page_id: pages[1].id,
+        exit_page_heading: "You are not eligible",
+        exit_page_heading_cy: "Nid ydych yn gymwys",
+        exit_page_markdown_cy: "Nid oes modd i chi ddefnyddio'r gwasanaeth hwn.",
+      )
+
+      create(
+        :condition,
         routing_page_id: pages[3].id,
         goto_page_id: pages[7].id,
       )
@@ -385,6 +404,7 @@ describe StepSummaryTableService do
 
       pages.each(&:reload)
       form.save_draft!
+      form.set_task_status_service(TaskStatusService.new(form:))
       form.make_live!
       pages
     end
@@ -401,12 +421,14 @@ describe StepSummaryTableService do
       it "includes a row for the routes" do
         expect(step_summary_table_service.values_with_welsh_content2).to include([
           "Routes",
-          "<p>Go to 5, ‘Question at the start of branch 2’ if the answer is:</p><ul class=\"govuk-list govuk-list--bullet govuk-!-static-margin-bottom-4\"><li>‘Second branch’</li><li>‘Also second branch’</li></ul>"\
-          "<p>Go to 8, ‘Question’ if the answer is:</p><ul class=\"govuk-list govuk-list--bullet govuk-!-static-margin-bottom-4\"><li>‘Also second branch’</li></ul>"\
-          "<p>Go to the end of the form if the answer is:</p><ul class=\"govuk-list govuk-list--bullet govuk-!-static-margin-bottom-4\"><li>‘None of the above’</li></ul>",
-          "<p>Go to 5, ‘Question at the start of branch 2 (Welsh)’ if the answer is:</p><ul class=\"govuk-list govuk-list--bullet govuk-!-static-margin-bottom-4\"><li>‘Second branch (Welsh)’</li><li>‘Also second branch (Welsh)’</li></ul>"\
-          "<p>Go to 8, ‘Question (Welsh)’ if the answer is:</p><ul class=\"govuk-list govuk-list--bullet govuk-!-static-margin-bottom-4\"><li>‘Also second branch (Welsh)’</li></ul>"\
-          "<p>Go to the end of the form if the answer is:</p><ul class=\"govuk-list govuk-list--bullet govuk-!-static-margin-bottom-4\"><li>‘Dim un o’r uchod’</li></ul>",
+          "<p>Go to 5, ‘Question at the start of branch 2’ if the answer is:</p><ul class=\"govuk-list govuk-list--bullet govuk-!-static-margin-bottom-4\"><li>’Second branch’</li><li>’Also second branch’</li></ul>"\
+          "<p>Go to 8, ‘Question’ if the answer is:</p><ul class=\"govuk-list govuk-list--bullet govuk-!-static-margin-bottom-4\"><li>’Also second branch’</li></ul>"\
+          "<p>Go to the end of the form if the answer is:</p><ul class=\"govuk-list govuk-list--bullet govuk-!-static-margin-bottom-4\"><li>’None of the above’</li></ul>"\
+          "<p>Go to exit page 1, ‘You are not eligible’ if the answer is:</p><ul class=\"govuk-list govuk-list--bullet govuk-!-static-margin-bottom-4\"><li>’Exit page’</li></ul>",
+          "<p>Go to 5, ‘Question at the start of branch 2 (Welsh)’ if the answer is:</p><ul class=\"govuk-list govuk-list--bullet govuk-!-static-margin-bottom-4\"><li>’Second branch (Welsh)’</li><li>’Also second branch (Welsh)’</li></ul>"\
+          "<p>Go to 8, ‘Question (Welsh)’ if the answer is:</p><ul class=\"govuk-list govuk-list--bullet govuk-!-static-margin-bottom-4\"><li>’Also second branch (Welsh)’</li></ul>"\
+          "<p>Go to the end of the form if the answer is:</p><ul class=\"govuk-list govuk-list--bullet govuk-!-static-margin-bottom-4\"><li>’Dim un o’r uchod’</li></ul>"\
+          "<p>Go to exit page 1, ‘Nid ydych yn gymwys’ if the answer is:</p><ul class=\"govuk-list govuk-list--bullet govuk-!-static-margin-bottom-4\"><li>’Exit page (Welsh)’</li></ul>",
         ])
       end
     end
@@ -432,6 +454,30 @@ describe StepSummaryTableService do
           "Go to the end of the form",
           "Go to the end of the form",
         ])
+      end
+    end
+
+    context "when a page has a condition routing to an exit page" do
+      let(:page) { pages_with_routing[1] }
+
+      it "includes the exit page caption in the routes row" do
+        expect(step_summary_table_service.values_with_welsh_content2).to include(
+          a_hash_including(
+            include(
+              I18n.t("page_conditions.go_to_exit_page", exit_page_index: 1, exit_page_heading: "You are not eligible"),
+            ),
+          ),
+        )
+      end
+
+      it "includes the Welsh exit page caption in the routes row" do
+        expect(step_summary_table_service.values_with_welsh_content2).to include(
+          a_hash_including(
+            include(
+              I18n.t("page_conditions.go_to_exit_page", exit_page_index: 1, exit_page_heading: "Nid ydych yn gymwys"),
+            ),
+          ),
+        )
       end
     end
   end
