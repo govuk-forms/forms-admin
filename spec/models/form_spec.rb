@@ -873,6 +873,20 @@ RSpec.describe Form, type: :model do
     end
   end
 
+  describe "save and return" do
+    describe "enum" do
+      it "returns a list of save and return values" do
+        expect(described_class.save_and_returns.keys).to eq(%w[disabled enabled])
+        expect(described_class.save_and_returns.values).to eq(%w[disabled enabled])
+      end
+    end
+
+    it "defaults to disabled" do
+      form = build(:form)
+      expect(form.save_and_return).to eq("disabled")
+    end
+  end
+
   describe "#destroy" do
     let(:form) { create :form }
 
