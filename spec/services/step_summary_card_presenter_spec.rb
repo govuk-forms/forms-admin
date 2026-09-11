@@ -120,6 +120,28 @@ describe StepSummaryCardPresenter do
     end
   end
 
+  describe "#build_exit_page_list" do
+    let(:exit_page) { OpenStruct.new(heading: "You are not eligible", markdown: "You cannot use this service.") }
+
+    it "returns a rows hash with the heading and content" do
+      expect(presenter.build_exit_page_list(exit_page, 1)).to eq({
+        rows: [
+          { key: { text: I18n.t("step_summary_card.exit_page.heading", exit_page_number: 1) }, value: { text: exit_page.heading } },
+          { key: { text: I18n.t("step_summary_card.exit_page.content", exit_page_number: 1) }, value: { text: exit_page.markdown } },
+        ],
+      })
+    end
+
+    it "uses the given number in the row keys" do
+      expect(presenter.build_exit_page_list(exit_page, 3)).to include({
+        rows: [
+          { key: { text: I18n.t("step_summary_card.exit_page.heading", exit_page_number: 3) }, value: { text: exit_page.heading } },
+          { key: { text: I18n.t("step_summary_card.exit_page.content", exit_page_number: 3) }, value: { text: exit_page.markdown } },
+        ],
+      })
+    end
+  end
+
   describe "#build_route_tables" do
     before do
       allow(StepSummaryTableService).to receive(:call).and_return(OpenStruct.new(

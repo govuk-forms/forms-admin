@@ -2372,6 +2372,13 @@ en:
     end_of_form:
       cy: End of the form
       en: End of the form
+    exit_page:
+      content: Exit page %{exit_page_number} content
+      heading: Exit page %{exit_page_number} heading
+      number: Exit page %{exit_page_number}
+      section_heading:
+        one: Question %{question_number}’s exit page
+        other: Question %{question_number}’s exit pages
     guidance_markdown: Guidance
     hint_text: Hint text
     name_type:
