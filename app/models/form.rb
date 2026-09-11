@@ -2,6 +2,8 @@ class Form < ApplicationRecord
   include FormStateMachine
   extend Mobility
 
+  self.ignored_columns += [:declaration_text]
+
   SUPPORTED_LANGUAGES = %w[en cy].freeze
 
   has_many :pages, -> { order(position: :asc) }, dependent: :destroy
@@ -28,7 +30,6 @@ class Form < ApplicationRecord
              :support_phone,
              :support_url,
              :support_url_text,
-             :declaration_text,
              :declaration_markdown,
              :what_happens_next_markdown,
              :payment_url
