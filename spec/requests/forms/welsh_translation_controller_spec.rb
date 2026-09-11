@@ -462,6 +462,9 @@ RSpec.describe Forms::WelshTranslationController, type: :request do
     end
 
     context "when a valid CSV is uploaded" do
+      let(:form) { create(:form, :with_pages, pages: [page]) }
+      let(:page) { create(:page, :with_selection_settings, question_text: "Are you eligible?") }
+
       context "when the multiple branches feature is disabled", feature_multiple_branches: false do
         let(:condition) do
           create(:condition, routing_page: form.pages.first, answer_value: "No",
@@ -473,6 +476,9 @@ RSpec.describe Forms::WelshTranslationController, type: :request do
           CSV.generate do |csv|
             csv << ["Content ID", "English content", "Welsh content"]
             csv << ["Form name", form.name, "Fy Ffurflen"]
+            csv << ["Question 1 - question text", "Are you eligible?", "Welsh question text"]
+            csv << ["Question 1 - option 1", "Option 1", "Welsh Option 1"]
+            csv << ["Question 1 - option 2", "Option 2", "Welsh Option 2"]
             csv << ["Question 1 - exit page heading", "You are ineligible", "Welsh exit page heading"]
             csv << ["Question 1 - exit page content", "Sorry, you are ineligible for this service.", "Welsh exit page content"]
           end
@@ -513,12 +519,15 @@ RSpec.describe Forms::WelshTranslationController, type: :request do
       end
 
       context "when the multiple branches feature is enabled", :feature_multiple_branches do
-        let(:exit_page) { create :exit_page, question_page: form.pages.first }
+        let(:exit_page) { create :exit_page, question_page: form.pages.first, heading: "You are ineligible" }
 
         let(:csv_data) do
           CSV.generate do |csv|
             csv << ["Content ID", "English content", "Welsh content"]
             csv << ["Form name", form.name, "Fy Ffurflen"]
+            csv << ["Question 1 - question text", "Are you eligible?", "Welsh question text"]
+            csv << ["Question 1 - option 1", "Option 1", "Welsh Option 1"]
+            csv << ["Question 1 - option 2", "Option 2", "Welsh Option 2"]
             csv << ["Question 1 - exit page 1 heading", "You are ineligible", "Welsh exit page heading"]
             csv << ["Question 1 - exit page 1 content", "Sorry, you are ineligible for this service.", "Welsh exit page content"]
           end

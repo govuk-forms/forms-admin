@@ -49,4 +49,20 @@ describe "forms/welsh_translation/show_upload.html.erb" do
       expect(rendered).to have_css(".govuk-error-message", text: "an error occurred")
     end
   end
+
+  context "when there are errors and an error_row_number is set" do
+    before do
+      welsh_translation_upload_input.errors.add(:file, "an error occurred")
+      welsh_translation_upload_input.error_row_number = 2
+      render template: "forms/welsh_translation/show_upload", locals: {
+        current_form: form,
+        welsh_translation_upload_input: welsh_translation_upload_input,
+      }
+    end
+
+    it "includes the row number in the error summary title" do
+      expect(rendered).to have_css(".govuk-error-summary__title", text: I18n.t("forms.welsh_translation.show_upload.error_summary_title_with_row_number", row_number: 2))
+      expect(rendered).to have_css(".govuk-error-message", text: "an error occurred")
+    end
+  end
 end

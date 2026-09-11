@@ -5,7 +5,11 @@
   <div class="govuk-grid-column-two-thirds">
     <%= form_with(model: welsh_translation_upload_input, url: welsh_translation_upload_path(current_form), method: 'POST') do |f| %>
       <% if welsh_translation_upload_input&.errors.any? %>
-        <%= f.govuk_error_summary %>
+        <% if welsh_translation_upload_input.error_row_number %>
+          <%= f.govuk_error_summary(t(".error_summary_title_with_row_number", row_number: welsh_translation_upload_input.error_row_number)) %>
+        <% else %>
+          <%= f.govuk_error_summary %>
+        <% end %>
       <% end %>
 
       <h1 class="govuk-heading-l">

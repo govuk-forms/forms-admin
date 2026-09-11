@@ -48,4 +48,20 @@ module WelshTranslationContentLabels
   def question_name(page)
     "Question #{page.position}"
   end
+
+  def is_selection_option?(label)
+    label.to_s.match?(/^Question \d+ - option \d+$/)
+  end
+
+  def is_question_text?(label)
+    label.to_s.match?(/^Question \d+ - #{PAGE_ATTRIBUTE_LABELS[:question_text]}$/)
+  end
+
+  def is_exit_page_heading?(label)
+    label.to_s.match?(/^Question \d+ - exit page (\d+ )?heading$/)
+  end
+
+  def question_number_from_label(label)
+    /^Question (\d+)/.match(label)&.[](1)&.to_i
+  end
 end

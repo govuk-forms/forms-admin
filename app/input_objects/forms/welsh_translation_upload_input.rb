@@ -1,10 +1,14 @@
 class Forms::WelshTranslationUploadInput < BaseInput
+  include ActiveModel::Attributes
+
   FILE_TYPES = %w[
     text/csv
   ].freeze
   MAX_SIZE_IN_MB = 10
 
   attr_accessor :form, :file
+
+  attribute :error_row_number
 
   validates :file, presence: true, file_content_type: { in: FILE_TYPES }
   validate :validate_file_size
@@ -21,6 +25,28 @@ class Forms::WelshTranslationUploadInput < BaseInput
     false
   rescue WelshCsvImportService::InvalidHeadersError
     errors.add(:file, :invalid_headers)
+    false
+  rescue WelshCsvImportService::DifferentNumberOfSelectionOptionsError => e
+    errors.add(:file, :different_number_of_selection_options, question_number: e.question_number)
+    false
+  rescue WelshCsvImportService::SelectionOptionsMismatchError => e
+    errors.add(:file, :selection_options_mismatch, question_number: e.question_number)
+    false
+  rescue WelshCsvImportService::SelectionOptionTranslationsMissingError => e
+    errors.add(:file, :selection_options_translations_missing, question_number: e.question_number)
+    false
+  rescue WelshCsvImportService::FormContentNotFoundError => e
+    errors.add(:file, :form_content_not_found)
+    self.error_row_number = e.row_number
+    false
+  rescue WelshCsvImportService::QuestionTextMismatchError => e
+    # the error message is the same as for form_content_not_found, but we use a separate key to distinguish in the logs
+    errors.add(:file, :question_text_mismatch)
+    self.error_row_number = e.row_number
+    false
+  rescue WelshCsvImportService::ExitPageHeadingMismatchError => e
+    errors.add(:file, :exit_page_heading_mismatch)
+    self.error_row_number = e.row_number
     false
   end
 

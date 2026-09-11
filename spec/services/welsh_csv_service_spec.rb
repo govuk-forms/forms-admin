@@ -8,6 +8,13 @@ RSpec.describe "WelshCsvService", feature_multiple_branches: false do
       expect(csv_rows(form)[0]).to eq(["\uFEFFContent ID", "English content", "Welsh content"])
     end
 
+    it "does not prepend the UTF-8 BOM if include_bom is false" do
+      csv = WelshCsvService.new(form).as_csv(include_bom: false)
+      rows = CSV.parse(csv)
+
+      expect(rows[0]).to eq(["Content ID", "English content", "Welsh content"])
+    end
+
     it "contains the form name" do
       expect(csv_rows(form)).to include([
         "Form name",

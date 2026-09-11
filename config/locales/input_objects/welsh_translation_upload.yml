@@ -7,10 +7,16 @@ en:
           attributes:
             file:
               blank: Select a file
+              different_number_of_selection_options: There’s a different number of options for the English and Welsh versions of Question %{question_number} - try downloading a new CSV of the existing content, then uploading it again
+              exit_page_heading_mismatch: It looks like the form has changed since you downloaded the CSV of existing content - try downloading a new version, then uploading it again
+              form_content_not_found: It looks like the form has changed since you downloaded the CSV of existing content - try downloading a new version, then uploading it again
               invalid_encoding: File is not in CSV UTF-8 format - in Excel, go to ‘File’ then ‘Save as’
               invalid_file_type: The selected file must be a CSV
               invalid_headers: We couldn’t upload the CSV because the column headings are wrong - check them and try uploading again
               malformed: The CSV has invalid formatting - try downloading a new version, then uploading it again
+              question_text_mismatch: It looks like the form has changed since you downloaded the CSV of existing content - try downloading a new version, then uploading it again
+              selection_options_mismatch: For the list options in question %{question_number}, the English and Welsh versions do not match - try downloading a new CSV of the existing content, then uploading it again
+              selection_options_translations_missing: Question %{question_number} is missing Welsh translations for one or more options - add them, then try uploading the CSV again
               too_big: The selected file must be smaller than 10MB
   helpers:
     hint:

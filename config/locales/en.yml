@@ -753,6 +753,7 @@ en:
         support_url_text: Text to describe the contact link
         welsh_header: Welsh content
       show_upload:
+        error_summary_title_with_row_number: There is a problem from row %{row_number} onwards in the CSV
         warning: This will replace any Welsh content you already have saved in the form
   group_forms:
     edit:

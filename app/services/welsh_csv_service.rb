@@ -15,7 +15,7 @@ class WelshCsvService
     @form = form
   end
 
-  def as_csv
+  def as_csv(include_bom: true)
     csv = CSV.generate do |csv|
       add_header(csv)
       add_form_name(csv)
@@ -24,7 +24,7 @@ class WelshCsvService
     end
 
     # Prepend UTF-8 BOM so Excel recognises the file as UTF-8 and preserves special characters
-    "#{UTF_8_BOM}#{csv}"
+    "#{UTF_8_BOM if include_bom}#{csv}"
   end
 
   def filename
