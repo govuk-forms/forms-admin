@@ -34,6 +34,15 @@ class StepSummaryCardPresenter
     }
   end
 
+  def build_bilingual_exit_page(exit_page, number)
+    {
+      classes: %w[app-translation-table],
+      head: bilingual_table_header,
+      rows: welsh_exit_page_rows(exit_page, number),
+      first_cell_is_header: true,
+    }
+  end
+
   def build_bilingual_table
     {
       classes: %w[app-translation-table],
@@ -123,6 +132,10 @@ private
     @welsh_steps.find { |welsh_step| welsh_step.id == @step.id }
   end
 
+  def welsh_exit_page(exit_page)
+    welsh_step.exit_pages.find { |page| page.id == exit_page.id }
+  end
+
   def step_summary_table_service
     StepSummaryTableService.call(step: @step, steps: @steps, welsh_steps: @welsh_steps)
   end
@@ -195,5 +208,20 @@ private
     ]
 
     translation_table_config(caption: "Exit page", rows:)
+  end
+
+  def welsh_exit_page_rows(exit_page, number)
+    [
+      [
+        I18n.t("step_summary_card.exit_page.heading", exit_page_number: number),
+        exit_page.heading,
+        welsh_exit_page(exit_page).heading,
+      ],
+      [
+        I18n.t("step_summary_card.exit_page.content", exit_page_number: number),
+        exit_page.markdown,
+        welsh_exit_page(exit_page).markdown,
+      ],
+    ]
   end
 end

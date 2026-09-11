@@ -18,6 +18,17 @@
         <% if welsh_form_document.present? && welsh_form_document&.steps.any? %>
           <% if multiple_branches_enabled %>
             <%= govuk_table(**StepSummaryCardPresenter.call(step:, steps: form_document.steps, welsh_steps: welsh_form_document.steps).build_bilingual_table2) %>
+            <% if step.exit_pages.present? && multiple_branches_enabled %>
+              <h3 class="govuk-heading-m govuk-!-margin-top-2">
+                <%= t("step_summary_card.exit_page.section_heading", question_number: step.position, count: step.exit_pages.count) %>
+              </h3>
+              <% step.exit_pages.each_with_index do |exit_page, index| %>
+                <h4 class="govuk-heading-s govuk-!-margin-top-4">
+                  <%= t("step_summary_card.exit_page.number", exit_page_number: index + 1) %>
+                </h4>
+                <%= govuk_table(**StepSummaryCardPresenter.call(step:, steps: form_document.steps, welsh_steps: welsh_form_document.steps, multiple_branches_enabled:).build_bilingual_exit_page(exit_page, index + 1)) %>
+              <% end %>
+            <% end %>
           <% else %>
             <%= govuk_table(**StepSummaryCardPresenter.call(step:, steps: form_document.steps, welsh_steps: welsh_form_document.steps).build_bilingual_table) %>
             <% if StepSummaryCardPresenter.call(step:, steps: form_document.steps, welsh_steps: welsh_form_document.steps).build_route_tables.present? %>

@@ -142,6 +142,37 @@ describe StepSummaryCardPresenter do
     end
   end
 
+  describe "#build_bilingual_exit_page" do
+    let(:exit_page) { OpenStruct.new(id: 1, heading: "You are not eligible", markdown: "You cannot use this service.") }
+    let(:welsh_exit_page) { OpenStruct.new(id: 1, heading: "Nid ydych yn gymwys", markdown: "Ni allwch ddefnyddio'r gwasanaeth hwn.") }
+    let(:welsh_step_double) { instance_double(FormDocument::Step, id: step.id, exit_pages: [welsh_exit_page]) }
+    let(:steps) { [step, *build_list(:form_document_step, 5)] }
+
+    before do
+      allow(presenter).to receive(:welsh_step).and_return(welsh_step_double)
+    end
+
+    it "returns a bilingual table config" do
+      result = presenter.build_bilingual_exit_page(exit_page, 1)
+      expect(result[:classes]).to eq %w[app-translation-table]
+      expect(result[:first_cell_is_header]).to be true
+    end
+
+    it "includes English and Welsh heading values in the rows" do
+      expect(presenter.build_bilingual_exit_page(exit_page, 1)[:rows]).to eq([
+        [I18n.t("step_summary_card.exit_page.heading", exit_page_number: 1), exit_page.heading, welsh_exit_page.heading],
+        [I18n.t("step_summary_card.exit_page.content", exit_page_number: 1), exit_page.markdown, welsh_exit_page.markdown],
+      ])
+    end
+
+    it "uses the given number in the row labels" do
+      expect(presenter.build_bilingual_exit_page(exit_page, 3)[:rows]).to eq([
+        [I18n.t("step_summary_card.exit_page.heading", exit_page_number: 3), exit_page.heading, welsh_exit_page.heading],
+        [I18n.t("step_summary_card.exit_page.content", exit_page_number: 3), exit_page.markdown, welsh_exit_page.markdown],
+      ])
+    end
+  end
+
   describe "#build_route_tables" do
     before do
       allow(StepSummaryTableService).to receive(:call).and_return(OpenStruct.new(
