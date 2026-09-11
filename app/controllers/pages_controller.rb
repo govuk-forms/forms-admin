@@ -20,10 +20,10 @@ class PagesController < FormsController
 
     if FeatureService.new(group: current_form.group).enabled?(:multiple_branches)
       @page_conditions = page.routing_conditions
-      @routing = @page_conditions + @page_goto_conditions
+      @routing = @page_conditions + @page_goto_conditions + page.exit_pages
       if @routing.present?
-        @routing_banner_heading = routing_banner_heading(@page_conditions, @page_goto_conditions)
-        @routing_banner_html = routing_banner_html(@page_conditions, @page_goto_conditions)
+        @routing_banner_heading = routing_banner_heading(@page_conditions, @page_goto_conditions, page.exit_pages)
+        @routing_banner_html = routing_banner_html(@page_conditions, @page_goto_conditions, page.exit_pages)
       end
     elsif page.routing_conditions.any? && page.routing_conditions.first.secondary_skip?
       @routing = :start_of_secondary_skip_route
@@ -189,23 +189,30 @@ private
     CurrentLoggingAttributes.validation_errors = errors.map { |error| "PageList: #{error}" } if errors.any?
   end
 
-  def routing_banner_heading(page_conditions, goto_conditions)
+  def routing_banner_heading(page_conditions, goto_conditions, exit_pages)
     if page_conditions.present? && goto_conditions.present?
       t("pages.delete.routing_and_goto_heading", question_number: page.position)
     elsif page_conditions.present?
       t("pages.delete.routing_heading", question_number: page.position, count: page_conditions.count)
     elsif goto_conditions.present?
       t("pages.delete.goto_heading", question_number: page.position, count: goto_conditions.count)
+    elsif exit_pages.present?
+      t("pages.delete.exit_pages_heading", question_number: page.position, count: exit_pages.count)
     end
   end
 
-  def routing_banner_html(page_conditions, goto_conditions)
+  def routing_banner_html(page_conditions, goto_conditions, exit_pages)
     if page_conditions.present? && goto_conditions.present?
-      t("pages.delete.routing_and_goto_html", routes_href: routes_path(current_form.id))
+      routes_and_exit_pages = helpers.routes_and_exit_pages(page, count_goto_conditions: true)
+      t("pages.delete.routing_and_goto_html", routes_and_exit_pages:, routes_href: routes_path(current_form.id))
     elsif page_conditions.present?
-      t("pages.delete.routing_html", question_number: page.position, count: page_conditions.count, routes_href: routes_path(current_form.id))
+      routes_and_exit_pages = helpers.routes_and_exit_pages(page)
+      t("pages.delete.routing_html", question_number: page.position, routes_and_exit_pages:, routes_href: routes_path(current_form.id))
     elsif goto_conditions.present?
       t("pages.delete.goto_html", question_number: page.position, count: goto_conditions.count, routes_href: routes_path(current_form.id))
+    elsif exit_pages.present?
+      exit_pages = t("helpers.pages.exit_pages", count: exit_pages.count)
+      t("pages.delete.exit_pages_html", question_number: page.position, exit_pages:, routes_href: routes_path(current_form.id))
     end
   end
 end

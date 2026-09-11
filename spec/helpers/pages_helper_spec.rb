@@ -180,4 +180,133 @@ RSpec.describe PagesHelper, type: :helper do
       end
     end
   end
+
+  describe "#routes_and_exit_pages" do
+    subject(:routes_and_exit_pages) { helper.routes_and_exit_pages(page) }
+
+    let(:page) { build_stubbed :page, routing_conditions:, goto_conditions:, exit_pages: }
+    let(:routing_conditions) { [] }
+    let(:goto_conditions) { [] }
+    let(:exit_pages) { [] }
+
+    context "when page has no routes and no exit pages" do
+      let(:routing_conditions) { [] }
+      let(:exit_pages) { [] }
+
+      it { is_expected.to eq "" }
+    end
+
+    context "when page has one route and no exit pages" do
+      let(:routing_conditions) { [build_stubbed(:condition)] }
+      let(:exit_pages) { [] }
+
+      it { is_expected.to eq "route" }
+    end
+
+    context "when page has multiple routes and no exit pages" do
+      let(:routing_conditions) { build_stubbed_list(:condition, 2) }
+      let(:exit_pages) { [] }
+
+      it { is_expected.to eq "routes" }
+    end
+
+    context "when page has no routes and one exit page" do
+      let(:routing_conditions) { [] }
+      let(:exit_pages) { [build_stubbed(:exit_page)] }
+
+      it { is_expected.to eq "exit page" }
+    end
+
+    context "when page has no routes and multiple exit pages" do
+      let(:routing_conditions) { [] }
+      let(:exit_pages) { build_stubbed_list(:exit_page, 2) }
+
+      it { is_expected.to eq "exit pages" }
+    end
+
+    context "when page has one route and one exit page" do
+      let(:routing_conditions) { [build_stubbed(:condition)] }
+      let(:exit_pages) { [build_stubbed(:exit_page)] }
+
+      it { is_expected.to eq "route and exit page" }
+    end
+
+    context "when page has multiple routes and one exit page" do
+      let(:routing_conditions) { build_stubbed_list(:condition, 2) }
+      let(:exit_pages) { [build_stubbed(:exit_page)] }
+
+      it { is_expected.to eq "routes and exit page" }
+    end
+
+    context "when page has multiple routes and multiple exit pages" do
+      let(:routing_conditions) { build_stubbed_list(:condition, 2) }
+      let(:exit_pages) { build_stubbed_list(:exit_page, 2) }
+
+      it { is_expected.to eq "routes and exit pages" }
+    end
+
+    context "when count_goto_conditions is false" do
+      subject(:routes_and_exit_pages) { helper.routes_and_exit_pages(page, count_goto_conditions: false) }
+
+      context "when page has no routing conditions and no goto conditions" do
+        let(:routing_conditions) { [] }
+        let(:goto_conditions) { [] }
+
+        it { is_expected.to eq "" }
+      end
+
+      context "when page has no routing conditions and one goto condition" do
+        let(:routing_conditions) { [] }
+        let(:goto_conditions) { [build_stubbed(:condition)] }
+
+        it { is_expected.to eq "" }
+      end
+
+      context "when page has one routing condition and no goto conditions" do
+        let(:routing_conditions) { [build_stubbed(:condition)] }
+        let(:goto_conditions) { [] }
+
+        it { is_expected.to eq "route" }
+      end
+
+      context "when page has one routing condition and one goto condition" do
+        let(:routing_conditions) { [build_stubbed(:condition)] }
+        let(:goto_conditions) { [build_stubbed(:condition)] }
+
+        it { is_expected.to eq "route" }
+      end
+    end
+
+    context "when count_goto_conditions is true" do
+      subject(:routes_and_exit_pages) { helper.routes_and_exit_pages(page, count_goto_conditions: true) }
+
+      context "when page has no routing conditions and no goto conditions" do
+        let(:routing_conditions) { [] }
+        let(:goto_conditions) { [] }
+
+        it { is_expected.to eq "" }
+      end
+
+      context "when page has no routing conditions and one goto condition" do
+        let(:routing_conditions) { [] }
+        let(:goto_conditions) { [build_stubbed(:condition)] }
+
+        it { is_expected.to eq "route" }
+      end
+
+      context "when page has one routing condition and no goto conditions" do
+        let(:routing_conditions) { [build_stubbed(:condition)] }
+        let(:goto_conditions) { [] }
+
+        it { is_expected.to eq "route" }
+      end
+
+      context "when page has one routing condition and one goto condition" do
+        let(:routing_conditions) { [build_stubbed(:condition)] }
+        let(:goto_conditions) { [build_stubbed(:condition)] }
+
+        it { is_expected.to eq "routes" }
+      end
+    end
+  end
 end

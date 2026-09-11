@@ -1,14 +1,15 @@
 require "rails_helper"
 
 describe "pages/selection/type.html.erb", type: :view do
-  let(:form) { create :form }
-  let(:page) { build :page, routing_conditions: }
+  let(:form) { create :form, pages: [page] }
+  let(:page) { build :page, routing_conditions:, exit_pages: }
   let(:page_number) { 1 }
   let(:back_link_url) { "/a-back-link-url" }
   let(:selection_type_path) { "/a-path" }
   let(:only_one_option) { "true" }
   let(:draft_question) { build :draft_question, answer_type: "selection" }
   let(:routing_conditions) { [] }
+  let(:exit_pages) { [] }
   let(:selection_type_input) { Pages::Selection::TypeInput.new(only_one_option:, draft_question:) }
 
   before do
@@ -91,7 +92,23 @@ describe "pages/selection/type.html.erb", type: :view do
 
             context "when show_routing_warning returns true" do
               it "displays a warning about routes being deleted" do
-                expect(rendered).to have_selector(".govuk-notification-banner__content", text: I18n.t("selection_type.routing_warning"))
+                expect(rendered).to have_selector(".govuk-notification-banner__content", text: I18n.t("selection_type.routing_warning", routes_and_exit_pages: "route"))
+              end
+
+              context "with more than one route from options" do
+                let(:routing_conditions) { build_list(:condition, 3) }
+
+                it "displays a warning about routes being deleted" do
+                  expect(rendered).to have_selector(".govuk-notification-banner__content", text: I18n.t("selection_type.routing_warning", routes_and_exit_pages: "routes"))
+                end
+              end
+
+              context "with one or more exit pages" do
+                let(:exit_pages) { build_list(:exit_page, 3) }
+
+                it "displays a warning about routes and exit pages being deleted" do
+                  expect(rendered).to have_selector(".govuk-notification-banner__content", text: I18n.t("selection_type.routing_warning", routes_and_exit_pages: "route and exit pages"))
+                end
               end
             end
 
@@ -111,8 +128,67 @@ describe "pages/selection/type.html.erb", type: :view do
             end
 
             it "displays a combined warning about routes being deleted and needing to reduce the options" do
-              expect(rendered).to have_selector(".govuk-notification-banner__content", text: I18n.t("selection_type.routing_and_reduce_your_options_combined_warning.heading"))
+              expect(rendered).to have_selector(".govuk-notification-banner__content", text: I18n.t("selection_type.routing_and_reduce_your_options_combined_warning.heading", routes_and_exit_pages: "route"))
             end
+
+            context "with one or more exit pages" do
+              let(:exit_pages) { build_list(:exit_page, 3) }
+
+              it "displays a combined warning about routes and exit pages being deleted and needing to reduce the options" do
+                expect(rendered).to have_selector(".govuk-notification-banner__content", text: I18n.t("selection_type.routing_and_reduce_your_options_combined_warning.heading", routes_and_exit_pages: "route and exit pages"))
+              end
+            end
+
+            context "with more than one route from options" do
+              let(:routing_conditions) { build_list(:condition, 3) }
+
+              it "displays a combined warning about routes being deleted and needing to reduce the options" do
+                expect(rendered).to have_selector(".govuk-notification-banner__content", text: I18n.t("selection_type.routing_and_reduce_your_options_combined_warning.heading", routes_and_exit_pages: "routes"))
+              end
+
+              context "with one or more exit pages" do
+                let(:exit_pages) { build_list(:exit_page, 3) }
+
+                it "displays a combined warning about routes and exit pages being deleted and needing to reduce the options" do
+                  expect(rendered).to have_selector(".govuk-notification-banner__content", text: I18n.t("selection_type.routing_and_reduce_your_options_combined_warning.heading", routes_and_exit_pages: "routes and exit pages"))
+                end
+              end
+            end
+          end
+        end
+      end
+    end
+
+    describe "exit pages warning" do
+      context "when question has no routes" do
+        context "and has no exit pages" do
+          it "does not display a warning about exit pages being deleted" do
+            render(template: "pages/selection/type")
+            expect(rendered).not_to have_selector(".govuk-notification-banner")
+          end
+        end
+
+        context "but does have one exit page" do
+          let(:exit_pages) { build_list(:exit_page, 1) }
+
+          it "displays a warning about exit page being deleted" do
+            render(template: "pages/selection/type")
+            expect(rendered).to have_selector(
+              ".govuk-notification-banner__content",
+              text: I18n.t("selection_type.exit_pages_warning", exit_pages: "exit page"),
+            )
+          end
+        end
+
+        context "but does have more than one exit page" do
+          let(:exit_pages) { build_list(:exit_page, 2) }
+
+          it "displays a warning about exit pages being deleted" do
+            render(template: "pages/selection/type")
+            expect(rendered).to have_selector(
+              ".govuk-notification-banner__content",
+              text: I18n.t("selection_type.exit_pages_warning", exit_pages: "exit pages"),
+            )
           end
         end
       end
@@ -136,8 +212,19 @@ describe "pages/selection/type.html.erb", type: :view do
           render(template: "pages/selection/type")
         end
 
-        it "does not display a warning about reducing the number of options" do
+        it "displays a warning about reducing the number of options" do
           expect(rendered).to have_selector(".govuk-notification-banner__content", text: I18n.t("selection_type.reduce_your_options_warning.heading"))
+        end
+
+        context "and the question has one or more exit pages" do
+          let(:exit_pages) { build_list(:exit_page, 3) }
+
+          it "displays a combined warning about exit pages being deleted and needing to reduce the options" do
+            expect(rendered).to have_selector(
+              ".govuk-notification-banner__content",
+              text: I18n.t("selection_type.exit_pages_and_reduce_your_options_combined_warning.heading", exit_pages: "exit pages"),
+            )
+          end
         end
       end
     end

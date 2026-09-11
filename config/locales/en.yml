@@ -1315,6 +1315,14 @@ en:
         is_optional: Should this additional question be mandatory or optional?
       pages_selection_options_input:
         include_none_of_the_above: Should the list include an option for ‘None of the above’?
+    pages:
+      exit_pages:
+        one: exit page
+        other: exit pages
+      routes:
+        one: route
+        other: routes
+      routes_and_exit_pages: "%{routes} and %{exit_pages}"
   home:
     actions: Actions
     change_filter: Change
@@ -1878,6 +1886,13 @@ en:
         back_link: Back to question %{question_number}’s routes
       hint_html: "<p>You can skip people who select one specific answer to question %{question_number} to a later question or page. People who select any other answer will continue to question %{continue_to_question_number}.<p>"
     delete:
+      exit_pages_heading:
+        one: Question %{question_number} has an exit page
+        other: Question %{question_number} has exit pages
+      exit_pages_html: |
+        <p class="govuk-body">
+          If you delete this question, its %{exit_pages} will also be deleted. <a class="govuk-notification-banner__link" href="%{routes_href}">View your question routes</a>
+        </p>
       goto_heading:
         one: There’s a route to question %{question_number}
         other: There are routes to question %{question_number}
@@ -1922,20 +1937,15 @@ en:
       routing_and_goto_heading: There are routes to and from question %{question_number}
       routing_and_goto_html: |
         <p class="govuk-body">
-          If you delete this question, its routes will also be deleted. <a class="govuk-notification-banner__link" href="%{routes_href}">View your question routes</a>
+          If you delete this question, its %{routes_and_exit_pages} will also be deleted. <a class="govuk-notification-banner__link" href="%{routes_href}">View your question routes</a>
         </p>
       routing_heading:
         one: Question %{question_number} has a route
         other: Question %{question_number} has routes
-      routing_html:
-        one: |
-          <p class="govuk-body">
-            If you delete this question, its route will also be deleted. <a class="govuk-notification-banner__link" href="%{routes_href}">View your question routes</a>
-          </p>
-        other: |
-          <p class="govuk-body">
-            If you delete this question, its routes will also be deleted. <a class="govuk-notification-banner__link" href="%{routes_href}">View your question routes</a>
-          </p>
+      routing_html: |
+        <p class="govuk-body">
+          If you delete this question, its %{routes_and_exit_pages} will also be deleted. <a class="govuk-notification-banner__link" href="%{routes_href}">View your question routes</a>
+        </p>
       title: Are you sure you want to delete this question?
     delete_question: Delete question
     destroy:
@@ -2313,13 +2323,17 @@ en:
     up_to_3000_options: You can have up to 3,000 options.
     up_to_30_options: You can have up to 30 options.
   selection_type:
+    exit_pages_and_reduce_your_options_combined_warning:
+      body: You can only have up to 30 options in a list where people can select one or more options. If you make this change, you’ll be able to edit your list on the next page.
+      heading: If you change this to ‘One or more options’, this question’s %{exit_pages} will be deleted and you’ll need to edit the list
+    exit_pages_warning: If you change this to ‘One or more options’, this question’s %{exit_pages} will be deleted
     reduce_your_options_warning:
       body: You can only have up to 30 options in a list where people can select one or more options. If you make this change, you’ll be able to edit your list on the next page.
-      heading: If you change this to ‘one or more options’, you’ll need to edit your list
+      heading: If you change this to ‘One or more options’, you’ll need to edit your list
     routing_and_reduce_your_options_combined_warning:
       body: You can only have up to 30 options in a list where people can select one or more options. If you make this change, you’ll be able to edit your list on the next page.
-      heading: If you change this to ‘one or more options’, the route from this question will be deleted and you’ll need to edit the list
-    routing_warning: If you change this to ‘one or more options’, the route from this question will be deleted
+      heading: If you change this to ‘One or more options’, this question’s %{routes_and_exit_pages} will be deleted and you’ll need to edit the list
+    routing_warning: If you change this to ‘One or more options’, this question’s %{routes_and_exit_pages} will be deleted
   set_email:
     new:
       body_html: |
@@ -2399,9 +2413,7 @@ en:
     not_started: Not started
     optional: Optional
   type_of_answer:
-    routing_warning_changing_from_one_option_heading:
-      one: If you change the answer type of this question, its route will be deleted
-      other: If you change the answer type of this question, its routes will be deleted
+    routing_warning_changing_from_one_option_heading: If you change the answer type of this question, its %{routes_and_exit_pages} will be deleted
   unarchive:
     new:
       body_html: |
