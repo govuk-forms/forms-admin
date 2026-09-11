@@ -2,8 +2,8 @@ require "rails_helper"
 
 RSpec.describe "pages/exit_pages/delete" do
   let(:delete_confirmation_input) { Forms::DeleteConfirmationInput.new }
-  let(:current_form) { create :form }
-  let(:page) { create :page, form: current_form }
+  let(:current_form) { create :form, :ready_for_routing }
+  let(:page) { current_form.pages.first }
   let(:exit_page) { create :exit_page, question_page: page, heading: "the heading" }
 
   before do
@@ -38,6 +38,69 @@ RSpec.describe "pages/exit_pages/delete" do
 
     it "does not have a hint" do
       expect(rendered).not_to have_css ".govuk-hint"
+    end
+  end
+
+  context "when there are no routes to the exit page" do
+    it "does not have a notification banner" do
+      expect(rendered).not_to have_selector(".govuk-notification-banner")
+    end
+  end
+
+  context "when there is a route to the exit page" do
+    let(:exit_page) do
+      exit_page = super()
+      exit_page.conditions << create(:condition, routing_page: page, check_page: page, answer_value: "Option 1")
+      exit_page
+    end
+
+    it "has a notification banner with a warning message" do
+      expect(rendered).to have_selector(
+        ".govuk-notification-banner__content",
+        text: I18n.t("pages.exit_pages.delete.warnings.routes_will_be_deleted", routes: "route"),
+      )
+    end
+
+    context "and there is a validation error" do
+      let(:delete_confirmation_input) do
+        delete_confirmation_input = super()
+        delete_confirmation_input.validate
+        delete_confirmation_input
+      end
+
+      it "does not have a notification banner" do
+        expect(rendered).not_to have_selector(".govuk-notification-banner")
+      end
+    end
+  end
+
+  context "when there is more than one route to the exit page" do
+    let(:exit_page) do
+      exit_page = super()
+      exit_page.conditions << [
+        create(:condition, routing_page: page, check_page: page, answer_value: "Option 1"),
+        create(:condition, routing_page: page, check_page: page, answer_value: "Option 2"),
+      ]
+      exit_page
+    end
+
+    it "has a notification banner with a warning message" do
+      expect(rendered).to have_selector(
+        ".govuk-notification-banner__content",
+        text: I18n.t("pages.exit_pages.delete.warnings.routes_will_be_deleted", routes: "routes"),
+      )
+    end
+
+    context "and there is a validation error" do
+      let(:delete_confirmation_input) do
+        delete_confirmation_input = super()
+        delete_confirmation_input.validate
+        delete_confirmation_input
+      end
+
+      it "does not have a notification banner" do
+        expect(rendered).not_to have_selector(".govuk-notification-banner")
+      end
     end
   end
 end

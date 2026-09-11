@@ -1955,6 +1955,8 @@ en:
         back_link: Back to edit exit page
         caption: 'Exit page %{exit_page_number}: %{heading}'
         title: Are you sure you want to delete this exit page?
+        warnings:
+          routes_will_be_deleted: If you delete this exit page, the %{routes} to it will also be deleted
       edit:
         back_link: Back to edit question routes
         delete_exit_page: Delete exit page

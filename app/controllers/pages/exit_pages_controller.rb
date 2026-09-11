@@ -53,6 +53,7 @@ class Pages::ExitPagesController < PagesController
     end
 
     current_form.save_question_changes! do
+      exit_page.conditions.destroy_all
       exit_page.destroy!
     end
 

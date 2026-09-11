@@ -3,6 +3,13 @@
 
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds">
+    <% if exit_page.conditions.any? && delete_confirmation_input.errors.blank? %>
+      <% routes = t("helpers.pages.routes", count: exit_page.conditions.size) %>
+      <%= govuk_notification_banner(title_text: t("banner.default.title")) do |banner| %>
+        <% banner.with_heading(text: t(".warnings.routes_will_be_deleted", routes:)) %>
+      <% end %>
+    <% end %>
+
     <%= render(
       delete_confirmation_input,
       url: exit_page_path(@current_form.id, page.id, exit_page.id),

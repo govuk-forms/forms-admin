@@ -213,6 +213,22 @@ RSpec.describe Pages::ExitPagesController, :feature_multiple_branches, type: :re
         expect(response).to have_http_status :unprocessable_content
       end
     end
+
+    context "when the exit page has conditions" do
+      it "deletes the conditions" do
+        goto_page = create(:page, form: page.form)
+
+        exit_page.conditions << [
+          create(:condition, routing_page: page, check_page: page, answer_value: "Option 1"),
+          create(:condition, routing_page: page, check_page: page, answer_value: "Option 2"),
+        ]
+
+        skip_route = create(:condition, routing_page: page, check_page: page, answer_value: "Option 3", goto_page:)
+
+        expect { delete(exit_page_url, params:) }.to change(Condition, :count).by(-2)
+        expect(page.reload.routing_conditions).to eq [skip_route]
+      end
+    end
   end
 
   describe "#render_preview" do
