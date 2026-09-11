@@ -1694,6 +1694,7 @@ en:
     end_of_form: End of the form
     exit_page: Add an exit page
     exit_page_label: An ‘exit page’ to leave the form
+    go_to_exit_page: 'Go to exit page %{exit_page_index}, ‘%{exit_page_heading}’ if the answer is:'
     go_to_page: 'Go to %{goto_page_question_number}, ‘%{goto_page_question_text}’ if the answer is:'
     go_to_the_end: 'Go to the end of the form if the answer is:'
     none_of_the_above: None of the above
@@ -2375,6 +2376,13 @@ en:
     end_of_form:
       cy: End of the form
       en: End of the form
+    exit_page:
+      content: Exit page %{exit_page_number} content
+      heading: Exit page %{exit_page_number} heading
+      number: Exit page %{exit_page_number}
+      section_heading:
+        one: Question %{question_number}’s exit page
+        other: Question %{question_number}’s exit pages
     guidance_markdown: Guidance
     hint_text: Hint text
     name_type:

@@ -75,4 +75,16 @@ RSpec.describe FormDocument::Step, type: :model do
       expect(step.routing_conditions).to all be_a FormDocument::Condition
     end
   end
+
+  describe "#exit_pages" do
+    it "defaults to an empty array" do
+      expect(described_class.new).to have_attributes(exit_pages: [])
+    end
+
+    it "converts attributes for exit pages to a model" do
+      exit_page_attributes = attributes_for :exit_page
+      step = described_class.new("exit_pages" => [exit_page_attributes])
+      expect(step.exit_pages).to all be_a FormDocument::ExitPage
+    end
+  end
 end

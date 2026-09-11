@@ -2,7 +2,7 @@ class FormDocument::Step
   include ActiveModel::API
   include ActiveModel::Attributes
 
-  attr_reader :routing_conditions
+  attr_reader :routing_conditions, :exit_pages
 
   attribute :id, :string
   attribute :data, DataStructType.new
@@ -14,6 +14,7 @@ class FormDocument::Step
 
   def initialize(attributes = {})
     @routing_conditions = attributes.fetch("routing_conditions", []).map { |condition| FormDocument::Condition.new(**condition) }
+    @exit_pages = attributes.fetch("exit_pages", []).map { |exit_page| FormDocument::ExitPage.new(**exit_page) }
     attributes.slice!(*self.class.attribute_names)
     super
   end
