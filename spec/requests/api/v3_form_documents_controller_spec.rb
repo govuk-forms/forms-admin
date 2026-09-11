@@ -133,9 +133,9 @@ RSpec.describe Api::V3FormDocumentsController, type: :request do
         form.update!(latest_form_document: form_document)
       end
 
-      it "redirects to the latest form document version" do
+      it "returns the latest form document version number" do
         get("/api/v3/forms/#{form.id}/versions/live", headers:)
-        expect(response).to redirect_to(api_v3_form_document_version_url(form_id: form.id, version: 2))
+        expect(response.parsed_body).to include({ version: 2 })
       end
     end
 
@@ -174,9 +174,9 @@ RSpec.describe Api::V3FormDocumentsController, type: :request do
         form.update!(latest_form_document: form_document)
       end
 
-      it "redirects to the latest form document version" do
+      it "returns the latest form document version number" do
         get("/api/v3/forms/#{form.id}/versions/archived", headers:)
-        expect(response).to redirect_to(api_v3_form_document_version_url(form_id: form.id, version: 2))
+        expect(response.parsed_body).to include({ version: 2 })
       end
     end
 
