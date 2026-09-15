@@ -1,10 +1,13 @@
 class Api::V3FormDocumentsController < ApplicationController
   def show
+    # we are switching to storing the form version on the submission,
+    # as a fallback we need to keep using the form document version until all submissions without a version have been deleted
     form_document = form.form_documents.find_by!(version: version, language: language)
+    version = form.try(:form_version) || form_document.version
 
-    CurrentLoggingAttributes.form_document_version = form_document.version
+    CurrentLoggingAttributes.form_document_version = version
 
-    render json: form_document.content.merge("version" => form_document.version)
+    render json: form_document.content.merge("version" => version)
   end
 
   def draft
