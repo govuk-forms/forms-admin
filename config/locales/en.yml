@@ -534,6 +534,7 @@ en:
     delete_form: Delete draft form
     form_overview:
       edit: Edit
+      edit_routes_html: Edit routes <span class="govuk-visually-hidden">for question %{question_number}</span>
       edit_with_visually_hidden_text_html: Edit <span class="govuk-visually-hidden">%{visually_hidden_text}</span>
       move_down_html: Move down <span class="govuk-visually-hidden">%{title}</span>
       move_up_html: Move up <span class="govuk-visually-hidden">%{title}</span>
@@ -1971,7 +1972,10 @@ en:
       change_order: Change your question order
       mark_complete:
         legend: Have you finished editing your questions?
-      routes: Edit question routes
+      routes:
+        one: Edit routes
+        other: Edit routes
+        zero: Add routes
       title: Add and edit your questions
     optional: "%{question_text} (optional)"
     question: Question
