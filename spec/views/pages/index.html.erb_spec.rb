@@ -47,7 +47,19 @@ describe "pages/index.html.erb", feature_multiple_branches: false do
     let(:form) { create(:form) }
 
     it "has a link to add a page routing" do
-      expect(rendered).to have_link("Edit question routes", href: routes_path(form.id))
+      expect(rendered).to have_link("Add routes", href: routes_path(form.id))
+    end
+
+    context "when it has routes" do
+      let(:form) do
+        form = create(:form, :ready_for_routing)
+        create(:condition, routing_page: form.pages.first, goto_page: form.pages.last, answer_value: "Option 1")
+        form
+      end
+
+      it "has a link to add a page routing" do
+        expect(rendered).to have_link("Edit routes", href: routes_path(form.id))
+      end
     end
   end
 end
