@@ -59,17 +59,17 @@ describe "routes/show.html.erb" do
       ]
     end
 
-    it "has a summary list with a row for each page" do
+    it "has a list with a list item for each page" do
       render_page
-      expect(rendered).to have_selector(".govuk-summary-list") do |summary_list|
-        expect(summary_list).to have_selector(".govuk-summary-list__row", count: pages.length)
-      end
+      expect(rendered).to have_selector("ol.app-routes-list > li", count: pages.length)
     end
 
     it "displays the page's position and question text" do
       render_page
-      expect(rendered).to have_selector(".govuk-summary-list__key", text: pages.first.position.to_s)
-      expect(rendered).to have_selector(".govuk-summary-list__value", text: pages.first.question_text)
+      expect(rendered).to have_selector("ol.app-routes-list > li") do |li|
+        expect(li).to have_selector "h2", text: pages.first.position.to_s
+        expect(li).to have_selector "h2", text: pages.first.question_text
+      end
     end
 
     it "includes the page's position in the id of the key" do
@@ -84,9 +84,14 @@ describe "routes/show.html.erb" do
       expect(rendered).not_to have_selector('input[name$="[page_id]"][value="103"]', visible: :hidden)
     end
 
+    it "has an empty state message for the last page" do
+      render_page
+      expect(rendered).to have_selector('li[id="page-3"]', text: I18n.t("routes.show.cannot_add_route_to_last_question_in_form"))
+    end
+
     it "has a list of select fields for pages with more than one route input" do
       render_page
-      expect(rendered).to have_selector('dt[id="page-1"] + dd') do |dd|
+      expect(rendered).to have_selector('li[id="page-1"]') do |dd|
         expect(dd).to have_selector("ul") do |ul|
           expect(ul).to have_selector('li .govuk-select[name="forms_routes_input[routes_attributes][0][goto]"]')
           expect(ul).to have_selector('li .govuk-select[name="forms_routes_input[routes_attributes][1][goto]"]')
@@ -96,7 +101,7 @@ describe "routes/show.html.erb" do
 
     it "has a single select field for pages with only one route input" do
       render_page
-      expect(rendered).to have_selector('dt[id="page-2"] + dd') do |dd|
+      expect(rendered).to have_selector('li[id="page-2"]') do |dd|
         expect(dd).not_to have_selector("ul, li")
         expect(dd).to have_selector('.govuk-select[name="forms_routes_input[routes_attributes][2][goto]"]')
       end
@@ -312,21 +317,21 @@ describe "routes/show.html.erb" do
       it "has inputs for each answer option" do
         render_page
 
-        expect(rendered).to have_selector(".govuk-summary-list") do |summary_list|
-          rows = summary_list.find_all(".govuk-summary-list__row")
+        expect(rendered).to have_selector("ol.app-routes-list") do |ol|
+          li = ol.find_all("> li")
 
-          expect(rows[0]).to have_selector('.govuk-select[name="forms_routes_input[routes_attributes][0][goto]"]')
-          expect(rows[0]).to have_selector('input[name="forms_routes_input[routes_attributes][0][page_id]"][value="101"]', visible: :hidden)
-          expect(rows[0]).to have_selector('input[name="forms_routes_input[routes_attributes][0][answer_value]"][value="Yes"]', visible: :hidden)
+          expect(li[0]).to have_selector('.govuk-select[name="forms_routes_input[routes_attributes][0][goto]"]')
+          expect(li[0]).to have_selector('input[name="forms_routes_input[routes_attributes][0][page_id]"][value="101"]', visible: :hidden)
+          expect(li[0]).to have_selector('input[name="forms_routes_input[routes_attributes][0][answer_value]"][value="Yes"]', visible: :hidden)
 
-          expect(rows[0]).to have_selector('.govuk-select[name="forms_routes_input[routes_attributes][1][goto]"]')
-          expect(rows[0]).to have_selector('input[name="forms_routes_input[routes_attributes][1][page_id]"][value="101"]', visible: :hidden)
-          expect(rows[0]).to have_selector('input[name="forms_routes_input[routes_attributes][1][answer_value]"][value="No"]', visible: :hidden)
+          expect(li[0]).to have_selector('.govuk-select[name="forms_routes_input[routes_attributes][1][goto]"]')
+          expect(li[0]).to have_selector('input[name="forms_routes_input[routes_attributes][1][page_id]"][value="101"]', visible: :hidden)
+          expect(li[0]).to have_selector('input[name="forms_routes_input[routes_attributes][1][answer_value]"][value="No"]', visible: :hidden)
 
-          expect(rows[1]).to have_selector('.govuk-select[name="forms_routes_input[routes_attributes][2][goto]"]')
-          expect(rows[1]).to have_selector('input[name="forms_routes_input[routes_attributes][2][page_id]"][value="102"]', visible: :hidden)
+          expect(li[1]).to have_selector('.govuk-select[name="forms_routes_input[routes_attributes][2][goto]"]')
+          expect(li[1]).to have_selector('input[name="forms_routes_input[routes_attributes][2][page_id]"][value="102"]', visible: :hidden)
 
-          expect(rows[2]).not_to have_selector(".govuk-select")
+          expect(li[2]).not_to have_selector(".govuk-select")
         end
       end
 
@@ -346,12 +351,12 @@ describe "routes/show.html.erb" do
         it "has one route input for that question" do
           render_page
 
-          expect(rendered).to have_selector(".govuk-summary-list") do |summary_list|
-            rows = summary_list.find_all(".govuk-summary-list__row")
+          expect(rendered).to have_selector("ol.app-routes-list") do |ol|
+            li = ol.find_all("> li")
 
-            expect(rows[0]).to have_selector(".govuk-select", count: 1)
-            expect(rows[1]).to have_selector(".govuk-select", count: 1)
-            expect(rows[2]).not_to have_selector(".govuk-select")
+            expect(li[0]).to have_selector(".govuk-select", count: 1)
+            expect(li[1]).to have_selector(".govuk-select", count: 1)
+            expect(li[2]).not_to have_selector(".govuk-select")
           end
         end
 
@@ -371,12 +376,12 @@ describe "routes/show.html.erb" do
           it "has one route input for that question" do
             render_page
 
-            expect(rendered).to have_selector(".govuk-summary-list") do |summary_list|
-              rows = summary_list.find_all(".govuk-summary-list__row")
+            expect(rendered).to have_selector("ol.app-routes-list") do |ol|
+              li = ol.find_all("> li")
 
-              expect(rows[0]).to have_selector(".govuk-select", count: 1)
-              expect(rows[1]).to have_selector(".govuk-select", count: 1)
-              expect(rows[2]).not_to have_selector(".govuk-select")
+              expect(li[0]).to have_selector(".govuk-select", count: 1)
+              expect(li[1]).to have_selector(".govuk-select", count: 1)
+              expect(li[2]).not_to have_selector(".govuk-select")
             end
           end
 
@@ -398,12 +403,12 @@ describe "routes/show.html.erb" do
           it "has inputs for each selection option with a condition" do
             render_page
 
-            expect(rendered).to have_selector(".govuk-summary-list") do |summary_list|
-              rows = summary_list.find_all(".govuk-summary-list__row")
+            expect(rendered).to have_selector("ol.app-routes-list") do |ol|
+              li = ol.find_all("> li")
 
-              expect(rows[0]).to have_selector(".govuk-select", count: 2)
-              expect(rows[1]).to have_selector(".govuk-select", count: 1)
-              expect(rows[2]).not_to have_selector(".govuk-select")
+              expect(li[0]).to have_selector(".govuk-select", count: 2)
+              expect(li[1]).to have_selector(".govuk-select", count: 1)
+              expect(li[2]).not_to have_selector(".govuk-select")
             end
           end
 
@@ -422,12 +427,12 @@ describe "routes/show.html.erb" do
             We hope to add this ability soon.
           TEXT
 
-          expect(rendered).to have_selector(".govuk-summary-list") do |summary_list|
-            rows = summary_list.find_all(".govuk-summary-list__row")
+          expect(rendered).to have_selector("ol.app-routes-list") do |ol|
+            li = ol.find_all("> li")
 
-            expect(rows[0]).to have_text(expected_content)
-            expect(rows[1]).not_to have_text(expected_content)
-            expect(rows[2]).not_to have_text(expected_content)
+            expect(li[0]).to have_text(expected_content)
+            expect(li[1]).not_to have_text(expected_content)
+            expect(li[2]).not_to have_text(expected_content)
           end
         end
       end
@@ -450,7 +455,7 @@ describe "routes/show.html.erb" do
 
     it "has links to the exit pages" do
       render_page
-      expect(rendered).to have_selector("h2", text: "Question 1’s exit pages", normalize_ws: true)
+      expect(rendered).to have_selector("h3", text: "Question 1’s exit pages", normalize_ws: true)
       expect(rendered).to have_link("Exit page 1: Can't continue", href: edit_exit_page_path(form.id, pages.first.id, exit_page.id))
       expect(rendered).to have_link("Exit page 2: Stop using this form", href: edit_exit_page_path(form.id, pages.first.id, another_exit_page.id))
     end

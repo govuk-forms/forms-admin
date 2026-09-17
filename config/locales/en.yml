@@ -2265,6 +2265,7 @@ en:
   routes:
     show:
       add_exit_page_html: Add an exit page <span class="govuk-visually-hidden">to question %{question_number}</span>
+      cannot_add_route_to_last_question_in_form: This is the last question in the form, so you cannot add a route or an exit page.
       exit_page_list_entry: 'Exit page %{exit_page_number}: %{heading}'
       exit_pages_list: Question %{question_number}’s exit pages
       not_enough_pages_html: |

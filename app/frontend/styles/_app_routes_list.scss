@@ -1,3 +1,7 @@
+.app-routes-list {
+  @extend %govuk-list;
+}
+
 .app-routes-list__key {
   @include govuk-media-query($from: desktop) {
     width: 5%;
