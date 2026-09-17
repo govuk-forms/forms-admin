@@ -670,4 +670,72 @@ describe StepSummaryCardService do
       end
     end
   end
+
+  describe "#answer_value_groups" do
+    subject(:groups) { step_summary_card_service.send(:answer_value_groups, form_document_step.routing_conditions) }
+
+    let(:form) { create :form, :ready_for_live, :ready_for_routing }
+    let(:page) { form.pages.first }
+
+    context "with goto_page conditions" do
+      before do
+        create :condition, routing_page_id: page.id, check_page_id: page.id, goto_page_id: form.pages.third.id, answer_value: "Option 1"
+        create :condition, routing_page_id: page.id, check_page_id: page.id, goto_page_id: form.pages.fourth.id, answer_value: "Option 2"
+        page.reload
+        form.reload.make_live!
+      end
+
+      it "returns one group per destination page" do
+        expect(groups.length).to eq(2)
+        expect(groups.map { |g| g[:group_type] }).to all(eq(:goto_page))
+      end
+    end
+
+    context "with a skip_to_end condition" do
+      before do
+        create :condition, routing_page_id: page.id, check_page_id: page.id, skip_to_end: true, answer_value: "Option 1"
+        page.reload
+        form.reload.make_live!
+      end
+
+      it "returns a single skip_to_end group" do
+        expect(groups).to include(a_hash_including(group_type: :skip_to_end))
+      end
+    end
+
+    context "with an exit_page condition" do
+      before do
+        create :condition, :with_exit_page, routing_page_id: page.id, check_page_id: page.id, answer_value: "Option 1"
+        page.reload
+        form.reload.make_live!
+      end
+
+      it "returns a single exit_page group" do
+        expect(groups).to include(a_hash_including(group_type: :exit_page))
+      end
+
+      it "includes exit_page and exit_page_index in the group" do
+        exit_page_group = groups.find { |g| g[:group_type] == :exit_page }
+        expect(exit_page_group).to include(:exit_page, :exit_page_index)
+      end
+    end
+
+    context "with mixed condition types" do
+      before do
+        page.answer_settings.selection_options << DataStruct.new(name: "Option 3", value: "Option 3")
+        page.save!
+
+        create :condition, routing_page_id: page.id, check_page_id: page.id, goto_page_id: form.pages.third.id, answer_value: "Option 1"
+        create :condition, routing_page_id: page.id, check_page_id: page.id, skip_to_end: true, answer_value: "Option 2"
+        create :condition, :with_exit_page, routing_page_id: page.id, check_page_id: page.id, answer_value: "Option 3"
+        page.reload
+        form.reload.make_live!
+      end
+
+      it "returns goto_page groups first, then skip_to_end, then exit_page" do
+        group_types = groups.map { |g| g[:group_type] }
+        expect(group_types).to eq(%i[goto_page skip_to_end exit_page])
+      end
+    end
+  end
 end

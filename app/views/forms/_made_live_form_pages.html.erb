@@ -36,6 +36,17 @@
           <% end %>
         <% else %>
           <%= govuk_summary_list(**StepSummaryCardPresenter.call(step:, steps: form_document.steps, multiple_branches_enabled:).build_summary_list)%>
+          <% if step.exit_pages.present? && multiple_branches_enabled %>
+            <h3 class="govuk-heading-m govuk-!-margin-top-2">
+              <%= t("step_summary_card.exit_page.section_heading", question_number: step.position, count: step.exit_pages.count) %>
+            </h3>
+            <% step.exit_pages.each_with_index do |exit_page, index| %>
+              <h4 class="govuk-heading-s govuk-!-margin-top-4">
+                <%= t("step_summary_card.exit_page.number", exit_page_number: index + 1) %>
+              </h4>
+              <%= govuk_summary_list(**StepSummaryCardPresenter.call(step:, steps: form_document.steps, multiple_branches_enabled:).build_exit_page_list(exit_page, index + 1)) %>
+            <% end %>
+          <% end %>
         <% end %>
       <% end %>
     <% end %>
