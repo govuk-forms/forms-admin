@@ -38,10 +38,16 @@ class Form < ApplicationRecord
     enabled: "enabled",
   }, prefix: :send_copy_of_answers
 
+  enum :save_and_return, {
+    disabled: "disabled",
+    enabled: "enabled",
+  }, prefix: :save_and_return
+
   validates :name, presence: true
   validates :payment_url, url: true, allow_blank: true
   validate :marking_complete_with_errors
   validates :send_copy_of_answers, presence: true
+  validates :save_and_return, presence: true
   validates :available_languages, presence: true, inclusion: { in: SUPPORTED_LANGUAGES }
   validates :submission_email, email_address: { message: :invalid_email }, allow_blank: true
   validates :support_email, email_address: { message: :invalid_email }, allow_blank: true
