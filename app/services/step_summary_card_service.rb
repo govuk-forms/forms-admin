@@ -309,8 +309,8 @@ private
     ordered_conditions
       .select { |condition| condition.goto_page_id.present? }
       .group_by(&:goto_page_id)
-      .values
-      .map { |grouped_conditions| { group_type: :goto_page, conditions: grouped_conditions } }
+      .sort_by { |goto_page_id, _| @steps.find_index { |page| page.id == goto_page_id } || Float::INFINITY }
+      .map { |_, grouped_conditions| { group_type: :goto_page, conditions: grouped_conditions } }
   end
 
   def skip_to_end_groups(ordered_conditions)
