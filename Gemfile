@@ -21,8 +21,8 @@ gem "warden"
 gem "pundit"
 
 # Use Sentry (https://sentry.io/for/ruby/?platform=sentry.ruby.rails#)
-gem "sentry-rails", "~> 6"
-gem "sentry-ruby", "~> 6"
+gem "sentry-rails", "~> 7"
+gem "sentry-ruby", "~> 7"
 
 gem "config"
 
