@@ -28,7 +28,6 @@ class Form < ApplicationRecord
              :support_phone,
              :support_url,
              :support_url_text,
-             :declaration_text,
              :declaration_markdown,
              :what_happens_next_markdown,
              :payment_url
