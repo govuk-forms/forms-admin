@@ -16,6 +16,12 @@
     @include govuk-font($size: 16);
   }
 
+  // Add a border if the summary list is not the last item in the summary card
+  .govuk-summary-list:not(:last-child) {
+    border-bottom: 1px solid govuk-functional-colour(border);
+    margin-bottom: govuk-spacing(4);
+  }
+
   .govuk-summary-list__row--error {
     border-left: 5px solid govuk-functional-colour(error);
 
