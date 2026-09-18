@@ -29,15 +29,6 @@ RSpec.describe RoutesController, type: :request do
         expect(response).to have_http_status :forbidden
       end
     end
-
-    context "when the multiple_branches feature is not enabled" do
-      let(:group) { create(:group, multiple_branches_enabled: false, organisation: standard_user.organisation) }
-
-      it "returns a 404" do
-        get routes_path(form.id)
-        expect(response).to have_http_status(:not_found)
-      end
-    end
   end
 
   describe "#create" do
@@ -98,15 +89,6 @@ RSpec.describe RoutesController, type: :request do
       it "returns a forbidden status code" do
         post routes_path(form.id), params: valid_params
         expect(response).to have_http_status :forbidden
-      end
-    end
-
-    context "when the multiple_branches feature is not enabled" do
-      let(:group) { create(:group, multiple_branches_enabled: false, organisation: standard_user.organisation) }
-
-      it "returns a 404" do
-        post routes_path(form.id), params: valid_params
-        expect(response).to have_http_status(:not_found)
       end
     end
   end
