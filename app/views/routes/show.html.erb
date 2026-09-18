@@ -26,24 +26,17 @@
                 capture do %>
                   <p> <%= page.question_text %> </p>
                   <% if @routes_input.form.next_page_after(page).present? || routes.any?(&:invalid?) || @routes_input.class.can_have_exit_pages?(page) %>
-                    <ul class="govuk-list">
-                      <% routes.each do |route| %>
-                        <li>
-                          <%= f.fields_for :routes, route do |route_form|
-                            route_form.hidden_field(:id) +
-                              route_form.hidden_field(:page_id) +
-                              route_form.hidden_field(:answer_value) +
-                              route_form.govuk_select(
-                                :goto,
-                                options_for_select(route_form.object.goto_options, route_form.object.goto),
-                                label: { text: route_form.object.label_text, for: route_form.field_id(:goto) },
-                                id: route_form.field_id(:goto),
-                                class: ["govuk-!-width-full"],
-                              )
-                          end %>
-                        </li>
-                      <% end %>
-                    </ul>
+                    <% if routes.one? %>
+                      <%= render "route_input", f:, route: routes.sole %>
+                    <% elsif routes.many? %>
+                      <ul class="govuk-list">
+                        <% routes.each do |route| %>
+                          <li>
+                            <%= render "route_input", f:, route: %>
+                          </li>
+                        <% end %>
+                      </ul>
+                    <% end %>
                     <% if page.answer_type == "selection" &&
                             page.answer_settings.only_one_option == "true" &&
                               @routes_input.class.too_many_selection_options?(page) %>

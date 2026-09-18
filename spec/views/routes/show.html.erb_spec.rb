@@ -97,6 +97,7 @@ describe "routes/show.html.erb" do
     it "has a single select field for pages with only one route input" do
       render_page
       expect(rendered).to have_selector('dt[id="page-2"] + dd') do |dd|
+        expect(dd).not_to have_selector("ul, li")
         expect(dd).to have_selector('.govuk-select[name="forms_routes_input[routes_attributes][2][goto]"]')
       end
     end
