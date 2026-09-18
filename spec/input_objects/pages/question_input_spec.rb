@@ -337,7 +337,7 @@ RSpec.describe Pages::QuestionInput, type: :model do
     end
   end
 
-  describe "#update_page" do
+  describe "#update_page", feature_multiple_branches: false do
     let(:page) { create(:page, form:) }
 
     it "returns false if the form is invalid" do
@@ -345,7 +345,7 @@ RSpec.describe Pages::QuestionInput, type: :model do
       expect(question_input.update_page(page)).to be false
     end
 
-    context "when form is valid valid" do
+    context "when form is valid" do
       before do
         question_input.question_text = "How old are you?"
         question_input.hint_text = "As a number"
@@ -483,9 +483,7 @@ RSpec.describe Pages::QuestionInput, type: :model do
       let!(:keep_condition) { create(:condition, answer_value: "Option 1", routing_page_id: page.id) }
       let!(:remove_condition) { create(:condition, answer_value: "Option 2", routing_page_id: page.id) }
 
-      context "when the form has multiple branches enabled" do
-        let(:form) { create :form, :with_group, group: create(:group, multiple_branches_enabled: true) }
-
+      context "when the form has multiple branches enabled", :feature_multiple_branches do
         it "removes the conditions" do
           expect { question_input.update_page(page) }.to change { page.routing_conditions.count }.from(2).to(1)
           expect(Condition.exists?(keep_condition.id)).to be true
@@ -517,9 +515,7 @@ RSpec.describe Pages::QuestionInput, type: :model do
       let!(:none_of_the_above_condition) { create(:condition, answer_value: Condition::NONE_OF_THE_ABOVE, routing_page_id: page.id) }
       let!(:other_condition) { create(:condition, answer_value: "Option 2", routing_page_id: page.id) }
 
-      context "when the form has multiple branches enabled" do
-        let(:form) { create :form, :with_group, group: create(:group, multiple_branches_enabled: true) }
-
+      context "when the form has multiple branches enabled", :feature_multiple_branches do
         it "removes the none of the above condition" do
           expect { question_input.update_page(page) }.to change { page.routing_conditions.count }.from(2).to(1)
           expect(Condition.exists?(none_of_the_above_condition.id)).to be false
@@ -527,9 +523,7 @@ RSpec.describe Pages::QuestionInput, type: :model do
         end
       end
 
-      context "when the form has multiple branches disabled" do
-        let(:form) { create :form, :with_group, group: create(:group, multiple_branches_enabled: false) }
-
+      context "when the form has multiple branches disabled", feature_multiple_branches: false do
         it "does not remove the none of the above condition" do
           expect { question_input.update_page(page) }.not_to change { page.routing_conditions.count }.from(2)
         end
@@ -541,9 +535,7 @@ RSpec.describe Pages::QuestionInput, type: :model do
       let(:answer_settings) { { only_one_option: "true", selection_options: [{ name: "Option 1", value: "Option 1" }, { name: "Option 2", value: "Option 2" }] } }
       let!(:condition) { create(:condition, routing_page_id: page.id) }
 
-      context "when the form has multiple branches enabled" do
-        let(:form) { create :form, :with_group, group: create(:group, multiple_branches_enabled: true) }
-
+      context "when the form has multiple branches enabled", :feature_multiple_branches do
         it "creates a condition for each option" do
           expect { question_input.update_page(page) }.to change { page.routing_conditions.count }.from(1).to(2)
 
@@ -578,9 +570,7 @@ RSpec.describe Pages::QuestionInput, type: :model do
         end
       end
 
-      context "when the form does not have multiple branches enabled" do
-        let(:form) { create :form, :with_group, group: create(:group, multiple_branches_enabled: false) }
-
+      context "when the form does not have multiple branches enabled", feature_multiple_branches: false do
         it "does not create a condition for each option or remove the original condition" do
           expect { question_input.update_page(page) }.not_to change { page.routing_conditions.count }.from(1)
           expect(Condition.exists?(condition.id)).to be true

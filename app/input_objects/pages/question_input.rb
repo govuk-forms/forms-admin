@@ -62,7 +62,7 @@ class Pages::QuestionInput < BaseInput
     page.assign_attributes(**attrs)
 
     ActiveRecord::Base.transaction do
-      if draft_question.form&.group&.multiple_branches_enabled?
+      if FeatureService.new(group: draft_question.form&.group).enabled?(:multiple_branches)
         remove_conditions_without_valid_answer_values(page)
         ensure_conditions_match_question_type(page)
       end

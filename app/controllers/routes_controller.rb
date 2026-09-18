@@ -31,7 +31,7 @@ private
   end
 
   def check_multiple_branches_enabled
-    return if current_form.group.multiple_branches_enabled
+    return if FeatureService.new(group: current_form.group).enabled?(:multiple_branches)
 
     render "errors/not_found", status: :not_found, formats: :html
   end
