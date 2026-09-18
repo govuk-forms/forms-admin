@@ -16,16 +16,6 @@
     @include govuk-font($size: 16);
   }
 
-  // Remove last item’s bottom border on mobile
-  .govuk-summary-list__row:last-child {
-    border-bottom: 0;
-  }
-
-  // Remove last item’s bottom border on tablet and larger
-  .govuk-summary-list__row:last-child > * {
-    border-bottom: 0;
-  }
-
   .govuk-summary-list__row--error {
     border-left: 5px solid govuk-functional-colour(error);
 
@@ -34,7 +24,6 @@
     @include govuk-media-query($from: tablet) {
       padding-left: 0;
     }
-
   }
 
   .govuk-summary-list__row--error .govuk-summary-list__key {
@@ -48,5 +37,4 @@
     color: govuk-functional-colour(error);
     font-weight: 700;
   }
-
 }
