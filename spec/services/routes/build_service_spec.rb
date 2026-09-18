@@ -204,6 +204,47 @@ RSpec.describe Routes::BuildService do
           end
         end
 
+        context "when the selection page is the last page in the form" do
+          let!(:pages) do
+            [
+              create(:page, id: 1, position: 1),
+              create(:page, id: 2, position: 2),
+              create(:page, :with_selection_settings, id: 3, position: 3, selection_options:),
+            ]
+          end
+
+          context "with condition for selection options that route backwards" do
+            let!(:conditions) do
+              [
+                create(:condition, routing_page_id: pages.last.id, answer_value: "Yes", goto_page_id: pages.first.id),
+              ]
+            end
+
+            it "sets the condition ID on the route input" do
+              routes = service.build_routes.select { |r| r.page_id == pages.last.id }
+              route = routes.find { |r| r.answer_value == "Yes" }
+
+              expect(route.id).to eq(conditions.sole.id)
+            end
+
+            it "assigns the correct goto value based on the condition" do
+              routes = service.build_routes.select { |r| r.page_id == pages.last.id }
+              route = routes.find { |r| r.answer_value == "Yes" }
+
+              expect(route.goto).to eq(GotoValue::Page.new(pages.first.id))
+            end
+
+            it "includes the goto page in the goto options" do
+              routes = service.build_routes.select { |r| r.page_id == pages.last.id }
+              route = routes.find { |r| r.answer_value == "Yes" }
+
+              expect(route.goto_options).to eq(
+                service.options_for_goto_page(pages.last, GotoValue::Page.new(pages.first.id)),
+              )
+            end
+          end
+        end
+
         context "with exit page conditions" do
           let!(:conditions) do
             [
