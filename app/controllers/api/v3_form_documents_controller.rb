@@ -27,6 +27,12 @@ class Api::V3FormDocumentsController < ApplicationController
     return_latest_version_number
   end
 
+  def delivery_configurations
+    return draft_delivery_configurations if state == "draft"
+
+    current_delivery_configurations
+  end
+
 private
 
   def return_latest_version_number
@@ -52,5 +58,21 @@ private
 
   def form_id
     params.require(:form_id)
+  end
+
+  def state
+    params.require(:state)
+  end
+
+  def draft_delivery_configurations
+    raise NotFoundError unless form.has_draft_version
+
+    render json: form.draft_form_document.content["delivery_configurations"]
+  end
+
+  def current_delivery_configurations
+    raise NotFoundError unless form.is_live? || form.is_archived?
+
+    render json: form.latest_form_document.content["delivery_configurations"]
   end
 end
