@@ -125,7 +125,7 @@ RSpec.describe PageListComponent::View, type: :component do
 
         context "when the page has a condition with multiple errors" do
           before do
-            create :condition, routing_page_id: pages.first.id, check_page_id: pages.first.id, answer_value: nil, goto_page_id: nil
+            create :condition, routing_page_id: pages.first.id, check_page_id: pages.first.id, answer_value: "Invalid option", goto_page_id: nil
 
             render_inline(page_list_component)
           end
