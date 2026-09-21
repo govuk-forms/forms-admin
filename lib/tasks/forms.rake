@@ -254,6 +254,47 @@ namespace :forms do
 
     Rails.logger.info "Finished with #{ExitPage.count} exit page objects"
   end
+
+  desc "Rebuild selection question secondary skips as multiple conditions"
+  task :rebuild_selection_question_skips, %i[dry_run] => :environment do |_, args|
+    ActiveRecord::Base.transaction do
+      Condition.find_each do |condition|
+        next unless condition.routing_page_id != condition.check_page_id
+
+        page = condition.routing_page
+
+        next unless page.answer_type == "selection" && page.answer_settings.only_one_option == "true"
+
+        attributes = if condition.skip_to_end?
+                       {
+                         goto_page_id: nil,
+                         skip_to_end: true,
+                         check_page_id: page.id,
+                       }
+                     else
+                       {
+                         goto_page_id: condition.goto_page_id,
+                         skip_to_end: false,
+                         check_page_id: page.id,
+                       }
+                     end
+
+        options = page.answer_settings[:selection_options].map { |option| option["value"] }
+        options << Condition::NONE_OF_THE_ABOVE if page.is_optional
+
+        options.each do |option|
+          condition_for_option = Condition.find_or_initialize_by(routing_page_id: page.id, answer_value: option)
+          condition_for_option.assign_attributes(attributes)
+          condition_for_option.save!
+        end
+
+        Rails.logger.info "#{args[:dry_run] == 'true' ? 'Dry run: would ' : ''}destroy condition #{condition.id} for form_id #{condition.form.id}"
+        condition.destroy!
+      end
+
+      raise ActiveRecord::Rollback if args[:dry_run] == "true"
+    end
+  end
 end
 
 def move_forms(form_ids, group_id)
