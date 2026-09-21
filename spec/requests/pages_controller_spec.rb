@@ -58,7 +58,7 @@ RSpec.describe PagesController, type: :request do
       let(:form) { create(:form, :ready_for_routing) }
 
       before do
-        create(:condition, routing_page_id: pages.first.id, check_page_id: pages.first.id, answer_value: nil, goto_page_id: pages.last.id)
+        create(:condition, routing_page_id: pages.first.id, check_page_id: pages.first.id, answer_value: "Invalid option", goto_page_id: pages.last.id)
 
         allow(standard_user).to receive(:collect_analytics?).and_return(collect_analytics)
 

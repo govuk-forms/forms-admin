@@ -41,7 +41,7 @@ describe "pages/conditions/edit.html.erb" do
   end
 
   context "with a validation error" do
-    let(:condition) { create :condition, routing_page_id: page.id, check_page_id: page.id, goto_page_id: pages.third.id }
+    let(:condition) { create :condition, routing_page_id: page.id, check_page_id: page.id, goto_page_id: pages.third.id, answer_value: "Invalid option" }
 
     it "has an error link that matches the field with errors" do
       field_id = "pages-conditions-input-answer-value-field-error"

@@ -31,7 +31,7 @@ RSpec.describe PageListComponent::ErrorSummary::View, type: :component do
 
     context "when the form has a route with an error" do
       let(:form) { create :form, :ready_for_routing }
-      let!(:condition) { create :condition, routing_page_id: pages.first.id, check_page_id: pages.first.id, answer_value: nil, goto_page_id: pages.last.id }
+      let!(:condition) { create :condition, routing_page_id: pages.first.id, check_page_id: pages.first.id, answer_value: "Invalid option", goto_page_id: pages.last.id }
 
       before do
         pages.first.reload
@@ -53,7 +53,7 @@ RSpec.describe PageListComponent::ErrorSummary::View, type: :component do
 
     context "when the form has multiple routes with errors" do
       let(:form) { create :form, :ready_for_routing }
-      let!(:condition_with_answer_value_missing) { create :condition, routing_page_id: pages.first.id, check_page_id: pages.first.id, goto_page_id: pages.third.id, answer_value: nil }
+      let!(:condition_with_answer_value_missing) { create :condition, routing_page_id: pages.first.id, check_page_id: pages.first.id, goto_page_id: pages.third.id, answer_value: "" }
       let!(:condition_with_goto_page_missing) { create :condition, routing_page_id: pages.second.id, check_page_id: pages.second.id, goto_page_id: nil, answer_value: "Option 1" }
 
       before do
@@ -118,7 +118,7 @@ RSpec.describe PageListComponent::ErrorSummary::View, type: :component do
 
   describe "class methods" do
     let(:form) { create :form, :ready_for_routing }
-    let!(:condition_with_answer_value_missing) { create :condition, routing_page_id: pages.first.id, check_page_id: pages.first.id, goto_page_id: pages.third.id, answer_value: nil }
+    let!(:condition_with_answer_value_missing) { create :condition, routing_page_id: pages.first.id, check_page_id: pages.first.id, goto_page_id: pages.third.id, answer_value: "" }
     let!(:condition_with_goto_page_missing) { create :condition, routing_page_id: pages.second.id, check_page_id: pages.second.id, goto_page_id: nil, answer_value: "Option 1" }
 
     before do
