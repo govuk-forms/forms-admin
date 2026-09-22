@@ -32,17 +32,29 @@ describe "routes/show.html.erb" do
       [
         build_stubbed(
           :page,
+          :with_selection_settings,
           id: 101,
           routing_conditions: [
             build_stubbed(
               :condition,
               routing_page_id: 101,
               goto_page_id: 103,
+              answer_value: "Option 1",
+            ),
+          ],
+        ),
+        build_stubbed(
+          :page,
+          id: 102,
+          routing_conditions: [
+            build_stubbed(
+              :condition,
+              routing_page_id: 102,
+              skip_to_end: true,
               answer_value: nil,
             ),
           ],
         ),
-        build_stubbed(:page, id: 102),
         build_stubbed(:page, id: 103),
       ]
     end
@@ -65,11 +77,28 @@ describe "routes/show.html.erb" do
       expect(rendered).to have_selector("#page-#{pages.first.position}")
     end
 
-    it "has a select field for each page except the last one" do
+    it "has route inputs for each page except the last one" do
       render_page
-      expect(rendered).to have_selector('.govuk-select[name="forms_routes_input[routes_attributes][0][goto]"]')
-      expect(rendered).to have_selector('.govuk-select[name="forms_routes_input[routes_attributes][1][goto]"]')
-      expect(rendered).not_to have_selector('.govuk-select[name="forms_routes_input[routes_attributes][2][goto]"]')
+      expect(rendered).to have_selector('input[name$="[page_id]"][value="101"]', visible: :hidden, count: 2)
+      expect(rendered).to have_selector('input[name$="[page_id]"][value="102"]', visible: :hidden)
+      expect(rendered).not_to have_selector('input[name$="[page_id]"][value="103"]', visible: :hidden)
+    end
+
+    it "has a list of select fields for pages with more than one route input" do
+      render_page
+      expect(rendered).to have_selector('dt[id="page-1"] + dd') do |dd|
+        expect(dd).to have_selector("ul") do |ul|
+          expect(ul).to have_selector('li .govuk-select[name="forms_routes_input[routes_attributes][0][goto]"]')
+          expect(ul).to have_selector('li .govuk-select[name="forms_routes_input[routes_attributes][1][goto]"]')
+        end
+      end
+    end
+
+    it "has a single select field for pages with only one route input" do
+      render_page
+      expect(rendered).to have_selector('dt[id="page-2"] + dd') do |dd|
+        expect(dd).to have_selector('.govuk-select[name="forms_routes_input[routes_attributes][2][goto]"]')
+      end
     end
 
     it "has options for where the route should go to for each select field" do
@@ -88,6 +117,14 @@ describe "routes/show.html.erb" do
       end
 
       expect(rendered).to have_selector('.govuk-select[name="forms_routes_input[routes_attributes][1][goto]"]') do |field|
+        expect(select_options(field)).to eq [
+          ["default", "2. #{pages.second.question_text}"],
+          ["page_103", "3. #{pages.third.question_text}"],
+          ["end_of_form", "End of the form"],
+        ]
+      end
+
+      expect(rendered).to have_selector('.govuk-select[name="forms_routes_input[routes_attributes][2][goto]"]') do |field|
         expect(select_options(field)).to eq [
           ["default", "3. #{pages.third.question_text}"],
           ["end_of_form", "End of the form"],
