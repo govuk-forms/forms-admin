@@ -626,8 +626,14 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && User
   Condition.create!(
     check_page: multiple_branch_form.pages[0],
     routing_page: multiple_branch_form.pages[0],
-    skip_to_end: true,
     answer_value: "No",
+    exit_page: ExitPage.create!(
+      question_page: multiple_branch_form.pages[0],
+      heading: "You are not eligible for this service",
+      markdown: "You must live in the United Kingdom to use this service.",
+    ),
+    exit_page_heading: ExitPage.last.heading,
+    exit_page_markdown: ExitPage.last.markdown,
   )
   Condition.create!(
     check_page: nil,
