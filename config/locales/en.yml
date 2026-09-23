@@ -2454,6 +2454,7 @@ en:
       mou_banner: You cannot upgrade this user’s role until someone from their organisation agrees to the MOU
       organisation: Organisation
       organisation_prompt: Select an organisation
+      page_title: Edit user %{user}
       role: Role
       title: Edit user
     has_access:

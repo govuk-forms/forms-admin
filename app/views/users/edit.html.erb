@@ -1,4 +1,4 @@
-<% set_page_title(title_with_error_prefix(@user.name.present? ? @user.name : @user.email, @user.errors.any?)) %>
+<% set_page_title(title_with_error_prefix(t("users.edit.page_title", user: @user.name.presence || @user.email), @user.errors.any?)) %>
 <% content_for :back_link, govuk_back_link_to(users_path) %>
 
 <div class="govuk-grid-row">
