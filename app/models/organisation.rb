@@ -78,7 +78,7 @@ class Organisation < ApplicationRecord
   end
 
   def admin_users
-    users.organisation_admin
+    users.organisation_admin.where(has_access: true)
   end
 
   alias_method :organisation_admin_users, :admin_users
