@@ -14,6 +14,10 @@ describe "forms/payment_link/new.html.erb" do
     expect(rendered).to have_css("h1", text: I18n.t("payment_link_input.heading"))
   end
 
+  it "has a heading caption with the form name" do
+    expect(rendered).to have_css("h1 .govuk-caption-l", text: "Form 1")
+  end
+
   it "contains the introductory paragraph" do
     expect(rendered).to include(I18n.t("payment_link_input.body_html"))
   end
