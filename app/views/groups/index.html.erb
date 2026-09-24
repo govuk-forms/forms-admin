@@ -52,7 +52,9 @@
     <%= render GroupListComponent::View.new(groups: @active_groups, title: t('groups.index.active_title'), empty_message: t('groups.index.active_empty_message')) %>
     <%= render GroupListComponent::View.new(groups: @trial_groups, title: t('groups.index.trial_title'), empty_message: t('groups.index.trial_empty_message')) %>
 
-    <%= govuk_button_link_to t("groups.index.create_group"), confirm_new_groups_path, class:"govuk-!-margin-top-3" %>
+    <% if @organisation == @current_user.organisation %>
+      <%= govuk_button_link_to t("groups.index.create_group"), confirm_new_groups_path, class:"govuk-!-margin-top-3" %>
+    <% end %>
   </div>
 </div>
 

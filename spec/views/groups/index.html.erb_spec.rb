@@ -120,5 +120,18 @@ RSpec.describe "groups/index", type: :view do
     it "shows an organisation selector" do
       expect(rendered).to have_select "search[organisation_id]"
     end
+
+    it "shows a create group button" do
+      expect(rendered).to have_link("Create a group", href: confirm_new_groups_path)
+    end
+
+    context "when viewing another organisation's groups" do
+      let(:organisation) { create :organisation, slug: "other-org" }
+      let(:search_input) { OrganisationSearchInput.new({ organisation_id: organisation.id }) }
+
+      it "does not show a create group button" do
+        expect(rendered).not_to have_link("Create a group")
+      end
+    end
   end
 end
