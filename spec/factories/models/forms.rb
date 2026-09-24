@@ -157,6 +157,23 @@ FactoryBot.define do
       end
     end
 
+    trait :ready_for_multiple_branches do
+      transient do
+        branches_count { 3 }
+      end
+
+      pages do
+        [
+          build(:page, :with_selection_settings, selection_options_count: branches_count, form: nil),
+          *build_list(:page, branches_count, form: nil),
+        ]
+      end
+
+      after(:build) do |form|
+        link_pages_list(form.pages) if form.pages.present?
+      end
+    end
+
     trait :missing_pages do
       ready_for_live
       question_section_completed { false }
