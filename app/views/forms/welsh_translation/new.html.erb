@@ -121,36 +121,9 @@
               <% end %>
             <% end %>
 
-            <% if page_form.object.page_has_selection_options? %>
-              <%= render ScrollingWrapperComponent::View.new(aria_label: t("forms.welsh_translation.new.section_headings.selection_options", question_number: page_form.object.page.position)) do %>
-                <%= page_form.govuk_fieldset legend: nil, described_by: ["selection_options_cy_table_caption"] do %>
-                  <%= govuk_table(classes: @table_presenter.two_column_classes) do |table| %>
-                    <%= table.with_caption(size: 's',
-                               text: t("forms.welsh_translation.new.section_headings.selection_options", question_number: page_form.object.page.position),
-                               html_attributes:{ id: "selection_options_cy_table_caption"})
-        table.with_head(**@table_presenter.two_column_headers) %>
-
-                    <%= table.with_body do |body| %>
-                      <% page_form.fields_for :selection_options_cy, page_form.object.selection_options_cy do |selection_options_form| %>
-                        <%= body.with_row do |row| %>
-                          <%= row.with_cell(text: page_form.object.page.answer_settings.selection_options[selection_options_form.index].name) %>
-                          <%= row.with_cell do %>
-                            <%= selection_options_form.hidden_field :id %>
-                            <%= selection_options_form.govuk_text_field :name_cy,
-                id: selection_options_form.object.form_field_id(:name_cy),
-                label: {
-                  text: t("helpers.label.forms_welsh_page_translation_input.selection_options_cy_html", question_number: page_form.object.page.position, option_number: selection_options_form.index + 1), for: selection_options_form.object.form_field_id(:name_cy),
-                },
-                lang: "cy"
-              %>
-                          <% end %>
-                        <% end %>
-                      <% end %>
-                    <% end %>
-                  <% end %>
-                <% end %>
-              <% end %>
-            <% end %>
+            <%= render WelshTranslation::SelectionOptionsComponent::View.new(
+                  page_form: page_form,
+                  table_presenter: @table_presenter) %>
 
             <% if FeatureService.new(group: @current_form.group).enabled?(:multiple_branches) %>
               <% if page_form.object.exit_page_translations.present? %>
