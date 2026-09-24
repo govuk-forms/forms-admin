@@ -36,7 +36,7 @@ FactoryBot.define do
 
       question_text { Faker::Lorem.question }
       answer_type { "selection" }
-      answer_settings { DataStruct.new(only_one_option:, selection_options:) }
+      answer_settings { { only_one_option:, selection_options: } }
     end
 
     trait :selection_with_radios do
@@ -97,12 +97,12 @@ FactoryBot.define do
       end
 
       answer_type { "text" }
-      answer_settings { DataStruct.new(input_type:) }
+      answer_settings { { input_type: } }
     end
 
     trait :with_single_line_text_settings do
       answer_type { "text" }
-      answer_settings { DataStruct.new(input_type: "single_line") }
+      answer_settings { { input_type: "single_line" } }
     end
 
     trait :with_date_settings do
@@ -111,7 +111,7 @@ FactoryBot.define do
       end
 
       answer_type { "date" }
-      answer_settings { DataStruct.new(input_type:) }
+      answer_settings { { input_type: } }
     end
 
     trait :with_address_settings do
@@ -121,7 +121,7 @@ FactoryBot.define do
       end
 
       answer_type { "address" }
-      answer_settings { DataStruct.new(input_type: DataStruct.new(uk_address:, international_address:)) }
+      answer_settings { { input_type: { uk_address:, international_address: } } }
     end
 
     trait :with_name_settings do
@@ -131,12 +131,12 @@ FactoryBot.define do
       end
 
       answer_type { "name" }
-      answer_settings { DataStruct.new(input_type:, title_needed:) }
+      answer_settings { { input_type:, title_needed: } }
     end
 
     trait :with_full_name_settings do
       answer_type { "name" }
-      answer_settings { DataStruct.new(input_type: "full_name", title_needed: false) }
+      answer_settings { { input_type: "full_name", title_needed: false } }
     end
 
     trait :with_file_upload_answer_type do
