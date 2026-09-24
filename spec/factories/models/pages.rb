@@ -30,8 +30,14 @@ FactoryBot.define do
 
     trait :with_selection_settings do
       transient do
+        selection_options_count { 2 }
+
         only_one_option { "true" }
-        selection_options { [{ name: "Option 1", value: "Option 1" }, { name: "Option 2", value: "Option 2" }] }
+        selection_options do
+          (1..selection_options_count).map do |i|
+            { name: "Option #{i}", value: "Option #{i}" }
+          end
+        end
       end
 
       question_text { Faker::Lorem.question }
@@ -40,44 +46,37 @@ FactoryBot.define do
     end
 
     trait :selection_with_radios do
-      answer_type { "selection" }
-      answer_settings do
-        {
-          only_one_option: "true",
-          selection_options: (1..30).to_a.map { |i| { name: i.to_s, value: i.to_s } },
-        }
+      with_selection_settings
+
+      transient do
+        selection_options_count { 30 }
       end
     end
 
     trait :selection_with_autocomplete do
-      answer_type { "selection" }
-      answer_settings do
-        {
-          only_one_option: "true",
-          selection_options: (1..31).to_a.map { |i| { name: i.to_s, value: i.to_s } },
-        }
+      with_selection_settings
+
+      transient do
+        selection_options_count { 31 }
       end
     end
 
     trait :selection_with_checkboxes do
-      answer_type { "selection" }
-      answer_settings do
-        {
-          only_one_option: "false",
-          selection_options: [{ name: "Option 1", value: "Option 1" }, { name: "Option 2", value: "Option 2" }],
-        }
+      with_selection_settings
+
+      transient do
+        only_one_option { "false" }
       end
     end
 
     trait :selection_with_none_of_the_above_question do
+      with_selection_settings
+
       transient do
-        only_one_option { "true" }
-        selection_options { [{ name: "Option 1", value: "Option 1" }, { name: "Option 2", value: "Option 2" }] }
         none_of_the_above_question_text { "None of the above question?" }
         none_of_the_above_question_is_optional { "true" }
       end
 
-      answer_type { "selection" }
       is_optional { true }
       answer_settings do
         {
