@@ -4,8 +4,8 @@ class RevertDraftFormService
   attr_reader :form
 
   # A list of attributes on the Form model that should be not be reverted
-  FORM_ATTRIBUTES_TO_PRESERVE = %i[id created_at updated_at creator_id].freeze
-  ATTRIBUTES_TO_EXCLUDE = Form::ATTRIBUTES_NOT_IN_FORM_DOCUMENT + FORM_ATTRIBUTES_TO_PRESERVE
+  FORM_ATTRIBUTES_TO_PRESERVE = %i[created_at updated_at creator_id].freeze
+  ATTRIBUTES_TO_REVERT = Form::FORM_DOCUMENT_ATTRIBUTES - FORM_ATTRIBUTES_TO_PRESERVE
 
   def initialize(form)
     @form = form
@@ -52,9 +52,7 @@ private
 
   # revert the top-level attributes of the Form object
   def revert_form_attributes(form_document_content)
-    attributes_to_update = Form.attribute_names - ATTRIBUTES_TO_EXCLUDE.map(&:to_s)
-
-    form.assign_attributes(form_document_content.slice(*attributes_to_update))
+    form.assign_attributes(form_document_content.slice(*ATTRIBUTES_TO_REVERT.map(&:to_s)))
   end
 
   def revert_pages_and_nested_associations(steps_data)

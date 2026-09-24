@@ -8,7 +8,7 @@ class FormCopyService
                  s3_bucket_aws_account_id
                  s3_bucket_name
                  s3_bucket_region].freeze
-  TO_EXCLUDE = Form::ATTRIBUTES_NOT_IN_FORM_DOCUMENT + DONT_COPY
+  TO_COPY = Form::FORM_DOCUMENT_ATTRIBUTES - DONT_COPY
 
   def initialize(form, logged_in_user)
     @form = form
@@ -56,7 +56,7 @@ class FormCopyService
 private
 
   def attributes_to_copy
-    Form.attribute_names - TO_EXCLUDE.map(&:to_s)
+    TO_COPY.map(&:to_s)
   end
 
   def copy_attributes(content)
