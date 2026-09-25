@@ -15,9 +15,5 @@
       <li><%= govuk_link_to t("reports.csv_downloads.questions", tag: tag_label("live-or-archived")), report_questions_csv_path(tag: "live-or-archived"), no_visited_state: true %></li>
       <li><%= govuk_link_to t("reports.csv_downloads.questions", tag: tag_label("draft")), report_questions_csv_path(tag: "draft"), no_visited_state: true %></li>
     </ul>
-    <p><%= t(".user_reports") %></p>
-    <ul class="govuk-list govuk-list--bullet">
-      <li><%= govuk_link_to t("reports.contact_for_research.title"), report_contact_for_research_path %></li>
-    </ul>
   </div>
 </div>

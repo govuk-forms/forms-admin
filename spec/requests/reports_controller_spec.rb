@@ -46,7 +46,6 @@ RSpec.describe ReportsController, type: :request do
           "Feature and answer type usage in draft forms",
           "Download data about all live or archived forms",
           "Download all questions in live or archived forms",
-          "Users interested in research",
         ]
         expect(response.body).to include(*reports_list)
       end
@@ -764,25 +763,6 @@ RSpec.describe ReportsController, type: :request do
         csv = CSV.parse(response.body, headers: true)
         expect(csv.headers).to eq Reports::QuestionsCsvReportService::QUESTIONS_CSV_HEADERS
         expect(csv.length).to eq 1
-      end
-    end
-  end
-
-  describe "#contact_for_research" do
-    let(:path) { report_contact_for_research_path }
-
-    include_examples "unauthorized user is forbidden"
-
-    context "when the user is a super admin" do
-      before do
-        login_as_super_admin_user
-
-        get path
-      end
-
-      it "returns http code 200 and renders the template" do
-        expect(response).to have_http_status(:ok)
-        expect(response).to render_template("reports/contact_for_research")
       end
     end
   end

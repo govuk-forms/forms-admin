@@ -2106,13 +2106,6 @@ en:
     back_link: Back to reports
     back_to_feature_usage: Back to feature and answer type usage
     back_to_selection_questions_summary: Back to select from a list questions
-    contact_for_research:
-      heading: Users who’ve agreed to be contacted about user research
-      table_headings:
-        date_added: Date agreed
-        email: Email
-        name: Name
-      title: Users interested in research
     csv_downloads:
       forms: Download data about all %{tag} forms
       questions: Download all questions in %{tag} forms
@@ -2206,7 +2199,6 @@ en:
       download_form_data_as_a_csv_file: Download form data as a CSV file
       feature_and_answer_type_usage: Feature and answer type usage
       title: Reports
-      user_reports: User reports
     questions_with_add_another_answer:
       download_csv: Download all questions with add another answer in %{tag} forms as a CSV file
       empty: There are no questions with add another answer in %{tag} forms
