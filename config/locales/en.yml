@@ -713,7 +713,8 @@ en:
       new:
         condition:
           heading: Question %{question_number}’s exit page
-        csv_download: Download content as CSV
+        csv_download: Download existing content as a CSV
+        csv_upload: Upload new Welsh content as a CSV
         delete_welsh_version: Delete Welsh version
         english_header: English content
         exit_page:

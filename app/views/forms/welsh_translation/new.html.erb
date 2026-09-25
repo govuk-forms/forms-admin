@@ -13,8 +13,9 @@
         <%= t("page_titles.welsh_translation") %>
       </h1>
 
-      <div class="govuk-button-group">
-        <%= govuk_button_link_to t(".csv_download"), welsh_translation_download_path(@welsh_translation_input.form, format: :csv), secondary: true, data: { "track-link": true }  %>
+      <div class="govuk-button-group app-button-group--column">
+        <%= govuk_button_link_to t(".csv_download"), welsh_translation_download_path(@welsh_translation_input.form, format: :csv), secondary: true, data: { "track-link": true } %>
+        <%= govuk_link_to t(".csv_upload"), welsh_translation_show_upload_path(@welsh_translation_input.form), secondary: true %>
         <%= render PreviewLinkComponent::View.new(@welsh_translation_input.form.pages, preview_link(@welsh_translation_input.form, locale: :cy), t(".preview_link_text")) %>
       </div>
     </div>
@@ -170,8 +171,8 @@
                             <%= exit_page_form.govuk_text_field(
                               :heading_cy,
                               id: exit_page_form.object.form_field_id(:heading_cy),
-                              label:  { 
-                                text: t("helpers.label.forms_welsh_exit_page_translation_input.heading_cy_html", exit_page_number: exit_page_form.object.position, question_number: page_form.object.page.position), 
+                              label:  {
+                                text: t("helpers.label.forms_welsh_exit_page_translation_input.heading_cy_html", exit_page_number: exit_page_form.object.position, question_number: page_form.object.page.position),
                                 for: exit_page_form.object.form_field_id(:heading_cy),
                               },
                               lang: "cy",
@@ -193,7 +194,7 @@
                                 label: t("helpers.label.forms_welsh_exit_page_translation_input.markdown_cy_html", exit_page_number: exit_page_form.object.position, question_number: page_form.object.page.position),
                                 label_heading: false,
                                 lang: "cy"
-                              ) 
+                              )
                             %>
                           <% end %>
                         <% end %>
