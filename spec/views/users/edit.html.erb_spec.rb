@@ -24,23 +24,23 @@ describe "users/edit.html.erb" do
   end
 
   describe "page title" do
-    it "is the user's name" do
-      expect(view.content_for(:title)).to eq user.name
+    it "includes the user's name" do
+      expect(view.content_for(:title)).to eq "Edit user #{user.name}"
     end
 
     context "with a user with no name set" do
       let(:user) { build(:user, :with_no_name, id: 1) }
 
-      it "is the users's email address" do
-        expect(view.content_for(:title)).to eq user.email
+      it "includes the user's email address" do
+        expect(view.content_for(:title)).to eq "Edit user #{user.email}"
       end
     end
 
     context "with a user with a blank name" do
       let(:user) { build(:user, name: "", id: 1) }
 
-      it "is the users's email address" do
-        expect(view.content_for(:title)).to eq user.email
+      it "includes the user's email address" do
+        expect(view.content_for(:title)).to eq "Edit user #{user.email}"
       end
     end
   end

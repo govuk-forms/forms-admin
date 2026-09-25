@@ -28,7 +28,6 @@ class Form < ApplicationRecord
              :support_phone,
              :support_url,
              :support_url_text,
-             :declaration_text,
              :declaration_markdown,
              :what_happens_next_markdown,
              :payment_url
@@ -38,17 +37,47 @@ class Form < ApplicationRecord
     enabled: "enabled",
   }, prefix: :send_copy_of_answers
 
+  enum :save_and_return, {
+    disabled: "disabled",
+    enabled: "enabled",
+  }, prefix: :save_and_return
+
   validates :name, presence: true
   validates :payment_url, url: true, allow_blank: true
   validate :marking_complete_with_errors
   validates :send_copy_of_answers, presence: true
+  validates :save_and_return, presence: true
   validates :available_languages, presence: true, inclusion: { in: SUPPORTED_LANGUAGES }
   validates :submission_email, email_address: { message: :invalid_email }, allow_blank: true
   validates :support_email, email_address: { message: :invalid_email }, allow_blank: true
 
   after_create :set_external_id
   after_update :update_draft_form_document
-  ATTRIBUTES_NOT_IN_FORM_DOCUMENT = %i[state external_id pages question_section_completed declaration_section_completed share_preview_completed welsh_completed latest_form_document_id].freeze
+  FORM_DOCUMENT_ATTRIBUTES = %i[
+    available_languages
+    brand_id
+    copied_from_id
+    created_at
+    creator_id
+    declaration_markdown
+    first_made_live_at
+    form_slug
+    name
+    payment_url
+    privacy_policy_url
+    s3_bucket_aws_account_id
+    s3_bucket_name
+    s3_bucket_region
+    save_and_return
+    send_copy_of_answers
+    submission_email
+    support_email
+    support_phone
+    support_url
+    support_url_text
+    updated_at
+    what_happens_next_markdown
+  ].freeze
 
   attr_accessor :task_status_service
 
@@ -177,7 +206,7 @@ class Form < ApplicationRecord
 
   def as_form_document(live_at: nil, language: :en)
     content = as_json(
-      except: ATTRIBUTES_NOT_IN_FORM_DOCUMENT,
+      only: [:id, *FORM_DOCUMENT_ATTRIBUTES],
       methods: %i[start_page steps delivery_configurations],
     )
     content["form_id"] = content.delete("id").to_s

@@ -1704,6 +1704,7 @@ en:
     end_of_form: End of the form
     exit_page: Add an exit page
     exit_page_label: An ‘exit page’ to leave the form
+    go_to_exit_page: 'Go to exit page %{exit_page_index}, ‘%{exit_page_heading}’ if the answer is:'
     go_to_page: 'Go to %{goto_page_question_number}, ‘%{goto_page_question_text}’ if the answer is:'
     go_to_the_end: 'Go to the end of the form if the answer is:'
     none_of_the_above: None of the above
@@ -2264,6 +2265,7 @@ en:
   routes:
     show:
       add_exit_page_html: Add an exit page <span class="govuk-visually-hidden">to question %{question_number}</span>
+      cannot_add_route_to_last_question_in_form: This is the last question in the form, so you cannot add a route or an exit page.
       exit_page_list_entry: 'Exit page %{exit_page_number}: %{heading}'
       exit_pages_list: Question %{question_number}’s exit pages
       not_enough_pages_html: |
@@ -2396,6 +2398,13 @@ en:
     end_of_form:
       cy: End of the form
       en: End of the form
+    exit_page:
+      content: Exit page %{exit_page_number} content
+      heading: Exit page %{exit_page_number} heading
+      number: Exit page %{exit_page_number}
+      section_heading:
+        one: Question %{question_number}’s exit page
+        other: Question %{question_number}’s exit pages
     guidance_markdown: Guidance
     hint_text: Hint text
     name_type:
@@ -2445,6 +2454,7 @@ en:
       mou_banner: You cannot upgrade this user’s role until someone from their organisation agrees to the MOU
       organisation: Organisation
       organisation_prompt: Select an organisation
+      page_title: Edit user %{user}
       role: Role
       title: Edit user
     has_access:

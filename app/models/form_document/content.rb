@@ -31,6 +31,7 @@ class FormDocument::Content
   attribute :what_happens_next_markdown, :string
   attribute :send_copy_of_answers, :string
   attribute :delivery_configurations, array: true
+  attribute :save_and_return, :string
 
   alias_attribute :id, :form_id
 

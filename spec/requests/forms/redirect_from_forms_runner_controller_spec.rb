@@ -81,8 +81,16 @@ RSpec.describe Forms::RedirectFromFormsRunnerController, type: :request do
         expect(response).to have_http_status(302)
       end
 
-      it "redirects to the show routes page" do
-        expect(response).to redirect_to(show_routes_path(form_id: form.id, page_id: page.id))
+      context "when the multiple branches feature is not enabled", feature_multiple_branches: false do
+        it "redirects to the show routes page" do
+          expect(response).to redirect_to(show_routes_path(form_id: form.id, page_id: page.id))
+        end
+      end
+
+      context "when the multiple branches feature is enabled", :feature_multiple_branches do
+        it "redirects to the edit routes page" do
+          expect(response).to redirect_to(routes_path(form_id: form.id, anchor: page.page_position_id))
+        end
       end
     end
 

@@ -197,7 +197,7 @@ RSpec.describe Condition, type: :model do
 
   describe "#validation_errors" do
     let(:form) { create :form }
-    let(:routing_page) { create :page, form: }
+    let(:routing_page) { create :page, :with_selection_settings, form: }
     let(:goto_page) { nil }
     let(:condition) { create :condition, routing_page_id: routing_page.id, goto_page_id: nil }
 
@@ -232,7 +232,7 @@ RSpec.describe Condition, type: :model do
 
   describe "#warning_goto_page_doesnt_exist" do
     let(:form) { create :form }
-    let(:routing_page) { create :page, form: }
+    let(:routing_page) { create :page, :with_selection_settings, form: }
     let(:goto_page) { create :page, form: }
     let(:condition) { create :condition, routing_page_id: routing_page.id, goto_page_id: goto_page.id }
 
@@ -323,6 +323,22 @@ RSpec.describe Condition, type: :model do
         it "returns object with error short name code" do
           expect(condition.warning_answer_doesnt_exist).to eq(DataStruct.new(name: "answer_value_doesnt_exist"))
         end
+      end
+    end
+
+    context "when condition is for an unconditional route" do
+      let(:condition) do
+        create(
+          :condition,
+          answer_value: nil,
+          check_page_id: check_page.id,
+          routing_page_id: check_page.id,
+          goto_page_id: goto_page.id,
+        )
+      end
+
+      it "returns nil" do
+        expect(condition.warning_answer_doesnt_exist).to be_nil
       end
     end
 
@@ -607,7 +623,7 @@ RSpec.describe Condition, type: :model do
   end
 
   describe "#errors_with_fields" do
-    let(:condition) { create(:condition, check_page:, answer_value: nil, goto_page_id: nil) }
+    let(:condition) { create(:condition, check_page:, answer_value: "Not an option", goto_page_id: nil) }
     let(:check_page) { create(:page, :with_selection_settings) }
 
     context "when the error is a known error" do
@@ -621,7 +637,7 @@ RSpec.describe Condition, type: :model do
     let(:form) { create :form }
     let(:check_page) { create :page, :with_selection_settings, form: }
     let(:goto_page) { create :page, form: }
-    let(:condition) { create :condition, routing_page_id: check_page.id, check_page_id: check_page.id, goto_page_id: goto_page.id, skip_to_end: false }
+    let(:condition) { create :condition, routing_page_id: check_page.id, check_page_id: check_page.id, goto_page_id: goto_page.id, answer_value: "", skip_to_end: false }
 
     it "returns a json object" do
       expect(condition.as_json).to match({
@@ -629,7 +645,7 @@ RSpec.describe Condition, type: :model do
         "check_page_id" => check_page.id,
         "routing_page_id" => check_page.id,
         "goto_page_id" => goto_page.id,
-        "answer_value" => nil,
+        "answer_value" => "",
         "created_at" => a_kind_of(String),
         "updated_at" => a_kind_of(String),
         "skip_to_end" => false,
@@ -660,7 +676,7 @@ RSpec.describe Condition, type: :model do
     let(:check_page) { create :page, :with_selection_settings, form: }
     let(:routing_page) { create :page, :with_selection_settings, form: }
     let(:goto_page) { create :page, form: }
-    let(:condition) { create :condition, routing_page_id: routing_page.id, check_page_id: check_page.id, goto_page_id: goto_page.id, skip_to_end: false }
+    let(:condition) { create :condition, routing_page_id: routing_page.id, check_page_id: check_page.id, goto_page_id: goto_page.id, answer_value: "", skip_to_end: false }
 
     it "returns a json object" do
       expect(condition.as_form_document_condition).to match({
@@ -668,7 +684,7 @@ RSpec.describe Condition, type: :model do
         "check_page_id" => check_page.external_id,
         "routing_page_id" => routing_page.external_id,
         "goto_page_id" => goto_page.external_id,
-        "answer_value" => nil,
+        "answer_value" => "",
         "created_at" => a_kind_of(String),
         "updated_at" => a_kind_of(String),
         "skip_to_end" => false,

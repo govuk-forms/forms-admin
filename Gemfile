@@ -54,7 +54,7 @@ gem "govuk-forms-markdown", require: "govuk_forms_markdown", github: "govuk-form
 gem "lograge"
 
 # For distributed tracing and telemetry
-gem "opentelemetry-exporter-otlp", "~> 0.34.1"
+gem "opentelemetry-exporter-otlp", "~> 0.36.0"
 gem "opentelemetry-instrumentation-all", "~> 0.96.0"
 gem "opentelemetry-propagator-xray", "~> 0.27.0"
 gem "opentelemetry-sdk", "~> 1.13"
@@ -124,7 +124,7 @@ group :test do
   gem "pundit-matchers"
 
   # Code coverage reporter
-  gem "simplecov", "~> 1.1.1", require: false
+  gem "simplecov", "~> 1.2.0", require: false
 
   gem "webmock"
 

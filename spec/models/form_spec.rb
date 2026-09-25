@@ -873,6 +873,20 @@ RSpec.describe Form, type: :model do
     end
   end
 
+  describe "save and return" do
+    describe "enum" do
+      it "returns a list of save and return values" do
+        expect(described_class.save_and_returns.keys).to eq(%w[disabled enabled])
+        expect(described_class.save_and_returns.values).to eq(%w[disabled enabled])
+      end
+    end
+
+    it "defaults to disabled" do
+      form = build(:form)
+      expect(form.save_and_return).to eq("disabled")
+    end
+  end
+
   describe "#destroy" do
     let(:form) { create :form }
 
@@ -1158,9 +1172,37 @@ RSpec.describe Form, type: :model do
       ])
     end
 
-    it "includes all attributes for the form" do
-      form_attributes = described_class.attribute_names - %w[id state external_id pages question_section_completed declaration_section_completed share_preview_completed welsh_completed latest_form_document_id]
-      expect(form.as_form_document).to match a_hash_including(*form_attributes)
+    it "includes only the allowlisted attributes" do
+      expect(form.as_form_document.keys).to match_array %w[
+        available_languages
+        brand_id
+        copied_from_id
+        created_at
+        creator_id
+        declaration_markdown
+        delivery_configurations
+        first_made_live_at
+        form_id
+        form_slug
+        language
+        name
+        payment_url
+        privacy_policy_url
+        s3_bucket_aws_account_id
+        s3_bucket_name
+        s3_bucket_region
+        save_and_return
+        send_copy_of_answers
+        start_page
+        steps
+        submission_email
+        support_email
+        support_phone
+        support_url
+        support_url_text
+        updated_at
+        what_happens_next_markdown
+      ]
     end
 
     it "includes the form ID" do

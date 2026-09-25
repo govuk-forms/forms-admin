@@ -26,7 +26,7 @@ module PagesHelper
 
   # option_indexes is either :number or :answer_value
   def selection_options_in_routes_banner(draft_question, selection_options, include_none_of_the_above, option_indexes: :number)
-    return unless draft_question.form&.group&.multiple_branches_enabled?
+    return unless FeatureService.new(group: draft_question.form&.group).enabled?(:multiple_branches)
 
     answer_values_from_options = selection_options.pluck(:value) + [Condition::NONE_OF_THE_ABOVE]
     options_in_routes = draft_question.form.conditions.where(routing_page_id: draft_question.page_id, answer_value: answer_values_from_options).select(:answer_value)

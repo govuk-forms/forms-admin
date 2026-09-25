@@ -196,4 +196,167 @@ RSpec.describe Api::V3FormDocumentsController, type: :request do
       end
     end
   end
+
+  describe "#delivery_configurations" do
+    context "when the form is a draft" do
+      let(:form) { create :form }
+
+      before do
+        form.delivery_configurations.create!(
+          delivery_method: "email",
+          delivery_schedule: "immediate",
+          formats: %w[csv],
+        )
+        form.save_draft!
+      end
+
+      context "when requesting the draft delivery configuration" do
+        before do
+          get "/api/v3/forms/#{form.id}/delivery-configurations/draft", headers:
+        end
+
+        it "returns the draft delivery configuration" do
+          expect(response.body).to eq "[{\"formats\":[\"csv\"],\"delivery_method\":\"email\",\"delivery_schedule\":\"immediate\"}]"
+        end
+      end
+
+      context "when requesting the current live or archived delivery configuration" do
+        before do
+          get "/api/v3/forms/#{form.id}/delivery-configurations/current", headers:
+        end
+
+        it "returns http not found" do
+          expect(response).to have_http_status(:not_found)
+          expect(response.headers["Content-Type"]).to eq("application/json; charset=utf-8")
+        end
+      end
+    end
+
+    context "when the form is live" do
+      let(:form) { create :form, :with_email_delivery, :live }
+
+      before do
+        # It's slightly artificial for a form with state `live` to have a different delivery configuration from its
+        # draft, but it allows us to test that the right form document is returned
+        form.draft_form_document.content["delivery_configurations"] = "[{\"formats\":[\"csv\"],\"delivery_method\":\"email\",\"delivery_schedule\":\"immediate\"}]"
+        form.draft_form_document.save!
+      end
+
+      context "when requesting the draft delivery configuration" do
+        before do
+          get "/api/v3/forms/#{form.id}/delivery-configurations/draft", headers:
+        end
+
+        it "returns the draft delivery configuration" do
+          expect(response.body).to eq "[{\"formats\":[\"csv\"],\"delivery_method\":\"email\",\"delivery_schedule\":\"immediate\"}]"
+        end
+      end
+
+      context "when requesting the current live or archived delivery configuration" do
+        before do
+          get "/api/v3/forms/#{form.id}/delivery-configurations/current", headers:
+        end
+
+        it "returns the live delivery configuration" do
+          expect(response).to have_http_status(:ok)
+          expect(response.body).to eq "[{\"formats\":[],\"delivery_method\":\"email\",\"delivery_schedule\":\"immediate\"}]"
+        end
+      end
+    end
+
+    context "when the form is live_with_draft" do
+      let(:form) { create :form, :with_email_delivery, :live_with_draft }
+
+      before do
+        form.delivery_configurations.first.update!(formats: %w[csv])
+        form.delivery_configurations.reload
+        form.save_draft!
+      end
+
+      context "when requesting the draft delivery configuration" do
+        before do
+          get "/api/v3/forms/#{form.id}/delivery-configurations/draft", headers:
+        end
+
+        it "returns the draft delivery configuration" do
+          expect(response).to have_http_status(:ok)
+          expect(response.body).to eq "[{\"formats\":[\"csv\"],\"delivery_method\":\"email\",\"delivery_schedule\":\"immediate\"}]"
+        end
+      end
+
+      context "when requesting the current live or archived delivery configuration" do
+        before do
+          get "/api/v3/forms/#{form.id}/delivery-configurations/current", headers:
+        end
+
+        it "returns the live delivery configuration" do
+          expect(response).to have_http_status(:ok)
+          expect(response.body).to eq "[{\"formats\":[],\"delivery_method\":\"email\",\"delivery_schedule\":\"immediate\"}]"
+        end
+      end
+    end
+
+    context "when the form is archived" do
+      let(:form) { create :form, :with_email_delivery, :archived }
+
+      before do
+        # It's slightly artificial for a form with state `archived` to have a different delivery configuration from its
+        # draft, but it allows us to test that the right form document is returned
+        form.draft_form_document.content["delivery_configurations"] = "[{\"formats\":[\"csv\"],\"delivery_method\":\"email\",\"delivery_schedule\":\"immediate\"}]"
+        form.draft_form_document.save!
+      end
+
+      context "when requesting the draft delivery configuration" do
+        before do
+          get "/api/v3/forms/#{form.id}/delivery-configurations/draft", headers:
+        end
+
+        it "returns the draft delivery configuration" do
+          expect(response.body).to eq "[{\"formats\":[\"csv\"],\"delivery_method\":\"email\",\"delivery_schedule\":\"immediate\"}]"
+        end
+      end
+
+      context "when requesting the current live or archived delivery configuration" do
+        before do
+          get "/api/v3/forms/#{form.id}/delivery-configurations/current", headers:
+        end
+
+        it "returns the archived delivery configuration" do
+          expect(response).to have_http_status(:ok)
+          expect(response.body).to eq "[{\"formats\":[],\"delivery_method\":\"email\",\"delivery_schedule\":\"immediate\"}]"
+        end
+      end
+    end
+
+    context "when the form is archived_with_draft" do
+      let(:form) { create :form, :with_email_delivery, :archived_with_draft }
+
+      before do
+        form.delivery_configurations.first.update!(formats: %w[csv])
+        form.delivery_configurations.reload
+        form.save_draft!
+      end
+
+      context "when requesting the draft delivery configuration" do
+        before do
+          get "/api/v3/forms/#{form.id}/delivery-configurations/draft", headers:
+        end
+
+        it "returns the draft delivery configuration" do
+          expect(response.body).to eq "[{\"formats\":[\"csv\"],\"delivery_method\":\"email\",\"delivery_schedule\":\"immediate\"}]"
+        end
+      end
+
+      context "when requesting the current live or archived delivery configuration" do
+        before do
+          get "/api/v3/forms/#{form.id}/delivery-configurations/current", headers:
+        end
+
+        it "returns the archived delivery configuration" do
+          expect(response).to have_http_status(:ok)
+          expect(response.body).to eq "[{\"formats\":[],\"delivery_method\":\"email\",\"delivery_schedule\":\"immediate\"}]"
+        end
+      end
+    end
+  end
 end

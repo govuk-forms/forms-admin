@@ -93,15 +93,16 @@ private
       answer_value = option["value"]
       key = [page.id, answer_value]
       condition = conditions_by_key[key]
+      goto = goto_value_for(condition)
 
       Forms::RouteInput.new(
         id: condition&.id,
         page_id: page.id,
         page:,
         answer_value:,
-        goto: goto_value_for(condition),
+        goto:,
         goto_page: condition&.goto_page,
-        goto_options: options_for_goto_page(page, condition&.goto_page_id),
+        goto_options: options_for_goto_page(page, goto),
       )
     end
   end
@@ -115,6 +116,7 @@ private
       answer_value = option["value"]
       key = [page.id, answer_value]
       condition = conditions_by_key[key]
+      goto = goto_value_for(condition)
 
       next unless condition
 
@@ -123,9 +125,9 @@ private
         page_id: page.id,
         page:,
         answer_value:,
-        goto: goto_value_for(condition),
+        goto:,
         goto_page: condition.goto_page,
-        goto_options: options_for_goto_page(page, condition.goto_page_id),
+        goto_options: options_for_goto_page(page, goto),
       )
     end
   end

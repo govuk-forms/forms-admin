@@ -1,3 +1,6 @@
+features:
+  multiple_branches: true
+
 # Use real authentication
 auth_provider: auth0
 
