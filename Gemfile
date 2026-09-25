@@ -4,7 +4,7 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 ruby file: ".ruby-version"
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
-gem "rails", "~> 8.1.3"
+gem "rails", "~> 8.1.4"
 
 # Use postgresql as the database for Active Record
 gem "pg", "~> 1.6"
@@ -21,8 +21,8 @@ gem "warden"
 gem "pundit"
 
 # Use Sentry (https://sentry.io/for/ruby/?platform=sentry.ruby.rails#)
-gem "sentry-rails", "~> 6"
-gem "sentry-ruby", "~> 6"
+gem "sentry-rails", "~> 7"
+gem "sentry-ruby", "~> 7"
 
 gem "config"
 
