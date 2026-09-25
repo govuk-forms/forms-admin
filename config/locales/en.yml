@@ -2206,7 +2206,6 @@ en:
       download_form_data_as_a_csv_file: Download form data as a CSV file
       feature_and_answer_type_usage: Feature and answer type usage
       title: Reports
-      user_reports: User reports
     questions_with_add_another_answer:
       download_csv: Download all questions with add another answer in %{tag} forms as a CSV file
       empty: There are no questions with add another answer in %{tag} forms
