@@ -22,7 +22,7 @@
   },
   "devDependencies": {
     "@testing-library/dom": "^10.4.2",
-    "autoprefixer": "^10.5.5",
+    "autoprefixer": "^10.6.1",
     "esbuild": "0.28.2",
     "jsdom": "^30.0.1",
     "postcss": "^8.5.28",
