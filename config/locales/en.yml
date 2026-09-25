@@ -2106,13 +2106,6 @@ en:
     back_link: Back to reports
     back_to_feature_usage: Back to feature and answer type usage
     back_to_selection_questions_summary: Back to select from a list questions
-    contact_for_research:
-      heading: Users who’ve agreed to be contacted about user research
-      table_headings:
-        date_added: Date agreed
-        email: Email
-        name: Name
-      title: Users interested in research
     csv_downloads:
       forms: Download data about all %{tag} forms
       questions: Download all questions in %{tag} forms

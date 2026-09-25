@@ -315,7 +315,6 @@ Rails.application.routes.draw do
     get "/forms/:tag/questions/csv", constraints: { tag: /(draft|live|live-or-archived)/ }, to: "reports#questions_csv", as: :report_questions_csv
 
     get "add_another_answer", to: "reports#add_another_answer", as: :report_add_another_answer
-    get "contact-for-research", to: "reports#contact_for_research", as: :report_contact_for_research
   end
 
   scope "api/v2", as: "api_v2" do
