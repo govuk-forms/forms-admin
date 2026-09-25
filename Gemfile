@@ -124,7 +124,7 @@ group :test do
   gem "pundit-matchers"
 
   # Code coverage reporter
-  gem "simplecov", "~> 1.2.0", require: false
+  gem "simplecov", "~> 1.3.0", require: false
 
   gem "webmock"
 
