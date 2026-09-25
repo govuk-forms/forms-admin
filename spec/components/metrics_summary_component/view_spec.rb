@@ -16,7 +16,7 @@ RSpec.describe MetricsSummaryComponent::View, type: :component do
   end
 
   it "renders the start and end dates" do
-    expect(render_inline(metrics_summary).to_html).to include(metrics_summary.formatted_date_range)
+    expect(rendered_content).to include(metrics_summary.formatted_date_range)
   end
 
   it "renders the number of days spanned" do
@@ -73,7 +73,7 @@ RSpec.describe MetricsSummaryComponent::View, type: :component do
     end
 
     it "renders the error message" do
-      expect(render_inline(metrics_summary).to_html).to include(metrics_summary.error_message)
+      expect(rendered_content).to include(metrics_summary.error_message)
     end
 
     it "does not render the CSV download link" do
@@ -90,7 +90,7 @@ RSpec.describe MetricsSummaryComponent::View, type: :component do
     end
 
     it "renders the error message" do
-      expect(render_inline(metrics_summary).to_html).to include(metrics_summary.error_message)
+      expect(rendered_content).to include(metrics_summary.error_message)
     end
 
     it "renders the heading without date information" do
@@ -145,7 +145,7 @@ RSpec.describe MetricsSummaryComponent::View, type: :component do
     end
 
     it "renders the error message" do
-      expect(render_inline(metrics_summary).to_html).to include(metrics_summary.error_message)
+      expect(rendered_content).to include(metrics_summary.error_message)
     end
 
     it "renders the CSV download link" do
