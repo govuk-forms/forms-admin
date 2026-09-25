@@ -107,12 +107,8 @@ describe "pages/_form.html.erb", type: :view do
             hint_text: page.hint_text
     end
 
-    let(:guidance_service) { instance_double(PageSummaryData::GuidanceService) }
-    let(:build_data) { {} }
-
     before do
-      allow(guidance_service).to receive(:build_data).and_return(build_data)
-      allow(PageSummaryData::GuidanceService).to receive(:call).and_return(guidance_service)
+      allow(PageSummaryData::GuidanceService).to receive(:call).and_call_original
 
       render partial: "pages/form", locals:
     end
