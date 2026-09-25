@@ -21,7 +21,7 @@
     "dev": "vite dev"
   },
   "devDependencies": {
-    "@testing-library/dom": "^10.4.1",
+    "@testing-library/dom": "^10.4.2",
     "autoprefixer": "^10.5.5",
     "esbuild": "0.28.2",
     "jsdom": "^30.0.1",
