@@ -259,6 +259,20 @@ RSpec.describe Organisation, type: :model do
     end
   end
 
+  describe "#admin_users" do
+    let(:organisation) { create :organisation, :with_signed_mou }
+    let!(:org_admin) { create :organisation_admin_user, organisation: }
+
+    before do
+      create :organisation_admin_user, organisation:, has_access: false
+      create :user, organisation:
+    end
+
+    it "only returns organisation admins who have access" do
+      expect(organisation.admin_users).to contain_exactly(org_admin)
+    end
+  end
+
   describe "#name_with_abbreviation" do
     it "uses abbreviation when it is not the same as name" do
       organisation = build :organisation, name: "An Organisation", abbreviation: "ABBR"
