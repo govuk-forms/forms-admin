@@ -80,9 +80,14 @@ class Reports::FormDocumentsService
     end
 
     def count_exit_pages(form_document)
-      form_document["content"]["steps"].sum do |step|
-        (step["exit_pages"]&.length || 0) +
-          (step["routing_conditions"]&.count { |c| c["exit_page_markdown"].present? } || 0)
+      form_document["content"]["steps"].sum { |step| count_step_exit_pages(step) }
+    end
+
+    def count_step_exit_pages(step)
+      if step["exit_pages"]&.any?
+        step["exit_pages"].length
+      else
+        step["routing_conditions"]&.count { |c| c["exit_page_markdown"].present? } || 0
       end
     end
 

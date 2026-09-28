@@ -374,6 +374,44 @@ RSpec.describe Reports::FormDocumentsService do
     end
   end
 
+  describe ".count_step_exit_pages" do
+    subject(:count_step_exit_pages) do
+      described_class.count_step_exit_pages(step)
+    end
+
+    context "when the step has exit pages via the ExitPage model" do
+      let(:step) { { "exit_pages" => [{ "id" => 1 }, { "id" => 2 }] } }
+
+      it { is_expected.to eq 2 }
+    end
+
+    context "when the step has an empty exit_pages array and a legacy exit_page_markdown on a routing condition" do
+      let(:step) do
+        {
+          "exit_pages" => [],
+          "routing_conditions" => [
+            { "exit_page_markdown" => "Exit page markdown" },
+          ],
+        }
+      end
+
+      it { is_expected.to eq 1 }
+    end
+
+    context "when the step has exit_pages and a legacy exit_page_markdown it does not double count" do
+      let(:step) do
+        {
+          "exit_pages" => [{ "id" => 1 }],
+          "routing_conditions" => [
+            { "exit_page_markdown" => "Exit page markdown" },
+          ],
+        }
+      end
+
+      it { is_expected.to eq 1 }
+    end
+  end
+
   describe ".has_add_another_answer?" do
     let(:form) do
       create(:form, :live, pages: [
