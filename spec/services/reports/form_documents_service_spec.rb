@@ -318,6 +318,62 @@ RSpec.describe Reports::FormDocumentsService do
     end
   end
 
+  describe ".count_exit_pages" do
+    subject(:count_exit_pages) do
+      described_class.count_exit_pages(form_document)
+    end
+
+    context "when a step has one exit page via the ExitPage model" do
+      let(:form_with_exit_page) do
+        form = create(:form, :live)
+        create(:exit_page, question_page: form.pages.first)
+        form.latest_form_document.update!(content: form.reload.as_form_document(live_at: form.updated_at))
+        form
+      end
+      let(:form_document) { form_with_exit_page.latest_form_document }
+
+      it { is_expected.to eq 1 }
+    end
+
+    context "when multiple steps each have an exit page via the ExitPage model" do
+      let(:form_with_multiple_exit_pages) do
+        form = create(:form, :live)
+        create(:exit_page, question_page: form.pages.first)
+        create(:exit_page, question_page: form.pages.second)
+        form.latest_form_document.update!(content: form.reload.as_form_document(live_at: form.updated_at))
+        form
+      end
+      let(:form_document) { form_with_multiple_exit_pages.latest_form_document }
+
+      it { is_expected.to eq 2 }
+    end
+
+    context "when form has no exit pages" do
+      let(:form_document) { basic_route_form.latest_form_document }
+
+      it { is_expected.to eq 0 }
+    end
+
+    context "when the form document is a legacy snapshot with an empty exit_pages array and exit_page_markdown on a routing condition" do
+      let(:form_document) do
+        {
+          "content" => {
+            "steps" => [
+              {
+                "exit_pages" => [],
+                "routing_conditions" => [
+                  { "exit_page_markdown" => "Exit page markdown" },
+                ],
+              },
+            ],
+          },
+        }
+      end
+
+      it { is_expected.to eq 1 }
+    end
+  end
+
   describe ".has_add_another_answer?" do
     let(:form) do
       create(:form, :live, pages: [
