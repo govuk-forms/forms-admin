@@ -187,7 +187,7 @@ private
 
   def form_with_routes_details(form)
     form["metadata"] = {
-      "number_of_routes" => form["content"]["steps"].count { |step| step["routing_conditions"].present? },
+      "number_of_questions_with_routes" => form["content"]["steps"].count { |step| step["routing_conditions"].present? },
     }
     form
   end

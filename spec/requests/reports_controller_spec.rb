@@ -186,7 +186,7 @@ RSpec.describe ReportsController, type: :request do
         expect(response).to render_template("reports/feature_report")
 
         node = Capybara.string(response.body)
-        expect(node).to have_xpath "//thead/tr/th[3]", text: "Number of routes"
+        expect(node).to have_xpath "//thead/tr/th[3]", text: "Number of questions with routes"
         expect(node).to have_xpath "//tbody/tr[1]/td[3]", text: "1"
       end
     end

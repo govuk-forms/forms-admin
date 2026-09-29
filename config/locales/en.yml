@@ -2160,7 +2160,7 @@ en:
         none_of_the_above: "‘None of the above’"
         none_of_the_above_follow_up_question: "‘None of the above’ follow-up question"
         number_of_options: Number of options
-        number_of_routes: Number of routes
+        number_of_questions_with_routes: Number of questions with routes
         organisation: Organisation
         question_text: Question text
       values:

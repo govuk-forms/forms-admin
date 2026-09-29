@@ -65,7 +65,7 @@ module ReportHelper
   def report_forms_with_routes_table_head
     [
       *report_forms_table_head,
-      I18n.t("reports.form_or_questions_list_table.headings.number_of_routes"),
+      I18n.t("reports.form_or_questions_list_table.headings.number_of_questions_with_routes"),
     ]
   end
 
@@ -114,7 +114,7 @@ private
   def report_forms_with_routes_table_row(form)
     [
       *report_forms_table_row(form),
-      form["metadata"]["number_of_routes"].to_s,
+      form["metadata"]["number_of_questions_with_routes"].to_s,
     ]
   end
 
