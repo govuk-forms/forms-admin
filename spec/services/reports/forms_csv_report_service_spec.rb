@@ -72,7 +72,6 @@ RSpec.describe Reports::FormsCsvReportService do
         "Version" => "1",
         "Number of questions" => "9",
         "Has routes" => "false",
-        "Has branch routes" => "false",
         "Has exit pages" => "false",
         "Has question with multiple exit pages" => "false",
         "Has question with multiple routes to exit pages" => "false",

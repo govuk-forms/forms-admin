@@ -2140,7 +2140,6 @@ en:
       features:
         copied_forms: "%{tag} forms that are copies"
         forms_with_add_another_answer: "%{tag} forms with add another answer"
-        forms_with_branch_routes: "%{tag} forms with branch routes"
         forms_with_copy_of_answers_enabled: "%{tag} forms that allow people to ask for a copy of their answers"
         forms_with_csv_submission_email_attachments: "%{tag} forms with CSV email attachments"
         forms_with_daily_submission_csv: "%{tag} forms getting a daily CSV of completed forms"
@@ -2159,7 +2158,6 @@ en:
         form_name: Form name
         none_of_the_above: "‘None of the above’"
         none_of_the_above_follow_up_question: "‘None of the above’ follow-up question"
-        number_of_branch_routes: Number of branch routes
         number_of_options: Number of options
         number_of_routes: Number of routes
         organisation: Organisation
@@ -2172,10 +2170,6 @@ en:
       download_csv: Download data about all %{tag} forms that are copies as a CSV file
       empty: There are no %{tag} forms that are copies
       heading: "%{tag} forms that are copies"
-    forms_with_branch_routes:
-      download_csv: Download data about all %{tag} forms with branch routes as a CSV file
-      empty: There are no %{tag} forms with branch routes
-      heading: "%{tag} forms with branch routes"
     forms_with_copy_of_answers_enabled:
       download_csv: Download data about all %{tag} forms that allow people to ask for a copy of their answers (as a CSV)
       empty: There are no %{tag} forms that allow people to ask for a copy of their answers

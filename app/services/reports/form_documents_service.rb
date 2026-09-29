@@ -22,20 +22,6 @@ class Reports::FormDocumentsService
       form_document["content"]["steps"].any? { |step| step["routing_conditions"].present? }
     end
 
-    def has_secondary_skip_routes?(form_document)
-      secondary_skip_conditions(form_document).any?
-    end
-
-    def count_secondary_skip_routes(form_document)
-      secondary_skip_conditions(form_document).count
-    end
-
-    def step_has_secondary_skip_route?(form_document, step)
-      secondary_skip_conditions(form_document).any? do |condition|
-        condition["check_page_id"] == step["id"]
-      end
-    end
-
     def has_add_another_answer?(form_document)
       form_document["content"]["steps"].any? { |step| step["data"]["is_repeatable"] }
     end
