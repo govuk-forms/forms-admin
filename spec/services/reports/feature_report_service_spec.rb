@@ -355,7 +355,7 @@ RSpec.describe Reports::FeatureReportService do
             "name" => basic_route_form.name,
           ),
           "metadata" => {
-            "number_of_routes" => 1,
+            "number_of_questions_with_routes" => 1,
           },
         ),
         a_hash_including(
@@ -364,7 +364,7 @@ RSpec.describe Reports::FeatureReportService do
             "name" => exit_page_form.name,
           ),
           "metadata" => {
-            "number_of_routes" => 1,
+            "number_of_questions_with_routes" => 1,
           },
         ),
       ]
@@ -392,7 +392,7 @@ RSpec.describe Reports::FeatureReportService do
       forms = described_class.new(form_documents).forms_with_routes
       expect(forms).to all include(
         "metadata" => a_hash_including(
-          "number_of_routes" => an_instance_of(Integer),
+          "number_of_questions_with_routes" => an_instance_of(Integer),
         ),
       )
     end

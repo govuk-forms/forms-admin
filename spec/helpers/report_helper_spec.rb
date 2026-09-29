@@ -11,8 +11,8 @@ RSpec.describe ReportHelper, type: :helper do
 
   let(:forms_with_routes) do
     [
-      { "form_id" => 3, "tag" => "live", "content" => { "name" => "Branch route form" }, "organisation_name" => "Ministry of Tests", "metadata" => { "number_of_routes" => 2 } },
-      { "form_id" => 4, "tag" => "live", "content" => { "name" => "Skip route form" }, "organisation_name" => "Department for Testing", "metadata" => { "number_of_routes" => 1 } },
+      { "form_id" => 3, "tag" => "live", "content" => { "name" => "Branch route form" }, "organisation_name" => "Ministry of Tests", "metadata" => { "number_of_questions_with_routes" => 2 } },
+      { "form_id" => 4, "tag" => "live", "content" => { "name" => "Skip route form" }, "organisation_name" => "Department for Testing", "metadata" => { "number_of_questions_with_routes" => 1 } },
     ]
   end
 
@@ -284,7 +284,7 @@ RSpec.describe ReportHelper, type: :helper do
       expect(helper.report_forms_with_routes_table_head).to eq [
         "Form name",
         "Organisation",
-        "Number of routes",
+        "Number of questions with routes",
       ]
     end
   end
@@ -323,7 +323,7 @@ RSpec.describe ReportHelper, type: :helper do
       ]
     end
 
-    it "includes the number of routes in the form" do
+    it "includes the number of questions with routes in the form" do
       expect(helper.report_forms_with_routes_table_rows(forms).map(&:third)).to eq %w[
         2
         1
