@@ -186,9 +186,25 @@ private
   end
 
   def form_with_routes_details(form)
-    form["metadata"] = {
-      "number_of_questions_with_routes" => form["content"]["steps"].count { |step| step["routing_conditions"].present? },
+    number_of_questions = {
+      "with_routes" => 0,
+      "with_many_conditional_routes" => 0,
     }
+
+    form["content"]["steps"].each do |step|
+      next unless step["routing_conditions"].any?
+
+      number_of_questions["with_routes"] += 1
+
+      if step["routing_conditions"].many? { |condition| condition["answer_value"].present? }
+        number_of_questions["with_many_conditional_routes"] += 1
+      end
+    end
+
+    form["metadata"] = {
+      "number_of_questions" => number_of_questions,
+    }
+
     form
   end
 end
