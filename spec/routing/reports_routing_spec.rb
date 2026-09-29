@@ -61,14 +61,6 @@ RSpec.describe ReportsController, type: :routing do
             expect(get: "/reports/features/#{tag}/forms-with-s3-submissions.csv").to route_to("reports#forms_with_s3_submissions", tag:, format: "csv")
           end
 
-          it "routes to #forms_with_branch_routes for #{tag} forms" do
-            expect(get: "/reports/features/#{tag}/forms-with-branch-routes").to route_to("reports#forms_with_branch_routes", tag:)
-          end
-
-          it "routes to #forms_with_branch_routes for #{tag} forms with csv format" do
-            expect(get: "/reports/features/#{tag}/forms-with-branch-routes.csv").to route_to("reports#forms_with_branch_routes", tag:, format: "csv")
-          end
-
           it "routes to #forms_with_exit_pages for #{tag} forms" do
             expect(get: "/reports/features/#{tag}/forms-with-exit-pages").to route_to("reports#forms_with_exit_pages", tag:)
           end
@@ -102,14 +94,6 @@ RSpec.describe ReportsController, type: :routing do
 
         it "does not route to #forms_with_routes with csv format" do
           expect(get: "/reports/features/foo/forms-with-routes.csv").not_to route_to("reports#forms_with_routes", format: "csv", tag: "foo")
-        end
-
-        it "does not route to #forms_with_branch_routes" do
-          expect(get: "/reports/features/foo/forms-with-branch-routes").not_to route_to("reports#forms_with_branch_routes", tag: "foo")
-        end
-
-        it "does not route to #forms_with_branch_routes with csv format" do
-          expect(get: "/reports/features/foo/forms-with-branch-routes.csv").not_to route_to("reports#forms_with_branch_routes", tag: "foo", format: "csv")
         end
 
         it "does not route to #forms_with_payments" do

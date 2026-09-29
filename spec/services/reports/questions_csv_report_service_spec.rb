@@ -36,27 +36,19 @@ RSpec.describe Reports::QuestionsCsvReportService do
       create(:page, :with_single_line_text_settings, is_repeatable: true),
     ])
   end
-  let(:branch_route_form) do
-    form = create(:form, :live, :ready_for_routing)
-    create(:condition, :with_exit_page, routing_page_id: form.pages[0].id, check_page_id: form.pages[0].id, answer_value: "Option 1")
-    create(:condition, routing_page_id: form.pages[1].id, check_page_id: form.pages[1].id, answer_value: "Option 1", goto_page_id: form.pages[3].id)
-    create(:condition, routing_page_id: form.pages[2].id, check_page_id: form.pages[1].id, goto_page_id: form.pages[4].id)
-    form.latest_form_document.update!(content: form.reload.as_form_document(live_at: form.updated_at))
-    form
-  end
   let(:basic_route_form) do
     form = create(:form, :live, :ready_for_routing)
     create(:condition, routing_page_id: form.pages.first.id, check_page_id: form.pages.first.id, answer_value: "Option 1", skip_to_end: true)
     form.latest_form_document.update!(content: form.reload.as_form_document(live_at: form.updated_at))
     form
   end
-  let(:forms) { [form_with_all_answer_types, branch_route_form, basic_route_form] }
+  let(:forms) { [form_with_all_answer_types, basic_route_form] }
 
   describe "#csv" do
     it "returns a CSV with a header row and a rows for each question" do
       csv = csv_reports_service.csv
       rows = CSV.parse(csv)
-      expect(rows.length).to eq 20
+      expect(rows.length).to eq 15
     end
 
     it "has expected values for text question" do
@@ -80,7 +72,6 @@ RSpec.describe Reports::QuestionsCsvReportService do
         "Is optional?" => "false",
         "Is repeatable?" => "true",
         "Has routes?" => "false",
-        "Has branch routes?" => "false",
         "Number of exit pages" => "0",
         "Number of routes to exit pages" => "0",
         "Number of unreachable exit pages" => "0",
@@ -115,7 +106,6 @@ RSpec.describe Reports::QuestionsCsvReportService do
         "Is optional?" => "true",
         "Is repeatable?" => "false",
         "Has routes?" => "false",
-        "Has branch routes?" => "false",
         "Number of exit pages" => "0",
         "Number of routes to exit pages" => "0",
         "Number of unreachable exit pages" => "0",
@@ -150,7 +140,6 @@ RSpec.describe Reports::QuestionsCsvReportService do
         "Is optional?" => "false",
         "Is repeatable?" => "false",
         "Has routes?" => "false",
-        "Has branch routes?" => "false",
         "Number of exit pages" => "0",
         "Number of routes to exit pages" => "0",
         "Number of unreachable exit pages" => "0",
@@ -185,42 +174,6 @@ RSpec.describe Reports::QuestionsCsvReportService do
         "Is optional?" => "false",
         "Is repeatable?" => "false",
         "Has routes?" => "true",
-        "Has branch routes?" => "false",
-        "Number of exit pages" => "0",
-        "Number of routes to exit pages" => "0",
-        "Number of unreachable exit pages" => "0",
-        "Answer settings - Input type" => nil,
-        "Select from a list settings - Only one option?" => "true",
-        "Select from a list settings - Number of options" => "2",
-        "Select from a list settings - None of the above?" => "false",
-        "Select from a list settings - None of the above follow-up question" => "No follow-up question",
-        "Name settings - Title needed?" => nil,
-        "Raw answer settings" => "{\"only_one_option\" => \"true\", \"selection_options\" => [{\"name\" => \"Option 1\", \"value\" => \"Option 1\"}, {\"name\" => \"Option 2\", \"value\" => \"Option 2\"}]}",
-      })
-    end
-
-    it "has expected values for question with branch routing conditions" do
-      csv = csv_reports_service.csv
-      rows = CSV.parse(csv, headers: true)
-      routing_question_row = rows.detect { |row| row["Question text"] == branch_route_form.pages[1].question_text }
-      expect(routing_question_row.to_h).to eq({
-        "Form ID" => branch_route_form.id.to_s,
-        "Status" => "live",
-        "Form name" => branch_route_form.name.to_s,
-        "Organisation name" => organisation_name,
-        "Organisation ID" => organisation_id.to_s,
-        "Group name" => group_name,
-        "Group ID" => group_external_id,
-        "Question number in form" => branch_route_form.pages[1].position.to_s,
-        "Question text" => branch_route_form.pages[1].question_text,
-        "Answer type" => "selection",
-        "Hint text" => nil,
-        "Page heading" => nil,
-        "Guidance markdown" => nil,
-        "Is optional?" => "false",
-        "Is repeatable?" => "false",
-        "Has routes?" => "true",
-        "Has branch routes?" => "true",
         "Number of exit pages" => "0",
         "Number of routes to exit pages" => "0",
         "Number of unreachable exit pages" => "0",

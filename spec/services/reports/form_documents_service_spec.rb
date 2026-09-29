@@ -9,28 +9,10 @@ RSpec.describe Reports::FormDocumentsService do
   let(:draft_internal_organisation_form) { create :form }
   let(:live_internal_organisation_form) { create :form }
   let(:form_with_welsh_translation) { create :form, welsh_completed: true }
-  let(:branch_route_form) do
-    form = create(:form, :live, :ready_for_routing)
-    create(:condition, :with_exit_page, routing_page_id: form.pages[0].id, check_page_id: form.pages[0].id, answer_value: "Option 1")
-    create(:condition, routing_page_id: form.pages[1].id, check_page_id: form.pages[1].id, answer_value: "Option 1", goto_page_id: form.pages[3].id)
-    create(:condition, routing_page_id: form.pages[2].id, check_page_id: form.pages[1].id, goto_page_id: form.pages[4].id)
-    form.latest_form_document.update!(content: form.reload.as_form_document(live_at: form.updated_at))
-    form
-  end
 
   let(:basic_route_form) do
     form = create(:form, :live, :ready_for_routing)
     create(:condition, routing_page_id: form.pages.first.id, check_page_id: form.pages.first.id, answer_value: "Option 1", skip_to_end: true)
-    form.latest_form_document.update!(content: form.reload.as_form_document(live_at: form.updated_at))
-    form
-  end
-
-  let(:form_with_2_branch_routes) do
-    form = create(:form, :live, :ready_for_routing, pages_count: 10)
-    create(:condition, routing_page_id: form.pages[1].id, check_page_id: form.pages[1].id, answer_value: "Option 1", goto_page_id: form.pages[3].id)
-    create(:condition, routing_page_id: form.pages[2].id, check_page_id: form.pages[1].id, answer_value: "Option 2", goto_page_id: form.pages[4].id)
-    create(:condition, routing_page_id: form.pages[6].id, check_page_id: form.pages[6].id, answer_value: "Option 1", goto_page_id: form.pages[8].id)
-    create(:condition, routing_page_id: form.pages[7].id, check_page_id: form.pages[6].id, answer_value: "Option 2", goto_page_id: form.pages[9].id)
     form.latest_form_document.update!(content: form.reload.as_form_document(live_at: form.updated_at))
     form
   end
@@ -145,83 +127,6 @@ RSpec.describe Reports::FormDocumentsService do
             [archived_form.id, 1],
             [archived_with_draft_form.id, 1],
           )
-      end
-    end
-  end
-
-  describe ".has_secondary_skip_routes?" do
-    subject(:count_secondary_skip_routes) do
-      described_class.has_secondary_skip_routes?(form_document)
-    end
-
-    context "when form has one step with one secondary skip condition" do
-      let(:form_document) { branch_route_form.latest_form_document }
-
-      it { is_expected.to be true }
-    end
-
-    context "when form has two steps each with one secondary skip condition" do
-      let(:form_document) { form_with_2_branch_routes.latest_form_document }
-
-      it { is_expected.to be true }
-    end
-
-    context "when form has no secondary skip conditions" do
-      let(:form_document) { basic_route_form.latest_form_document }
-
-      it { is_expected.to be false }
-    end
-  end
-
-  describe ".count_secondary_skip_routes" do
-    subject(:count_secondary_skip_routes) do
-      described_class.count_secondary_skip_routes(form_document)
-    end
-
-    context "when form has one step with one secondary skip condition" do
-      let(:form_document) { branch_route_form.latest_form_document }
-
-      it { is_expected.to eq 1 }
-    end
-
-    context "when form has two steps each with one secondary skip condition" do
-      let(:form_document) { form_with_2_branch_routes.latest_form_document }
-
-      it { is_expected.to eq 2 }
-    end
-
-    context "when form has no secondary skip conditions" do
-      let(:form_document) { basic_route_form.latest_form_document }
-
-      it { is_expected.to eq 0 }
-    end
-  end
-
-  describe ".step_has_secondary_skip_route?" do
-    context "when step is check page for secondary skip condition" do
-      let(:form_document) { branch_route_form.latest_form_document }
-      let(:step) { form_document["content"]["steps"][1] }
-
-      it "returns true" do
-        expect(described_class.step_has_secondary_skip_route?(form_document, step)).to be true
-      end
-    end
-
-    context "when step is not check page for secondary skip condition" do
-      let(:form_document) { branch_route_form.latest_form_document }
-      let(:step) { form_document["content"]["steps"][3] }
-
-      it "returns false" do
-        expect(described_class.step_has_secondary_skip_route?(form_document, step)).to be false
-      end
-    end
-
-    context "when form has no secondary skip conditions" do
-      let(:form_document) { basic_route_form.latest_form_document }
-      let(:step) { form_document["content"]["steps"][0] }
-
-      it "returns false" do
-        expect(described_class.step_has_secondary_skip_route?(form_document, step)).to be false
       end
     end
   end

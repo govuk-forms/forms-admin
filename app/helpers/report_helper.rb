@@ -66,7 +66,6 @@ module ReportHelper
     [
       *report_forms_table_head,
       I18n.t("reports.form_or_questions_list_table.headings.number_of_routes"),
-      I18n.t("reports.form_or_questions_list_table.headings.number_of_branch_routes"),
     ]
   end
 
@@ -116,7 +115,6 @@ private
     [
       *report_forms_table_row(form),
       form["metadata"]["number_of_routes"].to_s,
-      form["metadata"]["number_of_branch_routes"].to_s,
     ]
   end
 
