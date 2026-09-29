@@ -11,8 +11,8 @@ RSpec.describe ReportHelper, type: :helper do
 
   let(:forms_with_routes) do
     [
-      { "form_id" => 3, "tag" => "live", "content" => { "name" => "Branch route form" }, "organisation_name" => "Ministry of Tests", "metadata" => { "number_of_questions_with_routes" => 2 } },
-      { "form_id" => 4, "tag" => "live", "content" => { "name" => "Skip route form" }, "organisation_name" => "Department for Testing", "metadata" => { "number_of_questions_with_routes" => 1 } },
+      { "form_id" => 3, "tag" => "live", "content" => { "name" => "Branch route form" }, "organisation_name" => "Ministry of Tests", "metadata" => { "number_of_questions" => { "with_routes" => 2, "with_many_conditional_routes" => 1 } } },
+      { "form_id" => 4, "tag" => "live", "content" => { "name" => "Skip route form" }, "organisation_name" => "Department for Testing", "metadata" => { "number_of_questions" => { "with_routes" => 1, "with_many_conditional_routes" => 0 } } },
     ]
   end
 
@@ -285,6 +285,7 @@ RSpec.describe ReportHelper, type: :helper do
         "Form name",
         "Organisation",
         "Number of questions with routes",
+        "Number of questions with more than one conditional route",
       ]
     end
   end
@@ -327,6 +328,13 @@ RSpec.describe ReportHelper, type: :helper do
       expect(helper.report_forms_with_routes_table_rows(forms).map(&:third)).to eq %w[
         2
         1
+      ]
+    end
+
+    it "includes the number of questions with more than one conditional route in the form" do
+      expect(helper.report_forms_with_routes_table_rows(forms).map(&:fourth)).to eq %w[
+        1
+        0
       ]
     end
   end

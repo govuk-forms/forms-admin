@@ -143,8 +143,8 @@ describe "reports/feature_report" do
     let(:type) { :forms_with_routes }
     let(:records) do
       [
-        { "form_id" => 1, "tag" => tag, "content" => { "name" => "All question types form" }, "organisation_name" => "Government Digital Service", "metadata" => { "number_of_questions_with_routes" => 1 } },
-        { "form_id" => 3, "tag" => tag, "content" => { "name" => "Branch route form" }, "organisation_name" => "Government Digital Service", "metadata" => { "number_of_questions_with_routes" => 2 } },
+        { "form_id" => 1, "tag" => tag, "content" => { "name" => "All question types form" }, "organisation_name" => "Government Digital Service", "metadata" => { "number_of_questions" => { "with_routes" => 1 } } },
+        { "form_id" => 3, "tag" => tag, "content" => { "name" => "Branch route form" }, "organisation_name" => "Government Digital Service", "metadata" => { "number_of_questions" => { "with_routes" => 2 } } },
       ]
     end
 
