@@ -58,7 +58,7 @@ describe "exit_pages/edit.html.erb" do
       render_page
 
       expect(rendered).to have_css(".govuk-summary-list__key", text: "Options that go to this exit page")
-      expect(rendered).to have_css(".govuk-summary-list__value:text()", text: "option1", exact: true)
+      expect(rendered).to have_css(".govuk-summary-list__value", text: "option1")
     end
   end
 
