@@ -960,8 +960,6 @@ RSpec.describe Form, type: :model do
         welsh_language_status: :optional,
         share_preview_status: :completed,
         make_live_status: :completed,
-        make_only_english_live_status: :completed,
-        make_only_welsh_live_status: :cannot_start,
       }
       expect(form.all_task_statuses).to eq expected_hash
     end

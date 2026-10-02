@@ -22,7 +22,7 @@ class TaskStatusService
   end
 
   def all_task_statuses
-    {
+    statuses = {
       name_status:,
       pages_status:,
       declaration_status:,
@@ -35,13 +35,19 @@ class TaskStatusService
       submission_attachments_status:,
       batch_submissions_status:,
       share_preview_status:,
-      make_live_status:,
-      make_only_english_live_status:,
-      make_only_welsh_live_status:,
       welsh_language_status:,
       submission_email_status:,
       confirm_submission_email_status:,
     }
+
+    if display_make_languages_live_tasks?
+      statuses[:make_only_english_live_status] = make_only_english_live_status
+      statuses[:make_only_welsh_live_status] = make_only_welsh_live_status
+    else
+      statuses[:make_live_status] = make_live_status
+    end
+
+    statuses
   end
 
   def incomplete_email_tasks
@@ -58,6 +64,10 @@ class TaskStatusService
   end
 
 private
+
+  def display_make_languages_live_tasks?
+    !@form.has_live_welsh_translation? && @form.has_welsh_translation?
+  end
 
   def name_status
     :completed

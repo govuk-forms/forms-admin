@@ -196,9 +196,9 @@ private
   def make_form_live_section_tasks
     [
       share_preview_task,
-      (make_live_task unless display_make_languages_live_tasks?),
-      (make_only_english_live_task if display_make_languages_live_tasks?),
-      (make_only_welsh_live_task if display_make_languages_live_tasks?),
+      (make_live_task if @task_statuses.key?(:make_live_status)),
+      (make_only_english_live_task if @task_statuses.key?(:make_only_english_live_status)),
+      (make_only_welsh_live_task if @task_statuses.key?(:make_only_welsh_live_status)),
     ].compact
   end
 
@@ -248,10 +248,6 @@ private
       status:,
       active: can_make_form_live,
     }
-  end
-
-  def display_make_languages_live_tasks?
-    !@form.has_live_welsh_translation? && @form.has_welsh_translation?
   end
 
   def live_title_name
