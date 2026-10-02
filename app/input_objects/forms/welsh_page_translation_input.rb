@@ -57,7 +57,7 @@ class Forms::WelshPageTranslationInput < BaseInput
     end
 
     if page_has_selection_options?
-      page.answer_settings_cy.selection_options = DataStructType.new.cast_value(selection_options_cy.map(&:as_selection_option))
+      page.answer_settings_cy.selection_options = DataStructType.new.cast_value(selection_options_cy.sort_by!(&:id).map(&:as_selection_option))
     end
 
     page.save!
@@ -260,6 +260,18 @@ class Forms::WelshPageTranslationInput < BaseInput
 
   def page_has_selection_options?
     page.answer_type == "selection"
+  end
+
+  def hide_selection_option_fields?
+    selection_options_cy.size > 30
+  end
+
+  def has_translated_selection_options?
+    selection_options_cy.filter { |option| option.name_cy.present? }.any?
+  end
+
+  def translated_selection_options_without_errors
+    selection_options_cy.filter { |option| option.name_cy.present? && option.errors.none? }
   end
 
   # We need to normalize the Welsh answer settings to match the English ones.

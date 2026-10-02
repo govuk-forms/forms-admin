@@ -122,31 +122,74 @@
             <% end %>
 
             <% if page_form.object.page_has_selection_options? %>
-              <%= render ScrollingWrapperComponent::View.new(aria_label: t("forms.welsh_translation.new.section_headings.selection_options", question_number: page_form.object.page.position)) do %>
-                <%= page_form.govuk_fieldset legend: nil, described_by: ["selection_options_cy_table_caption"] do %>
-                  <%= govuk_table(classes: @table_presenter.two_column_classes) do |table| %>
-                    <%= table.with_caption(size: 's',
-                               text: t("forms.welsh_translation.new.section_headings.selection_options", question_number: page_form.object.page.position),
-                               html_attributes:{ id: "selection_options_cy_table_caption"})
-        table.with_head(**@table_presenter.two_column_headers) %>
-
-                    <%= table.with_body do |body| %>
-                      <% page_form.fields_for :selection_options_cy, page_form.object.selection_options_cy do |selection_options_form| %>
-                        <%= body.with_row do |row| %>
-                          <%= row.with_cell(text: page_form.object.page.answer_settings.selection_options[selection_options_form.index].name) %>
-                          <%= row.with_cell do %>
-                            <%= selection_options_form.hidden_field :id %>
-                            <%= selection_options_form.govuk_text_field :name_cy,
-                id: selection_options_form.object.form_field_id(:name_cy),
-                label: {
-                  text: t("helpers.label.forms_welsh_page_translation_input.selection_options_cy_html", question_number: page_form.object.page.position, option_number: selection_options_form.index + 1), for: selection_options_form.object.form_field_id(:name_cy),
-                },
-                lang: "cy"
-              %>
+              <% if page_form.object.hide_selection_option_fields? && !page_form.object.has_translated_selection_options? %>
+                <div class="govuk-grid-row">
+                  <div class="govuk-grid-column-two-thirds">
+                    <h3 class="govuk-heading-s"><%= t("forms.welsh_translation.new.section_headings.selection_options", question_number: page_form.object.page.position) %></h3>
+                    <p><%= t("forms.welsh_translation.new.long_list_of_selection_options") %></p>
+                  </div>
+                </div>
+              <% else %>
+                <%= render ScrollingWrapperComponent::View.new(aria_label: t("forms.welsh_translation.new.section_headings.selection_options", question_number: page_form.object.page.position)) do %>
+                  <%= page_form.govuk_fieldset legend: nil, described_by: ["selection_options_cy_table_caption"] do %>
+                    <% hidden_selection_option_fields = [] %>
+                    <%= govuk_table(classes: @table_presenter.two_column_classes) do |table| %>
+                      <%= table.with_caption(size: 's',
+                                 text: t("forms.welsh_translation.new.section_headings.selection_options", question_number: page_form.object.page.position),
+                                 html_attributes:{ id: "selection_options_cy_table_caption"})
+                      table.with_head(**@table_presenter.two_column_headers) %>
+                      <%= table.with_body do |body| %>
+                        <% if page_form.object.hide_selection_option_fields? && page_form.object.translated_selection_options_without_errors.any? %>
+                          <%= body.with_row do |row| %>
+                            <% options_in_details = page_form.object.translated_selection_options_without_errors %>
+                            <%= row.with_cell do %>
+                              <%= govuk_details(summary_text: t("forms.welsh_translation.new.selection_options_details_summary.english", count: options_in_details.size)) do %>
+                                <ul class="govuk-list govuk-list--bullet">
+                                  <% options_in_details.each do |option| %>
+                                    <li>
+                                      <%= page_form.object.page.answer_settings.selection_options[option.id].name %>
+                                    </li>
+                                  <% end %>
+                                </ul>
+                              <% end %>
+                            <% end %>
+                            <%= row.with_cell do %>
+                              <%= govuk_details(summary_text: t("forms.welsh_translation.new.selection_options_details_summary.welsh", count: options_in_details.size)) do %>
+                                <ul class="govuk-list govuk-list--bullet">
+                                  <% options_in_details.each do |option| %>
+                                    <li>
+                                      <%= option.name_cy %>
+                                    </li>
+                                  <% end %>
+                                </ul>
+                              <% end %>
+                            <% end %>
+                          <% end %>
+                        <% end %>
+                        <% page_form.fields_for :selection_options_cy, page_form.object.selection_options_cy do |selection_options_form| %>
+                          <% if page_form.object.hide_selection_option_fields? && selection_options_form.object.errors.none? %>
+                            <% hidden_selection_option_fields << selection_options_form.hidden_field(:id) %>
+                            <% hidden_selection_option_fields << selection_options_form.hidden_field(:name_cy) %>
+                          <% else %>
+                            <%= body.with_row do |row| %>
+                              <%= row.with_cell(text: page_form.object.page.answer_settings.selection_options[selection_options_form.index].name) %>
+                              <%= row.with_cell do %>
+                                <%= selection_options_form.hidden_field :id %>
+                                <%= selection_options_form.govuk_text_field :name_cy,
+                                    id: selection_options_form.object.form_field_id(:name_cy),
+                                    label: {
+                                      text: t("helpers.label.forms_welsh_page_translation_input.selection_options_cy_html", question_number: page_form.object.page.position, option_number: selection_options_form.index + 1), for: selection_options_form.object.form_field_id(:name_cy),
+                                    },
+                                    lang: "cy"
+                                %>
+                              <% end %>
+                            <% end %>
                           <% end %>
                         <% end %>
                       <% end %>
                     <% end %>
+
+                    <%= safe_join(hidden_selection_option_fields) %>
                   <% end %>
                 <% end %>
               <% end %>

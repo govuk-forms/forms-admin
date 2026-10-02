@@ -459,6 +459,34 @@ RSpec.describe Forms::WelshPageTranslationInput, type: :model do
         expect(page.reload.answer_settings_cy.selection_options.second.name).to eq("welsh option 2")
         expect(page.reload.answer_settings_cy.selection_options.second.value).to eq("Option 2")
       end
+
+      context "when the selection options are submitted out of order" do
+        let(:page) do
+          create_page(answer_type: "selection",
+                      answer_settings: { only_one_option: "true", selection_options: [{ name: "Option 1", value: "Option 1" }, { name: "Option 2", value: "Option 2" }, { name: "Option 3", value: "Option 3" }] })
+        end
+        let(:new_input_data) do
+          super().merge({ selection_options_cy_attributes: {
+            "0" => { "id" => "1", "name_cy" => "welsh option 2" },
+            "1" => { "id" => "0", "name_cy" => "welsh option 1" },
+            "2" => { "id" => "2", "name_cy" => "welsh option 3" },
+          } })
+        end
+
+        it "stores the selection options in the correct order" do
+          welsh_page_translation_input.submit
+
+          expect(page.reload.answer_settings_cy.selection_options.count).to eq(3)
+          expect(page.reload.answer_settings_cy.selection_options.first.name).to eq("welsh option 1")
+          expect(page.reload.answer_settings_cy.selection_options.first.value).to eq("Option 1")
+
+          expect(page.reload.answer_settings_cy.selection_options.second.name).to eq("welsh option 2")
+          expect(page.reload.answer_settings_cy.selection_options.second.value).to eq("Option 2")
+
+          expect(page.reload.answer_settings_cy.selection_options.third.name).to eq("welsh option 3")
+          expect(page.reload.answer_settings_cy.selection_options.third.value).to eq("Option 3")
+        end
+      end
     end
 
     context "when the page has a selection question with none of the above" do
@@ -717,6 +745,38 @@ RSpec.describe Forms::WelshPageTranslationInput, type: :model do
 
       it "is true" do
         expect(welsh_page_translation_input.page_has_none_of_the_above_question?).to be true
+      end
+    end
+  end
+
+  describe "#hide_selection_option_fields?" do
+    context "when the page has 30 selection options" do
+      let(:page) do
+        options = 30.times.map { |i| { name: "Option #{i + 1}", value: "Option #{i + 1}" } }
+        create_page(answer_type: "selection", answer_settings: { only_one_option: "true", selection_options: options })
+      end
+      let(:new_input_data) do
+        attrs = 30.times.each_with_object({}) { |i, h| h[i.to_s] = { "id" => i.to_s, "name_cy" => "Welsh option #{i + 1}" } }
+        super().merge(selection_options_cy_attributes: attrs)
+      end
+
+      it "returns false" do
+        expect(welsh_page_translation_input.hide_selection_option_fields?).to be false
+      end
+    end
+
+    context "when the page has more than 30 selection options" do
+      let(:page) do
+        options = 31.times.map { |i| { name: "Option #{i + 1}", value: "Option #{i + 1}" } }
+        create_page(answer_type: "selection", answer_settings: { only_one_option: "true", selection_options: options })
+      end
+      let(:new_input_data) do
+        attrs = 31.times.each_with_object({}) { |i, h| h[i.to_s] = { "id" => i.to_s, "name_cy" => "Welsh option #{i + 1}" } }
+        super().merge(selection_options_cy_attributes: attrs)
+      end
+
+      it "returns true" do
+        expect(welsh_page_translation_input.hide_selection_option_fields?).to be true
       end
     end
   end

@@ -293,6 +293,116 @@ describe "forms/welsh_translation/new.html.erb", feature_multiple_branches: fals
           expect(rendered).to have_field("Enter Welsh option 2")
         end
 
+        context "when the page has 30 or more selection options and none have been translated" do
+          let(:page) { create :page, :selection_with_autocomplete }
+
+          it "shows the section heading" do
+            expect(rendered).to have_css("h3.govuk-heading-s", text: t("forms.welsh_translation.new.section_headings.selection_options", question_number: page.position))
+          end
+
+          it "shows a paragraph instructing the user to upload a CSV" do
+            expect(rendered).to have_css("p", text: t("forms.welsh_translation.new.long_list_of_selection_options"))
+          end
+
+          it "does not show input fields for the selection options" do
+            expect(rendered).not_to have_field("Enter Welsh option 1")
+          end
+
+          it "does not show the selection options table" do
+            expect(rendered).not_to have_css("caption", text: t("forms.welsh_translation.new.section_headings.selection_options", question_number: page.position))
+          end
+        end
+
+        context "when the page has 30 or more selection options and all have been translated" do
+          let(:translated_options) { (1..31).map { |i| { name: "Welsh option #{i}", value: i.to_s } } }
+          let(:page) do
+            create :page, :selection_with_autocomplete,
+                   answer_settings_cy: { only_one_option: "true", selection_options: translated_options }
+          end
+
+          it "shows the selection heading as a table caption" do
+            expect(rendered).to have_css("caption", text: t("forms.welsh_translation.new.section_headings.selection_options", question_number: page.position))
+          end
+
+          it "shows a details summary with the count of translated Welsh options" do
+            expect(rendered).to have_css("summary", text: t("forms.welsh_translation.new.selection_options_details_summary.welsh", count: 31))
+          end
+
+          it "shows a details summary with the count of English options" do
+            expect(rendered).to have_css("summary", text: t("forms.welsh_translation.new.selection_options_details_summary.english", count: 31))
+          end
+
+          it "lists all English option names in the English details component" do
+            page.answer_settings.selection_options.each do |option|
+              expect(rendered).to have_css("li", text: option["name"], visible: :all)
+            end
+          end
+
+          it "lists all Welsh option names in the Welsh details component" do
+            translated_options.each do |option|
+              expect(rendered).to have_css("li", text: option[:name], visible: :all)
+            end
+          end
+
+          it "renders hidden fields for all translated selection options" do
+            translated_options.each do |option|
+              expect(rendered).to have_css("input[type='hidden'][value='#{option[:name]}']", visible: :hidden)
+            end
+          end
+
+          it "does not show individual input fields for the selection options" do
+            expect(rendered).not_to have_field("Enter Welsh option 1")
+          end
+
+          it "does not show the CSV upload paragraph" do
+            expect(rendered).not_to have_css("p", text: t("forms.welsh_translation.new.long_list_of_selection_options"))
+          end
+        end
+
+        context "when the page has 30 or more selection options and some have translation errors" do
+          let(:translated_options) do
+            [{ name: "Welsh option 1", value: "1" }] + (2..31).map { |i| { name: "", value: i.to_s } }
+          end
+          let(:page) do
+            create :page, :selection_with_autocomplete,
+                   answer_settings_cy: { only_one_option: "true", selection_options: translated_options }
+          end
+
+          before do
+            welsh_translation_input.validate(:mark_complete)
+            render
+          end
+
+          it "shows the selection heading as a table caption" do
+            expect(rendered).to have_css("caption", text: t("forms.welsh_translation.new.section_headings.selection_options", question_number: page.position))
+          end
+
+          it "shows a details summary for the translated options without errors" do
+            expect(rendered).to have_css("summary", text: t("forms.welsh_translation.new.selection_options_details_summary.welsh", count: 1))
+          end
+
+          it "lists the English name for the valid option in the English details component" do
+            expect(rendered).to have_css("li", text: page.answer_settings.selection_options[0].name, visible: :all)
+          end
+
+          it "lists the Welsh name for the valid option in the Welsh details component" do
+            expect(rendered).to have_css("li", text: translated_options.first[:name], visible: :all)
+          end
+
+          it "renders a hidden field for the valid translated option" do
+            expect(rendered).to have_css("input[type='hidden'][value='Welsh option 1']", visible: :hidden)
+          end
+
+          it "shows input fields for options with errors" do
+            expect(rendered).to have_field("Enter Welsh option 2")
+          end
+
+          it "does not show input fields for options without errors" do
+            option_1_field_id = welsh_page_translation_input.selection_options_cy.first.form_field_id(:name_cy)
+            expect(rendered).not_to have_field(id: option_1_field_id, type: "text")
+          end
+        end
+
         context "when the multiple branches feature is enabled", :feature_multiple_branches do
           let(:exit_page) { create :exit_page }
           let(:welsh_exit_page_translation_input) { Forms::WelshExitPageTranslationInput.new(exit_page:, position: 1).assign_exit_page_values }
