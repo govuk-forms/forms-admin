@@ -30,54 +30,53 @@ FactoryBot.define do
 
     trait :with_selection_settings do
       transient do
+        selection_options_count { 2 }
+
         only_one_option { "true" }
-        selection_options { [{ name: "Option 1", value: "Option 1" }, { name: "Option 2", value: "Option 2" }] }
+        selection_options do
+          (1..selection_options_count).map do |i|
+            { name: "Option #{i}", value: "Option #{i}" }
+          end
+        end
       end
 
       question_text { Faker::Lorem.question }
       answer_type { "selection" }
-      answer_settings { DataStruct.new(only_one_option:, selection_options:) }
+      answer_settings { { only_one_option:, selection_options: } }
     end
 
     trait :selection_with_radios do
-      answer_type { "selection" }
-      answer_settings do
-        {
-          only_one_option: "true",
-          selection_options: (1..30).to_a.map { |i| { name: i.to_s, value: i.to_s } },
-        }
+      with_selection_settings
+
+      transient do
+        selection_options_count { 30 }
       end
     end
 
     trait :selection_with_autocomplete do
-      answer_type { "selection" }
-      answer_settings do
-        {
-          only_one_option: "true",
-          selection_options: (1..31).to_a.map { |i| { name: i.to_s, value: i.to_s } },
-        }
+      with_selection_settings
+
+      transient do
+        selection_options_count { 31 }
       end
     end
 
     trait :selection_with_checkboxes do
-      answer_type { "selection" }
-      answer_settings do
-        {
-          only_one_option: "false",
-          selection_options: [{ name: "Option 1", value: "Option 1" }, { name: "Option 2", value: "Option 2" }],
-        }
+      with_selection_settings
+
+      transient do
+        only_one_option { "false" }
       end
     end
 
     trait :selection_with_none_of_the_above_question do
+      with_selection_settings
+
       transient do
-        only_one_option { "true" }
-        selection_options { [{ name: "Option 1", value: "Option 1" }, { name: "Option 2", value: "Option 2" }] }
         none_of_the_above_question_text { "None of the above question?" }
         none_of_the_above_question_is_optional { "true" }
       end
 
-      answer_type { "selection" }
       is_optional { true }
       answer_settings do
         {
@@ -97,12 +96,12 @@ FactoryBot.define do
       end
 
       answer_type { "text" }
-      answer_settings { DataStruct.new(input_type:) }
+      answer_settings { { input_type: } }
     end
 
     trait :with_single_line_text_settings do
       answer_type { "text" }
-      answer_settings { DataStruct.new(input_type: "single_line") }
+      answer_settings { { input_type: "single_line" } }
     end
 
     trait :with_date_settings do
@@ -111,7 +110,7 @@ FactoryBot.define do
       end
 
       answer_type { "date" }
-      answer_settings { DataStruct.new(input_type:) }
+      answer_settings { { input_type: } }
     end
 
     trait :with_address_settings do
@@ -121,7 +120,7 @@ FactoryBot.define do
       end
 
       answer_type { "address" }
-      answer_settings { DataStruct.new(input_type: DataStruct.new(uk_address:, international_address:)) }
+      answer_settings { { input_type: { uk_address:, international_address: } } }
     end
 
     trait :with_name_settings do
@@ -131,12 +130,12 @@ FactoryBot.define do
       end
 
       answer_type { "name" }
-      answer_settings { DataStruct.new(input_type:, title_needed:) }
+      answer_settings { { input_type:, title_needed: } }
     end
 
     trait :with_full_name_settings do
       answer_type { "name" }
-      answer_settings { DataStruct.new(input_type: "full_name", title_needed: false) }
+      answer_settings { { input_type: "full_name", title_needed: false } }
     end
 
     trait :with_file_upload_answer_type do
