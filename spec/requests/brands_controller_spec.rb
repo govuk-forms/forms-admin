@@ -50,6 +50,55 @@ RSpec.describe BrandsController, type: :request do
         expect(page).to have_link(brand.name, href: brand_path(brand))
       end
     end
+
+    context "when brands are in use" do
+      before do
+        create_list :organisation_brand, 2, brand: brand
+        create :organisation_brand, brand: other_brand
+
+        create :form, :live, brand_id: brand.slug
+        create :form, :archived, brand_id: brand.slug
+        create :form, :archived_with_draft, brand_id: brand.slug
+        create_list :form, 2, brand_id: brand.slug
+        create :form, brand_id: other_brand.slug
+
+        # the draft has switched brand, but the live version still uses the original one
+        live_with_draft_form = create :form, :live_with_draft, brand_id: brand.slug
+        live_with_draft_form.update_column(:brand_id, other_brand.slug)
+
+        login_as_super_admin_user
+
+        get path
+      end
+
+      it "shows the number of organisations, live forms and draft forms for each brand" do
+        rows = Capybara.string(response.body).all("tbody tr").map { |row| row.all("td, th").map { |cell| cell.text.strip } }
+        expect(rows).to eq([
+          ["Exampleton Town Council", "exampleton", "1", "0", "2"],
+          ["Testshire Council", "testshire", "2", "2", "3"],
+        ])
+      end
+    end
+
+    context "when a brand is only used by the draft version of a live form" do
+      before do
+        # the live version has no brand, and the brand was added in the draft
+        live_with_draft_form = create :form, :live_with_draft, brand_id: nil
+        live_with_draft_form.update_column(:brand_id, brand.slug)
+
+        login_as_super_admin_user
+
+        get path
+      end
+
+      it "counts the form as a draft form but not a live form for that brand" do
+        rows = Capybara.string(response.body).all("tbody tr").map { |row| row.all("td, th").map { |cell| cell.text.strip } }
+        expect(rows).to eq([
+          ["Exampleton Town Council", "exampleton", "0", "0", "0"],
+          ["Testshire Council", "testshire", "0", "0", "1"],
+        ])
+      end
+    end
   end
 
   describe "#show" do

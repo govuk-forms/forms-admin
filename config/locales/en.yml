@@ -334,7 +334,10 @@ en:
       no_results: No brands found.
       table_caption: Brands
       table_headings:
+        draft_forms: Draft forms
+        live_forms: Live forms
         name: Brand name
+        organisations: Organisations
         slug: Slug
     show:
       edit_brand: Edit this brand
