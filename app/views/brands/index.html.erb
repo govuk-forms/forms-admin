@@ -9,6 +9,9 @@
         head.with_row do |row|
           row.with_cell(header: true, text: t("brands.index.table_headings.name"))
           row.with_cell(header: true, text: t("brands.index.table_headings.slug"))
+          row.with_cell(header: true, text: t("brands.index.table_headings.organisations"), numeric: true)
+          row.with_cell(header: true, text: t("brands.index.table_headings.live_forms"), numeric: true)
+          row.with_cell(header: true, text: t("brands.index.table_headings.draft_forms"), numeric: true)
         end
       end %>
 
@@ -19,6 +22,9 @@
               govuk_link_to(brand.name, brand_path(brand))
             end
             row.with_cell(text: brand.slug)
+            row.with_cell(text: @organisation_counts.fetch(brand.id, 0).to_s, numeric: true)
+            row.with_cell(text: @live_form_counts.fetch(brand.slug, 0).to_s, numeric: true)
+            row.with_cell(text: @draft_form_counts.fetch(brand.slug, 0).to_s, numeric: true)
           end
         end
       end %>

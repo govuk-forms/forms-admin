@@ -6,6 +6,13 @@ class BrandsController < WebController
     authorize Brand, :can_view_brands?
 
     @brands = Brand.order(:name).load
+
+    # forms reference brands by slug rather than by id
+    @organisation_counts = OrganisationBrand.group(:brand_id).count
+    @live_form_counts = Form.joins(:latest_form_document)
+                            .where(state: %w[live live_with_draft])
+                            .group("form_documents.content->>'brand_id'").count
+    @draft_form_counts = Form.where(state: %w[draft live_with_draft archived_with_draft]).group(:brand_id).count
   end
 
   def show
