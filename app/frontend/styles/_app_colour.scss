@@ -1,0 +1,20 @@
+.app-colour {
+  display: inline-flex;
+  align-items: center;
+  gap: govuk-spacing(2);
+}
+
+.app-colour__swatch {
+  flex-shrink: 0;
+  // sized in ems so the swatch scales with the text when it is resized
+  width: 1em;
+  height: 1em;
+  // keep the swatch's actual colour when the user has forced colours enabled
+  forced-color-adjust: none;
+
+  // the outline uses currentColor, which is no longer forced, so set it to
+  // the user's text colour to keep it visible against their background
+  @media (forced-colors: active) {
+    color: CanvasText;
+  }
+}
