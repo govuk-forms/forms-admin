@@ -38,11 +38,9 @@ RSpec.describe BrandsController, type: :request do
         expect(response).to render_template("brands/index")
       end
 
-      it "lists all brands with their slugs" do
+      it "lists all brands" do
         expect(response.body).to include(brand.name)
-        expect(response.body).to include(brand.slug)
         expect(response.body).to include(other_brand.name)
-        expect(response.body).to include(other_brand.slug)
       end
 
       it "links each brand to its show page" do
@@ -74,8 +72,8 @@ RSpec.describe BrandsController, type: :request do
       it "shows the number of organisations, live forms and draft forms for each brand" do
         rows = Capybara.string(response.body).all("tbody tr").map { |row| row.all("td, th").map { |cell| cell.text.strip } }
         expect(rows).to eq([
-          ["Exampleton Town Council", "exampleton", "1", "0", "2"],
-          ["Testshire Council", "testshire", "2", "2", "3"],
+          ["Exampleton Town Council", "1", "0", "2"],
+          ["Testshire Council", "2", "2", "3"],
         ])
       end
     end
@@ -94,8 +92,8 @@ RSpec.describe BrandsController, type: :request do
       it "counts the form as a draft form but not a live form for that brand" do
         rows = Capybara.string(response.body).all("tbody tr").map { |row| row.all("td, th").map { |cell| cell.text.strip } }
         expect(rows).to eq([
-          ["Exampleton Town Council", "exampleton", "0", "0", "0"],
-          ["Testshire Council", "testshire", "0", "0", "1"],
+          ["Exampleton Town Council", "0", "0", "0"],
+          ["Testshire Council", "0", "0", "1"],
         ])
       end
     end
@@ -121,7 +119,6 @@ RSpec.describe BrandsController, type: :request do
 
       it "shows the brand's properties" do
         expect(response.body).to include(brand.name)
-        expect(response.body).to include(brand.slug)
         expect(response.body).to include(brand.logo_alt_text)
         expect(response.body).to include(brand.logo_link)
         expect(response.body).to include(brand.header_background_colour)
