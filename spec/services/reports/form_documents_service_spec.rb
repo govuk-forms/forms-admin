@@ -17,6 +17,16 @@ RSpec.describe Reports::FormDocumentsService do
     form
   end
 
+  let(:multiple_branches_form) do
+    form = create(:form, :live, :ready_for_multiple_branches)
+    create(:condition, routing_page: form.pages.first, check_page: form.pages.first, answer_value: "Option 2", goto_page: form.pages.third)
+    create(:condition, routing_page: form.pages.first, check_page: form.pages.first, answer_value: "Option 3", goto_page: form.pages.fourth)
+    create(:condition, routing_page: form.pages.second, check_page: form.pages.second, answer_value: nil, skip_to_end: true)
+    create(:condition, routing_page: form.pages.third, check_page: form.pages.third, answer_value: nil, skip_to_end: true)
+    form.latest_form_document.update!(content: form.reload.as_form_document(live_at: form.updated_at))
+    form
+  end
+
   describe "#form_documents" do
     let(:organisation) { create :organisation, internal: false, slug: "hm-revenue-customs" }
     let(:internal_organisation) { create :organisation, internal: true, slug: "internal-org" }
@@ -127,6 +137,104 @@ RSpec.describe Reports::FormDocumentsService do
             [archived_form.id, 1],
             [archived_with_draft_form.id, 1],
           )
+      end
+    end
+  end
+
+  describe ".update_routes_details" do
+    subject(:update_routes_details) do
+      described_class.update_routes_details(form_document)
+    end
+
+    let(:form_document) do
+      multiple_branches_form.latest_form_document.as_json
+    end
+
+    it "returns the form document" do
+      expect(update_routes_details).to eq form_document
+    end
+
+    it "adds form metadata" do
+      expect(update_routes_details["metadata"]).to include(
+        "number_of_questions" => {
+          "with_routes" => 3,
+          "with_many_conditional_routes" => 1,
+        },
+      )
+    end
+  end
+
+  describe ".has_add_another_answer?" do
+    let(:form) do
+      create(:form, :live, pages: [
+        create(:page, is_repeatable:),
+      ])
+    end
+    let(:form_document) { form.latest_form_document }
+
+    context "when the form has a question with add another answer" do
+      let(:is_repeatable) { true }
+
+      it "returns true" do
+        expect(described_class.has_add_another_answer?(form_document)).to be true
+      end
+    end
+
+    context "when the form does not have a question with add another answer" do
+      let(:is_repeatable) { false }
+
+      it "returns false" do
+        expect(described_class.has_add_another_answer?(form_document)).to be false
+      end
+    end
+  end
+
+  describe ".has_daily_submission_csv" do
+    subject(:daily_submission_batch_enabled) do
+      described_class.has_daily_submission_csv(form_document)
+    end
+
+    context "when form has a daily delivery_configuration" do
+      let(:form_document) do
+        create(:form, :live, delivery_configurations: [create(:delivery_configuration, :daily_email)])
+          .latest_form_document
+      end
+
+      it "returns true" do
+        expect(daily_submission_batch_enabled).to be true
+      end
+    end
+
+    context "when form does not have a daily delivery_configuration" do
+      let(:form_document) { create(:form, :live).latest_form_document }
+
+      it "returns false" do
+        expect(daily_submission_batch_enabled).to be false
+      end
+    end
+  end
+
+  describe ".has_weekly_submission_csv" do
+    subject(:weekly_submission_batch_enabled) do
+      described_class.has_weekly_submission_csv(form_document)
+    end
+
+    context "when form has weekly delivery_configuration" do
+      let(:form_document) do
+        create(:form, :live, delivery_configurations: [create(:delivery_configuration, :weekly_email)])
+          .latest_form_document
+      end
+
+      it "returns true" do
+        expect(weekly_submission_batch_enabled).to be true
+      end
+    end
+
+    context "when form does not have a weekly delivery_configuration" do
+      let(:form_document) { create(:form, :live).latest_form_document }
+
+      it "returns false" do
+        expect(weekly_submission_batch_enabled).to be false
       end
     end
   end
@@ -478,81 +586,6 @@ RSpec.describe Reports::FormDocumentsService do
       end
 
       it { is_expected.to eq 0 }
-    end
-  end
-
-  describe ".has_add_another_answer?" do
-    let(:form) do
-      create(:form, :live, pages: [
-        create(:page, is_repeatable:),
-      ])
-    end
-    let(:form_document) { form.latest_form_document }
-
-    context "when the form has a question with add another answer" do
-      let(:is_repeatable) { true }
-
-      it "returns true" do
-        expect(described_class.has_add_another_answer?(form_document)).to be true
-      end
-    end
-
-    context "when the form does not have a question with add another answer" do
-      let(:is_repeatable) { false }
-
-      it "returns false" do
-        expect(described_class.has_add_another_answer?(form_document)).to be false
-      end
-    end
-  end
-
-  describe ".has_daily_submission_csv" do
-    subject(:daily_submission_batch_enabled) do
-      described_class.has_daily_submission_csv(form_document)
-    end
-
-    context "when form has a daily delivery_configuration" do
-      let(:form_document) do
-        create(:form, :live, delivery_configurations: [create(:delivery_configuration, :daily_email)])
-          .latest_form_document
-      end
-
-      it "returns true" do
-        expect(daily_submission_batch_enabled).to be true
-      end
-    end
-
-    context "when form does not have a daily delivery_configuration" do
-      let(:form_document) { create(:form, :live).latest_form_document }
-
-      it "returns false" do
-        expect(daily_submission_batch_enabled).to be false
-      end
-    end
-  end
-
-  describe ".has_weekly_submission_csv" do
-    subject(:weekly_submission_batch_enabled) do
-      described_class.has_weekly_submission_csv(form_document)
-    end
-
-    context "when form has weekly delivery_configuration" do
-      let(:form_document) do
-        create(:form, :live, delivery_configurations: [create(:delivery_configuration, :weekly_email)])
-          .latest_form_document
-      end
-
-      it "returns true" do
-        expect(weekly_submission_batch_enabled).to be true
-      end
-    end
-
-    context "when form does not have a weekly delivery_configuration" do
-      let(:form_document) { create(:form, :live).latest_form_document }
-
-      it "returns false" do
-        expect(weekly_submission_batch_enabled).to be false
-      end
     end
   end
 

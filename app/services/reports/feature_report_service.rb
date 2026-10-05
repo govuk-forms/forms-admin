@@ -131,7 +131,7 @@ class Reports::FeatureReportService
   def forms_with_routes
     form_documents
       .select { |form| Reports::FormDocumentsService.has_routes?(form) }
-      .map { |form| form_with_routes_details(form) }
+      .map { |form| Reports::FormDocumentsService.update_routes_details(form) }
   end
 
   def forms_with_payments
@@ -183,28 +183,5 @@ private
 
   def questions_details(form, step)
     step.dup.merge("form" => form)
-  end
-
-  def form_with_routes_details(form)
-    number_of_questions = {
-      "with_routes" => 0,
-      "with_many_conditional_routes" => 0,
-    }
-
-    form["content"]["steps"].each do |step|
-      next unless step["routing_conditions"].any?
-
-      number_of_questions["with_routes"] += 1
-
-      if step["routing_conditions"].many? { |condition| condition["answer_value"].present? }
-        number_of_questions["with_many_conditional_routes"] += 1
-      end
-    end
-
-    form["metadata"] = {
-      "number_of_questions" => number_of_questions,
-    }
-
-    form
   end
 end

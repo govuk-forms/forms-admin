@@ -18,6 +18,29 @@ class Reports::FormDocumentsService
       form_documents.find_each(batch_size: 100).lazy.map(&:as_json)
     end
 
+    def update_routes_details(form_document)
+      number_of_questions = {
+        "with_routes" => 0,
+        "with_many_conditional_routes" => 0,
+      }
+
+      form_document["content"]["steps"].each do |step|
+        next unless step["routing_conditions"].any?
+
+        number_of_questions["with_routes"] += 1
+
+        if step["routing_conditions"].many? { |condition| condition["answer_value"].present? }
+          number_of_questions["with_many_conditional_routes"] += 1
+        end
+      end
+
+      form_document["metadata"] = {
+        "number_of_questions" => number_of_questions,
+      }
+
+      form_document
+    end
+
     def has_routes?(form_document)
       form_document["content"]["steps"].any? { |step| step["routing_conditions"].present? }
     end
