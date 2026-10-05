@@ -56,6 +56,23 @@ RSpec.describe WelshTranslation::SelectionOptionsComponent::View, type: :compone
         expect(page).to have_text(I18n.t("forms.welsh_translation.new.long_list_of_selection_options"))
         expect(page).not_to have_css("table")
       end
+
+      context "when the input has been marked as complete causing errors for blanks" do
+        before do
+          form_builder = form_builder_for_page(form_page)
+          form_builder.object.validate(:mark_complete)
+          render_inline(described_class.new(page_form: form_builder, table_presenter:))
+        end
+
+        it "does not render the long list notice" do
+          expect(page).not_to have_text(I18n.t("forms.welsh_translation.new.long_list_of_selection_options"))
+        end
+
+        it "renders visible input fields for the options with errors" do
+          expect(page).to have_css("table")
+          expect(page).to have_field("Enter Welsh option 1", type: "text")
+        end
+      end
     end
 
     context "and all are translated without errors" do

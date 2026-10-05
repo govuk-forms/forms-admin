@@ -14,6 +14,8 @@ class Forms::WelshPageTranslationInput < BaseInput
   attribute :guidance_markdown_cy
   attribute :none_of_the_above_question_cy
 
+  before_validation :prepare_selection_options
+
   validate :question_text_cy_present?, on: :mark_complete
   validate :question_text_cy_length, if: -> { question_text_cy.present? }
 
@@ -76,9 +78,7 @@ class Forms::WelshPageTranslationInput < BaseInput
       Forms::WelshConditionTranslationInput.new(condition:).assign_condition_values
     end
 
-    self.selection_options_cy = welsh_answer_settings&.selection_options&.map&.with_index do |selection_option, index|
-      Forms::WelshSelectionOptionTranslationInput.new(selection_option:, page:, id: index).assign_selection_option_values
-    end
+    prepare_selection_options
 
     self
   end
@@ -289,5 +289,15 @@ class Forms::WelshPageTranslationInput < BaseInput
 
   def blanked?
     all_fields_empty? && condition_translations.all?(&:all_fields_empty?) && selection_options_cy.all?(&:all_fields_empty?)
+  end
+
+private
+
+  def prepare_selection_options
+    return unless page_has_selection_options? && selection_options_cy.blank?
+
+    self.selection_options_cy = welsh_answer_settings&.selection_options&.map&.with_index do |selection_option, index|
+      Forms::WelshSelectionOptionTranslationInput.new(selection_option:, page:, id: index).assign_selection_option_values
+    end
   end
 end

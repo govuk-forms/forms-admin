@@ -210,6 +210,28 @@ RSpec.describe Forms::WelshPageTranslationInput2, type: :model do
           end
         end
       end
+
+      context "when the page has a long list of selection options" do
+        let(:page) { create_page(attributes_for(:page, :selection_with_autocomplete)) }
+
+        it "is invalid when the input object was initialised without selection option translations" do
+          expect(welsh_page_translation_input).not_to be_valid(:mark_complete)
+          expect(welsh_page_translation_input.errors.full_messages_for(:select_option_0_name_cy)).to include "Select option 0 name cy #{I18n.t('activemodel.errors.models.forms/welsh_selection_option_translation_input.attributes.name_cy.blank', selection_number: 1, question_number: page.position)}"
+        end
+
+        context "when all translations are present" do
+          let(:new_input_data) do
+            selection_options_cy_attributes = page.answer_settings.selection_options.map.with_index { |option, index|
+              [index.to_s, { "id" => index.to_s, "name_cy" => "Welsh #{option.name}" }]
+            }.to_h
+            super().merge(selection_options_cy_attributes:)
+          end
+
+          it "is valid" do
+            expect(welsh_page_translation_input).to be_valid
+          end
+        end
+      end
     end
 
     context "when the form is not marked complete" do

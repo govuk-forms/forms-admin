@@ -14,7 +14,7 @@ module WelshTranslation
       end
 
       def long_list_without_translations?
-        long_list? && !has_translated_selection_options?
+        long_list? && !has_translated_selection_options? && !has_errors?
       end
 
       def collapsed_options
@@ -37,6 +37,10 @@ module WelshTranslation
 
       def has_translated_selection_options?
         @page_form.object.selection_options_cy.filter { |option| option.name_cy.present? }.any?
+      end
+
+      def has_errors?
+        @page_form.object.selection_options_cy.filter { |option| option.errors.any? }.any?
       end
     end
   end
