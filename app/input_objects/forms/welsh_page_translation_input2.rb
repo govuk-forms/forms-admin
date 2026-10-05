@@ -57,7 +57,7 @@ class Forms::WelshPageTranslationInput2 < BaseInput
     end
 
     if page_has_selection_options?
-      page.answer_settings_cy.selection_options = DataStructType.new.cast_value(selection_options_cy.map(&:as_selection_option))
+      page.answer_settings_cy.selection_options = DataStructType.new.cast_value(selection_options_cy.sort_by!(&:id).map(&:as_selection_option))
     end
 
     page.save!
