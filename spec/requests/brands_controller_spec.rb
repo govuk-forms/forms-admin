@@ -129,6 +129,10 @@ RSpec.describe BrandsController, type: :request do
         expect(response.body).to include(brand.copyright_holder)
       end
 
+      it "links to the logo link" do
+        expect(Capybara.string(response.body)).to have_link(brand.logo_link, href: brand.logo_link)
+      end
+
       it "shows that no assets have been uploaded" do
         expect(response.body).to include(I18n.t("brands.show.summary.not_uploaded"))
       end
