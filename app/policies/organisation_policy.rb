@@ -10,4 +10,8 @@ class OrganisationPolicy < ApplicationPolicy
   def can_manage_organisation_domains?
     user.super_admin?
   end
+
+  def can_manage_organisation_feature_flags?
+    user.super_admin?
+  end
 end
