@@ -79,6 +79,35 @@ class Reports::FormDocumentsService
       end
     end
 
+    def count_exit_pages(form_document)
+      form_document["content"]["steps"].sum { |step| count_step_exit_pages(step) }
+    end
+
+    def count_step_exit_pages(step)
+      if step["exit_pages"]&.any?
+        step["exit_pages"].length
+      else
+        step["routing_conditions"]&.count { |c| c["exit_page_markdown"].present? } || 0
+      end
+    end
+
+    def has_question_with_multiple_exit_pages?(form_document)
+      form_document["content"]["steps"].any? { |step| count_step_exit_pages(step) > 1 }
+    end
+
+    def has_question_with_multiple_routes_to_exit_pages?(form_document)
+      form_document["content"]["steps"].any? do |step|
+        (step["routing_conditions"]&.count { |condition| condition["exit_page_id"].present? } || 0) > 1
+      end
+    end
+
+    def count_unreachable_exit_pages(step)
+      return 0 unless step["exit_pages"]&.any?
+
+      routed_exit_page_ids = (step["routing_conditions"] || []).filter_map { |condition| condition["exit_page_id"] }
+      step["exit_pages"].count { |exit_page| routed_exit_page_ids.exclude?(exit_page["id"]) }
+    end
+
     def is_copy?(form_document)
       form_document["content"]["copied_from_id"].present?
     end

@@ -18,6 +18,9 @@ class Reports::FormsCsvReportService
     "Has routes",
     "Has branch routes",
     "Has exit pages",
+    "Number of exit pages",
+    "Has question with multiple exit pages",
+    "Has question with multiple routes to exit pages",
     "Has add another answer",
     "Payment URL",
     "Support URL",
@@ -53,6 +56,7 @@ private
 
   def form_row(form)
     form_id = form["form_id"]
+
     [
       form_id,
       form["tag"],
@@ -70,6 +74,9 @@ private
       form["content"]["steps"].any? { |step| step["routing_conditions"].present? },
       Reports::FormDocumentsService.has_secondary_skip_routes?(form),
       Reports::FormDocumentsService.has_exit_pages?(form),
+      Reports::FormDocumentsService.count_exit_pages(form),
+      Reports::FormDocumentsService.has_question_with_multiple_exit_pages?(form),
+      Reports::FormDocumentsService.has_question_with_multiple_routes_to_exit_pages?(form),
       Reports::FormDocumentsService.has_add_another_answer?(form),
       form["content"]["payment_url"],
       form["content"]["support_url"],
