@@ -171,5 +171,26 @@ RSpec.describe WelshTranslation::SelectionOptionsComponent::View, type: :compone
         expect(page).not_to have_field(id: option_1_field_id, type: "text")
       end
     end
+
+    context "and there are duplicates in the translated options" do
+      let(:input) { Forms::WelshPageTranslationInput.new(page: form_page).assign_page_values }
+
+      before do
+        input.selection_options_cy.first(2).each_with_index { |opt, idx| opt.name_cy = "Welsh option #{idx + 1}" }
+        input.selection_options_cy[2].name_cy = "duplicate"
+        input.selection_options_cy[3].name_cy = "duplicate"
+        input.validate
+        render_inline(described_class.new(page_form: form_builder_for_input(input), table_presenter:))
+      end
+
+      it "renders visible input fields for all the options" do
+        expect(page).to have_field("Enter Welsh option 1", type: "text")
+      end
+
+      it "does not render the details components" do
+        expect(page).not_to have_css("details", text: /options in English/)
+        expect(page).not_to have_css("details", text: /options in Welsh/)
+      end
+    end
   end
 end

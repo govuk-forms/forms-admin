@@ -18,11 +18,13 @@ module WelshTranslation
       end
 
       def collapsed_options
+        return [] if all_options_error?
+
         @collapsed_options ||= @page_form.object.selection_options_cy.filter { |option| option.name_cy.present? && option.errors.none? }
       end
 
       def hide_option?(selection_options_form)
-        long_list? && selection_options_form.object.errors.none?
+        long_list? && selection_options_form.object.errors.none? && !all_options_error?
       end
 
       def question_number
@@ -40,7 +42,11 @@ module WelshTranslation
       end
 
       def has_errors?
-        @page_form.object.selection_options_cy.filter { |option| option.errors.any? }.any?
+        @page_form.object.selection_options_cy.filter { |option| option.errors.any? }.any? || all_options_error?
+      end
+
+      def all_options_error?
+        @page_form.object.errors[:selection_options_cy].any?
       end
     end
   end
