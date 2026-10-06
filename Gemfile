@@ -69,7 +69,7 @@ gem "validate_url"
 gem "paper_trail"
 
 # For AWS interactions
-gem "aws-sdk-cloudwatch", "~> 1.148"
+gem "aws-sdk-cloudwatch", "~> 1.149"
 gem "aws-sdk-codepipeline", "~> 1.120"
 gem "aws-sdk-s3", "~> 1.232", require: false
 
