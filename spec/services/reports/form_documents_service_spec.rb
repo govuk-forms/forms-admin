@@ -521,6 +521,61 @@ RSpec.describe Reports::FormDocumentsService do
     end
   end
 
+  describe ".count_unreachable_exit_pages" do
+    subject(:count_unreachable_exit_pages) do
+      described_class.count_unreachable_exit_pages(step)
+    end
+
+    context "when all exit pages have routes" do
+      let(:step) do
+        {
+          "exit_pages" => [{ "id" => 1 }, { "id" => 2 }],
+          "routing_conditions" => [
+            { "exit_page_id" => 1 },
+            { "exit_page_id" => 2 },
+          ],
+        }
+      end
+
+      it { is_expected.to eq 0 }
+    end
+
+    context "when some exit pages have routes" do
+      let(:step) do
+        {
+          "exit_pages" => [{ "id" => 1 }, { "id" => 2 }, { "id" => 3 }],
+          "routing_conditions" => [
+            { "exit_page_id" => 1 },
+          ],
+        }
+      end
+
+      it { is_expected.to eq 2 }
+    end
+
+    context "when no exit pages have routes" do
+      let(:step) do
+        {
+          "exit_pages" => [{ "id" => 1 }],
+          "routing_conditions" => [],
+        }
+      end
+
+      it { is_expected.to eq 1 }
+    end
+
+    context "when there are no exit pages" do
+      let(:step) do
+        {
+          "exit_pages" => [],
+          "routing_conditions" => [],
+        }
+      end
+
+      it { is_expected.to eq 0 }
+    end
+  end
+
   describe ".has_add_another_answer?" do
     let(:form) do
       create(:form, :live, pages: [

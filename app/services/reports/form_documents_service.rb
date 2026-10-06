@@ -101,6 +101,13 @@ class Reports::FormDocumentsService
       end
     end
 
+    def count_unreachable_exit_pages(step)
+      return 0 unless step["exit_pages"]&.any?
+
+      routed_exit_page_ids = (step["routing_conditions"] || []).filter_map { |condition| condition["exit_page_id"] }
+      step["exit_pages"].count { |exit_page| routed_exit_page_ids.exclude?(exit_page["id"]) }
+    end
+
     def is_copy?(form_document)
       form_document["content"]["copied_from_id"].present?
     end
