@@ -21,16 +21,30 @@ class Reports::FormDocumentsService
     def update_routes_details(form_document)
       number_of_questions = {
         "with_routes" => 0,
+        "with_one_conditional_route" => 0,
         "with_many_conditional_routes" => 0,
+        "with_unconditional_route" => 0,
       }
 
       form_document["content"]["steps"].each do |step|
-        next unless step["routing_conditions"].any?
+        conditions = step["routing_conditions"]
+
+        next unless conditions.any?
 
         number_of_questions["with_routes"] += 1
 
-        if step["routing_conditions"].many? { |condition| condition["answer_value"].present? }
+        conditional_routes_count = conditions.count { |condition| condition["answer_value"].present? }
+
+        if conditional_routes_count == 1
+          number_of_questions["with_one_conditional_route"] += 1
+        elsif conditional_routes_count > 1
           number_of_questions["with_many_conditional_routes"] += 1
+        end
+
+        unconditional_route_present = conditions.any? { |condition| condition["answer_value"].nil? }
+
+        if unconditional_route_present
+          number_of_questions["with_unconditional_route"] += 1
         end
       end
 

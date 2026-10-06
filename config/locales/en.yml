@@ -2162,7 +2162,9 @@ en:
         number_of_options: Number of options
         number_of_questions:
           with_many_conditional_routes: Number of questions with more than one conditional route
+          with_one_conditional_route: Number of questions with one conditional route only
           with_routes: Number of questions with routes
+          with_unconditional_route: Number of questions with an unconditional route
         organisation: Organisation
         question_text: Question text
       values:
