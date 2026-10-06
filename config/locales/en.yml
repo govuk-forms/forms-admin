@@ -1638,6 +1638,9 @@ en:
         live_forms: Live forms
         name: Name
         users: Users
+    new:
+      label: Organisation name
+      title: Add an organisation
     show:
       admin_users:
         heading: Organisation admins

@@ -1,0 +1,18 @@
+<% set_page_title(title_with_error_prefix(t(".title"), @organisation_input.errors.any?)) %>
+<% content_for :back_link, govuk_back_link_to(organisations_path) %>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <%= form_with(model: @organisation_input, url: organisations_path) do |f| %>
+      <% if @organisation_input.errors.any? %>
+        <%= f.govuk_error_summary %>
+      <% end %>
+
+      <h1 class="govuk-heading-l"><%= t(".title") %></h1>
+
+      <%= f.govuk_text_field :name, label: { text: t(".label"), size: "m" } %>
+
+      <%= f.govuk_submit t("save_and_continue") %>
+    <% end %>
+  </div>
+</div>
