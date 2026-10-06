@@ -185,6 +185,57 @@ describe FeatureService do
           }.to raise_error(NoMethodError)
         end
       end
+
+      context "when feature is enabled_by_organisation" do
+        subject(:feature_service) { described_class.new(organisation: flagged_organisation) }
+
+        let(:flagged_organisation) { double }
+
+        before do
+          Settings.features[:test_feature] = Config::Options.new(enabled_by_organisation: true)
+        end
+
+        after do
+          Settings.features.delete_field(:test_feature)
+        end
+
+        it "raises OrganisationRequiredError if organisation is not provided" do
+          service = described_class.new
+
+          expect {
+            service.enabled?(:test_feature)
+          }.to raise_error(
+            described_class::OrganisationRequiredError,
+            "Feature test_feature requires organisation to be provided",
+          )
+        end
+
+        it "calls the corresponding enabled? method on the organisation" do
+          allow(flagged_organisation).to receive(:test_feature_enabled?).and_return(true)
+
+          expect(feature_service.enabled?(:test_feature)).to be true
+        end
+
+        it "returns false when organisation method returns false" do
+          allow(flagged_organisation).to receive(:test_feature_enabled?).and_return(false)
+
+          expect(feature_service.enabled?(:test_feature)).to be false
+        end
+
+        it "uses the group's organisation when only a group is provided" do
+          allow(flagged_organisation).to receive(:test_feature_enabled?).and_return(true)
+          group = instance_double(Group, organisation: flagged_organisation)
+
+          expect(described_class.new(group:).enabled?(:test_feature)).to be true
+        end
+
+        it "uses the user's organisation when only a user is provided" do
+          allow(flagged_organisation).to receive(:test_feature_enabled?).and_return(true)
+          user = instance_double(User, organisation: flagged_organisation)
+
+          expect(described_class.new(user:).enabled?(:test_feature)).to be true
+        end
+      end
     end
   end
 
