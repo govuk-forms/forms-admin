@@ -183,14 +183,14 @@ Refer to the [settings file](config/settings.yml) for all the settings required 
 
 ### Feature flags
 
-This repo supports the ability to set up feature flags. To do this, add your feature flag in the [settings file](config/settings.yml) under the `features` property. eg:
+This repo supports the ability to set up feature flags. To do this, add your feature flag in the [settings file](config/settings.yml) under the `features` property. For example:
 
 ```yaml
 features:
   some_feature: true
 ```
 
-You can then use the [feature service](app/services/feature_service.rb) to check whether the feature is enabled or not. Eg. `FeatureService.enabled?(:some_feature)`.
+You can then use the [feature service](app/services/feature_service.rb) to check whether the feature is enabled or not. For example, `FeatureService.enabled?(:some_feature)`.
 
 You can also nest features:
 
@@ -212,7 +212,28 @@ features:
       some_organisation: true
 ```
 
-The `features.some_features.enabled` key sets the default for the flag, and then you can override for an organisation by adding a key for the organisation slug (with underscores instead of dashes). And then check the flag for a user with `FeatureService.new(user).enabled?(:some_feature)`.
+The `features.some_features.enabled` key sets the default for the flag, and then you can override for an organisation by adding a key for the organisation slug (with underscores instead of dashes). And then check the flag for a user with `FeatureService.new(user: current_user).enabled?(:some_feature)`.
+
+#### Feature flags for a group or an organisation
+
+Super admins can turn a feature on for individual groups or organisations. To add a feature flag like this:
+
+1. Add a boolean column named `<feature>_enabled`, defaulting to `false`, to the `groups` or `organisations` table.
+2. Mark the feature as `enabled_by_group` or `enabled_by_organisation` in the settings file:
+
+   ```yaml
+   features:
+     some_group_feature:
+       enabled_by_group: true
+     some_organisation_feature:
+       enabled_by_organisation: true
+   ```
+
+3. Add a label for the flag in `config/locales/en.yml`, under `groups.feature_flags.flags.<feature>_enabled` or `organisations.feature_flags.flags.<feature>_enabled`.
+
+Then check the flag by passing in the group or organisation. For example, `FeatureService.new(group: form.group).enabled?(:some_group_feature)` or `FeatureService.new(organisation: form.group.organisation).enabled?(:some_organisation_feature)`.
+
+Super admins turn these flags on from the group’s page or the organisation’s page. They can turn a flag on, but they cannot turn it off.
 
 ### Testing with features
 
