@@ -1666,6 +1666,16 @@ en:
         table_headings:
           actions: Actions
           domain: Domain
+      feature_flags:
+        heading: Feature flags
+        manage: Manage feature flags
+        none: There are no organisation feature flags available.
+        status:
+          'off': 'Off'
+          'on': 'On'
+        table_headings:
+          name: Name
+          status: Status
       mou_signatures:
         heading: MOUs and agreements
         none: No one has agreed an MOU or agreement for this organisation.

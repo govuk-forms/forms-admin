@@ -4,7 +4,12 @@ describe "organisations/show.html.erb" do
   let(:organisation) { create :organisation, :with_org_admin, slug: "department-for-testing" }
   let(:organisation_domains) { [create(:organisation_domain, organisation:, domain: "testing.gov.uk")] }
 
+  let(:feature_flag_attributes) { [] }
+
   before do
+    allow(Organisation).to receive(:feature_flag_attributes).and_return(feature_flag_attributes)
+    I18n.backend.store_translations(:en, organisations: { feature_flags: { flags: { internal: "Stand-in flag", closed: "Other stand-in flag" } } })
+
     organisation_domains
     group = create(:group, organisation:)
     create(:form, :live, :with_group, group:)
@@ -156,6 +161,32 @@ describe "organisations/show.html.erb" do
 
       it "shows a make default button for the other brand" do
         expect(rendered).to have_css("input[name='brand_id'][value='#{other_brand.id}']", visible: :hidden)
+      end
+    end
+  end
+
+  describe "feature flags" do
+    context "when there are no organisation feature flags" do
+      it "shows a message and no link to manage them" do
+        expect(rendered).to have_text(I18n.t("organisations.show.feature_flags.none"))
+        expect(rendered).not_to have_link(I18n.t("organisations.show.feature_flags.manage"))
+      end
+    end
+
+    context "when there are organisation feature flags" do
+      # No feature is organisation-scoped yet, so use existing boolean columns as stand-in flags
+      let(:feature_flag_attributes) { %w[internal closed] }
+      let(:organisation) { create :organisation, slug: "department-for-testing", internal: true, closed: false }
+
+      it "shows whether each flag is on" do
+        expect(rendered).to have_css("tr", text: /Stand-in flag\s*On/)
+        expect(rendered).to have_css("tr", text: /Other stand-in flag\s*Off/)
+        expect(rendered).to have_css(".govuk-tag--green", text: "On")
+        expect(rendered).to have_css(".govuk-tag--grey", text: "Off")
+      end
+
+      it "links to the page to manage them" do
+        expect(rendered).to have_link(I18n.t("organisations.show.feature_flags.manage"), href: organisation_feature_flags_path(organisation))
       end
     end
   end
