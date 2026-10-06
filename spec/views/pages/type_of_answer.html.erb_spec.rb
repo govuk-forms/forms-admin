@@ -98,7 +98,7 @@ describe "pages/type_of_answer.html.erb", type: :view do
 
     context "with more than 10 selection options" do
       let(:page) { build(:page, :with_selection_settings, routing_conditions:, selection_options:) }
-      let(:selection_options) { (1..11).map { |n| DataStruct.new(name: "Option #{n}", value: "Option #{n}") } }
+      let(:selection_options) { (1..11).map { |n| { name: "Option #{n}", value: "Option #{n}" } } }
 
       context "and no routing conditions" do
         let(:routing_conditions) { [] }
