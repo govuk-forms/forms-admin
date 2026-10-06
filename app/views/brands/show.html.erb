@@ -7,11 +7,6 @@
 
     <%= govuk_summary_list(actions: false) do |summary_list|
       summary_list.with_row do |row|
-        row.with_key { t('brands.show.summary.slug') }
-        row.with_value { @brand.slug }
-      end
-
-      summary_list.with_row do |row|
         row.with_key { t('brands.show.summary.logo_alt_text') }
         row.with_value { @brand.logo_alt_text }
       end

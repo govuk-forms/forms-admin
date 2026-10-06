@@ -338,7 +338,6 @@ en:
         live_forms: Live forms
         name: Brand name
         organisations: Organisations
-        slug: Slug
     show:
       edit_brand: Edit this brand
       summary:
@@ -352,7 +351,6 @@ en:
         logo_link: Logo link
         not_uploaded: Not uploaded
         opengraph_image: Opengraph image
-        slug: Slug
     success_messages:
       create: The brand has been created
       update: The brand has been updated
