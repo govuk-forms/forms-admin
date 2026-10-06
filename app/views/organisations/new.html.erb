@@ -10,7 +10,11 @@
 
       <h1 class="govuk-heading-l"><%= t(".title") %></h1>
 
-      <%= f.govuk_text_field :name, label: { text: t(".label"), size: "m" } %>
+      <%= f.govuk_text_field :name, label: { text: t(".name_label"), size: "m" } %>
+
+      <%= f.govuk_text_field :domain,
+            label: { text: t(".domain_label"), size: "m" },
+            hint: { text: t(".domain_hint") } %>
 
       <%= f.govuk_submit t("save_and_continue") %>
     <% end %>

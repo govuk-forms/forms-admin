@@ -73,7 +73,7 @@ private
   end
 
   def organisation_input_params
-    params.require(:organisations_organisation_input).permit(:name)
+    params.require(:organisations_organisation_input).permit(:name, :domain)
   end
 
   def filter_params

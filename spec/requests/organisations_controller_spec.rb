@@ -207,7 +207,7 @@ RSpec.describe OrganisationsController, type: :request do
   end
 
   describe "#create" do
-    let(:params) { { organisations_organisation_input: { name: "New Test Organisation" } } }
+    let(:params) { { organisations_organisation_input: { name: "New Test Organisation", domain: "new-test.gov.uk" } } }
 
     context "when the user is not a super admin" do
       before { login_as_standard_user }

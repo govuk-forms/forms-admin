@@ -1,15 +1,19 @@
 module Organisations
   class OrganisationInput < BaseInput
-    attr_accessor :name
+    attr_accessor :name, :domain
     attr_reader :created_organisation
 
     validates :name, presence: true
+    validates :domain, presence: true, domain: true
     validate :name_is_unique, if: -> { name.present? }
 
     def submit
       return false if invalid?
 
-      @created_organisation = Organisation.create!(name:, slug: name.parameterize)
+      ActiveRecord::Base.transaction do
+        @created_organisation = Organisation.create!(name:, slug: name.parameterize)
+        @created_organisation.organisation_domains.create!(domain:)
+      end
     end
 
   private
