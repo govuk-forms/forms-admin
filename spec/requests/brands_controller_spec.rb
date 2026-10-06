@@ -129,6 +129,16 @@ RSpec.describe BrandsController, type: :request do
         expect(response.body).to include(brand.copyright_holder)
       end
 
+      it "links to the logo link" do
+        expect(Capybara.string(response.body)).to have_link(brand.logo_link, href: brand.logo_link)
+      end
+
+      it "shows a swatch of each colour" do
+        rendered = Capybara.string(response.body)
+        expect(rendered).to have_css(".app-colour__swatch rect[fill='#{brand.header_background_colour}']")
+        expect(rendered).to have_css(".app-colour__swatch rect[fill='#{brand.border_colour}']")
+      end
+
       it "shows that no assets have been uploaded" do
         expect(response.body).to include(I18n.t("brands.show.summary.not_uploaded"))
       end

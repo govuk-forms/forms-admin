@@ -18,17 +18,17 @@
 
       summary_list.with_row do |row|
         row.with_key { t('brands.show.summary.logo_link') }
-        row.with_value { @brand.logo_link }
+        row.with_value { govuk_link_to(@brand.logo_link, @brand.logo_link) }
       end
 
       summary_list.with_row do |row|
         row.with_key { t('brands.show.summary.header_background_colour') }
-        row.with_value { @brand.header_background_colour }
+        row.with_value { render "colour", colour: @brand.header_background_colour }
       end
 
       summary_list.with_row do |row|
         row.with_key { t('brands.show.summary.border_colour') }
-        row.with_value { @brand.border_colour }
+        row.with_value { render "colour", colour: @brand.border_colour }
       end
 
       summary_list.with_row do |row|
