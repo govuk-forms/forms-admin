@@ -273,6 +273,44 @@ RSpec.describe Organisation, type: :model do
     end
   end
 
+  describe ".feature_flag_attributes" do
+    let(:features) do
+      Config::Options.new(
+        some_organisation_feature: Config::Options.new(enabled_by_organisation: true),
+        feature_without_column: Config::Options.new(enabled_by_organisation: true),
+        group_feature: Config::Options.new(enabled_by_group: true),
+        global_feature: Config::Options.new(enabled: true),
+      )
+    end
+
+    before do
+      allow(Settings).to receive(:features).and_return(features)
+      allow(described_class).to receive(:has_attribute?).and_call_original
+      allow(described_class).to receive(:has_attribute?).with("some_organisation_feature_enabled").and_return(true)
+      allow(described_class).to receive(:has_attribute?).with("group_feature_enabled").and_return(true)
+    end
+
+    it "includes the column for each enabled_by_organisation feature with a matching column" do
+      expect(described_class.feature_flag_attributes).to include("some_organisation_feature_enabled")
+    end
+
+    it "excludes enabled_by_organisation features that have no matching column" do
+      expect(described_class.feature_flag_attributes).not_to include("feature_without_column_enabled")
+    end
+
+    it "excludes features that are not enabled_by_organisation" do
+      expect(described_class.feature_flag_attributes).not_to include("group_feature_enabled", "global_feature_enabled")
+    end
+
+    context "when no features are configured" do
+      let(:features) { nil }
+
+      it "returns an empty array" do
+        expect(described_class.feature_flag_attributes).to eq([])
+      end
+    end
+  end
+
   describe "#name_with_abbreviation" do
     it "uses abbreviation when it is not the same as name" do
       organisation = build :organisation, name: "An Organisation", abbreviation: "ABBR"
