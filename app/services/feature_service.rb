@@ -1,8 +1,9 @@
 class FeatureService
   class UserRequiredError < StandardError; end
   class GroupRequiredError < StandardError; end
+  class OrganisationRequiredError < StandardError; end
 
-  attr_reader :group
+  attr_reader :group, :organisation
 
   class << self
     def enabled?(...)
@@ -10,9 +11,10 @@ class FeatureService
     end
   end
 
-  def initialize(user: nil, group: nil)
+  def initialize(user: nil, group: nil, organisation: nil)
     @user = user
     @group = group
+    @organisation = organisation
   end
 
   def enabled?(feature_name)
@@ -36,6 +38,12 @@ class FeatureService
       raise GroupRequiredError, "Feature #{feature_name} requires group to be provided" if group.blank?
 
       return group.send(:"#{feature_name}_enabled?")
+    end
+
+    if feature.enabled_by_organisation.present? && feature.enabled_by_organisation
+      raise OrganisationRequiredError, "Feature #{feature_name} requires organisation to be provided" if organisation.blank?
+
+      return organisation.send(:"#{feature_name}_enabled?")
     end
 
     feature.enabled
