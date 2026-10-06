@@ -39,6 +39,17 @@ describe "Settings" do
         end
       end
     end
+
+    describe "organisation-scoped feature flags" do
+      organisation_features = features.select { |_, config| config.is_a?(Hash) && config["enabled_by_organisation"] }
+
+      it "has a label for every feature flag on the feature flags page" do
+        Organisation.feature_flag_attributes.each do |attribute|
+          translation_key = "organisations.feature_flags.flags.#{attribute}"
+          expect(I18n.exists?(translation_key)).to be(true), "expected a translation for #{translation_key}"
+        end
+      end
+    end
   end
 
   describe "forms_api" do
