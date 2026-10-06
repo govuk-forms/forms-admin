@@ -7,7 +7,8 @@
   </div>
 <% else %>
   <%= render ScrollingWrapperComponent::View.new(aria_label: t("forms.welsh_translation.new.section_headings.selection_options", question_number: question_number)) do %>
-    <%= @page_form.govuk_fieldset legend: nil, described_by: ["selection_options_cy_table_caption"] do %>
+    <% table_caption_id = "selection_options_cy_table_caption_#{@page_form.object.page.id}" %>
+    <%= @page_form.govuk_fieldset legend: nil, described_by: [table_caption_id] do %>
 
       <!-- For a long list of options, we won't display inputs unless there is an error for an option, and instead use
       hidden inputs to store their values -->
@@ -16,7 +17,7 @@
       <%= govuk_table(classes: @table_presenter.two_column_classes) do |table| %>
         <%= table.with_caption(size: 's',
                    text: t("forms.welsh_translation.new.section_headings.selection_options", question_number: question_number),
-                   html_attributes:{ id: "selection_options_cy_table_caption"})
+                   html_attributes: { id: table_caption_id })
             table.with_head(**@table_presenter.two_column_headers) %>
         <%= table.with_body do |body| %>
 
