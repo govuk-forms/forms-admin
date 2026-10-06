@@ -1607,6 +1607,7 @@ en:
     create:
       success: "%{organisation_name} has been added"
     index:
+      add_organisation: Add an organisation
       agreement_type_none: None
       filter:
         agreement_type:

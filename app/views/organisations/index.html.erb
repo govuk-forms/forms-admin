@@ -89,3 +89,5 @@
 <% else %>
   <p class="govuk-body"><%= t("organisations.index.no_results") %></p>
 <% end %>
+
+<%= govuk_button_link_to t("organisations.index.add_organisation"), new_organisation_path, secondary: true %>
