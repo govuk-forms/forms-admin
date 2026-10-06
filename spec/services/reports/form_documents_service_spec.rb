@@ -158,7 +158,9 @@ RSpec.describe Reports::FormDocumentsService do
       expect(update_routes_details["metadata"]).to include(
         "number_of_questions" => {
           "with_routes" => 3,
+          "with_one_conditional_route" => 0,
           "with_many_conditional_routes" => 1,
+          "with_unconditional_route" => 2,
         },
       )
     end

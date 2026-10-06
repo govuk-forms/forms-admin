@@ -370,7 +370,9 @@ RSpec.describe Reports::FeatureReportService do
           "metadata" => {
             "number_of_questions" => {
               "with_routes" => 1,
+              "with_one_conditional_route" => 1,
               "with_many_conditional_routes" => 0,
+              "with_unconditional_route" => 0,
             },
           },
         ),
@@ -382,7 +384,9 @@ RSpec.describe Reports::FeatureReportService do
           "metadata" => {
             "number_of_questions" => {
               "with_routes" => 3,
+              "with_one_conditional_route" => 0,
               "with_many_conditional_routes" => 1,
+              "with_unconditional_route" => 2,
             },
           },
         ),
@@ -394,7 +398,9 @@ RSpec.describe Reports::FeatureReportService do
           "metadata" => {
             "number_of_questions" => {
               "with_routes" => 1,
+              "with_one_conditional_route" => 1,
               "with_many_conditional_routes" => 0,
+              "with_unconditional_route" => 0,
             },
           },
         ),
@@ -422,7 +428,9 @@ RSpec.describe Reports::FeatureReportService do
         "metadata" => a_hash_including(
           "number_of_questions" => {
             "with_routes" => an_instance_of(Integer),
+            "with_one_conditional_route" => an_instance_of(Integer),
             "with_many_conditional_routes" => an_instance_of(Integer),
+            "with_unconditional_route" => an_instance_of(Integer),
           },
         ),
       )
