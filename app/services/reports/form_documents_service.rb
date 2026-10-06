@@ -91,6 +91,10 @@ class Reports::FormDocumentsService
       end
     end
 
+    def has_question_with_multiple_exit_pages?(form_document)
+      form_document["content"]["steps"].any? { |step| count_step_exit_pages(step) > 1 }
+    end
+
     def is_copy?(form_document)
       form_document["content"]["copied_from_id"].present?
     end

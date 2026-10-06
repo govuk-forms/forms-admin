@@ -75,6 +75,7 @@ RSpec.describe Reports::FormsCsvReportService do
         "false",
         "false",
         "0",
+        "false",
         "true",
         form.payment_url,
         form.support_url,

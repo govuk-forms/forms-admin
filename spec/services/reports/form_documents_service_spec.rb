@@ -412,6 +412,55 @@ RSpec.describe Reports::FormDocumentsService do
     end
   end
 
+  describe ".has_question_with_multiple_exit_pages?" do
+    subject(:has_question_with_multiple_exit_pages?) do
+      described_class.has_question_with_multiple_exit_pages?(form_document)
+    end
+
+    context "when a step has multiple exit pages" do
+      let(:form_document) do
+        {
+          "content" => {
+            "steps" => [
+              { "exit_pages" => [{ "id" => 1 }, { "id" => 2 }], "routing_conditions" => [] },
+            ],
+          },
+        }
+      end
+
+      it { is_expected.to be true }
+    end
+
+    context "when no step has multiple exit pages" do
+      let(:form_document) do
+        {
+          "content" => {
+            "steps" => [
+              { "exit_pages" => [{ "id" => 1 }], "routing_conditions" => [] },
+              { "exit_pages" => [], "routing_conditions" => [] },
+            ],
+          },
+        }
+      end
+
+      it { is_expected.to be false }
+    end
+
+    context "when no steps have exit pages" do
+      let(:form_document) do
+        {
+          "content" => {
+            "steps" => [
+              { "exit_pages" => [], "routing_conditions" => [] },
+            ],
+          },
+        }
+      end
+
+      it { is_expected.to be false }
+    end
+  end
+
   describe ".has_add_another_answer?" do
     let(:form) do
       create(:form, :live, pages: [
