@@ -461,6 +461,66 @@ RSpec.describe Reports::FormDocumentsService do
     end
   end
 
+  describe ".has_question_with_multiple_routes_to_exit_pages?" do
+    subject(:has_question_with_multiple_routes_to_exit_pages?) do
+      described_class.has_question_with_multiple_routes_to_exit_pages?(form_document)
+    end
+
+    context "when a step has multiple routes going to exit pages" do
+      let(:form_document) do
+        {
+          "content" => {
+            "steps" => [
+              {
+                "exit_pages" => [],
+                "routing_conditions" => [
+                  { "exit_page_id" => 1, "exit_page_markdown" => nil },
+                  { "exit_page_id" => 2, "exit_page_markdown" => nil },
+                ],
+              },
+            ],
+          },
+        }
+      end
+
+      it { is_expected.to be true }
+    end
+
+    context "when a step has only one route to an exit page" do
+      let(:form_document) do
+        {
+          "content" => {
+            "steps" => [
+              {
+                "exit_pages" => [],
+                "routing_conditions" => [
+                  { "exit_page_id" => 1, "exit_page_markdown" => nil },
+                  { "exit_page_id" => nil, "exit_page_markdown" => nil },
+                ],
+              },
+            ],
+          },
+        }
+      end
+
+      it { is_expected.to be false }
+    end
+
+    context "when no steps have routing conditions to exit pages" do
+      let(:form_document) do
+        {
+          "content" => {
+            "steps" => [
+              { "exit_pages" => [], "routing_conditions" => [] },
+            ],
+          },
+        }
+      end
+
+      it { is_expected.to be false }
+    end
+  end
+
   describe ".has_add_another_answer?" do
     let(:form) do
       create(:form, :live, pages: [

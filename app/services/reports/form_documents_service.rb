@@ -95,6 +95,12 @@ class Reports::FormDocumentsService
       form_document["content"]["steps"].any? { |step| count_step_exit_pages(step) > 1 }
     end
 
+    def has_question_with_multiple_routes_to_exit_pages?(form_document)
+      form_document["content"]["steps"].any? do |step|
+        (step["routing_conditions"]&.count { |condition| condition["exit_page_id"].present? } || 0) > 1
+      end
+    end
+
     def is_copy?(form_document)
       form_document["content"]["copied_from_id"].present?
     end
