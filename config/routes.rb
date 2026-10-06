@@ -237,7 +237,7 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :organisations, only: %i[index show] do
+  resources :organisations, only: %i[index show new create] do
     resources :brands, controller: :organisation_brands, only: %i[new create destroy]
     resources :domains, controller: :organisation_domains, only: %i[new create destroy] do
       member do

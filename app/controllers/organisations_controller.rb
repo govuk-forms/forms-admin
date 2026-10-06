@@ -31,6 +31,22 @@ class OrganisationsController < WebController
     @organisation = Organisation.includes(:organisation_domains, :brands, mou_signatures: :user).find(params[:id])
   end
 
+  def new
+    authorize Organisation, :can_manage_organisations?
+    @organisation_input = Organisations::OrganisationInput.new
+  end
+
+  def create
+    authorize Organisation, :can_manage_organisations?
+    @organisation_input = Organisations::OrganisationInput.new(organisation_input_params)
+    if @organisation_input.submit
+      redirect_to organisation_path(@organisation_input.created_organisation),
+                  success: t(".success", organisation_name: @organisation_input.name)
+    else
+      render :new, status: :unprocessable_content
+    end
+  end
+
 private
 
   def filtered_organisations
@@ -54,6 +70,10 @@ private
     else
       scope.order(:name)
     end
+  end
+
+  def organisation_input_params
+    params.require(:organisations_organisation_input).permit(:name)
   end
 
   def filter_params

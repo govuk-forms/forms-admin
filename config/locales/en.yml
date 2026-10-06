@@ -1604,6 +1604,8 @@ en:
     boolean:
       'false': 'No'
       'true': 'Yes'
+    create:
+      success: "%{organisation_name} has been added"
     index:
       agreement_type_none: None
       filter:

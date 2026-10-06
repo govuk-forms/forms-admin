@@ -187,6 +187,67 @@ RSpec.describe OrganisationsController, type: :request do
     end
   end
 
+  describe "#new" do
+    let(:path) { new_organisation_path }
+
+    include_examples "unauthorized user is forbidden"
+
+    context "when the user is a super admin" do
+      before do
+        login_as_super_admin_user
+
+        get path
+      end
+
+      it "returns http code 200 and renders the new view" do
+        expect(response).to have_http_status(:ok)
+        expect(response).to render_template("organisations/new")
+      end
+    end
+  end
+
+  describe "#create" do
+    let(:params) { { organisations_organisation_input: { name: "New Test Organisation" } } }
+
+    context "when the user is not a super admin" do
+      before { login_as_standard_user }
+
+      it "returns http code 403 and does not create an organisation" do
+        expect { post organisations_path, params: params }.not_to change(Organisation, :count)
+
+        expect(response).to have_http_status(:forbidden)
+        expect(response).to render_template("errors/forbidden")
+      end
+    end
+
+    context "when the user is a super admin" do
+      before { login_as_super_admin_user }
+
+      context "with valid params" do
+        it "creates the organisation and redirects to its show page with a success message" do
+          post organisations_path, params: params
+
+          created = Organisation.last
+          expect(response).to redirect_to(organisation_path(created))
+          follow_redirect!
+          expect(response.body).to include("New Test Organisation has been added")
+        end
+      end
+
+      context "with invalid params" do
+        let(:params) { { organisations_organisation_input: { name: "" } } }
+
+        it "returns 422 and renders the new view with an error" do
+          post organisations_path, params: params
+
+          expect(response).to have_http_status(:unprocessable_content)
+          expect(response).to render_template("organisations/new")
+          expect(response.body).to include("Enter an organisation name")
+        end
+      end
+    end
+  end
+
   describe "#show" do
     let(:organisation) { create :organisation, :with_org_admin, slug: "department-for-testing" }
     let(:path) { organisation_path(organisation) }
