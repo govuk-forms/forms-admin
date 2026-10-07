@@ -1,0 +1,16 @@
+<%# locals: (feature_flags_input:, url:, title:, caption:, hint:, label_scope:) %>
+<%= form_with(model: feature_flags_input, url:) do |f| %>
+  <% if feature_flags_input.errors.any? %>
+    <%= f.govuk_error_summary %>
+  <% end %>
+
+  <%= f.govuk_check_boxes_fieldset :feature_flags, multiple: false, legend: { text: title, tag: "h1", size: "l" }, caption: { text: caption, size: "l" }, hint: { text: hint } do %>
+    <% feature_flags_input.flags.each do |flag| %>
+      <%= f.govuk_check_box flag, "true", "false", multiple: false,
+            checked: feature_flags_input.flag_checked?(flag), disabled: feature_flags_input.flag_locked?(flag),
+            label: { text: t(flag, scope: label_scope) } %>
+    <% end %>
+  <% end %>
+
+  <%= f.govuk_submit t("save_and_continue") %>
+<% end %>

@@ -1,4 +1,6 @@
 class Organisation < ApplicationRecord
+  include FeatureFlaggable
+
   has_paper_trail
 
   has_many :groups
@@ -68,18 +70,6 @@ class Organisation < ApplicationRecord
     order(Arel.sql("(SELECT MIN(created_at) FROM mou_signatures WHERE mou_signatures.organisation_id = organisations.id) DESC NULLS LAST"))
       .order(:name)
   }
-
-  # Feature flag columns that super admins can toggle per organisation. Derived from
-  # the features in settings.yml marked `enabled_by_organisation: true` that also have
-  # a matching `*_enabled` column.
-  def self.feature_flag_attributes
-    return [] if Settings.features.blank?
-
-    Settings.features.filter_map do |name, config|
-      column = "#{name}_enabled"
-      column if config.respond_to?(:enabled_by_organisation) && config.enabled_by_organisation && has_attribute?(column)
-    end
-  end
 
   def name_with_abbreviation
     if abbreviation.present? && abbreviation != name

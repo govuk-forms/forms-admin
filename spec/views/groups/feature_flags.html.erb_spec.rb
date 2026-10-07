@@ -12,7 +12,7 @@ RSpec.describe "groups/feature_flags", type: :view do
     skip "no group feature flags are configured" if Group.feature_flag_attributes.empty?
 
     assign(:group, group)
-    assign(:feature_flags_input, Groups::FeatureFlagsInput.new(group:).assign_group_values)
+    assign(:feature_flags_input, FeatureFlagsInput.new(record: group))
     render
   end
 
@@ -22,7 +22,7 @@ RSpec.describe "groups/feature_flags", type: :view do
 
   it "renders the feature flags form posting to the update action" do
     assert_select "form[action=?][method=?]", feature_flags_group_path(group), "post" do
-      assert_select "input[name=?]", "groups_feature_flags_input[#{feature_flag}]"
+      assert_select "input[name=?]", "feature_flags_input[#{feature_flag}]"
     end
   end
 
@@ -46,13 +46,13 @@ RSpec.describe "groups/feature_flags", type: :view do
     end
 
     it "renders the flag as checked and disabled so it cannot be turned off" do
-      assert_select "input[type=checkbox][name=?][checked=checked][disabled=disabled]", "groups_feature_flags_input[#{feature_flag}]"
+      assert_select "input[type=checkbox][name=?][checked=checked][disabled=disabled]", "feature_flags_input[#{feature_flag}]"
     end
 
     it "leaves flags that are off enabled and unchecked" do
       skip "fewer than two group feature flags are configured" if Group.feature_flag_attributes.size < 2
 
-      assert_select "input[type=checkbox][name=?]:not([disabled])", "groups_feature_flags_input[#{other_feature_flag}]"
+      assert_select "input[type=checkbox][name=?]:not([disabled])", "feature_flags_input[#{other_feature_flag}]"
     end
   end
 end

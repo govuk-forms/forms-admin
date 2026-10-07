@@ -484,7 +484,7 @@ RSpec.describe "/groups", type: :request do
 
     context "when user is not a super admin" do
       it "is forbidden and does not change the flag" do
-        post feature_flags_group_path(group), params: { groups_feature_flags_input: { feature_flag => "true" } }
+        post feature_flags_group_path(group), params: { feature_flags_input: { feature_flag => "true" } }
 
         expect(response).to have_http_status(:forbidden)
         expect(group.reload[feature_flag]).to be(false)
@@ -497,7 +497,7 @@ RSpec.describe "/groups", type: :request do
       end
 
       it "enables a feature flag and redirects to the group" do
-        post feature_flags_group_path(group), params: { groups_feature_flags_input: { feature_flag => "true" } }
+        post feature_flags_group_path(group), params: { feature_flags_input: { feature_flag => "true" } }
 
         expect(group.reload[feature_flag]).to be(true)
         expect(FeatureService.new(group:).enabled?(feature_name)).to be(true)
@@ -508,14 +508,14 @@ RSpec.describe "/groups", type: :request do
       it "does not turn an enabled feature flag off" do
         group.update!(feature_flag => true)
 
-        post feature_flags_group_path(group), params: { groups_feature_flags_input: { feature_flag => "false" } }
+        post feature_flags_group_path(group), params: { feature_flags_input: { feature_flag => "false" } }
 
         expect(group.reload[feature_flag]).to be(true)
         expect(FeatureService.new(group:).enabled?(feature_name)).to be(true)
       end
 
       it "does not show a success message when no flags have changed" do
-        post feature_flags_group_path(group), params: { groups_feature_flags_input: { feature_flag => "false" } }
+        post feature_flags_group_path(group), params: { feature_flags_input: { feature_flag => "false" } }
 
         expect(response).to redirect_to(group_path(group))
         expect(flash[:success]).to be_nil
@@ -534,7 +534,7 @@ RSpec.describe "/groups", type: :request do
         other_feature_flag = Group.feature_flag_attributes.second
         group.update!(feature_flag => true)
 
-        post feature_flags_group_path(group), params: { groups_feature_flags_input: { feature_flag => "false", other_feature_flag => "true" } }
+        post feature_flags_group_path(group), params: { feature_flags_input: { feature_flag => "false", other_feature_flag => "true" } }
 
         group.reload
         expect(group[feature_flag]).to be(true)

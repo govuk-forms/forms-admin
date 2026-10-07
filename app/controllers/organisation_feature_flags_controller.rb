@@ -5,11 +5,11 @@ class OrganisationFeatureFlagsController < WebController
   after_action :verify_authorized
 
   def edit
-    @feature_flags_input = Organisations::FeatureFlagsInput.new(organisation:).assign_organisation_values
+    @feature_flags_input = FeatureFlagsInput.new(record: organisation)
   end
 
   def update
-    @feature_flags_input = Organisations::FeatureFlagsInput.new(feature_flags_input_params)
+    @feature_flags_input = FeatureFlagsInput.new(record: organisation, submitted: feature_flags_input_params)
 
     if @feature_flags_input.submit
       success_message = t(".success") if @feature_flags_input.flags_changed?
@@ -27,7 +27,8 @@ private
 
   def feature_flags_input_params
     # When every flag is already enabled the form has no enabled inputs, so the
-    # input params may be missing entirely.
-    params.fetch(:organisations_feature_flags_input, {}).permit(*Organisation.feature_flag_attributes).merge(organisation:)
+    # input params may be missing entirely. The input only reads the feature flag
+    # attributes, so there is nothing to permit here.
+    params.fetch(:feature_flags_input, {})
   end
 end

@@ -180,7 +180,8 @@
     <%= govuk_button_link_to t("organisations.show.brands.add"), new_organisation_brand_path(@organisation), secondary: true %>
 
     <h2 class="govuk-heading-m"><%= t("organisations.show.feature_flags.heading") %></h2>
-    <% if Organisation.feature_flag_attributes.any? %>
+    <% feature_flags = Organisation.feature_flag_attributes %>
+    <% if feature_flags.any? %>
       <%= render ScrollingWrapperComponent::View.new(aria_label: t("organisations.show.feature_flags.heading")) do %>
         <%= govuk_table do |table| %>
           <%= table.with_head do |head|
@@ -191,7 +192,7 @@
           end %>
 
           <%= table.with_body do |body| %>
-            <% Organisation.feature_flag_attributes.each do |flag| %>
+            <% feature_flags.each do |flag| %>
               <%= body.with_row do |row| %>
                 <%= row.with_cell(text: t("organisations.feature_flags.flags.#{flag}")) %>
                 <%= row.with_cell do %>

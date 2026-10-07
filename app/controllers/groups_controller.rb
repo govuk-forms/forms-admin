@@ -109,14 +109,14 @@ class GroupsController < WebController
   def feature_flags
     authorize @group, :manage_feature_flags?
 
-    @feature_flags_input = Groups::FeatureFlagsInput.new(group: @group).assign_group_values
+    @feature_flags_input = FeatureFlagsInput.new(record: @group)
   end
 
   # POST /groups/1/feature-flags
   def update_feature_flags
     authorize @group, :manage_feature_flags?
 
-    @feature_flags_input = Groups::FeatureFlagsInput.new(feature_flags_input_params)
+    @feature_flags_input = FeatureFlagsInput.new(record: @group, submitted: feature_flags_input_params)
 
     if @feature_flags_input.submit
       success_message = t("groups.success_messages.feature_flags") if @feature_flags_input.flags_changed?
@@ -224,8 +224,9 @@ private
 
   def feature_flags_input_params
     # When every flag is already enabled the form has no enabled inputs, so the
-    # input params may be missing entirely.
-    params.fetch(:groups_feature_flags_input, {}).permit(*Group.feature_flag_attributes).merge(group: @group)
+    # input params may be missing entirely. The input only reads the feature flag
+    # attributes, so there is nothing to permit here.
+    params.fetch(:feature_flags_input, {})
   end
 
   def confirm_upgrade_input_params
