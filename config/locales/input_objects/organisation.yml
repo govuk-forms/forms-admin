@@ -1,0 +1,13 @@
+---
+en:
+  activemodel:
+    errors:
+      models:
+        organisations/organisation_input:
+          attributes:
+            domain:
+              blank: Enter a domain name
+              invalid_domain: Enter a domain name in the correct format, like subdomain.gov.uk
+            name:
+              blank: Enter an organisation name
+              taken: An organisation with this name already exists
