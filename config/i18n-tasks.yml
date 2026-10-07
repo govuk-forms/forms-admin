@@ -131,6 +131,7 @@ ignore_unused:
 - 'activerecord.errors.*'
 - 'errors.*'
 - 'date.formats.*'
+- 'groups.feature_flags.flags.*'
 - 'helpers.*'
 - 'reports.*.heading'
 - 'reports.*.download_csv'
