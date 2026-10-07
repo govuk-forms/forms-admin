@@ -1644,6 +1644,9 @@ en:
     new:
       domain_hint: You can add more domains after the organisation has been created
       domain_label: Email domain
+      guidance_html: |
+        <p>Before adding an organisation, check the existing list to avoid duplicates.</p>
+        <p>If you’re unsure whether to add the organisation, speak to a product manager.</p>
       name_label: Organisation name
       title: Add an organisation
     show:
