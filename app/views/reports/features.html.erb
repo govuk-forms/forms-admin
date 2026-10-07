@@ -19,6 +19,18 @@
         <%= row.with_value(text: govuk_link_to(data[:forms_with_routing], report_forms_with_routes_path, no_visited_state: true)) %>
       <% end %>
       <%= summary_list.with_row do |row| %>
+        <%= row.with_key(text: t(".features.forms_with_only_steps_with_one_conditional_route", tag: tag_label(tag)).upcase_first) %>
+        <%= row.with_value(text: data[:forms_with_only_steps_with_one_conditional_route]) %>
+      <% end %>
+      <%= summary_list.with_row do |row| %>
+        <%= row.with_key(text: t(".features.forms_with_steps_with_many_conditional_routes", tag: tag_label(tag)).upcase_first) %>
+        <%= row.with_value(text: data[:forms_with_steps_with_many_conditional_routes]) %>
+      <% end %>
+      <%= summary_list.with_row do |row| %>
+        <%= row.with_key(text: t(".features.forms_with_only_unconditional_routes", tag: tag_label(tag)).upcase_first) %>
+        <%= row.with_value(text: data[:forms_with_only_unconditional_routes]) %>
+      <% end %>
+      <%= summary_list.with_row do |row| %>
         <%= row.with_key(text: t(".features.forms_with_exit_pages", tag: tag_label(tag)).upcase_first) %>
         <%= row.with_value(text: govuk_link_to(data[:forms_with_exit_pages], report_forms_with_exit_pages_path, no_visited_state: true)) %>
       <% end %>

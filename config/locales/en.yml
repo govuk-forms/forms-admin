@@ -2146,9 +2146,12 @@ en:
         forms_with_daily_submission_csv: "%{tag} forms getting a daily CSV of completed forms"
         forms_with_exit_pages: "%{tag} forms with exit pages"
         forms_with_json_submission_email_attachments: "%{tag} forms with JSON email attachments"
+        forms_with_only_steps_with_one_conditional_route: "%{tag} forms with only one conditional route from the same question"
+        forms_with_only_unconditional_routes: "%{tag} forms with only unconditional routes"
         forms_with_payments: "%{tag} forms with payments"
         forms_with_routes: "%{tag} forms with routes"
         forms_with_s3_submissions: "%{tag} forms with S3 submissions"
+        forms_with_steps_with_many_conditional_routes: "%{tag} forms with more than one conditional route from the same question"
         forms_with_weekly_submission_csv: "%{tag} forms getting a weekly CSV of completed forms"
         forms_with_welsh_translation: "%{tag} forms with Welsh translation"
         heading: Feature usage
