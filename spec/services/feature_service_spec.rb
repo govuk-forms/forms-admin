@@ -217,6 +217,10 @@ describe FeatureService do
 
           expect(feature_service.enabled?(:test_feature)).to be false
         end
+
+        it "returns false when the organisation has no column for the feature" do
+          expect(described_class.new(organisation: build(:organisation)).enabled?(:test_feature)).to be false
+        end
       end
     end
   end

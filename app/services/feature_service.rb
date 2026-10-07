@@ -43,7 +43,10 @@ class FeatureService
     if feature.enabled_by_organisation.present? && feature.enabled_by_organisation
       raise OrganisationRequiredError, "Feature #{feature_name} requires organisation to be provided" if organisation.blank?
 
-      return organisation.send(:"#{feature_name}_enabled?")
+      # The setting may be deployed before the migration that adds the column, so
+      # treat the feature as off until the organisation has it.
+      flag_method = :"#{feature_name}_enabled?"
+      return organisation.respond_to?(flag_method) && organisation.public_send(flag_method)
     end
 
     feature.enabled
