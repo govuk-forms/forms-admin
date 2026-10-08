@@ -33,6 +33,10 @@ describe "pages/selection/type.html.erb", type: :view do
       render(template: "pages/selection/type")
     end
 
+    it "has a hint" do
+      expect(rendered).to have_css(".govuk-hint", text: I18n.t("helpers.hint.pages_selection_type_input.only_one_option"))
+    end
+
     context "when input object has value of true" do
       let(:only_one_option) { "true" }
 
