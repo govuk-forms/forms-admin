@@ -38,7 +38,8 @@ RSpec.describe Forms::WelshTranslationController, type: :request do
     context "when the multiple branches feature is disabled", feature_multiple_branches: false do
       let(:mark_complete) { "true" }
       let(:condition_translations_attributes) { { "0" => { "id" => condition.id, exit_page_heading_cy: "Nid ydych yn gymwys", exit_page_markdown_cy: "Mae'n ddrwg gennym, nid ydych yn gymwys ar gyfer y gwasanaeth hwn." } } }
-      let(:page_translations_attributes) { { "0" => { "id" => form.pages.first.id, question_text_cy: "Ydych chi'n adnewyddu trwydded?", condition_translations_attributes: } } }
+      let(:selection_options_cy_attributes) { { "0" => { id: 0, name_cy: "Opsiwn 1" }, "1" => { id: 1, name_cy: "Opsiwn 2" } } }
+      let(:page_translations_attributes) { { "0" => { "id" => form.pages.first.id, question_text_cy: "Ydych chi'n adnewyddu trwydded?", condition_translations_attributes:, selection_options_cy_attributes: } } }
       let(:params) { { forms_welsh_translation_input: { form:, mark_complete:, name_cy: "Gwneud cais am drwydded jyglo", privacy_policy_url_cy: "https://juggling.gov.uk/privacy_policy/cy", page_translations_attributes: } } }
 
       context "when 'Yes' is selected" do
@@ -164,7 +165,8 @@ RSpec.describe Forms::WelshTranslationController, type: :request do
       let(:mark_complete) { "true" }
       let(:exit_page) { create :exit_page, question_page: form.pages.first }
       let(:exit_page_translations_attributes) { { "0" => { "id" => exit_page.id, heading_cy: "Nid ydych yn gymwys", markdown_cy: "Mae'n ddrwg gennym, nid ydych yn gymwys ar gyfer y gwasanaeth hwn." } } }
-      let(:page_translations_attributes) { { "0" => { "id" => form.pages.first.id, question_text_cy: "Ydych chi'n adnewyddu trwydded?", exit_page_translations_attributes: } } }
+      let(:selection_options_cy_attributes) { { "0" => { id: 0, name_cy: "Opsiwn 1" }, "1" => { id: 1, name_cy: "Opsiwn 2" } } }
+      let(:page_translations_attributes) { { "0" => { "id" => form.pages.first.id, question_text_cy: "Ydych chi'n adnewyddu trwydded?", exit_page_translations_attributes:, selection_options_cy_attributes: } } }
       let(:params) { { forms_welsh_translation_input2: { form:, mark_complete:, name_cy: "Gwneud cais am drwydded jyglo", privacy_policy_url_cy: "https://juggling.gov.uk/privacy_policy/cy", page_translations_attributes: } } }
 
       context "when 'Yes' is selected" do

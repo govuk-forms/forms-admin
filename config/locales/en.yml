@@ -731,6 +731,7 @@ en:
         hint: Selecting ‘Yes’ will mark this task as complete. You’ll still be able to make more changes if you need to.
         hint_text: Hint text
         legend: Have you finished adding your Welsh version?
+        long_list_of_selection_options: Your list has more than 30 options. You need to upload translations of the list options as a CSV.
         no_declaration_added: No declaration has been added to the form.
         no_pages_added: No questions have been added to the form yet.
         no_privacy_information_added: No privacy information has been added to the form yet.
@@ -750,6 +751,13 @@ en:
           selection_options: Question %{question_number}’s list of options
           support_information: Contact details for support
           what_happens_next: Information about what happens next
+        selection_options_details_summary:
+          english:
+            one: "%{count} option in English"
+            other: "%{count} options in English"
+          welsh:
+            one: "%{count} option in Welsh"
+            other: "%{count} options in Welsh"
         support_email: Email
         support_phone: Phone number and opening times
         support_url: Online contact link

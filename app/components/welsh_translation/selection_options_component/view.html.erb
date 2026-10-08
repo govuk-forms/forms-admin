@@ -1,0 +1,78 @@
+<% if long_list_without_translations? %>
+  <div class="govuk-grid-row  govuk-!-margin-bottom-8">
+    <div class="govuk-grid-column-two-thirds">
+      <h3 class="govuk-heading-s"><%= t("forms.welsh_translation.new.section_headings.selection_options", question_number: question_number) %></h3>
+      <p><%= t("forms.welsh_translation.new.long_list_of_selection_options") %></p>
+    </div>
+  </div>
+<% else %>
+  <%= render ScrollingWrapperComponent::View.new(aria_label: t("forms.welsh_translation.new.section_headings.selection_options", question_number: question_number)) do %>
+    <% table_caption_id = "selection_options_cy_table_caption_#{@page_form.object.page.id}" %>
+    <%= @page_form.govuk_fieldset legend: nil, described_by: [table_caption_id] do %>
+
+      <!-- For a long list of options, we won't display inputs unless there is an error for an option, and instead use
+      hidden inputs to store their values -->
+      <% hidden_selection_option_fields = [] %>
+
+      <%= govuk_table(classes: @table_presenter.two_column_classes) do |table| %>
+        <%= table.with_caption(size: 's',
+                   text: t("forms.welsh_translation.new.section_headings.selection_options", question_number: question_number),
+                   html_attributes: { id: table_caption_id })
+            table.with_head(**@table_presenter.two_column_headers) %>
+        <%= table.with_body do |body| %>
+
+          <!-- Show translated options for a long list in details components -->
+          <% if long_list? && collapsed_options.any? %>
+            <%= body.with_row do |row| %>
+              <%= row.with_cell do %>
+                <%= govuk_details(summary_text: t("forms.welsh_translation.new.selection_options_details_summary.english", count: collapsed_options.size)) do %>
+                  <ul class="govuk-list govuk-list--bullet">
+                    <% collapsed_options.each do |option| %>
+                      <li>
+                        <%= @page_form.object.page.answer_settings.selection_options[option.id].name %>
+                      </li>
+                    <% end %>
+                  </ul>
+                <% end %>
+              <% end %>
+              <%= row.with_cell do %>
+                <%= govuk_details(summary_text: t("forms.welsh_translation.new.selection_options_details_summary.welsh", count: collapsed_options.size)) do %>
+                  <ul class="govuk-list govuk-list--bullet">
+                    <% collapsed_options.each do |option| %>
+                      <li lang="cy">
+                        <%= option.name_cy %>
+                      </li>
+                    <% end %>
+                  </ul>
+                <% end %>
+              <% end %>
+            <% end %>
+          <% end %>
+
+          <% @page_form.fields_for :selection_options_cy, @page_form.object.selection_options_cy do |selection_options_form| %>
+            <% if hide_option?(selection_options_form) %>
+              <% hidden_selection_option_fields << selection_options_form.hidden_field(:id) %>
+              <% hidden_selection_option_fields << selection_options_form.hidden_field(:name_cy) %>
+            <% else %>
+              <%= body.with_row do |row| %>
+                <%= row.with_cell(text: @page_form.object.page.answer_settings.selection_options[selection_options_form.object.id].name) %>
+                <%= row.with_cell do %>
+                  <%= selection_options_form.hidden_field :id %>
+                  <%= selection_options_form.govuk_text_field :name_cy,
+                      id: selection_options_form.object.form_field_id(:name_cy),
+                      label: {
+                        text: t("helpers.label.forms_welsh_page_translation_input.selection_options_cy_html", question_number: question_number, option_number: selection_options_form.object.id + 1), for: selection_options_form.object.form_field_id(:name_cy),
+                      },
+                      lang: "cy"
+                  %>
+                <% end %>
+              <% end %>
+            <% end %>
+          <% end %>
+        <% end %>
+      <% end %>
+
+      <%= safe_join(hidden_selection_option_fields) %>
+    <% end %>
+  <% end %>
+<% end %>
