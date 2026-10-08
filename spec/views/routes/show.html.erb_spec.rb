@@ -59,6 +59,11 @@ describe "routes/show.html.erb" do
       ]
     end
 
+    it "shows the using routes details component" do
+      render_page
+      expect(rendered).to have_text("Using routes")
+    end
+
     it "has a list with a list item for each page" do
       render_page
       expect(rendered).to have_selector("ol.app-routes-list > li", count: pages.length)
@@ -468,9 +473,19 @@ describe "routes/show.html.erb" do
       ]
     end
 
-    it "shows a warning" do
+    it "shows a warning heading in an inset text block" do
+      render_page
+      expect(rendered).to have_selector(".govuk-inset-text h2", text: "You cannot add any routes yet")
+    end
+
+    it "shows a warning message" do
       render_page
       expect(rendered).to have_content("You need more than one question in your form before you can add any routes.")
+    end
+
+    it "shows the using routes details component" do
+      render_page
+      expect(rendered).to have_text("Using routes")
     end
 
     it "shows a link to the question pages" do
