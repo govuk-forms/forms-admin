@@ -13,7 +13,8 @@ RSpec.describe Api::BrandsController, type: :request do
                border_colour: "#206c49",
                logo_alt_text: "Golden Zephyr Council",
                logo_link: "https://www.goldenzephyr.example.com",
-               copyright_holder: "Golden Zephyr Council"
+               copyright_holder: "Golden Zephyr Council",
+               open_government_licence: true
       end
 
       before do
@@ -33,6 +34,7 @@ RSpec.describe Api::BrandsController, type: :request do
           "logo_alt_text" => "Golden Zephyr Council",
           "logo_link" => "https://www.goldenzephyr.example.com",
           "copyright_holder" => "Golden Zephyr Council",
+          "open_government_licence" => true,
           "logo_path" => nil,
           "favicon_path" => nil,
           "opengraph_image_path" => nil,
