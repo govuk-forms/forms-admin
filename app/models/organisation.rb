@@ -69,6 +69,18 @@ class Organisation < ApplicationRecord
       .order(:name)
   }
 
+  # Feature flag columns that super admins can toggle per organisation. Derived from
+  # the features in settings.yml marked `enabled_by_organisation: true` that also have
+  # a matching `*_enabled` column.
+  def self.feature_flag_attributes
+    return [] if Settings.features.blank?
+
+    Settings.features.filter_map do |name, config|
+      column = "#{name}_enabled"
+      column if config.respond_to?(:enabled_by_organisation) && config.enabled_by_organisation && has_attribute?(column)
+    end
+  end
+
   def name_with_abbreviation
     if abbreviation.present? && abbreviation != name
       "#{name} (#{abbreviation})"
