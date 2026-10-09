@@ -2278,16 +2278,26 @@ en:
   routes:
     show:
       add_exit_page_html: Add an exit page <span class="govuk-visually-hidden">to question %{question_number}</span>
+      back_to_your_questions_html: |
+        <p>
+          <a href="%{pages_link}">Back to your questions</a>
+        </p>
       cannot_add_route_to_last_question_in_form: This is the last question in the form, so you cannot add a route or an exit page.
       exit_page_list_entry: 'Exit page %{exit_page_number}: %{heading}'
       exit_pages_list: Question %{question_number}’s exit pages
       not_enough_pages_html: |
-        <p>You need more than one question in your form before you can add any routes.</p>
-        <p><a href="%{pages_link}">Back to your questions</a></p>
+        <div class="govuk-inset-text">
+          <h2 class="govuk-heading-m">You cannot add any routes yet</h2>
+          <p>You need more than one question in your form before you can add any routes.</p>
+        </div>
       too_many_options_html: |
         <div class="govuk-inset-text">
           <p>You cannot add routes from answers if the question has more than 10 options. We hope to add this ability soon.</p>
         </div>
+      using_routes_details_summary: Using routes
+      using_routes_details_text_html: |
+        <p>You can use ‘routes’ to direct people through your form based on their answers, so people will only need to answer questions that are relevant to them.</p>
+        <p><a href="https://www.forms.service.gov.uk/about/using-routes" target="_blank"" rel="noreferrer noopener">Read about using routes (opens in new tab)</a> on the GOV.UK Forms website.</p>
   routing_page:
     body_html: |
       <p> You can add a route to a question so if someone selects one specific answer, they’ll be skipped to: </p>

@@ -10,8 +10,11 @@
     </h1>
 
     <%if @routes_input.form.pages.length < 2 %>
-      <%= t(".not_enough_pages_html", pages_link: form_pages_path(@current_form)) %>
+      <%= t(".not_enough_pages_html") %>
+      <%= govuk_details(summary_text: t('.using_routes_details_summary'), text: t('.using_routes_details_text_html')) %>
+      <%= t(".back_to_your_questions_html", pages_link: form_pages_path(@current_form)) %>
     <% else %>
+      <%= govuk_details(summary_text: t('.using_routes_details_summary'), text: t('.using_routes_details_text_html')) %>
       <%= form_with(model: @routes_input, url: routes_path(@routes_input.form)) do |f| %>
         <% if @routes_input&.errors&.present? %>
           <%= f.govuk_error_summary(presenter: ErrorSummaryPresenter.new(@routes_input.errors)) %>
