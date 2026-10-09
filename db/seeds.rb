@@ -15,6 +15,7 @@ if (HostingEnvironment.local_development? || HostingEnvironment.review?) && Bran
     logo_alt_text: "Toadstool Town Council",
     logo_link: "https://www.toadstooltown.example.com",
     copyright_holder: "Toadstool Town Council",
+    open_government_licence: true,
   )
   Brand.create!(
     slug: "dragonfly-district",
