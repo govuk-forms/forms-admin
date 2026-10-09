@@ -186,41 +186,8 @@ RSpec.describe ReportsController, type: :request do
         expect(response).to render_template("reports/feature_report")
 
         node = Capybara.string(response.body)
-        expect(node).to have_xpath "//thead/tr/th[3]", text: "Number of routes"
+        expect(node).to have_xpath "//thead/tr/th[3]", text: "Number of questions with routes"
         expect(node).to have_xpath "//tbody/tr[1]/td[3]", text: "1"
-      end
-    end
-  end
-
-  describe "#forms_with_branch_routes" do
-    let(:path) { report_forms_with_branch_routes_path(tag: :live) }
-    let(:form) do
-      form = create(:form, :live, :ready_for_routing)
-      create(:condition, routing_page_id: form.pages.first.id, check_page_id: form.pages.first.id, answer_value: "Option 1", goto_page_id: form.pages.third.id)
-      create(:condition, routing_page_id: form.pages.second.id, check_page_id: form.pages.first.id, goto_page_id: form.pages.fourth.id)
-      form.latest_form_document.update!(content: form.reload.as_form_document(live_at: form.updated_at))
-      form
-    end
-    let(:forms) { [form] }
-
-    include_examples "unauthorized user is forbidden"
-
-    context "when the user is a super admin" do
-      before do
-        login_as_super_admin_user
-
-        get path
-      end
-
-      it "returns http code 200 with the expected report data" do
-        expect(response).to have_http_status(:ok)
-        expect(response).to render_template("reports/feature_report")
-
-        node = Capybara.string(response.body)
-        expect(node).to have_xpath "//thead/tr/th[3]", text: "Number of routes"
-        expect(node).to have_xpath "//tbody/tr/td[3]", text: "2"
-        expect(node).to have_xpath "//thead/tr/th[4]", text: "Number of branch routes"
-        expect(node).to have_xpath "//tbody/tr/td[4]", text: "1"
       end
     end
   end

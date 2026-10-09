@@ -5,10 +5,12 @@ RSpec.describe Reports::FeatureReportService do
     [
       form_with_all_answer_types,
       form_with_a_few_answer_types,
-      branch_route_form,
       basic_route_form,
+      multiple_branches_form,
+      exit_page_form,
       copied_form,
       form_with_a_welsh_translation,
+      s3_submissions_form,
     ]
   end
   let(:form_documents) do
@@ -55,19 +57,27 @@ RSpec.describe Reports::FeatureReportService do
              create(:delivery_configuration, :weekly_email),
            ])
   end
-  let(:branch_route_form) do
-    form = create(:form, :live, :ready_for_routing, delivery_configurations: [
-      create(:delivery_configuration, :s3, formats: %w[csv]),
-    ])
-    create(:condition, :with_exit_page, routing_page_id: form.pages[0].id, check_page_id: form.pages[0].id, answer_value: "Option 1")
-    create(:condition, routing_page_id: form.pages[1].id, check_page_id: form.pages[1].id, answer_value: "Option 1", goto_page_id: form.pages[3].id)
-    create(:condition, routing_page_id: form.pages[2].id, check_page_id: form.pages[1].id, goto_page_id: form.pages[4].id)
-    form.latest_form_document.update!(content: form.reload.as_form_document(live_at: form.updated_at))
-    form
-  end
   let(:basic_route_form) do
     form = create(:form, :live, :ready_for_routing)
     create(:condition, routing_page_id: form.pages.first.id, check_page_id: form.pages.first.id, answer_value: "Option 1", skip_to_end: true)
+    form.latest_form_document.update!(content: form.reload.as_form_document(live_at: form.updated_at))
+    form
+  end
+  let(:multiple_branches_form) do
+    form = create(:form, :live, :ready_for_multiple_branches, pages: [
+      build(:page, :with_selection_settings, selection_options_count: 3),
+      *build_list(:page, 3, :with_text_settings),
+    ])
+    create(:condition, routing_page: form.pages.first, check_page: form.pages.first, answer_value: "Option 2", goto_page: form.pages.third)
+    create(:condition, routing_page: form.pages.first, check_page: form.pages.first, answer_value: "Option 3", goto_page: form.pages.fourth)
+    create(:condition, routing_page: form.pages.second, check_page: form.pages.second, answer_value: nil, skip_to_end: true)
+    create(:condition, routing_page: form.pages.third, check_page: form.pages.third, answer_value: nil, skip_to_end: true)
+    form.latest_form_document.update!(content: form.reload.as_form_document(live_at: form.updated_at))
+    form
+  end
+  let(:exit_page_form) do
+    form = create(:form, :live, :ready_for_routing)
+    create(:condition, :with_exit_page, routing_page_id: form.pages[0].id, check_page_id: form.pages[0].id, answer_value: "Option 1")
     form.latest_form_document.update!(content: form.reload.as_form_document(live_at: form.updated_at))
     form
   end
@@ -80,6 +90,11 @@ RSpec.describe Reports::FeatureReportService do
     form = create(:form, :live, welsh_completed: true, pages: [])
     form
   end
+  let(:s3_submissions_form) do
+    create(:form, :live, pages: [], delivery_configurations: [
+      create(:delivery_configuration, :s3, formats: %w[csv]),
+    ])
+  end
 
   before do
     forms.each do |form|
@@ -91,11 +106,10 @@ RSpec.describe Reports::FeatureReportService do
     it "returns the feature report" do
       report = described_class.new(form_documents).report
       expect(report).to eq({
-        total_forms: 6,
+        total_forms: 8,
         copied_forms: 1,
         forms_with_payment: 1,
-        forms_with_routing: 2,
-        forms_with_branch_routing: 1,
+        forms_with_routing: 3,
         forms_with_add_another_answer: 1,
         forms_with_csv_submission_email_attachments: 2,
         forms_with_json_submission_email_attachments: 1,
@@ -110,8 +124,8 @@ RSpec.describe Reports::FeatureReportService do
           "national_insurance_number" => 1,
           "number" => 1,
           "phone_number" => 1,
-          "selection" => 3,
-          "text" => 1,
+          "selection" => 4,
+          "text" => 2,
         },
         steps_with_answer_type: {
           "address" => 1,
@@ -121,8 +135,8 @@ RSpec.describe Reports::FeatureReportService do
           "national_insurance_number" => 1,
           "number" => 1,
           "phone_number" => 1,
-          "selection" => 11,
-          "text" => 1,
+          "selection" => 12,
+          "text" => 4,
         },
         forms_with_exit_pages: 1,
         forms_with_welsh_translation: 1,
@@ -134,7 +148,7 @@ RSpec.describe Reports::FeatureReportService do
   describe "#questions" do
     it "returns all questions in all forms given" do
       questions = described_class.new(form_documents).questions
-      expect(questions.length).to eq 23
+      expect(questions.length).to eq 27
     end
 
     it "returns details needed to render report" do
@@ -344,41 +358,80 @@ RSpec.describe Reports::FeatureReportService do
     end
   end
 
-  describe "#forms_with_branch_routes" do
+  describe "#forms_with_routes" do
     it "returns details needed to render report" do
-      forms = described_class.new(form_documents).forms_with_branch_routes
+      forms = described_class.new(form_documents).forms_with_routes
       expect(forms).to match [
         a_hash_including(
-          "form_id" => branch_route_form.id,
+          "form_id" => basic_route_form.id,
           "content" => a_hash_including(
-            "name" => branch_route_form.name,
+            "name" => basic_route_form.name,
           ),
           "metadata" => {
-            "number_of_routes" => 3,
-            "number_of_branch_routes" => 1,
+            "number_of_questions" => {
+              "with_routes" => 1,
+              "with_one_conditional_route" => 1,
+              "with_many_conditional_routes" => 0,
+              "with_unconditional_route" => 0,
+            },
+          },
+        ),
+        a_hash_including(
+          "form_id" => multiple_branches_form.id,
+          "content" => a_hash_including(
+            "name" => multiple_branches_form.name,
+          ),
+          "metadata" => {
+            "number_of_questions" => {
+              "with_routes" => 3,
+              "with_one_conditional_route" => 0,
+              "with_many_conditional_routes" => 1,
+              "with_unconditional_route" => 2,
+            },
+          },
+        ),
+        a_hash_including(
+          "form_id" => exit_page_form.id,
+          "content" => a_hash_including(
+            "name" => exit_page_form.name,
+          ),
+          "metadata" => {
+            "number_of_questions" => {
+              "with_routes" => 1,
+              "with_one_conditional_route" => 1,
+              "with_many_conditional_routes" => 0,
+              "with_unconditional_route" => 0,
+            },
           },
         ),
       ]
     end
 
-    it "returns forms with branch routes" do
-      forms = described_class.new(form_documents).forms_with_branch_routes
+    it "returns forms with routes" do
+      forms = described_class.new(form_documents).forms_with_routes
       expect(forms).to match [
         a_hash_including(
-          "form_id" => branch_route_form.id,
-          "content" => a_hash_including(
-            "name" => branch_route_form.name,
-          ),
+          "form_id" => basic_route_form.id,
+        ),
+        a_hash_including(
+          "form_id" => multiple_branches_form.id,
+        ),
+        a_hash_including(
+          "form_id" => exit_page_form.id,
         ),
       ]
     end
 
     it "includes counts of routes" do
-      forms = described_class.new(form_documents).forms_with_branch_routes
+      forms = described_class.new(form_documents).forms_with_routes
       expect(forms).to all include(
         "metadata" => a_hash_including(
-          "number_of_routes" => an_instance_of(Integer),
-          "number_of_branch_routes" => an_instance_of(Integer),
+          "number_of_questions" => {
+            "with_routes" => an_instance_of(Integer),
+            "with_one_conditional_route" => an_instance_of(Integer),
+            "with_many_conditional_routes" => an_instance_of(Integer),
+            "with_unconditional_route" => an_instance_of(Integer),
+          },
         ),
       )
     end
@@ -403,7 +456,7 @@ RSpec.describe Reports::FeatureReportService do
       forms = described_class.new(form_documents).forms_with_exit_pages
       expect(forms).to match [
         a_hash_including(
-          "form_id" => branch_route_form.id,
+          "form_id" => exit_page_form.id,
           "content" => a_hash_including(
             "name",
           ),
@@ -484,9 +537,9 @@ RSpec.describe Reports::FeatureReportService do
       expect(forms.length).to eq 1
       expect(forms).to match [
         a_hash_including(
-          "form_id" => branch_route_form.id,
+          "form_id" => s3_submissions_form.id,
           "content" => a_hash_including(
-            "name" => branch_route_form.name,
+            "name" => s3_submissions_form.name,
           ),
         ),
       ]

@@ -143,8 +143,8 @@ describe "reports/feature_report" do
     let(:type) { :forms_with_routes }
     let(:records) do
       [
-        { "form_id" => 1, "tag" => tag, "content" => { "name" => "All question types form" }, "organisation_name" => "Government Digital Service", "metadata" => { "number_of_routes" => 1 } },
-        { "form_id" => 3, "tag" => tag, "content" => { "name" => "Branch route form" }, "organisation_name" => "Government Digital Service", "metadata" => { "number_of_routes" => 2 } },
+        { "form_id" => 1, "tag" => tag, "content" => { "name" => "All question types form" }, "organisation_name" => "Government Digital Service", "metadata" => { "number_of_questions" => { "with_routes" => 1 } } },
+        { "form_id" => 3, "tag" => tag, "content" => { "name" => "Branch route form" }, "organisation_name" => "Government Digital Service", "metadata" => { "number_of_questions" => { "with_routes" => 2 } } },
       ]
     end
 
@@ -166,8 +166,8 @@ describe "reports/feature_report" do
     describe "forms table" do
       it "has rows for each forms" do
         expect(rendered).to have_table with_rows: [
-          { "Form name" => "All question types form", "Organisation" => "Government Digital Service", "Number of routes" => "1" },
-          { "Form name" => "Branch route form", "Organisation" => "Government Digital Service", "Number of routes" => "2" },
+          { "Form name" => "All question types form", "Organisation" => "Government Digital Service", "Number of questions with routes" => "1" },
+          { "Form name" => "Branch route form", "Organisation" => "Government Digital Service", "Number of questions with routes" => "2" },
         ]
       end
 

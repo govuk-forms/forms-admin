@@ -9,14 +9,6 @@ RSpec.describe Reports::FormDocumentsService do
   let(:draft_internal_organisation_form) { create :form }
   let(:live_internal_organisation_form) { create :form }
   let(:form_with_welsh_translation) { create :form, welsh_completed: true }
-  let(:branch_route_form) do
-    form = create(:form, :live, :ready_for_routing)
-    create(:condition, :with_exit_page, routing_page_id: form.pages[0].id, check_page_id: form.pages[0].id, answer_value: "Option 1")
-    create(:condition, routing_page_id: form.pages[1].id, check_page_id: form.pages[1].id, answer_value: "Option 1", goto_page_id: form.pages[3].id)
-    create(:condition, routing_page_id: form.pages[2].id, check_page_id: form.pages[1].id, goto_page_id: form.pages[4].id)
-    form.latest_form_document.update!(content: form.reload.as_form_document(live_at: form.updated_at))
-    form
-  end
 
   let(:basic_route_form) do
     form = create(:form, :live, :ready_for_routing)
@@ -25,12 +17,12 @@ RSpec.describe Reports::FormDocumentsService do
     form
   end
 
-  let(:form_with_2_branch_routes) do
-    form = create(:form, :live, :ready_for_routing, pages_count: 10)
-    create(:condition, routing_page_id: form.pages[1].id, check_page_id: form.pages[1].id, answer_value: "Option 1", goto_page_id: form.pages[3].id)
-    create(:condition, routing_page_id: form.pages[2].id, check_page_id: form.pages[1].id, answer_value: "Option 2", goto_page_id: form.pages[4].id)
-    create(:condition, routing_page_id: form.pages[6].id, check_page_id: form.pages[6].id, answer_value: "Option 1", goto_page_id: form.pages[8].id)
-    create(:condition, routing_page_id: form.pages[7].id, check_page_id: form.pages[6].id, answer_value: "Option 2", goto_page_id: form.pages[9].id)
+  let(:multiple_branches_form) do
+    form = create(:form, :live, :ready_for_multiple_branches)
+    create(:condition, routing_page: form.pages.first, check_page: form.pages.first, answer_value: "Option 2", goto_page: form.pages.third)
+    create(:condition, routing_page: form.pages.first, check_page: form.pages.first, answer_value: "Option 3", goto_page: form.pages.fourth)
+    create(:condition, routing_page: form.pages.second, check_page: form.pages.second, answer_value: nil, skip_to_end: true)
+    create(:condition, routing_page: form.pages.third, check_page: form.pages.third, answer_value: nil, skip_to_end: true)
     form.latest_form_document.update!(content: form.reload.as_form_document(live_at: form.updated_at))
     form
   end
@@ -149,79 +141,102 @@ RSpec.describe Reports::FormDocumentsService do
     end
   end
 
-  describe ".has_secondary_skip_routes?" do
-    subject(:count_secondary_skip_routes) do
-      described_class.has_secondary_skip_routes?(form_document)
+  describe ".update_routes_details" do
+    subject(:update_routes_details) do
+      described_class.update_routes_details(form_document)
     end
 
-    context "when form has one step with one secondary skip condition" do
-      let(:form_document) { branch_route_form.latest_form_document }
-
-      it { is_expected.to be true }
+    let(:form_document) do
+      multiple_branches_form.latest_form_document.as_json
     end
 
-    context "when form has two steps each with one secondary skip condition" do
-      let(:form_document) { form_with_2_branch_routes.latest_form_document }
-
-      it { is_expected.to be true }
+    it "returns the form document" do
+      expect(update_routes_details).to eq form_document
     end
 
-    context "when form has no secondary skip conditions" do
-      let(:form_document) { basic_route_form.latest_form_document }
-
-      it { is_expected.to be false }
-    end
-  end
-
-  describe ".count_secondary_skip_routes" do
-    subject(:count_secondary_skip_routes) do
-      described_class.count_secondary_skip_routes(form_document)
-    end
-
-    context "when form has one step with one secondary skip condition" do
-      let(:form_document) { branch_route_form.latest_form_document }
-
-      it { is_expected.to eq 1 }
-    end
-
-    context "when form has two steps each with one secondary skip condition" do
-      let(:form_document) { form_with_2_branch_routes.latest_form_document }
-
-      it { is_expected.to eq 2 }
-    end
-
-    context "when form has no secondary skip conditions" do
-      let(:form_document) { basic_route_form.latest_form_document }
-
-      it { is_expected.to eq 0 }
+    it "adds form metadata" do
+      expect(update_routes_details["metadata"]).to include(
+        "number_of_questions" => {
+          "with_routes" => 3,
+          "with_one_conditional_route" => 0,
+          "with_many_conditional_routes" => 1,
+          "with_unconditional_route" => 2,
+        },
+      )
     end
   end
 
-  describe ".step_has_secondary_skip_route?" do
-    context "when step is check page for secondary skip condition" do
-      let(:form_document) { branch_route_form.latest_form_document }
-      let(:step) { form_document["content"]["steps"][1] }
+  describe ".has_add_another_answer?" do
+    let(:form) do
+      create(:form, :live, pages: [
+        create(:page, is_repeatable:),
+      ])
+    end
+    let(:form_document) { form.latest_form_document }
+
+    context "when the form has a question with add another answer" do
+      let(:is_repeatable) { true }
 
       it "returns true" do
-        expect(described_class.step_has_secondary_skip_route?(form_document, step)).to be true
+        expect(described_class.has_add_another_answer?(form_document)).to be true
       end
     end
 
-    context "when step is not check page for secondary skip condition" do
-      let(:form_document) { branch_route_form.latest_form_document }
-      let(:step) { form_document["content"]["steps"][3] }
+    context "when the form does not have a question with add another answer" do
+      let(:is_repeatable) { false }
 
       it "returns false" do
-        expect(described_class.step_has_secondary_skip_route?(form_document, step)).to be false
+        expect(described_class.has_add_another_answer?(form_document)).to be false
+      end
+    end
+  end
+
+  describe ".has_daily_submission_csv" do
+    subject(:daily_submission_batch_enabled) do
+      described_class.has_daily_submission_csv(form_document)
+    end
+
+    context "when form has a daily delivery_configuration" do
+      let(:form_document) do
+        create(:form, :live, delivery_configurations: [create(:delivery_configuration, :daily_email)])
+          .latest_form_document
+      end
+
+      it "returns true" do
+        expect(daily_submission_batch_enabled).to be true
       end
     end
 
-    context "when form has no secondary skip conditions" do
-      let(:form_document) { basic_route_form.latest_form_document }
-      let(:step) { form_document["content"]["steps"][0] }
+    context "when form does not have a daily delivery_configuration" do
+      let(:form_document) { create(:form, :live).latest_form_document }
 
       it "returns false" do
-        expect(described_class.step_has_secondary_skip_route?(form_document, step)).to be false
+        expect(daily_submission_batch_enabled).to be false
+      end
+    end
+  end
+
+  describe ".has_weekly_submission_csv" do
+    subject(:weekly_submission_batch_enabled) do
+      described_class.has_weekly_submission_csv(form_document)
+    end
+
+    context "when form has weekly delivery_configuration" do
+      let(:form_document) do
+        create(:form, :live, delivery_configurations: [create(:delivery_configuration, :weekly_email)])
+          .latest_form_document
+      end
+
+      it "returns true" do
+        expect(weekly_submission_batch_enabled).to be true
+      end
+    end
+
+    context "when form does not have a weekly delivery_configuration" do
+      let(:form_document) { create(:form, :live).latest_form_document }
+
+      it "returns false" do
+        expect(weekly_submission_batch_enabled).to be false
       end
     end
   end
@@ -573,81 +588,6 @@ RSpec.describe Reports::FormDocumentsService do
       end
 
       it { is_expected.to eq 0 }
-    end
-  end
-
-  describe ".has_add_another_answer?" do
-    let(:form) do
-      create(:form, :live, pages: [
-        create(:page, is_repeatable:),
-      ])
-    end
-    let(:form_document) { form.latest_form_document }
-
-    context "when the form has a question with add another answer" do
-      let(:is_repeatable) { true }
-
-      it "returns true" do
-        expect(described_class.has_add_another_answer?(form_document)).to be true
-      end
-    end
-
-    context "when the form does not have a question with add another answer" do
-      let(:is_repeatable) { false }
-
-      it "returns false" do
-        expect(described_class.has_add_another_answer?(form_document)).to be false
-      end
-    end
-  end
-
-  describe ".has_daily_submission_csv" do
-    subject(:daily_submission_batch_enabled) do
-      described_class.has_daily_submission_csv(form_document)
-    end
-
-    context "when form has a daily delivery_configuration" do
-      let(:form_document) do
-        create(:form, :live, delivery_configurations: [create(:delivery_configuration, :daily_email)])
-          .latest_form_document
-      end
-
-      it "returns true" do
-        expect(daily_submission_batch_enabled).to be true
-      end
-    end
-
-    context "when form does not have a daily delivery_configuration" do
-      let(:form_document) { create(:form, :live).latest_form_document }
-
-      it "returns false" do
-        expect(daily_submission_batch_enabled).to be false
-      end
-    end
-  end
-
-  describe ".has_weekly_submission_csv" do
-    subject(:weekly_submission_batch_enabled) do
-      described_class.has_weekly_submission_csv(form_document)
-    end
-
-    context "when form has weekly delivery_configuration" do
-      let(:form_document) do
-        create(:form, :live, delivery_configurations: [create(:delivery_configuration, :weekly_email)])
-          .latest_form_document
-      end
-
-      it "returns true" do
-        expect(weekly_submission_batch_enabled).to be true
-      end
-    end
-
-    context "when form does not have a weekly delivery_configuration" do
-      let(:form_document) { create(:form, :live).latest_form_document }
-
-      it "returns false" do
-        expect(weekly_submission_batch_enabled).to be false
-      end
     end
   end
 

@@ -15,8 +15,10 @@ class Reports::FormsCsvReportService
     "Last made live",
     "Version",
     "Number of questions",
-    "Has routes",
-    "Has branch routes",
+    "Number of questions with routes",
+    "Number of questions with one conditional route only",
+    "Number of questions with more than one conditional route",
+    "Number of questions with an unconditional route",
     "Has exit pages",
     "Number of exit pages",
     "Has question with multiple exit pages",
@@ -55,10 +57,10 @@ class Reports::FormsCsvReportService
 private
 
   def form_row(form)
-    form_id = form["form_id"]
+    Reports::FormDocumentsService.update_routes_details(form)
 
     [
-      form_id,
+      form["form_id"],
       form["tag"],
       form["content"]["name"],
       form["content"]["form_slug"],
@@ -71,8 +73,10 @@ private
       form["content"]["live_at"],
       form["version"],
       form["content"]["steps"].length,
-      form["content"]["steps"].any? { |step| step["routing_conditions"].present? },
-      Reports::FormDocumentsService.has_secondary_skip_routes?(form),
+      form["metadata"]["number_of_questions"]["with_routes"],
+      form["metadata"]["number_of_questions"]["with_one_conditional_route"],
+      form["metadata"]["number_of_questions"]["with_many_conditional_routes"],
+      form["metadata"]["number_of_questions"]["with_unconditional_route"],
       Reports::FormDocumentsService.has_exit_pages?(form),
       Reports::FormDocumentsService.count_exit_pages(form),
       Reports::FormDocumentsService.has_question_with_multiple_exit_pages?(form),

@@ -18,22 +18,45 @@ class Reports::FormDocumentsService
       form_documents.find_each(batch_size: 100).lazy.map(&:as_json)
     end
 
+    def update_routes_details(form_document)
+      number_of_questions = {
+        "with_routes" => 0,
+        "with_one_conditional_route" => 0,
+        "with_many_conditional_routes" => 0,
+        "with_unconditional_route" => 0,
+      }
+
+      form_document["content"]["steps"].each do |step|
+        conditions = step["routing_conditions"]
+
+        next unless conditions.any?
+
+        number_of_questions["with_routes"] += 1
+
+        conditional_routes_count = conditions.count { |condition| condition["answer_value"].present? }
+
+        if conditional_routes_count == 1
+          number_of_questions["with_one_conditional_route"] += 1
+        elsif conditional_routes_count > 1
+          number_of_questions["with_many_conditional_routes"] += 1
+        end
+
+        unconditional_route_present = conditions.any? { |condition| condition["answer_value"].nil? }
+
+        if unconditional_route_present
+          number_of_questions["with_unconditional_route"] += 1
+        end
+      end
+
+      form_document["metadata"] = {
+        "number_of_questions" => number_of_questions,
+      }
+
+      form_document
+    end
+
     def has_routes?(form_document)
       form_document["content"]["steps"].any? { |step| step["routing_conditions"].present? }
-    end
-
-    def has_secondary_skip_routes?(form_document)
-      secondary_skip_conditions(form_document).any?
-    end
-
-    def count_secondary_skip_routes(form_document)
-      secondary_skip_conditions(form_document).count
-    end
-
-    def step_has_secondary_skip_route?(form_document, step)
-      secondary_skip_conditions(form_document).any? do |condition|
-        condition["check_page_id"] == step["id"]
-      end
     end
 
     def has_add_another_answer?(form_document)
@@ -129,14 +152,6 @@ class Reports::FormDocumentsService
         "archived" => %w[archived archived_with_draft],
         "live-or-archived" => %w[live live_with_draft archived archived_with_draft],
       }[tag]
-    end
-
-    def secondary_skip_conditions(form_document)
-      form_document["content"]["steps"].lazy.flat_map do |step|
-        (step["routing_conditions"]&.lazy || []).reject do |condition|
-          condition["check_page_id"] == condition["routing_page_id"]
-        end
-      end
     end
   end
 end

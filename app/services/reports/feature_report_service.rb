@@ -11,7 +11,6 @@ class Reports::FeatureReportService
       copied_forms: 0,
       forms_with_payment: 0,
       forms_with_routing: 0,
-      forms_with_branch_routing: 0,
       forms_with_add_another_answer: 0,
       forms_with_csv_submission_email_attachments: 0,
       forms_with_json_submission_email_attachments: 0,
@@ -30,7 +29,6 @@ class Reports::FeatureReportService
       report[:copied_forms] += 1 if Reports::FormDocumentsService.is_copy?(form)
       report[:forms_with_payment] += 1 if Reports::FormDocumentsService.has_payments?(form)
       report[:forms_with_routing] += 1 if Reports::FormDocumentsService.has_routes?(form)
-      report[:forms_with_branch_routing] += 1 if Reports::FormDocumentsService.has_secondary_skip_routes?(form)
       report[:forms_with_add_another_answer] += 1 if Reports::FormDocumentsService.has_add_another_answer?(form)
       report[:forms_with_csv_submission_email_attachments] += 1 if Reports::FormDocumentsService.has_csv_submission_email_attachments(form)
       report[:forms_with_json_submission_email_attachments] += 1 if Reports::FormDocumentsService.has_json_submission_email_attachments(form)
@@ -133,13 +131,7 @@ class Reports::FeatureReportService
   def forms_with_routes
     form_documents
       .select { |form| Reports::FormDocumentsService.has_routes?(form) }
-      .map { |form| form_with_routes_details(form) }
-  end
-
-  def forms_with_branch_routes
-    form_documents
-      .select { |form| Reports::FormDocumentsService.has_secondary_skip_routes?(form) }
-      .map { |form| form_with_routes_details(form) }
+      .map { |form| Reports::FormDocumentsService.update_routes_details(form) }
   end
 
   def forms_with_payments
@@ -191,13 +183,5 @@ private
 
   def questions_details(form, step)
     step.dup.merge("form" => form)
-  end
-
-  def form_with_routes_details(form)
-    form["metadata"] = {
-      "number_of_routes" => form["content"]["steps"].count { |step| step["routing_conditions"].present? },
-      "number_of_branch_routes" => Reports::FormDocumentsService.count_secondary_skip_routes(form),
-    }
-    form
   end
 end

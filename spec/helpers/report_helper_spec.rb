@@ -6,13 +6,15 @@ RSpec.describe ReportHelper, type: :helper do
       { "form_id" => 1, "tag" => "live", "content" => { "name" => "All question types form" }, "organisation_name" => "Government Digital Service" },
       { "form_id" => 3, "tag" => "live", "content" => { "name" => "Branch route form" }, "organisation_name" => "Ministry of Tests" },
       { "form_id" => 4, "tag" => "live", "content" => { "name" => "Skip route form" }, "organisation_name" => "Department for Testing" },
+      { "form_id" => 5, "tag" => "live", "content" => { "name" => "Multiple branches form" }, "organisation_name" => "Ministry of Tests" },
     ]
   end
 
   let(:forms_with_routes) do
     [
-      { "form_id" => 3, "tag" => "live", "content" => { "name" => "Branch route form" }, "organisation_name" => "Ministry of Tests", "metadata" => { "number_of_routes" => 2, "number_of_branch_routes" => 1 } },
-      { "form_id" => 4, "tag" => "live", "content" => { "name" => "Skip route form" }, "organisation_name" => "Department for Testing", "metadata" => { "number_of_routes" => 1, "number_of_branch_routes" => 0 } },
+      { "form_id" => 3, "tag" => "live", "content" => { "name" => "Branch route form" }, "organisation_name" => "Ministry of Tests", "metadata" => { "number_of_questions" => { "with_routes" => 2, "with_one_conditional_route" => 0, "with_many_conditional_routes" => 1, "with_unconditional_route" => 1 } } },
+      { "form_id" => 4, "tag" => "live", "content" => { "name" => "Skip route form" }, "organisation_name" => "Department for Testing", "metadata" => { "number_of_questions" => { "with_routes" => 1, "with_one_conditional_route" => 1, "with_many_conditional_routes" => 0, "with_unconditional_route" => 0 } } },
+      { "form_id" => 5, "tag" => "live", "content" => { "name" => "Multiple branches form" }, "organisation_name" => "Ministry of Tests", "metadata" => { "number_of_questions" => { "with_routes" => 3, "with_one_conditional_route" => 0, "with_many_conditional_routes" => 1, "with_unconditional_route" => 2 } } },
     ]
   end
 
@@ -249,6 +251,7 @@ RSpec.describe ReportHelper, type: :helper do
         "<a class=\"govuk-link\" href=\"/forms/1/live/pages\">All question types form</a>",
         "<a class=\"govuk-link\" href=\"/forms/3/live/pages\">Branch route form</a>",
         "<a class=\"govuk-link\" href=\"/forms/4/live/pages\">Skip route form</a>",
+        "<a class=\"govuk-link\" href=\"/forms/5/live/pages\">Multiple branches form</a>",
       ]
     end
 
@@ -275,6 +278,7 @@ RSpec.describe ReportHelper, type: :helper do
         "Government Digital Service",
         "Ministry of Tests",
         "Department for Testing",
+        "Ministry of Tests",
       ]
     end
   end
@@ -284,8 +288,10 @@ RSpec.describe ReportHelper, type: :helper do
       expect(helper.report_forms_with_routes_table_head).to eq [
         "Form name",
         "Organisation",
-        "Number of routes",
-        "Number of branch routes",
+        "Number of questions with routes",
+        "Number of questions with one conditional route only",
+        "Number of questions with more than one conditional route",
+        "Number of questions with an unconditional route",
       ]
     end
   end
@@ -314,6 +320,7 @@ RSpec.describe ReportHelper, type: :helper do
       expect(helper.report_forms_with_routes_table_rows(forms).map(&:first)).to eq [
         "<a class=\"govuk-link\" href=\"/forms/3/live/pages\">Branch route form</a>",
         "<a class=\"govuk-link\" href=\"/forms/4/live/pages\">Skip route form</a>",
+        "<a class=\"govuk-link\" href=\"/forms/5/live/pages\">Multiple branches form</a>",
       ]
     end
 
@@ -321,20 +328,39 @@ RSpec.describe ReportHelper, type: :helper do
       expect(helper.report_forms_with_routes_table_rows(forms).map(&:second)).to eq [
         "Ministry of Tests",
         "Department for Testing",
+        "Ministry of Tests",
       ]
     end
 
-    it "includes the number of routes in the form" do
-      expect(helper.report_forms_with_routes_table_rows(forms).map(&:third)).to eq %w[
+    it "includes the number of questions with routes in the form" do
+      expect(helper.report_forms_with_routes_table_rows(forms).map { it[2] }).to eq %w[
         2
         1
+        3
       ]
     end
 
-    it "includes the number of branch routes in the form" do
-      expect(helper.report_forms_with_routes_table_rows(forms).map(&:fourth)).to eq %w[
+    it "includes the number of questions with one conditional route only in the form" do
+      expect(helper.report_forms_with_routes_table_rows(forms).map { it[3] }).to eq %w[
+        0
         1
         0
+      ]
+    end
+
+    it "includes the number of questions with more than one conditional route in the form" do
+      expect(helper.report_forms_with_routes_table_rows(forms).map { it[4] }).to eq %w[
+        1
+        0
+        1
+      ]
+    end
+
+    it "includes the number of questions with an unconditional route in the form" do
+      expect(helper.report_forms_with_routes_table_rows(forms).map { it[5] }).to eq %w[
+        1
+        0
+        2
       ]
     end
   end
