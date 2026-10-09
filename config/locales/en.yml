@@ -1113,6 +1113,7 @@ en:
       pages_selection_options_input:
         include_none_of_the_above: If you select ‘Yes’ we’ll add ‘None of the above’ to the end of your list of options.
       pages_selection_type_input:
+        only_one_option: You can only add a route from an answer if people are limited to selecting one option.
         only_one_option_options:
           'false': Your list can have up to 30 options
           'true': Your list can have up to 3,000 options
