@@ -27,6 +27,27 @@ RSpec.describe Reports::FormDocumentsService do
     form
   end
 
+  let(:step_with_no_routes) { { "routing_conditions" => [] } }
+
+  let(:step_with_one_conditional_route) do
+    { "routing_conditions" => [
+      { "answer_value" => "Option 1" },
+    ] }
+  end
+
+  let(:step_with_many_conditional_routes) do
+    { "routing_conditions" => [
+      { "answer_value" => "Option 1" },
+      { "answer_value" => "Option 2" },
+    ] }
+  end
+
+  let(:step_with_unconditional_route) do
+    { "routing_conditions" => [
+      { "answer_value" => nil },
+    ] }
+  end
+
   describe "#form_documents" do
     let(:organisation) { create :organisation, internal: false, slug: "hm-revenue-customs" }
     let(:internal_organisation) { create :organisation, internal: true, slug: "internal-org" }
@@ -163,6 +184,96 @@ RSpec.describe Reports::FormDocumentsService do
           "with_unconditional_route" => 2,
         },
       )
+    end
+  end
+
+  describe ".count_step_routes" do
+    subject(:count_step_routes) do
+      described_class.count_step_routes(step)
+    end
+
+    context "with step with no routing conditions" do
+      let(:step) { step_with_no_routes }
+
+      it { is_expected.to eq 0 }
+    end
+
+    context "with step with one conditional route" do
+      let(:step) { step_with_one_conditional_route }
+
+      it { is_expected.to eq 1 }
+    end
+
+    context "with step with more than one conditional route" do
+      let(:step) { step_with_many_conditional_routes }
+
+      it { is_expected.to eq 2 }
+    end
+
+    context "with step with one unconditional route" do
+      let(:step) { step_with_unconditional_route }
+
+      it { is_expected.to eq 1 }
+    end
+  end
+
+  describe ".count_step_conditional_routes" do
+    subject(:count_step_conditional_routes) do
+      described_class.count_step_conditional_routes(step)
+    end
+
+    context "with step with no routing conditions" do
+      let(:step) { step_with_no_routes }
+
+      it { is_expected.to eq 0 }
+    end
+
+    context "with step with one conditional route" do
+      let(:step) { step_with_one_conditional_route }
+
+      it { is_expected.to eq 1 }
+    end
+
+    context "with step with more than one conditional route" do
+      let(:step) { step_with_many_conditional_routes }
+
+      it { is_expected.to eq 2 }
+    end
+
+    context "with step with one unconditional route" do
+      let(:step) { step_with_unconditional_route }
+
+      it { is_expected.to eq 0 }
+    end
+  end
+
+  describe ".count_step_unconditional_routes" do
+    subject(:count_step_unconditional_routes) do
+      described_class.count_step_unconditional_routes(step)
+    end
+
+    context "with step with no routing conditions" do
+      let(:step) { step_with_no_routes }
+
+      it { is_expected.to eq 0 }
+    end
+
+    context "with step with one conditional route" do
+      let(:step) { step_with_one_conditional_route }
+
+      it { is_expected.to eq 0 }
+    end
+
+    context "with step with more than one conditional route" do
+      let(:step) { step_with_many_conditional_routes }
+
+      it { is_expected.to eq 0 }
+    end
+
+    context "with step with one unconditional route" do
+      let(:step) { step_with_unconditional_route }
+
+      it { is_expected.to eq 1 }
     end
   end
 

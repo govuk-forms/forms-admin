@@ -11,6 +11,9 @@ class Reports::FeatureReportService
       copied_forms: 0,
       forms_with_payment: 0,
       forms_with_routing: 0,
+      forms_with_only_steps_with_one_conditional_route: 0,
+      forms_with_steps_with_many_conditional_routes: 0,
+      forms_with_only_unconditional_routes: 0,
       forms_with_add_another_answer: 0,
       forms_with_csv_submission_email_attachments: 0,
       forms_with_json_submission_email_attachments: 0,
@@ -28,7 +31,6 @@ class Reports::FeatureReportService
       report[:total_forms] += 1
       report[:copied_forms] += 1 if Reports::FormDocumentsService.is_copy?(form)
       report[:forms_with_payment] += 1 if Reports::FormDocumentsService.has_payments?(form)
-      report[:forms_with_routing] += 1 if Reports::FormDocumentsService.has_routes?(form)
       report[:forms_with_add_another_answer] += 1 if Reports::FormDocumentsService.has_add_another_answer?(form)
       report[:forms_with_csv_submission_email_attachments] += 1 if Reports::FormDocumentsService.has_csv_submission_email_attachments(form)
       report[:forms_with_json_submission_email_attachments] += 1 if Reports::FormDocumentsService.has_json_submission_email_attachments(form)
@@ -38,6 +40,18 @@ class Reports::FeatureReportService
       report[:forms_with_exit_pages] += 1 if Reports::FormDocumentsService.has_exit_pages?(form)
       report[:forms_with_welsh_translation] += 1 if Reports::FormDocumentsService.has_welsh_translation(form)
       report[:forms_with_copy_of_answers_enabled] += 1 if Reports::FormDocumentsService.copy_of_answers_enabled?(form)
+
+      if Reports::FormDocumentsService.has_routes?(form)
+        Reports::FormDocumentsService.update_routes_details(form)
+        counts = form["metadata"]["number_of_questions"]
+
+        # rubocop:disable Style/NumericPredicate
+        report[:forms_with_routing] += 1
+        report[:forms_with_only_steps_with_one_conditional_route] += 1 if counts["with_one_conditional_route"] > 0 && counts["with_many_conditional_routes"] == 0
+        report[:forms_with_steps_with_many_conditional_routes] += 1 if counts["with_many_conditional_routes"] > 0
+        report[:forms_with_only_unconditional_routes] += 1 if counts["with_routes"] == counts["with_unconditional_route"]
+        # rubocop:enable Style/NumericPredicate
+      end
 
       answer_types_in_form = form["content"]["steps"].map { |step| step["data"]["answer_type"] }
 

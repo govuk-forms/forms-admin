@@ -30,7 +30,10 @@ describe "reports/features.html.erb" do
         text: 5,
       }.with_indifferent_access,
       forms_with_payment: 1,
-      forms_with_routing: 2,
+      forms_with_routing: 6,
+      forms_with_only_steps_with_one_conditional_route: 3,
+      forms_with_steps_with_many_conditional_routes: 2,
+      forms_with_only_unconditional_routes: 1,
       forms_with_add_another_answer: 3,
       forms_with_csv_submission_email_attachments: 2,
       forms_with_json_submission_email_attachments: 4,
@@ -119,6 +122,18 @@ describe "reports/features.html.erb" do
 
   it "includes the number of live forms with routes" do
     expect(rendered).to have_css(".govuk-summary-list__row", text: "Live forms with routes#{report[:forms_with_routing]}")
+  end
+
+  it "includes the number of live forms with only one conditional route from the same question (not more than one)" do
+    expect(rendered).to have_css(".govuk-summary-list__row", text: "Live forms with only one conditional route from the same question#{report[:forms_with_only_steps_with_one_conditional_route]}")
+  end
+
+  it "includes the number of live forms with more than one conditional route from the same question" do
+    expect(rendered).to have_css(".govuk-summary-list__row", text: "Live forms with more than one conditional route from the same question#{report[:forms_with_steps_with_many_conditional_routes]}")
+  end
+
+  it "includes the number of live forms that only use unconditional routes" do
+    expect(rendered).to have_css(".govuk-summary-list__row", text: "Live forms with only unconditional routes#{report[:forms_with_only_unconditional_routes]}")
   end
 
   it "includes the number of live forms with payments" do

@@ -7,6 +7,7 @@ RSpec.describe Reports::FeatureReportService do
       form_with_a_few_answer_types,
       basic_route_form,
       multiple_branches_form,
+      unreachable_step_form,
       exit_page_form,
       copied_form,
       form_with_a_welsh_translation,
@@ -75,6 +76,12 @@ RSpec.describe Reports::FeatureReportService do
     form.latest_form_document.update!(content: form.reload.as_form_document(live_at: form.updated_at))
     form
   end
+  let(:unreachable_step_form) do
+    form = create(:form, :live, pages: build_list(:page, 3, :with_text_settings))
+    create(:condition, routing_page: form.pages.first, check_page: form.pages.first, answer_value: nil, goto_page: form.pages.third)
+    form.latest_form_document.update!(content: form.reload.as_form_document(live_at: form.updated_at))
+    form
+  end
   let(:exit_page_form) do
     form = create(:form, :live, :ready_for_routing)
     create(:condition, :with_exit_page, routing_page_id: form.pages[0].id, check_page_id: form.pages[0].id, answer_value: "Option 1")
@@ -106,10 +113,13 @@ RSpec.describe Reports::FeatureReportService do
     it "returns the feature report" do
       report = described_class.new(form_documents).report
       expect(report).to eq({
-        total_forms: 8,
+        total_forms: 9,
         copied_forms: 1,
         forms_with_payment: 1,
-        forms_with_routing: 3,
+        forms_with_routing: 4,
+        forms_with_only_steps_with_one_conditional_route: 2,
+        forms_with_steps_with_many_conditional_routes: 1,
+        forms_with_only_unconditional_routes: 1,
         forms_with_add_another_answer: 1,
         forms_with_csv_submission_email_attachments: 2,
         forms_with_json_submission_email_attachments: 1,
@@ -125,7 +135,7 @@ RSpec.describe Reports::FeatureReportService do
           "number" => 1,
           "phone_number" => 1,
           "selection" => 4,
-          "text" => 2,
+          "text" => 3,
         },
         steps_with_answer_type: {
           "address" => 1,
@@ -136,7 +146,7 @@ RSpec.describe Reports::FeatureReportService do
           "number" => 1,
           "phone_number" => 1,
           "selection" => 12,
-          "text" => 4,
+          "text" => 7,
         },
         forms_with_exit_pages: 1,
         forms_with_welsh_translation: 1,
@@ -148,7 +158,7 @@ RSpec.describe Reports::FeatureReportService do
   describe "#questions" do
     it "returns all questions in all forms given" do
       questions = described_class.new(form_documents).questions
-      expect(questions.length).to eq 27
+      expect(questions.length).to eq 30
     end
 
     it "returns details needed to render report" do
@@ -391,6 +401,20 @@ RSpec.describe Reports::FeatureReportService do
           },
         ),
         a_hash_including(
+          "form_id" => unreachable_step_form.id,
+          "content" => a_hash_including(
+            "name" => unreachable_step_form.name,
+          ),
+          "metadata" => {
+            "number_of_questions" => {
+              "with_routes" => 1,
+              "with_one_conditional_route" => 0,
+              "with_many_conditional_routes" => 0,
+              "with_unconditional_route" => 1,
+            },
+          },
+        ),
+        a_hash_including(
           "form_id" => exit_page_form.id,
           "content" => a_hash_including(
             "name" => exit_page_form.name,
@@ -415,6 +439,9 @@ RSpec.describe Reports::FeatureReportService do
         ),
         a_hash_including(
           "form_id" => multiple_branches_form.id,
+        ),
+        a_hash_including(
+          "form_id" => unreachable_step_form.id,
         ),
         a_hash_including(
           "form_id" => exit_page_form.id,
