@@ -349,8 +349,11 @@ en:
         logo: Logo
         logo_alt_text: Logo alt text
         logo_link: Logo link
+        not_shown: Not shown
         not_uploaded: Not uploaded
+        open_government_licence: Open Government Licence in footer
         opengraph_image: Opengraph image
+        shown: Shown
     success_messages:
       create: The brand has been created
       update: The brand has been updated
@@ -1056,6 +1059,7 @@ en:
         logo_file: Upload a PNG or JPEG file. Shown in the header of the form.
         logo_link: The web address people go to when they select the logo. Usually the organisation’s website.
         name: Used to identify the brand. Not shown to people filling in forms.
+        open_government_licence: Shows ‘All content is available under the Open Government Licence v3.0, except where otherwise stated’ in the form’s footer.
         opengraph_image_file: Upload a PNG or JPEG file. Shown when a link to the form is shared on social media.
       forms_copy_input:
         name: The form name will be shown at the top of each page of the form. Use a name that describes what the form will help people to do. For example ‘Apply for a juggling licence’.
@@ -1133,6 +1137,9 @@ en:
         logo_file: Logo
         logo_link: Logo link
         name: Brand name
+        open_government_licence_options:
+          'false': 'No'
+          'true': 'Yes'
         opengraph_image_file: Opengraph image
       forms_batch_submissions_input:
         batch_frequencies_options:
@@ -1308,6 +1315,8 @@ en:
         organisation_id: Which of these organisations do you work for?
       account_terms_of_use_input:
         agreed: Do you agree to these terms?
+      brand:
+        open_government_licence: Open Government Licence
       forms_batch_submissions_input:
         batch_frequencies: Do you want to get a daily or weekly CSV of submissions to this form?
       forms_copy_of_answers_input:

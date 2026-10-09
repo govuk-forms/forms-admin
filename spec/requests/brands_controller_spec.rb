@@ -126,6 +126,18 @@ RSpec.describe BrandsController, type: :request do
         expect(response.body).to include(brand.copyright_holder)
       end
 
+      it "shows that the Open Government Licence is not shown in the footer" do
+        expect(Capybara.string(response.body)).to have_css(".govuk-summary-list__row", text: /Open Government Licence in footer\s*Not shown/)
+      end
+
+      context "when the brand shows the Open Government Licence" do
+        let(:brand) { create :brand, open_government_licence: true }
+
+        it "shows that the Open Government Licence is shown in the footer" do
+          expect(Capybara.string(response.body)).to have_css(".govuk-summary-list__row", text: /Open Government Licence in footer\s*Shown/)
+        end
+      end
+
       it "links to the logo link" do
         expect(Capybara.string(response.body)).to have_link(brand.logo_link, href: brand.logo_link)
       end
@@ -182,6 +194,13 @@ RSpec.describe BrandsController, type: :request do
         end
       end
 
+      it "has radios for showing the Open Government Licence, with no selected by default" do
+        page = Capybara.string(response.body)
+        expect(page).to have_css("fieldset legend", exact_text: "Open Government Licence")
+        expect(page).to have_unchecked_field("Yes")
+        expect(page).to have_checked_field("No")
+      end
+
       it "does not have a field for the slug" do
         page = Capybara.string(response.body)
         expect(page).not_to have_field("Slug")
@@ -205,6 +224,7 @@ RSpec.describe BrandsController, type: :request do
           logo_alt_text: "Testshire Council",
           logo_link: "https://www.testshire.example.com",
           copyright_holder: "Testshire Council",
+          open_government_licence: "true",
         },
       }
     end
@@ -244,6 +264,7 @@ RSpec.describe BrandsController, type: :request do
           logo_alt_text: "Testshire Council",
           logo_link: "https://www.testshire.example.com",
           copyright_holder: "Testshire Council",
+          open_government_licence: true,
         )
       end
 
@@ -375,6 +396,16 @@ RSpec.describe BrandsController, type: :request do
           expect(page).to have_field(label)
         end
       end
+
+      context "when the brand shows the Open Government Licence" do
+        let(:brand) { create :brand, open_government_licence: true }
+
+        it "selects yes for showing the Open Government Licence" do
+          page = Capybara.string(response.body)
+          expect(page).to have_checked_field("Yes")
+          expect(page).to have_unchecked_field("No")
+        end
+      end
     end
 
     context "when the user is a super admin and the brand has assets" do
@@ -408,6 +439,7 @@ RSpec.describe BrandsController, type: :request do
           logo_alt_text: "Greater Testshire Council",
           logo_link: "https://www.greater-testshire.example.com",
           copyright_holder: "Greater Testshire Council",
+          open_government_licence: "true",
         },
       }
     end
@@ -444,7 +476,22 @@ RSpec.describe BrandsController, type: :request do
           logo_alt_text: "Greater Testshire Council",
           logo_link: "https://www.greater-testshire.example.com",
           copyright_holder: "Greater Testshire Council",
+          open_government_licence: true,
         )
+      end
+
+      context "when no is selected for showing the Open Government Licence" do
+        let(:brand) { create :brand, slug: "testshire", name: "Testshire Council", open_government_licence: true }
+
+        before do
+          params[:brand][:open_government_licence] = "false"
+        end
+
+        it "stops showing the Open Government Licence" do
+          put path, params: params
+
+          expect(brand.reload.open_government_licence).to be false
+        end
       end
 
       it "redirects to the brand page with a success message" do
