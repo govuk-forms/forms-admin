@@ -60,6 +60,6 @@ private
   end
 
   def brand_params
-    params.require(:brand).permit(:name, :header_background_colour, :border_colour, :logo_alt_text, :logo_link, :copyright_holder, :logo_file, :favicon_file, :opengraph_image_file)
+    params.require(:brand).permit(:name, :header_background_colour, :border_colour, :logo_alt_text, :logo_link, :copyright_holder, :open_government_licence, :logo_file, :favicon_file, :opengraph_image_file)
   end
 end

@@ -3,6 +3,10 @@ require "rails_helper"
 RSpec.describe Brand, type: :model do
   subject(:brand) { build :brand }
 
+  it "does not show the Open Government Licence by default" do
+    expect(described_class.new.open_government_licence).to be false
+  end
+
   it "is invalid without a name" do
     brand.name = nil
     expect(brand).to be_invalid

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_11_071702) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_08_144746) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -50,6 +50,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_11_071702) do
     t.string "logo_alt_text"
     t.string "logo_link"
     t.string "name", null: false
+    t.boolean "open_government_licence", default: false, null: false
     t.string "slug", null: false
     t.datetime "updated_at", null: false
     t.index ["slug"], name: "index_brands_on_slug", unique: true

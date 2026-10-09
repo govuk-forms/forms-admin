@@ -22,6 +22,11 @@
 
       <%= f.govuk_text_field :copyright_holder, label: { size: 'm' } %>
 
+      <%= f.govuk_radio_buttons_fieldset :open_government_licence, legend: { size: 'm' } do %>
+        <%= f.govuk_radio_button :open_government_licence, "true", link_errors: true %>
+        <%= f.govuk_radio_button :open_government_licence, "false" %>
+      <% end %>
+
       <%= f.govuk_file_field :logo_file, label: { size: 'm' } %>
 
       <%= f.govuk_file_field :favicon_file, label: { size: 'm' } %>
