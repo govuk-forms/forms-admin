@@ -43,7 +43,15 @@ class FeatureService
     if feature.enabled_by_organisation
       raise OrganisationRequiredError, "Feature #{feature_name} requires organisation to be provided" if organisation.blank?
 
-      return organisation.send(:"#{feature_name}_enabled?")
+      # Every enabled_by_organisation setting should have a matching column. If it
+      # doesn't, treat the feature as off rather than erroring.
+      flag_method = :"#{feature_name}_enabled?"
+      unless organisation.respond_to?(flag_method)
+        Rails.logger.warn("Feature #{feature_name} has no #{feature_name}_enabled column on organisations, treating as off")
+        return false
+      end
+
+      return organisation.public_send(flag_method)
     end
 
     feature.enabled

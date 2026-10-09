@@ -43,6 +43,12 @@ describe "Settings" do
     describe "organisation-scoped feature flags" do
       organisation_features = features.select { |_, config| config.is_a?(Hash) && config["enabled_by_organisation"] }
 
+      it "has a feature flag column on the organisations table for every settings entry" do
+        settings_feature_columns = organisation_features.keys.map { |name| "#{name}_enabled" }
+
+        expect(settings_feature_columns - Organisation.column_names).to be_empty
+      end
+
       it "has a label for every feature flag on the feature flags page" do
         Organisation.feature_flag_attributes.each do |attribute|
           translation_key = "organisations.feature_flags.flags.#{attribute}"

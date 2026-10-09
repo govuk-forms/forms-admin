@@ -222,6 +222,10 @@ describe FeatureService do
           expect(feature_service.enabled?(:test_feature)).to be false
         end
 
+        it "returns false when the organisation has no column for the feature" do
+          expect(described_class.new(organisation: build(:organisation)).enabled?(:test_feature)).to be false
+        end
+
         it "uses the group's organisation when only a group is provided" do
           allow(flagged_organisation).to receive(:test_feature_enabled?).and_return(true)
           group = instance_double(Group, organisation: flagged_organisation)
