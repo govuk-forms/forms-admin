@@ -59,6 +59,18 @@ class Reports::FormDocumentsService
       form_document["content"]["steps"].any? { |step| step["routing_conditions"].present? }
     end
 
+    def count_step_routes(step)
+      step["routing_conditions"].count
+    end
+
+    def count_step_conditional_routes(step)
+      step["routing_conditions"].count { |condition| condition["answer_value"].present? }
+    end
+
+    def count_step_unconditional_routes(step)
+      step["routing_conditions"].count { |condition| condition["answer_value"].nil? }
+    end
+
     def has_add_another_answer?(form_document)
       form_document["content"]["steps"].any? { |step| step["data"]["is_repeatable"] }
     end
