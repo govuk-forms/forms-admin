@@ -1,0 +1,26 @@
+<% set_page_title(title_with_error_prefix(t('page_titles.save_and_return'), @save_and_return_input.errors.any?)) %>
+
+<% content_for :back_link, govuk_back_link_to(form_path(@save_and_return_input.form.id), t("back_link.form_create")) %>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <%= form_with(model: @save_and_return_input, url: save_and_return_create_path(@save_and_return_input.form.id)) do |f| %>
+      <% if @save_and_return_input&.errors.any? %>
+        <%= f.govuk_error_summary %>
+      <% end %>
+
+      <h1 class="govuk-heading-l">
+        <span class="govuk-caption-l"><%= @save_and_return_input.form.name %></span>
+        <%= t("page_titles.save_and_return") %>
+      </h1>
+
+      <%= t(".body_html") %>
+
+      <%= f.govuk_check_boxes_fieldset :save_and_return, multiple: false, legend: { tag: 'h2', size: 'm'}, hint:{ text: t(".hint_text") } do %>
+        <%= f.govuk_check_box :save_and_return, "enabled", "disabled", multiple: false, link_errors: true %>
+      <% end %>
+
+      <%= f.govuk_submit t('save_and_continue') %>
+    <% end %>
+  </div>
+</div>
