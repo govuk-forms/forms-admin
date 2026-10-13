@@ -70,6 +70,11 @@ private
     end
     rows << { task_name: I18n.t("forms.task_list_#{create_or_edit}.create_form_optional_subsection.copy_of_answers"), path: copy_of_answers_path(@form.id), status: @task_statuses[:copy_of_answers_status] }
 
+    if FeatureService.new(group: @form.group).enabled?(:save_and_return)
+      save_and_return_hint_text = I18n.t("forms.task_list_#{create_or_edit}.create_form_optional_subsection.save_and_return_hint")
+      rows << { task_name: I18n.t("forms.task_list_#{create_or_edit}.create_form_optional_subsection.save_and_return"), path: save_and_return_path(@form.id), hint_text: save_and_return_hint_text, status: @task_statuses[:save_and_return_status] }
+    end
+
     {
       title: I18n.t("forms.task_list.optional_tasks_title", count: rows.count),
       rows: rows,
@@ -295,6 +300,7 @@ private
     statuses.delete(:copy_of_answers_status)
     statuses.delete(:submission_attachments_status)
     statuses.delete(:batch_submissions_status)
+    statuses.delete(:save_and_return_status)
   end
 
   def can_enter_submission_email_code

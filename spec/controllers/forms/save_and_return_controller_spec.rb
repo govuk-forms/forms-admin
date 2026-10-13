@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe Forms::SaveAndReturnController, type: :request do
+RSpec.describe Forms::SaveAndReturnController, :feature_save_and_return, type: :request do
   let(:form) { create(:form, :live, save_and_return: save_and_return_original_value) }
   let(:save_and_return_original_value) { "disabled" }
   let(:current_user) { standard_user }
@@ -31,6 +31,12 @@ RSpec.describe Forms::SaveAndReturnController, type: :request do
 
       it "returns 403" do
         expect(response).to have_http_status(:forbidden)
+      end
+    end
+
+    context "when the feature flag is disabled", feature_save_and_return: false do
+      it "returns 404" do
+        expect(response).to have_http_status(:not_found)
       end
     end
   end
@@ -102,6 +108,13 @@ RSpec.describe Forms::SaveAndReturnController, type: :request do
       it "returns 403" do
         post(save_and_return_create_path(form_id: form.id), params:)
         expect(response).to have_http_status(:forbidden)
+      end
+    end
+
+    context "when the feature flag is disabled", feature_save_and_return: false do
+      it "returns 404" do
+        post(save_and_return_create_path(form_id: form.id), params:)
+        expect(response).to have_http_status(:not_found)
       end
     end
   end
