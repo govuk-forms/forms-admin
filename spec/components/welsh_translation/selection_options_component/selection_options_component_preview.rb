@@ -13,7 +13,7 @@ class WelshTranslation::SelectionOptionsComponent::SelectionOptionsComponentPrev
 
   def long_list_with_some_translations
     page = build(:page, :selection_with_autocomplete, id: 1, position: 1)
-    input = Forms::WelshPageTranslationInput2.new(page:).assign_page_values
+    input = Forms::WelshPageTranslationInput.new(page:).assign_page_values
     input.selection_options_cy.first(3).each_with_index do |option, i|
       option.name_cy = "Welsh option #{i + 1}"
     end
@@ -25,7 +25,7 @@ class WelshTranslation::SelectionOptionsComponent::SelectionOptionsComponentPrev
 
   def long_list_with_translations_and_errors
     page = build(:page, :selection_with_autocomplete, id: 1, position: 1)
-    input = Forms::WelshPageTranslationInput2.new(page:).assign_page_values
+    input = Forms::WelshPageTranslationInput.new(page:).assign_page_values
     input.selection_options_cy.first(5).each_with_index do |option, i|
       option.name_cy = "Welsh option #{i + 1}"
     end
@@ -40,7 +40,7 @@ class WelshTranslation::SelectionOptionsComponent::SelectionOptionsComponentPrev
 
   def short_list_with_validation_error
     page = build(:page, :selection_with_radios, id: 1, position: 1)
-    input = Forms::WelshPageTranslationInput2.new(page:).assign_page_values
+    input = Forms::WelshPageTranslationInput.new(page:).assign_page_values
     input.selection_options_cy.first.name_cy = "a" * 260
     input.validate
     render(WelshTranslation::SelectionOptionsComponent::View.new(
@@ -52,7 +52,7 @@ class WelshTranslation::SelectionOptionsComponent::SelectionOptionsComponentPrev
 private
 
   def render_component(page)
-    input = Forms::WelshPageTranslationInput2.new(page:).assign_page_values
+    input = Forms::WelshPageTranslationInput.new(page:).assign_page_values
     render(WelshTranslation::SelectionOptionsComponent::View.new(
              page_form: page_form_for(input),
              table_presenter: Forms::TranslationTablePresenter.new,

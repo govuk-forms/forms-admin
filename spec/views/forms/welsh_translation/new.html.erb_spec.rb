@@ -6,9 +6,9 @@ describe "forms/welsh_translation/new.html.erb" do
   let(:another_page) { create :page, position: 2 }
   let(:exit_page) { create :exit_page }
   let(:welsh_exit_page_translation_input) { Forms::WelshExitPageTranslationInput.new(exit_page:, position: 1).assign_exit_page_values }
-  let(:welsh_page_translation_input) { Forms::WelshPageTranslationInput2.new(page:).assign_page_values }
-  let(:another_welsh_page_translation_input) { Forms::WelshPageTranslationInput2.new(page: another_page).assign_page_values }
-  let(:welsh_translation_input) { Forms::WelshTranslationInput2.new(form:, page_translations: [welsh_page_translation_input, another_welsh_page_translation_input]).assign_form_values }
+  let(:welsh_page_translation_input) { Forms::WelshPageTranslationInput.new(page:).assign_page_values }
+  let(:another_welsh_page_translation_input) { Forms::WelshPageTranslationInput.new(page: another_page).assign_page_values }
+  let(:welsh_translation_input) { Forms::WelshTranslationInput.new(form:, page_translations: [welsh_page_translation_input, another_welsh_page_translation_input]).assign_form_values }
   let(:table_presenter) { Forms::TranslationTablePresenter.new }
   let(:mark_complete) { "true" }
   let(:welsh_translation_delete_path) { "/welsh-translation/delete" }
@@ -229,7 +229,7 @@ describe "forms/welsh_translation/new.html.erb" do
 
     context "when the form does not have any pages" do
       let(:form) { build_form(pages: []) }
-      let(:welsh_translation_input) { Forms::WelshTranslationInput2.new(form:, page_translations: []).assign_form_values }
+      let(:welsh_translation_input) { Forms::WelshTranslationInput.new(form:, page_translations: []).assign_form_values }
 
       it "does not render any page translation content" do
         expect(rendered).not_to have_field(id: "forms_welsh_page_translation_input_#{page.id}_page_translations_question_text_cy", type: "text")
@@ -362,7 +362,7 @@ describe "forms/welsh_translation/new.html.erb" do
 
     it "links the error summary to the invalid field" do
       error_message = I18n.t("activemodel.errors.models.forms/welsh_translation_input.attributes.mark_complete.blank")
-      expect(rendered).to have_link(error_message, href: "#forms-welsh-translation-input2-mark-complete-field-error")
+      expect(rendered).to have_link(error_message, href: "#forms-welsh-translation-input-mark-complete-field-error")
     end
 
     it "adds an inline error message to the invalid field" do

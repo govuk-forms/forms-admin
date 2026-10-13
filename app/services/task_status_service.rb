@@ -174,7 +174,7 @@ private
 
   def welsh_translations_invalid
     @welsh_translations_invalid ||= begin
-      translation_input = Forms::WelshTranslationInput2.new(form: @form, mark_complete: true).assign_form_values
+      translation_input = Forms::WelshTranslationInput.new(form: @form, mark_complete: true).assign_form_values
       translation_input.invalid?
     end
   end

@@ -3,14 +3,14 @@ module Forms
     def new
       authorize current_form, :can_edit_form?
 
-      @welsh_translation_input = WelshTranslationInput2.new(form: form_with_pages_and_exit_pages).assign_form_values
+      @welsh_translation_input = WelshTranslationInput.new(form: form_with_pages_and_exit_pages).assign_form_values
       @table_presenter = Forms::TranslationTablePresenter.new
     end
 
     def create
       authorize current_form, :can_edit_form?
 
-      @welsh_translation_input = WelshTranslationInput2.new(welsh_translation_params)
+      @welsh_translation_input = WelshTranslationInput.new(welsh_translation_params)
       @table_presenter = Forms::TranslationTablePresenter.new
 
       if @welsh_translation_input.blanked?
@@ -87,7 +87,7 @@ module Forms
         return render :show_upload, status: :unprocessable_entity, locals: { current_form:, welsh_translation_upload_input: }
       end
 
-      @welsh_translation_input = WelshTranslationInput2.new(form: form_with_pages_and_exit_pages)
+      @welsh_translation_input = WelshTranslationInput.new(form: form_with_pages_and_exit_pages)
       @welsh_translation_input.assign_from_spreadsheet(data).validate(:upload)
       @table_presenter = Forms::TranslationTablePresenter.new
 
@@ -104,10 +104,10 @@ module Forms
     end
 
     def welsh_translation_params
-      params.require(:forms_welsh_translation_input2).permit(
-        *WelshTranslationInput2.attribute_names,
+      params.require(:forms_welsh_translation_input).permit(
+        *WelshTranslationInput.attribute_names,
         page_translations_attributes: [
-          *WelshPageTranslationInput2.attribute_names,
+          *WelshPageTranslationInput.attribute_names,
           { selection_options_cy_attributes: %i[id name_cy] },
           { exit_page_translations_attributes: WelshExitPageTranslationInput.attribute_names },
         ],

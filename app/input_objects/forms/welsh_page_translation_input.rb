@@ -1,4 +1,4 @@
-class Forms::WelshPageTranslationInput2 < BaseInput
+class Forms::WelshPageTranslationInput < BaseInput
   include TextInputHelper
   include ActionView::Helpers::FormTagHelper
   include ActiveModel::Attributes

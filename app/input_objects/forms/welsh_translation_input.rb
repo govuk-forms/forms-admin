@@ -1,4 +1,4 @@
-class Forms::WelshTranslationInput2 < BaseInput
+class Forms::WelshTranslationInput < BaseInput
   include TextInputHelper
   include ActiveModel::Attributes
   include WelshTranslationContentLabels
@@ -71,7 +71,7 @@ class Forms::WelshTranslationInput2 < BaseInput
       # skip the page if it doesn't belong to the form
       next unless page_object
 
-      Forms::WelshPageTranslationInput2.new(page_attrs.symbolize_keys.merge(page: page_object))
+      Forms::WelshPageTranslationInput.new(page_attrs.symbolize_keys.merge(page: page_object))
     }.compact
   end
 
@@ -121,7 +121,7 @@ class Forms::WelshTranslationInput2 < BaseInput
     self.mark_complete = form.try(:welsh_completed)
 
     self.page_translations = form.pages.map do |page|
-      Forms::WelshPageTranslationInput2.new(page:).assign_page_values
+      Forms::WelshPageTranslationInput.new(page:).assign_page_values
     end
 
     self
@@ -145,7 +145,7 @@ class Forms::WelshTranslationInput2 < BaseInput
     end
 
     self.page_translations = form.pages.map do |page|
-      Forms::WelshPageTranslationInput2.new(page:).assign_from_spreadsheet(data)
+      Forms::WelshPageTranslationInput.new(page:).assign_from_spreadsheet(data)
     end
 
     self

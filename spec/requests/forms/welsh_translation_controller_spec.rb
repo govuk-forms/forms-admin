@@ -39,7 +39,7 @@ RSpec.describe Forms::WelshTranslationController, type: :request do
     let(:exit_page_translations_attributes) { { "0" => { "id" => exit_page.id, heading_cy: "Nid ydych yn gymwys", markdown_cy: "Mae'n ddrwg gennym, nid ydych yn gymwys ar gyfer y gwasanaeth hwn." } } }
     let(:selection_options_cy_attributes) { { "0" => { id: 0, name_cy: "Opsiwn 1" }, "1" => { id: 1, name_cy: "Opsiwn 2" } } }
     let(:page_translations_attributes) { { "0" => { "id" => form.pages.first.id, question_text_cy: "Ydych chi'n adnewyddu trwydded?", exit_page_translations_attributes:, selection_options_cy_attributes: } } }
-    let(:params) { { forms_welsh_translation_input2: { form:, mark_complete:, name_cy: "Gwneud cais am drwydded jyglo", privacy_policy_url_cy: "https://juggling.gov.uk/privacy_policy/cy", page_translations_attributes: } } }
+    let(:params) { { forms_welsh_translation_input: { form:, mark_complete:, name_cy: "Gwneud cais am drwydded jyglo", privacy_policy_url_cy: "https://juggling.gov.uk/privacy_policy/cy", page_translations_attributes: } } }
 
     context "when 'Yes' is selected" do
       it "updates the form, pages and exit pages" do
@@ -98,7 +98,7 @@ RSpec.describe Forms::WelshTranslationController, type: :request do
     context "when 'Yes' is selected and all fields are empty" do
       let(:exit_page_translations_attributes) { { "0" => { "id" => exit_page.id, heading_cy: "", markdown_cy: "" } } }
       let(:page_translations_attributes) { { "0" => { "id" => form.pages.first.id, question_text_cy: "", exit_page_translations_attributes: } } }
-      let(:params) { { forms_welsh_translation_input2: { form:, mark_complete:, name_cy: "", privacy_policy_url_cy: "", page_translations_attributes: } } }
+      let(:params) { { forms_welsh_translation_input: { form:, mark_complete:, name_cy: "", privacy_policy_url_cy: "", page_translations_attributes: } } }
 
       it "deletes the form" do
         post(welsh_translation_create_path(id), params:)
@@ -118,7 +118,7 @@ RSpec.describe Forms::WelshTranslationController, type: :request do
       let(:support_email) { Faker::Internet.email(domain:) }
 
       let(:form) { create(:form, :ready_for_routing, welsh_completed: false, support_email:) }
-      let(:params) { { forms_welsh_translation_input2: { form:, mark_complete:, name_cy: "Gwneud cais am drwydded jyglo", privacy_policy_url_cy: "https://juggling.gov.uk/privacy_policy/cy", support_email_cy: support_email, page_translations_attributes: } } }
+      let(:params) { { forms_welsh_translation_input: { form:, mark_complete:, name_cy: "Gwneud cais am drwydded jyglo", privacy_policy_url_cy: "https://juggling.gov.uk/privacy_policy/cy", support_email_cy: support_email, page_translations_attributes: } } }
 
       it "returns a 422, re-renders the page with an error, and does not display a success banner" do
         post(welsh_translation_create_path(id), params:)

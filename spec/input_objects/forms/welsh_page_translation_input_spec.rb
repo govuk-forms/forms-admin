@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe Forms::WelshPageTranslationInput2, type: :model do
+RSpec.describe Forms::WelshPageTranslationInput, type: :model do
   subject(:welsh_page_translation_input) { described_class.new(new_input_data) }
 
   let(:page) { create_page }
@@ -595,8 +595,8 @@ RSpec.describe Forms::WelshPageTranslationInput2, type: :model do
 
         expect(selection_options_cy).to eq([
           { name: "Welsh option 1", value: "Yes" },
-          { name:  "", value: "No" },
-          { name:  "", value: "Maybe" },
+          { name: "", value: "No" },
+          { name: "", value: "Maybe" },
         ])
       end
     end

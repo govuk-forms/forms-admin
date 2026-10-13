@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe Forms::WelshTranslationInput2, type: :model do
+RSpec.describe Forms::WelshTranslationInput, type: :model do
   subject(:welsh_translation_input) { described_class.new(new_input_data) }
 
   let(:form) { build_form }
@@ -560,7 +560,7 @@ RSpec.describe Forms::WelshTranslationInput2, type: :model do
     end
 
     context "when any of the form's page translations have errors" do
-      let(:page_translation) { Forms::WelshPageTranslationInput2.new(page:) }
+      let(:page_translation) { Forms::WelshPageTranslationInput.new(page:) }
       let(:new_input_data) { super().merge(page_translations: [page_translation]) }
 
       it "includes the page error with a custom attribute" do
@@ -666,8 +666,8 @@ RSpec.describe Forms::WelshTranslationInput2, type: :model do
       end
 
       context "when the form includes page translation objects" do
-        let(:page_translation) { Forms::WelshPageTranslationInput2.new(page:, question_text_cy: "Ydych chi'n adnewyddu trwydded?", hint_text_cy: "Dewiswch 'Ydw' os oes gennych drwydded ddilys eisoes.", page_heading_cy: "Trwyddedu", guidance_markdown_cy: "Mae'r rhan hon o'r ffurflen yn ymwneud â thrwyddedu.") }
-        let(:another_page_translation) { Forms::WelshPageTranslationInput2.new(page: another_page, question_text_cy: "Ydych chi'n adnewyddu trwydded?") }
+        let(:page_translation) { Forms::WelshPageTranslationInput.new(page:, question_text_cy: "Ydych chi'n adnewyddu trwydded?", hint_text_cy: "Dewiswch 'Ydw' os oes gennych drwydded ddilys eisoes.", page_heading_cy: "Trwyddedu", guidance_markdown_cy: "Mae'r rhan hon o'r ffurflen yn ymwneud â thrwyddedu.") }
+        let(:another_page_translation) { Forms::WelshPageTranslationInput.new(page: another_page, question_text_cy: "Ydych chi'n adnewyddu trwydded?") }
 
         let(:new_input_data) { super().merge(page_translations: [page_translation, another_page_translation]) }
 
@@ -804,7 +804,7 @@ RSpec.describe Forms::WelshTranslationInput2, type: :model do
   end
 
   describe "#blanked?" do
-    let(:page_translation) { Forms::WelshPageTranslationInput2.new(page:) }
+    let(:page_translation) { Forms::WelshPageTranslationInput.new(page:) }
     let(:new_input_data) do
       {
         form:,
@@ -829,7 +829,7 @@ RSpec.describe Forms::WelshTranslationInput2, type: :model do
     end
 
     context "when the pages are not all blank" do
-      let(:page_translation) { Forms::WelshPageTranslationInput2.new(page:, question_text_cy: "Some question text") }
+      let(:page_translation) { Forms::WelshPageTranslationInput.new(page:, question_text_cy: "Some question text") }
 
       it "returns false" do
         expect(welsh_translation_input.blanked?).to be false
