@@ -562,7 +562,7 @@ en:
       contact_details: Your form’s contact details for support
       copy_of_answers:
         enabled: You’ve opted to let people ask to be sent a copy of their answers after they’ve filled in the form.
-        title: People can ask for a copy of their answers
+        title: Ask for a copy of their answers
       declaration: Declaration
       declaration_description: Your form’s declaration is shown to people when they have answered all the questions, just before they submit the form.
       draft_create: Create a draft to edit
@@ -607,6 +607,9 @@ en:
       questions_link:
         one: View your form’s 1 question
         other: View your form’s %{count} questions
+      save_and_return:
+        enabled: You’ve opted to let people save their progress and return to the form later.
+        title: Save their progress and return
       support_email: Email
       support_phone: Phone
       support_url: Support contact online
@@ -616,6 +619,7 @@ en:
       what_happens_next_description: Information about what happens next is shown to people when they have completed and submitted a form.
       what_is_declaration: What is a declaration?
       what_is_what_happens_next: What is ‘what happens next information’?
+      what_people_can_do_with_one_login: What people can do with GOV.UK One Login
     save_and_return:
       new:
         body_html: |

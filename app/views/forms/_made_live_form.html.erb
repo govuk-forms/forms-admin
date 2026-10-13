@@ -140,9 +140,18 @@
       <% end %>
     <% end %>
 
+    <% if form_document.send_copy_of_answers == "enabled" or form_document.save_and_return == "enabled" %>
+      <h3 class="govuk-heading-m"><%= t(".what_people_can_do_with_one_login") %></h3>
+    <% end %>
+
     <% if form_document.send_copy_of_answers == "enabled" %>
-      <h3 class="govuk-heading-m"><%= t(".copy_of_answers.title") %></h3>
+      <h3 class="govuk-heading-s"><%= t(".copy_of_answers.title") %></h3>
       <p><%= t(".copy_of_answers.enabled") %></p>
+    <% end %>
+
+    <% if form_document.save_and_return == "enabled" %>
+      <h3 class="govuk-heading-s"><%= t(".save_and_return.title") %></h3>
+      <p><%= t(".save_and_return.enabled") %></p>
     <% end %>
 
     <h3 class="govuk-heading-m"><%= t(".how_you_get_completed_forms.title") %></h3>
