@@ -46,6 +46,7 @@ describe FormTaskListService do
         submission_email_status: :completed,
         confirm_submission_email_status: :not_started,
         welsh_language_status: :in_progress,
+        save_and_return_status: :optional,
       }
     end
     let(:form) { create(:form) }
