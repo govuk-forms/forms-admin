@@ -1612,6 +1612,12 @@ en:
       label: Domain
       submit: Add domain
       title: Add a domain
+  organisation_feature_flags:
+    edit:
+      hint: You can turn a feature flag on, but you cannot turn it off. Turning a feature on can change how an organisation’s groups and forms work. Ask a developer if you need to turn a feature off.
+      title: Feature flags
+    update:
+      success: This organisation’s feature flags have been updated
   organisations:
     boolean:
       'false': 'No'

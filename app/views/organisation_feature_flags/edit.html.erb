@@ -1,0 +1,22 @@
+<% set_page_title(title_with_error_prefix(t(".title"), @feature_flags_input.errors.any?)) %>
+<% content_for :back_link, govuk_back_link_to(organisation_path(@organisation)) %>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <%= form_with(model: @feature_flags_input, url: organisation_feature_flags_path(@organisation)) do |f| %>
+      <% if @feature_flags_input.errors.any? %>
+        <%= f.govuk_error_summary %>
+      <% end %>
+
+      <%= f.govuk_check_boxes_fieldset :feature_flags, multiple: false, legend: { text: t(".title"), tag: "h1", size: "l" }, caption: { text: @organisation.name, size: "l" }, hint: { text: t(".hint") } do %>
+        <% Organisation.feature_flag_attributes.each do |flag| %>
+          <%= f.govuk_check_box flag, "true", "false", multiple: false,
+                checked: @feature_flags_input.flag_checked?(flag), disabled: @feature_flags_input.flag_locked?(flag),
+                label: { text: t("organisations.feature_flags.flags.#{flag}") } %>
+        <% end %>
+      <% end %>
+
+      <%= f.govuk_submit t("save_and_continue") %>
+    <% end %>
+  </div>
+</div>
