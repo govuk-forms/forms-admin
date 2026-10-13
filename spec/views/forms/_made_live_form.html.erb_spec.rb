@@ -5,7 +5,7 @@ describe "forms/_made_live_form.html.erb" do
   let(:past_week_metrics_data) { { weekly_submissions: 125, weekly_starts: 256 } }
   let(:what_happens_next_markdown) { "If you have not received a response within 5 working days, [contact our user support team](https://example.com)." }
   let(:form_metadata) do
-    create(:form, :live, declaration_markdown:, what_happens_next_markdown:, send_copy_of_answers:)
+    create(:form, :live, declaration_markdown:, what_happens_next_markdown:, send_copy_of_answers:, save_and_return:)
   end
   let(:form_document) do
     form_document_content = FormDocument::Content.from_form_document(form_metadata.latest_form_document)
@@ -18,6 +18,7 @@ describe "forms/_made_live_form.html.erb" do
   let(:preview_mode) { :preview_live }
   let(:questions_path) { Faker::Internet.url }
   let(:send_copy_of_answers) { "disabled" }
+  let(:save_and_return) { "disabled" }
   let(:cloudwatch_service) { instance_double(CloudWatchService, past_week_metrics_data:) }
 
   before do
@@ -423,6 +424,7 @@ describe "forms/_made_live_form.html.erb" do
 
     it "tells the user people can ask for a copy of their answers" do
       expect(rendered).to have_css("h3", text: I18n.t("forms.made_live_form.copy_of_answers.title"))
+      expect(rendered).to have_css("h3", text: I18n.t("forms.made_live_form.what_people_can_do_with_one_login"))
       expect(rendered).to include(I18n.t("forms.made_live_form.copy_of_answers.enabled"))
     end
   end
@@ -432,6 +434,33 @@ describe "forms/_made_live_form.html.erb" do
 
     it "does not include the copy of answers section" do
       expect(rendered).not_to have_css("h3", text: I18n.t("forms.made_live_form.copy_of_answers.title"))
+    end
+  end
+
+  context "when form fillers can save and return" do
+    let(:save_and_return) { "enabled" }
+
+    it "tells the user people can save their progress and return" do
+      expect(rendered).to have_css("h3", text: I18n.t("forms.made_live_form.save_and_return.title"))
+      expect(rendered).to have_css("h3", text: I18n.t("forms.made_live_form.what_people_can_do_with_one_login"))
+      expect(rendered).to include(I18n.t("forms.made_live_form.save_and_return.enabled"))
+    end
+  end
+
+  context "when form fillers cannot save and return" do
+    let(:save_and_return) { "disabled" }
+
+    it "does not include the save and return section" do
+      expect(rendered).not_to have_css("h3", text: I18n.t("forms.made_live_form.save_and_return.title"))
+    end
+  end
+
+  context "when form fillers can neither save and return nor get a copy of their answers" do
+    let(:save_and_return) { "disabled" }
+    let(:send_copy_of_answers) { "disabled" }
+
+    it "does not include the save and return section" do
+      expect(rendered).not_to have_css("h3", text: I18n.t("forms.made_live_form.what_people_can_do_with_one_login"))
     end
   end
 
