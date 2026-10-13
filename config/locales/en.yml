@@ -93,7 +93,7 @@ en:
           blank: Select ‘Yes’ to delete the draft
         forms/save_and_return_input:
           attributes:
-            enable_save_and_return:
+            save_and_return:
               blank: Sorry, there was a problem. Please try again.
               inclusion: Sorry, there was a problem. Please try again.
         forms/submission_attachments_input:
@@ -312,8 +312,8 @@ en:
         receive_json_enabled: Completed form emails will include a JSON file
         receive_no_attachments: Completed form emails will not include a CSV or JSON file
         routing_saved: Your routes have been saved
-        save_and_return_disabled: People will not have the option to save and return (TODO check this is correct)
-        save_and_return_enabled: People will have the option to save and return (TODO check this is correct)
+        save_and_return_disabled: People will not have the option to save their progress and return later
+        save_and_return_enabled: People will have the option to save their progress and return later
         share_preview_completed: The preview task has been completed
         support_details_saved: Your contact details for support have been saved
         welsh_translation_saved: The Welsh version of your form has been saved
@@ -1163,9 +1163,6 @@ en:
           'false': 'No'
           'true': 'Yes'
         opengraph_image_file: Opengraph image
-      forms_save_and_return_input:
-        save_and_return_options:
-          enabled: Give people the option to save their progress and return later
       forms_batch_submissions_input:
         batch_frequencies_options:
           daily: Get a daily CSV of submissions
@@ -1184,6 +1181,9 @@ en:
           confirm: Are you sure you want to make your English form live?
       forms_make_live_input:
         confirm: Are you sure you want to make your form live?
+      forms_save_and_return_input:
+        save_and_return_options:
+          enabled: Give people the option to save their progress and return later
       forms_submission_attachments_input:
         submission_format_options:
           csv: Get a CSV file of each completed form
