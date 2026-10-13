@@ -41,6 +41,7 @@ class TaskStatusService
       welsh_language_status:,
       submission_email_status:,
       confirm_submission_email_status:,
+      save_and_return_status:,
     }
   end
 
@@ -195,5 +196,11 @@ private
       sent: :not_started,
       confirmed: :completed,
     }[@form.email_confirmation_status]
+  end
+
+  def save_and_return_status
+    return :completed if @form.save_and_return_enabled?
+
+    :optional
   end
 end

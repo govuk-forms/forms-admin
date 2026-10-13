@@ -44,6 +44,7 @@ describe FormTaskListService do
         share_preview_status: :completed,
         submission_email_status: :completed,
         confirm_submission_email_status: :not_started,
+        save_and_return_status: :optional,
       }
     end
     let(:form) { create(:form) }

@@ -951,6 +951,7 @@ RSpec.describe Form, type: :model do
         submission_email_status: :completed,
         confirm_submission_email_status: :completed,
         privacy_policy_status: :completed,
+        save_and_return_status: :optional,
         payment_link_status: :optional,
         brand_status: :optional,
         copy_of_answers_status: :optional,
