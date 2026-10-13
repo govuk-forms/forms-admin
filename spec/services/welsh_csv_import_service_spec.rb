@@ -23,9 +23,9 @@ RSpec.describe WelshCsvImportService do
            :selection_with_none_of_the_above_question,
            question_text: "None of the above question?",
            none_of_the_above_question_text: "None of the above question?",
-           routing_conditions: [condition]
+           exit_pages: [exit_page]
   end
-  let(:condition) { create :condition, :with_exit_page, exit_page_heading: "Exit page heading" }
+  let(:exit_page) { build :exit_page, heading: "Exit page heading", markdown: "Exit page markdown" }
   let(:another_page) { create :page, question_text: "What?", page_heading: "Page heading", guidance_markdown: "This is the guidance." }
 
   let(:file) { Tempfile.new }
@@ -46,8 +46,8 @@ RSpec.describe WelshCsvImportService do
           ["Question 1 - option 1", "Option 1", "Welsh Option 1"],
           ["Question 1 - option 2", "Option 2", "Welsh Option 2"],
           ["Question 1 - question or label if 'None of the above' is selected", "None of the above question?", "Welsh None of the above question?"],
-          ["Question 1 - exit page heading", "Exit page heading", "Welsh exit page heading"],
-          ["Question 1 - exit page content", "Exit page markdown", "Welsh exit page markdown"],
+          ["Question 1 - exit page 1 heading", "Exit page heading", "Welsh exit page heading"],
+          ["Question 1 - exit page 1 content", "Exit page markdown", "Welsh exit page markdown"],
           ["Question 2 - page heading", "Page heading", "Welsh Page heading"],
           ["Question 2 - guidance text", "This is the guidance.", "Welsh This is the guidance."],
           ["Question 2 - question text", "What?", "Welsh What?"],
@@ -71,8 +71,8 @@ RSpec.describe WelshCsvImportService do
           "Question 1 - option 1" => "Welsh Option 1",
           "Question 1 - option 2" => "Welsh Option 2",
           "Question 1 - question or label if 'None of the above' is selected" => "Welsh None of the above question?",
-          "Question 1 - exit page heading" => "Welsh exit page heading",
-          "Question 1 - exit page content" => "Welsh exit page markdown",
+          "Question 1 - exit page 1 heading" => "Welsh exit page heading",
+          "Question 1 - exit page 1 content" => "Welsh exit page markdown",
           "Question 2 - page heading" => "Welsh Page heading",
           "Question 2 - guidance text" => "Welsh This is the guidance.",
           "Question 2 - question text" => "Welsh What?",
@@ -290,7 +290,7 @@ RSpec.describe WelshCsvImportService do
       context "when an exit page heading in the CSV does not match the current form" do
         let(:page) do
           create :page, :with_text_settings, question_text: "What colour is the sky?",
-                                             routing_conditions: [create(:condition, :with_exit_page, exit_page_heading: "Exit page heading")]
+                                             exit_pages: [build(:exit_page, heading: "Exit page heading")]
         end
 
         before do
@@ -298,7 +298,7 @@ RSpec.describe WelshCsvImportService do
             ["Content ID", "English content", "Welsh content"],
             ["Form name", "A form", "Welsh A form ôÂŵéï"],
             ["Question 1 - question text", "What colour is the sky?", "Welsh What colour is the sky?"],
-            ["Question 1 - exit page heading", "WRONG HEADING", "Welsh exit page heading"],
+            ["Question 1 - exit page 1 heading", "WRONG HEADING", "Welsh exit page heading"],
           ]
           file.write(rows.map(&:to_csv).join)
           file.rewind

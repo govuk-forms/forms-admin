@@ -62,7 +62,7 @@ class Forms::WelshTranslationInput < BaseInput
     submitted_page_ids = attributes.values.map { |attrs| attrs["id"] }.compact
 
     # lookup hash for efficiency
-    pages_by_id = form.pages.where(id: submitted_page_ids).includes(:routing_conditions).index_by(&:id)
+    pages_by_id = form.pages.where(id: submitted_page_ids).includes(:exit_pages).index_by(&:id)
 
     self.page_translations = attributes.values.map { |page_attrs|
       page_id = page_attrs["id"].to_i

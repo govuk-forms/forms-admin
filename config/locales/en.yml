@@ -715,8 +715,6 @@ en:
       destroy:
         success: The Welsh version of your form has been deleted
       new:
-        condition:
-          heading: Question %{question_number}’s exit page
         csv_download: Download content as a CSV
         csv_upload: Upload Welsh content as a CSV
         delete_welsh_version: Delete Welsh version
@@ -728,8 +726,6 @@ en:
           page_heading:
             one: Question %{question_number}’s exit page
             other: Question %{question_number}’s exit pages
-        exit_page_heading: Exit page heading
-        exit_page_markdown: Exit page content
         guidance_markdown: Guidance text
         hint: Selecting ‘Yes’ will mark this task as complete. You’ll still be able to make more changes if you need to.
         hint_text: Hint text

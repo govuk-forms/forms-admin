@@ -4,7 +4,7 @@ class Forms::WelshPageTranslationInput < BaseInput
   include ActiveModel::Attributes
   include WelshTranslationContentLabels
 
-  attr_accessor :condition_translations, :selection_options_cy
+  attr_accessor :exit_page_translations, :selection_options_cy
   attr_reader :page
 
   attribute :id
@@ -31,14 +31,14 @@ class Forms::WelshPageTranslationInput < BaseInput
   validate :none_of_the_above_question_cy_present?, on: :mark_complete
   validate :none_of_the_above_question_cy_length, if: -> { none_of_the_above_question_cy.present? }
 
-  validate :condition_translations_valid?
+  validate :exit_page_translations_valid?
   validate :selection_options_valid?
 
   def initialize(attributes = {})
     @page = attributes.delete(:page) if attributes.key?(:page)
     super
     self.id ||= @page&.id
-    @condition_translations ||= []
+    @exit_page_translations ||= []
     @selection_options_cy ||= []
   end
 
@@ -50,7 +50,7 @@ class Forms::WelshPageTranslationInput < BaseInput
     page.page_heading_cy = page_has_page_heading_and_guidance_markdown? ? page_heading_cy : nil
     page.guidance_markdown_cy = page_has_page_heading_and_guidance_markdown? ? guidance_markdown_cy : nil
 
-    condition_translations.presence&.each(&:submit)
+    exit_page_translations.presence&.each(&:submit)
 
     page.answer_settings_cy = welsh_answer_settings
 
@@ -74,8 +74,10 @@ class Forms::WelshPageTranslationInput < BaseInput
     self.guidance_markdown_cy = page.guidance_markdown_cy
     self.none_of_the_above_question_cy = page.answer_settings_cy&.none_of_the_above_question&.question_text
 
-    self.condition_translations = page.routing_conditions.map do |condition|
-      Forms::WelshConditionTranslationInput.new(condition:).assign_condition_values
+    exit_page_positions = ExitPage.positions_for_page(page)
+
+    self.exit_page_translations = page.exit_pages.map do |exit_page|
+      Forms::WelshExitPageTranslationInput.new(exit_page:, position: exit_page_positions[exit_page.id]).assign_exit_page_values
     end
 
     prepare_selection_options
@@ -92,30 +94,33 @@ class Forms::WelshPageTranslationInput < BaseInput
       send(:"#{attr}_cy=", data[content_label]) if data.key?(content_label) && data[content_label].present?
     end
 
-    selection_options_cy&.each do |option|
-      option.assign_from_spreadsheet(data)
+    selection_options_cy&.each_with_index do |option, index|
+      content_label = selection_option_label(page, index)
+      option.name_cy = data[content_label] if data.key?(content_label) && data[content_label].present?
     end
 
-    condition_translations.each do |condition_translation|
-      condition_translation.assign_from_spreadsheet(data)
+    exit_page_translations&.each do |exit_page_translation|
+      exit_page_translation.assign_from_spreadsheet(data)
     end
 
     self
   end
 
-  def condition_translations_attributes=(attributes)
-    submitted_condition_ids = attributes.values.map { |attrs| attrs["id"] }.compact
+  def exit_page_translations_attributes=(attributes)
+    submitted_exit_page_ids = attributes.values.map { |attrs| attrs["id"] }.compact
 
-    conditions_by_id = page.routing_conditions.where(id: submitted_condition_ids).index_by(&:id)
+    exit_pages_by_id = page.exit_pages.where(id: submitted_exit_page_ids).index_by(&:id)
+    exit_page_positions = ExitPage.positions_for_page(page)
 
-    self.condition_translations = attributes.values.map { |condition_attrs|
-      condition_id = condition_attrs["id"].to_i
-      condition_object = conditions_by_id[condition_id]
+    self.exit_page_translations = attributes.values.map { |exit_page_attrs|
+      exit_page_id = exit_page_attrs["id"].to_i
+      exit_page_position = exit_page_positions[exit_page_id]
+      exit_page_object = exit_pages_by_id[exit_page_id]
 
-      # skip the condition if it doesn't belong to the page
-      next unless condition_object
+      # skip the exit page if it doesn't belong to the page
+      next unless exit_page_object
 
-      Forms::WelshConditionTranslationInput.new(condition_attrs.symbolize_keys.merge(condition: condition_object))
+      Forms::WelshExitPageTranslationInput.new(exit_page_attrs.symbolize_keys.merge(exit_page: exit_page_object, position: exit_page_position))
     }.compact
   end
 
@@ -223,13 +228,13 @@ class Forms::WelshPageTranslationInput < BaseInput
     mark_complete == "true"
   end
 
-  def condition_translations_valid?
-    return if condition_translations.nil?
+  def exit_page_translations_valid?
+    return if exit_page_translations.nil?
 
-    condition_translations.each do |condition_translation|
-      condition_translation.validate(validation_context)
+    exit_page_translations.each do |exit_page_translation|
+      exit_page_translation.validate(validation_context)
 
-      errors.merge!(condition_translation.errors)
+      errors.merge!(exit_page_translation.errors)
     end
   end
 
@@ -288,7 +293,7 @@ class Forms::WelshPageTranslationInput < BaseInput
   end
 
   def blanked?
-    all_fields_empty? && condition_translations.all?(&:all_fields_empty?) && selection_options_cy.all?(&:all_fields_empty?)
+    all_fields_empty? && exit_page_translations.all?(&:all_fields_empty?) && selection_options_cy.all?(&:all_fields_empty?)
   end
 
 private

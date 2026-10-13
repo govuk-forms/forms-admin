@@ -5,13 +5,17 @@ RSpec.describe Forms::WelshPageTranslationInput, type: :model do
 
   let(:page) { create_page }
 
-  let(:condition) do
-    create :condition, routing_page: page, answer_value: "Yes",
-                       exit_page_heading: "You are ineligible",
-                       exit_page_markdown: "Sorry, you are ineligible for this service."
+  let(:exit_page) do
+    create :exit_page, question_page: page,
+                       heading: "You are ineligible",
+                       markdown: "Sorry, you are ineligible for this service."
   end
 
-  let(:another_condition) { create :condition, routing_page: page, answer_value: "Yes", exit_page_heading: "Exit page heading", exit_page_markdown: "Exit page markdown" }
+  let(:another_exit_page) do
+    create :exit_page, question_page: page,
+                       heading: "Exit page heading",
+                       markdown: "Exit page markdown"
+  end
 
   let(:new_input_data) do
     {
@@ -25,6 +29,7 @@ RSpec.describe Forms::WelshPageTranslationInput, type: :model do
 
   def create_page(attributes = {})
     default_attributes = {
+      id: 1,
       question_text: "Are you renewing a licence?",
       hint_text: "Choose 'Yes' if you already have a valid licence.",
       page_heading: "Licencing",
@@ -392,13 +397,13 @@ RSpec.describe Forms::WelshPageTranslationInput, type: :model do
       end
     end
 
-    context "when any of the page's condition translations have errors" do
-      let(:condition_translation) { Forms::WelshConditionTranslationInput.new(condition:) }
-      let(:new_input_data) { super().merge(condition_translations: [condition_translation]) }
+    context "when any of the page's exit_page translations have errors" do
+      let(:exit_page_translation) { Forms::WelshExitPageTranslationInput.new(exit_page:) }
+      let(:new_input_data) { super().merge(exit_page_translations: [exit_page_translation]) }
 
       it "is invalid" do
         expect(welsh_page_translation_input).not_to be_valid(:mark_complete)
-        expect(welsh_page_translation_input.errors.full_messages_for(:exit_page_markdown_cy)).to include "Exit page markdown cy #{I18n.t('activemodel.errors.models.forms/welsh_condition_translation_input.attributes.exit_page_markdown_cy.blank', question_number: page.position)}"
+        expect(welsh_page_translation_input.errors.full_messages_for(:markdown_cy)).to include "Markdown cy #{I18n.t('activemodel.errors.models.forms/welsh_exit_page_translation_input.attributes.markdown_cy.blank', question_number: page.position)}"
       end
     end
   end
@@ -443,19 +448,19 @@ RSpec.describe Forms::WelshPageTranslationInput, type: :model do
       end
     end
 
-    context "when the form includes condition translation objects" do
-      let(:condition_translation) { Forms::WelshConditionTranslationInput.new(condition: condition, exit_page_heading_cy: "Nid ydych yn gymwys", exit_page_markdown_cy: "Mae'n ddrwg gennym, nid ydych yn gymwys ar gyfer y gwasanaeth hwn.") }
-      let(:another_condition_translation) { Forms::WelshConditionTranslationInput.new(condition: another_condition, exit_page_heading_cy: "Welsh exit page heading", exit_page_markdown_cy: "Welsh exit page markdown") }
+    context "when the form includes exit page translation objects" do
+      let(:exit_page_translation) { Forms::WelshExitPageTranslationInput.new(exit_page:, heading_cy: "Nid ydych yn gymwys", markdown_cy: "Mae'n ddrwg gennym, nid ydych yn gymwys ar gyfer y gwasanaeth hwn.") }
+      let(:another_exit_page_translation) { Forms::WelshExitPageTranslationInput.new(exit_page: another_exit_page, heading_cy: "Welsh exit page heading", markdown_cy: "Welsh exit page markdown") }
 
-      let(:new_input_data) { super().merge(condition_translations: [condition_translation, another_condition_translation]) }
+      let(:new_input_data) { super().merge(exit_page_translations: [exit_page_translation, another_exit_page_translation]) }
 
-      it "submits the data on the condition translation objects" do
+      it "submits the data on the exit page translation objects" do
         welsh_page_translation_input.submit
 
-        expect(condition.reload.exit_page_heading_cy).to eq("Nid ydych yn gymwys")
-        expect(condition.reload.exit_page_markdown_cy).to eq("Mae'n ddrwg gennym, nid ydych yn gymwys ar gyfer y gwasanaeth hwn.")
-        expect(another_condition.reload.exit_page_heading_cy).to eq("Welsh exit page heading")
-        expect(another_condition.reload.exit_page_markdown_cy).to eq("Welsh exit page markdown")
+        expect(exit_page.reload.heading_cy).to eq("Nid ydych yn gymwys")
+        expect(exit_page.reload.markdown_cy).to eq("Mae'n ddrwg gennym, nid ydych yn gymwys ar gyfer y gwasanaeth hwn.")
+        expect(another_exit_page.reload.heading_cy).to eq("Welsh exit page heading")
+        expect(another_exit_page.reload.markdown_cy).to eq("Welsh exit page markdown")
       end
     end
 
@@ -636,7 +641,7 @@ RSpec.describe Forms::WelshPageTranslationInput, type: :model do
     end
 
     before do
-      page.routing_conditions = [condition, another_condition]
+      page.exit_pages = [exit_page, another_exit_page]
     end
 
     context "when the spreadsheet data contains Welsh translations for all fields" do
@@ -649,8 +654,10 @@ RSpec.describe Forms::WelshPageTranslationInput, type: :model do
           "Question 3 - option 1" => "Welsh Option 1 from spreadsheet",
           "Question 3 - option 2" => "Welsh Option 2 from spreadsheet",
           "Question 3 - question or label if 'None of the above' is selected" => "Welsh None of the above question? from spreadsheet",
-          "Question 3 - exit page heading" => "Welsh exit page heading from spreadsheet",
-          "Question 3 - exit page content" => "Welsh exit page markdown from spreadsheet",
+          "Question 3 - exit page 1 heading" => "Welsh exit page heading from spreadsheet",
+          "Question 3 - exit page 1 content" => "Welsh exit page markdown from spreadsheet",
+          "Question 3 - exit page 2 heading" => "Another exit page heading from spreadsheet",
+          "Question 3 - exit page 2 content" => "Another exit page markdown from spreadsheet",
           "Question 1 - page heading" => "Translation for a different page (ignored)",
           "Declaration" => "Translation for a form field (ignored)",
         }
@@ -673,9 +680,13 @@ RSpec.describe Forms::WelshPageTranslationInput, type: :model do
           { name: "Welsh Option 2 from spreadsheet", value: "Option 2" },
         ])
 
-        condition_translation = welsh_page_translation_input.condition_translations.find { |ct| ct.id == condition.id }
-        expect(condition_translation.exit_page_heading_cy).to eq("Welsh exit page heading from spreadsheet")
-        expect(condition_translation.exit_page_markdown_cy).to eq("Welsh exit page markdown from spreadsheet")
+        exit_page_translation = welsh_page_translation_input.exit_page_translations.find { |ct| ct.id == exit_page.id }
+        expect(exit_page_translation.heading_cy).to eq("Welsh exit page heading from spreadsheet")
+        expect(exit_page_translation.markdown_cy).to eq("Welsh exit page markdown from spreadsheet")
+
+        another_exit_page_translation = welsh_page_translation_input.exit_page_translations.find { |ct| ct.id == another_exit_page.id }
+        expect(another_exit_page_translation.heading_cy).to eq("Another exit page heading from spreadsheet")
+        expect(another_exit_page_translation.markdown_cy).to eq("Another exit page markdown from spreadsheet")
       end
     end
 
@@ -798,14 +809,14 @@ RSpec.describe Forms::WelshPageTranslationInput, type: :model do
         hint_text_cy: "",
         page_heading_cy: "",
         guidance_markdown_cy: "",
-        condition_translations: [condition_translation],
+        exit_page_translations: [exit_page_translation],
         selection_options_cy_attributes: {
           "0" => { "id" => "0", "name_cy" => "" },
           "1" => { "id" => "1", "name_cy" => "" },
         },
       )
     end
-    let(:condition_translation) { Forms::WelshConditionTranslationInput.new(condition: condition, exit_page_heading_cy: "", exit_page_markdown_cy: "") }
+    let(:exit_page_translation) { Forms::WelshExitPageTranslationInput.new(exit_page:, heading_cy: "", markdown_cy: "") }
     let(:selection_options_cy) { welsh_page_translation_input.selection_options_cy.map(&:as_selection_option) }
 
     it "returns true when all fields are blank" do
@@ -820,8 +831,8 @@ RSpec.describe Forms::WelshPageTranslationInput, type: :model do
       end
     end
 
-    context "when the condition is not blank" do
-      let(:condition_translation) { Forms::WelshConditionTranslationInput.new(condition: condition, exit_page_heading_cy: "Heading", exit_page_markdown_cy: "markdown") }
+    context "when the exit page is not blank" do
+      let(:exit_page_translation) { Forms::WelshExitPageTranslationInput.new(exit_page:, heading_cy: "Heading", markdown_cy: "markdown") }
 
       it "returns false" do
         expect(welsh_page_translation_input.blanked?).to be false
@@ -832,7 +843,7 @@ RSpec.describe Forms::WelshPageTranslationInput, type: :model do
       let(:new_input_data) do
         super().merge(
           question_text_cy: "New question text",
-          condition_translations: [],
+          exit_page_translations: [],
           selection_options_cy_attributes: {
             "0" => { "id" => "0", "name_cy" => "welsh option 1" },
             "1" => { "id" => "1", "name_cy" => "" },

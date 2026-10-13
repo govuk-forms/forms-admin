@@ -1,11 +1,11 @@
 require "rails_helper"
 
-describe "forms/welsh_translation/new.html.erb", feature_multiple_branches: false do
+describe "forms/welsh_translation/new.html.erb" do
   let(:form) { build_form }
   let(:page) { create :page, position: 1 }
   let(:another_page) { create :page, position: 2 }
-  let(:condition) { create :condition, :with_exit_page, routing_page_id: page.id }
-  let(:welsh_condition_translation_input) { Forms::WelshConditionTranslationInput.new(condition:).assign_condition_values }
+  let(:exit_page) { create :exit_page }
+  let(:welsh_exit_page_translation_input) { Forms::WelshExitPageTranslationInput.new(exit_page:, position: 1).assign_exit_page_values }
   let(:welsh_page_translation_input) { Forms::WelshPageTranslationInput.new(page:).assign_page_values }
   let(:another_welsh_page_translation_input) { Forms::WelshPageTranslationInput.new(page: another_page).assign_page_values }
   let(:welsh_translation_input) { Forms::WelshTranslationInput.new(form:, page_translations: [welsh_page_translation_input, another_welsh_page_translation_input]).assign_form_values }
@@ -41,7 +41,6 @@ describe "forms/welsh_translation/new.html.erb", feature_multiple_branches: fals
     allow(view).to receive_messages(welsh_translation_delete_path:, welsh_translation_download_path:)
     allow(form).to receive(:has_welsh_translation?).and_return(has_welsh_translation?)
     assign(:table_presenter, table_presenter)
-    assign(:current_form, form)
   end
 
   context "when the form has no errors" do
@@ -292,51 +291,6 @@ describe "forms/welsh_translation/new.html.erb", feature_multiple_branches: fals
           expect(rendered).to have_css("td", text: page.answer_settings.selection_options.second["name"])
           expect(rendered).to have_field("Enter Welsh option 2")
         end
-
-        context "when the multiple branches feature is enabled", :feature_multiple_branches do
-          let(:exit_page) { create :exit_page }
-          let(:welsh_exit_page_translation_input) { Forms::WelshExitPageTranslationInput.new(exit_page:, position: 1).assign_exit_page_values }
-          let(:welsh_page_translation_input) { Forms::WelshPageTranslationInput2.new(page:).assign_page_values }
-          let(:another_welsh_page_translation_input) { Forms::WelshPageTranslationInput2.new(page: another_page).assign_page_values }
-          let(:welsh_translation_input) { Forms::WelshTranslationInput2.new(form:, page_translations: [welsh_page_translation_input, another_welsh_page_translation_input]).assign_form_values }
-
-          context "when a page has an exit page" do
-            let(:page) { create :page, position: 1, exit_pages: [exit_page] }
-
-            it "shows the heading for the exit page section" do
-              expect(rendered).to have_css("h3", text: "Question 1’s exit page")
-            end
-
-            it "shows the English and Welsh text for the exit page fields" do
-              expect(rendered).to have_css("td", text: exit_page.heading)
-              expect(rendered).to have_field("Enter question #{page.position}’s Welsh exit page 1 heading", type: "text", id: welsh_exit_page_translation_input.form_field_id(:heading_cy))
-              expect(rendered).to have_css("td", text: exit_page.markdown)
-              expect(rendered).to have_field("Enter question #{page.position}’s Welsh exit page 1 content", type: "textarea", id: welsh_exit_page_translation_input.form_field_id(:markdown_cy))
-            end
-          end
-
-          context "when a page has multiple exit pages" do
-            let(:another_exit_page) { create :exit_page }
-            let(:another_welsh_exit_page_translation_input) { Forms::WelshExitPageTranslationInput.new(exit_page: another_exit_page, position: 2).assign_exit_page_values }
-            let(:page) { create :page, position: 1, exit_pages: [exit_page, another_exit_page] }
-
-            it "shows the heading for the exit page section" do
-              expect(rendered).to have_css("h3", text: "Question 1’s exit pages")
-            end
-
-            it "shows the English and Welsh text for the exit pages’ fields" do
-              expect(rendered).to have_css("td", text: exit_page.heading)
-              expect(rendered).to have_field("Enter question #{page.position}’s Welsh exit page 1 heading", type: "text", id: welsh_exit_page_translation_input.form_field_id(:heading_cy))
-              expect(rendered).to have_css("td", text: exit_page.markdown)
-              expect(rendered).to have_field("Enter question #{page.position}’s Welsh exit page 1 content", type: "textarea", id: welsh_exit_page_translation_input.form_field_id(:markdown_cy))
-
-              expect(rendered).to have_css("td", text: another_exit_page.heading)
-              expect(rendered).to have_field("Enter question #{page.position}’s Welsh exit page 2 heading", type: "text", id: another_welsh_exit_page_translation_input.form_field_id(:heading_cy))
-              expect(rendered).to have_css("td", text: another_exit_page.markdown)
-              expect(rendered).to have_field("Enter question #{page.position}’s Welsh exit page 2 content", type: "textarea", id: another_welsh_exit_page_translation_input.form_field_id(:markdown_cy))
-            end
-          end
-        end
       end
 
       context "when a page has a selection question with none of the above" do
@@ -352,21 +306,40 @@ describe "forms/welsh_translation/new.html.erb", feature_multiple_branches: fals
         end
       end
 
-      context "when at least one page has routing conditions" do
-        context "when the condition has an exit page" do
-          let(:page) { create :page, position: 1, routing_conditions: [condition] }
-          let(:condition) { create :condition, :with_exit_page }
+      context "when a page has an exit page" do
+        let(:page) { create :page, position: 1, exit_pages: [exit_page] }
 
-          it "shows a caption with the page the condition applies to" do
-            expect(rendered).to have_css("caption", text: t("forms.welsh_translation.new.condition.heading", question_number: condition.routing_page.position))
-          end
+        it "shows the heading for the exit page section" do
+          expect(rendered).to have_css("h3", text: "Question 1’s exit page")
+        end
 
-          it "shows the English text and Welsh field for each condition's exit page fields" do
-            expect(rendered).to have_css("td", text: condition.exit_page_heading)
-            expect(rendered).to have_field("Enter Welsh exit page heading for question #{condition.routing_page.position}", type: "text", id: welsh_condition_translation_input.form_field_id(:exit_page_heading_cy))
-            expect(rendered).to have_css("td", text: condition.exit_page_markdown)
-            expect(rendered).to have_field("Enter Welsh exit page content for question #{condition.routing_page.position}", type: "textarea", id: welsh_condition_translation_input.form_field_id(:exit_page_markdown_cy))
-          end
+        it "shows the English and Welsh text for the exit page fields" do
+          expect(rendered).to have_css("td", text: exit_page.heading)
+          expect(rendered).to have_field("Enter question #{page.position}’s Welsh exit page 1 heading", type: "text", id: welsh_exit_page_translation_input.form_field_id(:heading_cy))
+          expect(rendered).to have_css("td", text: exit_page.markdown)
+          expect(rendered).to have_field("Enter question #{page.position}’s Welsh exit page 1 content", type: "textarea", id: welsh_exit_page_translation_input.form_field_id(:markdown_cy))
+        end
+      end
+
+      context "when a page has multiple exit pages" do
+        let(:another_exit_page) { create :exit_page }
+        let(:another_welsh_exit_page_translation_input) { Forms::WelshExitPageTranslationInput.new(exit_page: another_exit_page, position: 2).assign_exit_page_values }
+        let(:page) { create :page, position: 1, exit_pages: [exit_page, another_exit_page] }
+
+        it "shows the heading for the exit page section" do
+          expect(rendered).to have_css("h3", text: "Question 1’s exit pages")
+        end
+
+        it "shows the English and Welsh text for the exit pages’ fields" do
+          expect(rendered).to have_css("td", text: exit_page.heading)
+          expect(rendered).to have_field("Enter question #{page.position}’s Welsh exit page 1 heading", type: "text", id: welsh_exit_page_translation_input.form_field_id(:heading_cy))
+          expect(rendered).to have_css("td", text: exit_page.markdown)
+          expect(rendered).to have_field("Enter question #{page.position}’s Welsh exit page 1 content", type: "textarea", id: welsh_exit_page_translation_input.form_field_id(:markdown_cy))
+
+          expect(rendered).to have_css("td", text: another_exit_page.heading)
+          expect(rendered).to have_field("Enter question #{page.position}’s Welsh exit page 2 heading", type: "text", id: another_welsh_exit_page_translation_input.form_field_id(:heading_cy))
+          expect(rendered).to have_css("td", text: another_exit_page.markdown)
+          expect(rendered).to have_field("Enter question #{page.position}’s Welsh exit page 2 content", type: "textarea", id: another_welsh_exit_page_translation_input.form_field_id(:markdown_cy))
         end
       end
     end
@@ -423,12 +396,11 @@ describe "forms/welsh_translation/new.html.erb", feature_multiple_branches: fals
     end
   end
 
-  context "when a condition translation has validation errors" do
-    let(:page) { create :page, position: 1, routing_conditions: [condition] }
-    let(:condition) { create :condition, :with_exit_page, answer_value: "Yes" }
+  context "when an exit page translation has validation errors" do
+    let(:page) { create :page, position: 1, exit_pages: [exit_page] }
 
     before do
-      welsh_condition_translation_input.exit_page_heading_cy = nil
+      welsh_exit_page_translation_input.heading_cy = nil
       welsh_translation_input.validate(mark_complete ? :mark_complete : nil)
 
       assign(:welsh_translation_input, welsh_translation_input)
@@ -441,47 +413,13 @@ describe "forms/welsh_translation/new.html.erb", feature_multiple_branches: fals
     end
 
     it "links the error summary to the invalid field" do
-      error_message = I18n.t("activemodel.errors.models.forms/welsh_condition_translation_input.attributes.exit_page_heading_cy.blank", question_number: page.position)
-      expect(rendered).to have_link(error_message, href: "#forms_welsh_condition_translation_input_#{condition.id}_condition_translations_exit_page_heading_cy")
+      error_message = I18n.t("activemodel.errors.models.forms/welsh_exit_page_translation_input.attributes.heading_cy.blank", question_number: page.position)
+      expect(rendered).to have_link(error_message, href: "#forms_welsh_exit_page_translation_input_#{exit_page.id}_exit_page_translations_heading_cy")
     end
 
     it "adds an inline error message to the invalid field" do
-      error_message = "Error: #{I18n.t('activemodel.errors.models.forms/welsh_condition_translation_input.attributes.exit_page_heading_cy.blank', question_number: page.position)}"
+      error_message = "Error: #{I18n.t('activemodel.errors.models.forms/welsh_exit_page_translation_input.attributes.heading_cy.blank', question_number: page.position)}"
       expect(rendered).to have_css(".govuk-error-message", text: error_message)
-    end
-  end
-
-  context "when the multiple branches feature is enabled", :feature_multiple_branches do
-    let(:exit_page) { create :exit_page }
-    let(:welsh_exit_page_translation_input) { Forms::WelshExitPageTranslationInput.new(exit_page:, position: 1).assign_exit_page_values }
-    let(:welsh_page_translation_input) { Forms::WelshPageTranslationInput2.new(page:).assign_page_values }
-    let(:another_welsh_page_translation_input) { Forms::WelshPageTranslationInput2.new(page: another_page).assign_page_values }
-    let(:welsh_translation_input) { Forms::WelshTranslationInput2.new(form:, page_translations: [welsh_page_translation_input, another_welsh_page_translation_input]).assign_form_values }
-    let(:page) { create :page, position: 1, exit_pages: [exit_page] }
-
-    context "when the exit page translation has a validation error" do
-      before do
-        welsh_exit_page_translation_input.heading_cy = nil
-        welsh_translation_input.validate(mark_complete ? :mark_complete : nil)
-
-        assign(:welsh_translation_input, welsh_translation_input)
-        render
-      end
-
-      it "displays an error summary box" do
-        expect(rendered).to have_css(".govuk-error-summary")
-        expect(rendered).to have_css("h2.govuk-error-summary__title", text: "There is a problem")
-      end
-
-      it "links the error summary to the invalid field" do
-        error_message = I18n.t("activemodel.errors.models.forms/welsh_exit_page_translation_input.attributes.heading_cy.blank", question_number: page.position)
-        expect(rendered).to have_link(error_message, href: "#forms_welsh_exit_page_translation_input_#{exit_page.id}_exit_page_translations_heading_cy")
-      end
-
-      it "adds an inline error message to the invalid field" do
-        error_message = "Error: #{I18n.t('activemodel.errors.models.forms/welsh_exit_page_translation_input.attributes.heading_cy.blank', question_number: page.position)}"
-        expect(rendered).to have_css(".govuk-error-message", text: error_message)
-      end
     end
   end
 end
