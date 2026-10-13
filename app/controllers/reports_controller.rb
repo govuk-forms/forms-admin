@@ -47,6 +47,7 @@ class ReportsController < WebController
     tag = params[:tag]
     forms = Reports::FormDocumentsService.form_documents(tag:)
     forms = Reports::FeatureReportService.new(forms).forms_with_routes
+    forms = forms.sort_by { |form| form["metadata"]["number_of_questions"]["with_routes"] }.reverse!
 
     forms_feature_report(tag, params[:action], forms, type: :forms_with_routes)
   end
