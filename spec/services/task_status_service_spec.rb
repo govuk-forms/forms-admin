@@ -614,9 +614,9 @@ describe TaskStatusService do
           let(:form) { create(:form, :live, :with_group, available_languages: %w[en cy], welsh_completed: true, group:) }
 
           before do
-            welsh_translation_input = instance_double(Forms::WelshTranslationInput)
+            welsh_translation_input = instance_double(Forms::WelshTranslationInput2)
             allow(welsh_translation_input).to receive_messages(assign_form_values: welsh_translation_input, invalid?: false)
-            allow(Forms::WelshTranslationInput).to receive(:new).and_return(welsh_translation_input)
+            allow(Forms::WelshTranslationInput2).to receive(:new).and_return(welsh_translation_input)
           end
 
           it "returns no missing sections" do

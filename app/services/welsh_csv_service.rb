@@ -53,12 +53,7 @@ private
       add_question_content(csv, page)
       add_selection_options(csv, page) if page.answer_type == "selection"
       add_none_of_above_question(csv, page) if has_none_of_the_above?(page)
-
-      if FeatureService.new(group: form.group).enabled?(:multiple_branches)
-        add_exit_pages(csv, page)
-      else
-        add_routing_conditions(csv, page)
-      end
+      add_exit_pages(csv, page)
     end
   end
 
@@ -90,15 +85,6 @@ private
   def has_none_of_the_above?(page)
     page.answer_type == "selection" &&
       page.answer_settings.none_of_the_above_question.present?
-  end
-
-  def add_routing_conditions(csv, page)
-    page.routing_conditions.each do |condition|
-      if condition.is_exit_page?
-        csv << [condition_label(page, :exit_page_heading), condition.exit_page_heading, condition.exit_page_heading_cy]
-        csv << [condition_label(page, :exit_page_markdown), condition.exit_page_markdown, condition.exit_page_markdown_cy]
-      end
-    end
   end
 
   def add_exit_pages(csv, page)

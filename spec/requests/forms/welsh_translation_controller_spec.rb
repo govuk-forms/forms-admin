@@ -3,7 +3,6 @@ require "rails_helper"
 RSpec.describe Forms::WelshTranslationController, type: :request do
   let(:form) { create(:form, :ready_for_routing, welsh_completed: false) }
   let(:id) { form.id }
-  let(:condition) { create :condition, routing_page: form.pages.first, answer_value: "No", exit_page_heading: "You are ineligible", exit_page_markdown: "Sorry, you are ineligible for this service." }
 
   let(:current_user) { standard_user }
   let(:group) { create(:group, organisation: standard_user.organisation) }
@@ -35,256 +34,128 @@ RSpec.describe Forms::WelshTranslationController, type: :request do
   end
 
   describe "#create" do
-    context "when the multiple branches feature is disabled", feature_multiple_branches: false do
-      let(:mark_complete) { "true" }
-      let(:condition_translations_attributes) { { "0" => { "id" => condition.id, exit_page_heading_cy: "Nid ydych yn gymwys", exit_page_markdown_cy: "Mae'n ddrwg gennym, nid ydych yn gymwys ar gyfer y gwasanaeth hwn." } } }
-      let(:selection_options_cy_attributes) { { "0" => { id: 0, name_cy: "Opsiwn 1" }, "1" => { id: 1, name_cy: "Opsiwn 2" } } }
-      let(:page_translations_attributes) { { "0" => { "id" => form.pages.first.id, question_text_cy: "Ydych chi'n adnewyddu trwydded?", condition_translations_attributes:, selection_options_cy_attributes: } } }
-      let(:params) { { forms_welsh_translation_input: { form:, mark_complete:, name_cy: "Gwneud cais am drwydded jyglo", privacy_policy_url_cy: "https://juggling.gov.uk/privacy_policy/cy", page_translations_attributes: } } }
+    let(:mark_complete) { "true" }
+    let(:exit_page) { create :exit_page, question_page: form.pages.first }
+    let(:exit_page_translations_attributes) { { "0" => { "id" => exit_page.id, heading_cy: "Nid ydych yn gymwys", markdown_cy: "Mae'n ddrwg gennym, nid ydych yn gymwys ar gyfer y gwasanaeth hwn." } } }
+    let(:selection_options_cy_attributes) { { "0" => { id: 0, name_cy: "Opsiwn 1" }, "1" => { id: 1, name_cy: "Opsiwn 2" } } }
+    let(:page_translations_attributes) { { "0" => { "id" => form.pages.first.id, question_text_cy: "Ydych chi'n adnewyddu trwydded?", exit_page_translations_attributes:, selection_options_cy_attributes: } } }
+    let(:params) { { forms_welsh_translation_input2: { form:, mark_complete:, name_cy: "Gwneud cais am drwydded jyglo", privacy_policy_url_cy: "https://juggling.gov.uk/privacy_policy/cy", page_translations_attributes: } } }
 
-      context "when 'Yes' is selected" do
-        it "updates the form, pages and conditions" do
-          expect {
-            post(welsh_translation_create_path(id), params:)
-          }.to change { form.reload.welsh_completed }.to(true)
-          .and change { form.pages.first.reload.question_text_cy }.to("Ydych chi'n adnewyddu trwydded?")
-          .and change { condition.reload.exit_page_heading_cy }.to("Nid ydych yn gymwys")
+    context "when 'Yes' is selected" do
+      it "updates the form, pages and exit pages" do
+        expect {
+          post(welsh_translation_create_path(id), params:)
+        }.to change { form.reload.welsh_completed }.to(true)
+        .and change { form.pages.first.reload.question_text_cy }.to("Ydych chi'n adnewyddu trwydded?")
+        .and change { exit_page.reload.heading_cy }.to("Nid ydych yn gymwys")
+      end
+
+      it "redirects to the form task list and displays a success banner including text about being marked complete" do
+        post(welsh_translation_create_path(id), params:)
+        expect(response).to redirect_to(form_path(id))
+        expect(flash[:success]).to eq(I18n.t("banner.success.form.welsh_translation_saved_and_completed"))
+      end
+    end
+
+    context "when 'No' is selected" do
+      let(:mark_complete) { "false" }
+      let(:form) { create(:form, :ready_for_routing, welsh_completed: true) }
+
+      it "updates the form and redirects to the form task list" do
+        expect {
+          post(welsh_translation_create_path(id), params:)
+        }.to change { form.reload.welsh_completed }.to(false)
+      end
+
+      it "redirects to the form and displays a success banner without text about being marked complete" do
+        post(welsh_translation_create_path(id), params:)
+        expect(response).to redirect_to(form_path(id))
+        expect(flash[:success]).to eq(I18n.t("banner.success.form.welsh_translation_saved"))
+      end
+    end
+
+    context "when no value is selected" do
+      let(:mark_complete) { "" }
+
+      it "does not update the form, pages or exit pages" do
+        expect {
+          post(welsh_translation_create_path(id), params:)
+        }.to not_change { form.reload.welsh_completed }
+        .and not_change { form.pages.first.reload.question_text_cy }
+        .and(not_change { exit_page.reload.markdown_cy })
+      end
+
+      it "returns a 422, re-renders the page with an error, and does not display a success banner" do
+        post(welsh_translation_create_path(id), params:)
+
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(response).to render_template(:new)
+        expect(response.body).to include(I18n.t("activemodel.errors.models.forms/welsh_translation_input.attributes.mark_complete.blank"))
+        expect(flash).to be_empty
+      end
+    end
+
+    context "when 'Yes' is selected and all fields are empty" do
+      let(:exit_page_translations_attributes) { { "0" => { "id" => exit_page.id, heading_cy: "", markdown_cy: "" } } }
+      let(:page_translations_attributes) { { "0" => { "id" => form.pages.first.id, question_text_cy: "", exit_page_translations_attributes: } } }
+      let(:params) { { forms_welsh_translation_input2: { form:, mark_complete:, name_cy: "", privacy_policy_url_cy: "", page_translations_attributes: } } }
+
+      it "deletes the form" do
+        post(welsh_translation_create_path(id), params:)
+        expect(form.pages.first.reload.question_text_cy).to be_nil
+        expect(exit_page.reload.heading_cy).to be_nil
+      end
+
+      it "redirects to the form with a success banner" do
+        post(welsh_translation_create_path(id), params:)
+        expect(response).to redirect_to(form_path(id))
+        expect(flash[:success]).to eq(I18n.t("forms.welsh_translation.destroy.success"))
+      end
+    end
+
+    context "when 'Yes' is selected and support email does not end in '.gov.uk'" do
+      let(:domain) { "ogd.ewxample" }
+      let(:support_email) { Faker::Internet.email(domain:) }
+
+      let(:form) { create(:form, :ready_for_routing, welsh_completed: false, support_email:) }
+      let(:params) { { forms_welsh_translation_input2: { form:, mark_complete:, name_cy: "Gwneud cais am drwydded jyglo", privacy_policy_url_cy: "https://juggling.gov.uk/privacy_policy/cy", support_email_cy: support_email, page_translations_attributes: } } }
+
+      it "returns a 422, re-renders the page with an error, and does not display a success banner" do
+        post(welsh_translation_create_path(id), params:)
+
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(response).to render_template(:new)
+        expect(response.body).to include(I18n.t("activemodel.errors.models.forms/welsh_translation_input.attributes.support_email_cy.non_government_email"))
+        expect(flash).to be_empty
+      end
+
+      context "and the organisation has an associated domain matching the email" do
+        before do
+          create :organisation_domain, organisation: group.organisation, domain: domain
         end
 
         it "redirects to the form task list and displays a success banner including text about being marked complete" do
           post(welsh_translation_create_path(id), params:)
           expect(response).to redirect_to(form_path(id))
           expect(flash[:success]).to eq(I18n.t("banner.success.form.welsh_translation_saved_and_completed"))
-        end
-      end
-
-      context "when 'No' is selected" do
-        let(:mark_complete) { "false" }
-        let(:form) { create(:form, :ready_for_routing, welsh_completed: true) }
-
-        it "updates the form and redirects to the form task list" do
-          expect {
-            post(welsh_translation_create_path(id), params:)
-          }.to change { form.reload.welsh_completed }.to(false)
-        end
-
-        it "redirects to the form and displays a success banner without text about being marked complete" do
-          post(welsh_translation_create_path(id), params:)
-          expect(response).to redirect_to(form_path(id))
-          expect(flash[:success]).to eq(I18n.t("banner.success.form.welsh_translation_saved"))
-        end
-      end
-
-      context "when no value is selected" do
-        let(:mark_complete) { "" }
-
-        it "does not update the form, pages or conditions" do
-          expect {
-            post(welsh_translation_create_path(id), params:)
-          }.to not_change { form.reload.welsh_completed }
-          .and not_change { form.pages.first.reload.question_text_cy }
-          .and(not_change { condition.reload.exit_page_markdown_cy })
-        end
-
-        it "returns a 422, re-renders the page with an error, and does not display a success banner" do
-          post(welsh_translation_create_path(id), params:)
-
-          expect(response).to have_http_status(:unprocessable_content)
-          expect(response).to render_template(:new)
-          expect(response.body).to include(I18n.t("activemodel.errors.models.forms/welsh_translation_input.attributes.mark_complete.blank"))
-          expect(flash).to be_empty
-        end
-      end
-
-      context "when 'Yes' is selected and all fields are empty" do
-        let(:condition_translations_attributes) { { "0" => { "id" => condition.id, exit_page_heading_cy: "", exit_page_markdown_cy: "" } } }
-        let(:page_translations_attributes) { { "0" => { "id" => form.pages.first.id, question_text_cy: "", condition_translations_attributes: } } }
-        let(:params) { { forms_welsh_translation_input: { form:, mark_complete:, name_cy: "", privacy_policy_url_cy: "", page_translations_attributes: } } }
-
-        it "deletes the form" do
-          post(welsh_translation_create_path(id), params:)
-          expect(form.pages.first.reload.question_text_cy).to be_nil
-          expect(condition.reload.exit_page_heading_cy).to be_nil
-        end
-
-        it "redirects to the form with a success banner" do
-          post(welsh_translation_create_path(id), params:)
-          expect(response).to redirect_to(form_path(id))
-          expect(flash[:success]).to eq(I18n.t("forms.welsh_translation.destroy.success"))
-        end
-      end
-
-      context "when 'Yes' is selected and support email does not end in '.gov.uk'" do
-        let(:domain) { "ogd.ewxample" }
-        let(:support_email) { Faker::Internet.email(domain:) }
-
-        let(:form) { create(:form, :ready_for_routing, welsh_completed: false, support_email:) }
-        let(:params) { { forms_welsh_translation_input: { form:, mark_complete:, name_cy: "Gwneud cais am drwydded jyglo", privacy_policy_url_cy: "https://juggling.gov.uk/privacy_policy/cy", support_email_cy: support_email, page_translations_attributes: } } }
-
-        it "returns a 422, re-renders the page with an error, and does not display a success banner" do
-          post(welsh_translation_create_path(id), params:)
-
-          expect(response).to have_http_status(:unprocessable_content)
-          expect(response).to render_template(:new)
-          expect(response.body).to include(I18n.t("activemodel.errors.models.forms/welsh_translation_input.attributes.support_email_cy.non_government_email"))
-          expect(flash).to be_empty
-        end
-
-        context "and the organisation has an associated domain matching the email" do
-          before do
-            create :organisation_domain, organisation: group.organisation, domain: domain
-          end
-
-          it "redirects to the form task list and displays a success banner including text about being marked complete" do
-            post(welsh_translation_create_path(id), params:)
-            expect(response).to redirect_to(form_path(id))
-            expect(flash[:success]).to eq(I18n.t("banner.success.form.welsh_translation_saved_and_completed"))
-          end
-        end
-      end
-
-      context "when the user is not authorized" do
-        let(:current_user) { build :user }
-
-        it "does not update the form, pages or conditions" do
-          expect {
-            post(welsh_translation_create_path(id), params:)
-          }.to not_change { form.reload.welsh_completed }
-          .and not_change { form.pages.first.reload.question_text_cy }
-          .and(not_change { condition.reload.exit_page_markdown_cy })
-        end
-
-        it "returns 403" do
-          post(welsh_translation_create_path(id), params:)
-          expect(response).to have_http_status(:forbidden)
         end
       end
     end
 
-    context "when the multiple branches feature is enabled", :feature_multiple_branches do
-      let(:mark_complete) { "true" }
-      let(:exit_page) { create :exit_page, question_page: form.pages.first }
-      let(:exit_page_translations_attributes) { { "0" => { "id" => exit_page.id, heading_cy: "Nid ydych yn gymwys", markdown_cy: "Mae'n ddrwg gennym, nid ydych yn gymwys ar gyfer y gwasanaeth hwn." } } }
-      let(:selection_options_cy_attributes) { { "0" => { id: 0, name_cy: "Opsiwn 1" }, "1" => { id: 1, name_cy: "Opsiwn 2" } } }
-      let(:page_translations_attributes) { { "0" => { "id" => form.pages.first.id, question_text_cy: "Ydych chi'n adnewyddu trwydded?", exit_page_translations_attributes:, selection_options_cy_attributes: } } }
-      let(:params) { { forms_welsh_translation_input2: { form:, mark_complete:, name_cy: "Gwneud cais am drwydded jyglo", privacy_policy_url_cy: "https://juggling.gov.uk/privacy_policy/cy", page_translations_attributes: } } }
+    context "when the user is not authorized" do
+      let(:current_user) { build :user }
 
-      context "when 'Yes' is selected" do
-        it "updates the form, pages and conditions" do
-          expect {
-            post(welsh_translation_create_path(id), params:)
-          }.to change { form.reload.welsh_completed }.to(true)
-          .and change { form.pages.first.reload.question_text_cy }.to("Ydych chi'n adnewyddu trwydded?")
-          .and change { exit_page.reload.heading_cy }.to("Nid ydych yn gymwys")
-        end
-
-        it "redirects to the form task list and displays a success banner including text about being marked complete" do
+      it "does not update the form, pages or exit pages" do
+        expect {
           post(welsh_translation_create_path(id), params:)
-          expect(response).to redirect_to(form_path(id))
-          expect(flash[:success]).to eq(I18n.t("banner.success.form.welsh_translation_saved_and_completed"))
-        end
+        }.to not_change { form.reload.welsh_completed }
+        .and not_change { form.pages.first.reload.question_text_cy }
+        .and(not_change { exit_page.reload.markdown_cy })
       end
 
-      context "when 'No' is selected" do
-        let(:mark_complete) { "false" }
-        let(:form) { create(:form, :ready_for_routing, welsh_completed: true) }
-
-        it "updates the form and redirects to the form task list" do
-          expect {
-            post(welsh_translation_create_path(id), params:)
-          }.to change { form.reload.welsh_completed }.to(false)
-        end
-
-        it "redirects to the form and displays a success banner without text about being marked complete" do
-          post(welsh_translation_create_path(id), params:)
-          expect(response).to redirect_to(form_path(id))
-          expect(flash[:success]).to eq(I18n.t("banner.success.form.welsh_translation_saved"))
-        end
-      end
-
-      context "when no value is selected" do
-        let(:mark_complete) { "" }
-
-        it "does not update the form, pages or conditions" do
-          expect {
-            post(welsh_translation_create_path(id), params:)
-          }.to not_change { form.reload.welsh_completed }
-          .and not_change { form.pages.first.reload.question_text_cy }
-          .and(not_change { exit_page.reload.markdown_cy })
-        end
-
-        it "returns a 422, re-renders the page with an error, and does not display a success banner" do
-          post(welsh_translation_create_path(id), params:)
-
-          expect(response).to have_http_status(:unprocessable_content)
-          expect(response).to render_template(:new)
-          expect(response.body).to include(I18n.t("activemodel.errors.models.forms/welsh_translation_input.attributes.mark_complete.blank"))
-          expect(flash).to be_empty
-        end
-      end
-
-      context "when 'Yes' is selected and all fields are empty" do
-        let(:exit_page_translations_attributes) { { "0" => { "id" => exit_page.id, heading_cy: "", markdown_cy: "" } } }
-        let(:page_translations_attributes) { { "0" => { "id" => form.pages.first.id, question_text_cy: "", exit_page_translations_attributes: } } }
-        let(:params) { { forms_welsh_translation_input2: { form:, mark_complete:, name_cy: "", privacy_policy_url_cy: "", page_translations_attributes: } } }
-
-        it "deletes the form" do
-          post(welsh_translation_create_path(id), params:)
-          expect(form.pages.first.reload.question_text_cy).to be_nil
-          expect(exit_page.reload.heading_cy).to be_nil
-        end
-
-        it "redirects to the form with a success banner" do
-          post(welsh_translation_create_path(id), params:)
-          expect(response).to redirect_to(form_path(id))
-          expect(flash[:success]).to eq(I18n.t("forms.welsh_translation.destroy.success"))
-        end
-      end
-
-      context "when 'Yes' is selected and support email does not end in '.gov.uk'" do
-        let(:domain) { "ogd.ewxample" }
-        let(:support_email) { Faker::Internet.email(domain:) }
-
-        let(:form) { create(:form, :ready_for_routing, welsh_completed: false, support_email:) }
-        let(:params) { { forms_welsh_translation_input2: { form:, mark_complete:, name_cy: "Gwneud cais am drwydded jyglo", privacy_policy_url_cy: "https://juggling.gov.uk/privacy_policy/cy", support_email_cy: support_email, page_translations_attributes: } } }
-
-        it "returns a 422, re-renders the page with an error, and does not display a success banner" do
-          post(welsh_translation_create_path(id), params:)
-
-          expect(response).to have_http_status(:unprocessable_content)
-          expect(response).to render_template(:new)
-          expect(response.body).to include(I18n.t("activemodel.errors.models.forms/welsh_translation_input.attributes.support_email_cy.non_government_email"))
-          expect(flash).to be_empty
-        end
-
-        context "and the organisation has an associated domain matching the email" do
-          before do
-            create :organisation_domain, organisation: group.organisation, domain: domain
-          end
-
-          it "redirects to the form task list and displays a success banner including text about being marked complete" do
-            post(welsh_translation_create_path(id), params:)
-            expect(response).to redirect_to(form_path(id))
-            expect(flash[:success]).to eq(I18n.t("banner.success.form.welsh_translation_saved_and_completed"))
-          end
-        end
-      end
-
-      context "when the user is not authorized" do
-        let(:current_user) { build :user }
-
-        it "does not update the form, pages or conditions" do
-          expect {
-            post(welsh_translation_create_path(id), params:)
-          }.to not_change { form.reload.welsh_completed }
-          .and not_change { form.pages.first.reload.question_text_cy }
-          .and(not_change { exit_page.reload.markdown_cy })
-        end
-
-        it "returns 403" do
-          post(welsh_translation_create_path(id), params:)
-          expect(response).to have_http_status(:forbidden)
-        end
+      it "returns 403" do
+        post(welsh_translation_create_path(id), params:)
+        expect(response).to have_http_status(:forbidden)
       end
     end
   end
@@ -467,119 +338,64 @@ RSpec.describe Forms::WelshTranslationController, type: :request do
       let(:form) { create(:form, :with_pages, pages: [page]) }
       let(:page) { create(:page, :with_selection_settings, question_text: "Are you eligible?") }
 
-      context "when the multiple branches feature is disabled", feature_multiple_branches: false do
-        let(:condition) do
-          create(:condition, routing_page: form.pages.first, answer_value: "No",
-                             exit_page_heading: "You are ineligible",
-                             exit_page_markdown: "Sorry, you are ineligible for this service.")
-        end
+      let(:exit_page) { create :exit_page, question_page: form.pages.first, heading: "You are ineligible" }
 
-        let(:csv_data) do
-          CSV.generate do |csv|
-            csv << ["Content ID", "English content", "Welsh content"]
-            csv << ["Form name", form.name, "Fy Ffurflen"]
-            csv << ["Question 1 - question text", "Are you eligible?", "Welsh question text"]
-            csv << ["Question 1 - option 1", "Option 1", "Welsh Option 1"]
-            csv << ["Question 1 - option 2", "Option 2", "Welsh Option 2"]
-            csv << ["Question 1 - exit page heading", "You are ineligible", "Welsh exit page heading"]
-            csv << ["Question 1 - exit page content", "Sorry, you are ineligible for this service.", "Welsh exit page content"]
-          end
-        end
-
-        before do
-          condition
-          post welsh_translation_upload_path(id), params: { forms_welsh_translation_upload_input: { file: } }
-        end
-
-        it "renders the new template" do
-          expect(response).to have_http_status(:ok)
-          expect(response).to render_template(:new)
-          expect(response.body).to include(I18n.t("banner.success.form.welsh_translation_uploaded"))
-        end
-
-        it "pre-populates fields from CSV" do
-          expect(response.body).not_to include(I18n.t("error_summary.heading"))
-          expect(response.body).to include("Fy Ffurflen")
-          expect(response.body).to include("Welsh exit page heading")
-          expect(response.body).to include("Welsh exit page content")
-        end
-
-        context "when there are invalid translations" do
-          let(:csv_data) do
-            CSV.generate do |csv|
-              csv << ["Content ID", "English content", "Welsh content"]
-              csv << ["Link to privacy information for this form", form.privacy_policy_url, "this is not a URL"]
-            end
-          end
-
-          it "pre-validates the fields and shows errors for invalid data" do
-            expect(response.body).to include(I18n.t("error_summary.heading"))
-            expect(response.body).to include(I18n.t("activemodel.errors.models.forms/welsh_translation_input.attributes.privacy_policy_url_cy.url"))
-            expect(response.body).to include("this is not a URL")
-          end
+      let(:csv_data) do
+        CSV.generate do |csv|
+          csv << ["Content ID", "English content", "Welsh content"]
+          csv << ["Form name", form.name, "Fy Ffurflen"]
+          csv << ["Question 1 - question text", "Are you eligible?", "Welsh question text"]
+          csv << ["Question 1 - option 1", "Option 1", "Welsh Option 1"]
+          csv << ["Question 1 - option 2", "Option 2", "Welsh Option 2"]
+          csv << ["Question 1 - exit page 1 heading", "You are ineligible", "Welsh exit page heading"]
+          csv << ["Question 1 - exit page 1 content", "Sorry, you are ineligible for this service.", "Welsh exit page content"]
         end
       end
 
-      context "when the multiple branches feature is enabled", :feature_multiple_branches do
-        let(:exit_page) { create :exit_page, question_page: form.pages.first, heading: "You are ineligible" }
+      before do
+        exit_page
+        post welsh_translation_upload_path(id), params: { forms_welsh_translation_upload_input: { file: } }
+      end
 
+      it "renders the new template" do
+        expect(response).to have_http_status(:ok)
+        expect(response).to render_template(:new)
+        expect(response.body).to include(I18n.t("banner.success.form.welsh_translation_uploaded"))
+      end
+
+      it "pre-populates fields from CSV" do
+        expect(response.body).not_to include(I18n.t("error_summary.heading"))
+        expect(response.body).to include("Fy Ffurflen")
+        expect(response.body).to include("Welsh exit page heading")
+        expect(response.body).to include("Welsh exit page content")
+      end
+
+      context "when there are invalid translations" do
         let(:csv_data) do
           CSV.generate do |csv|
             csv << ["Content ID", "English content", "Welsh content"]
-            csv << ["Form name", form.name, "Fy Ffurflen"]
-            csv << ["Question 1 - question text", "Are you eligible?", "Welsh question text"]
-            csv << ["Question 1 - option 1", "Option 1", "Welsh Option 1"]
-            csv << ["Question 1 - option 2", "Option 2", "Welsh Option 2"]
-            csv << ["Question 1 - exit page 1 heading", "You are ineligible", "Welsh exit page heading"]
-            csv << ["Question 1 - exit page 1 content", "Sorry, you are ineligible for this service.", "Welsh exit page content"]
+            csv << ["Link to privacy information for this form", form.privacy_policy_url, "this is not a URL"]
           end
         end
 
-        before do
-          exit_page
-          post welsh_translation_upload_path(id), params: { forms_welsh_translation_upload_input: { file: } }
-        end
-
-        it "renders the new template" do
-          expect(response).to have_http_status(:ok)
-          expect(response).to render_template(:new)
-          expect(response.body).to include(I18n.t("banner.success.form.welsh_translation_uploaded"))
-        end
-
-        it "pre-populates fields from CSV" do
-          expect(response.body).not_to include(I18n.t("error_summary.heading"))
-          expect(response.body).to include("Fy Ffurflen")
-          expect(response.body).to include("Welsh exit page heading")
-          expect(response.body).to include("Welsh exit page content")
-        end
-
-        context "when there are invalid translations" do
-          let(:csv_data) do
-            CSV.generate do |csv|
-              csv << ["Content ID", "English content", "Welsh content"]
-              csv << ["Link to privacy information for this form", form.privacy_policy_url, "this is not a URL"]
-            end
-          end
-
-          it "pre-validates the fields and shows errors for invalid data" do
-            expect(response.body).to include(I18n.t("error_summary.heading"))
-            expect(response.body).to include(I18n.t("activemodel.errors.models.forms/welsh_translation_input.attributes.privacy_policy_url_cy.url"))
-            expect(response.body).to include("this is not a URL")
-          end
+        it "pre-validates the fields and shows errors for invalid data" do
+          expect(response.body).to include(I18n.t("error_summary.heading"))
+          expect(response.body).to include(I18n.t("activemodel.errors.models.forms/welsh_translation_input.attributes.privacy_policy_url_cy.url"))
+          expect(response.body).to include("this is not a URL")
         end
       end
+    end
 
-      context "when no file is provided" do
-        before do
-          post welsh_translation_upload_path(id), params: { forms_welsh_translation_upload_input: { file: nil } }
-        end
+    context "when no file is provided" do
+      before do
+        post welsh_translation_upload_path(id), params: { forms_welsh_translation_upload_input: { file: nil } }
+      end
 
-        it "renders the upload file page with an error" do
-          expect(response).to have_http_status(:unprocessable_content)
-          expect(response).to render_template(:show_upload)
-          expect(response.body).to include(I18n.t("activemodel.errors.models.forms/welsh_translation_upload_input.attributes.file.blank"))
-          expect(flash).to be_empty
-        end
+      it "renders the upload file page with an error" do
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(response).to render_template(:show_upload)
+        expect(response.body).to include(I18n.t("activemodel.errors.models.forms/welsh_translation_upload_input.attributes.file.blank"))
+        expect(flash).to be_empty
       end
     end
 

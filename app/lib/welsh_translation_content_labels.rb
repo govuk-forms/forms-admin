@@ -19,11 +19,6 @@ module WelshTranslationContentLabels
     none_of_the_above_question: "question or label if 'None of the above' is selected",
   }.freeze
 
-  CONDITION_ATTRIBUTE_LABELS = {
-    exit_page_heading: "exit page heading",
-    exit_page_markdown: "exit page content",
-  }.freeze
-
   EXIT_PAGE_ATTRIBUTE_LABELS = {
     heading: "heading",
     markdown: "content",
@@ -35,10 +30,6 @@ module WelshTranslationContentLabels
 
   def selection_option_label(page, option_index)
     "#{question_name(page)} - option #{option_index + 1}"
-  end
-
-  def condition_label(page, attribute)
-    "#{question_name(page)} - #{CONDITION_ATTRIBUTE_LABELS.fetch(attribute)}"
   end
 
   def exit_page_label(page, exit_page_position, attribute)

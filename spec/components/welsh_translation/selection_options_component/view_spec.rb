@@ -4,7 +4,7 @@ RSpec.describe WelshTranslation::SelectionOptionsComponent::View, type: :compone
   let(:table_presenter) { Forms::TranslationTablePresenter.new }
 
   def form_builder_for_page(form_page)
-    input = Forms::WelshPageTranslationInput.new(page: form_page).assign_page_values
+    input = Forms::WelshPageTranslationInput2.new(page: form_page).assign_page_values
     form_builder_for_input(input)
   end
 
@@ -78,7 +78,7 @@ RSpec.describe WelshTranslation::SelectionOptionsComponent::View, type: :compone
     context "and all are translated without errors" do
       let(:form_page) { create(:page, :selection_with_autocomplete) }
       let(:input) do
-        input = Forms::WelshPageTranslationInput.new(page: form_page).assign_page_values
+        input = Forms::WelshPageTranslationInput2.new(page: form_page).assign_page_values
         input.selection_options_cy.each_with_index { |opt, idx| opt.name_cy = "Welsh option #{idx + 1}" }
         input
       end
@@ -121,7 +121,7 @@ RSpec.describe WelshTranslation::SelectionOptionsComponent::View, type: :compone
     end
 
     context "and there are translations and some validation errors" do
-      let(:input) { Forms::WelshPageTranslationInput.new(page: form_page).assign_page_values }
+      let(:input) { Forms::WelshPageTranslationInput2.new(page: form_page).assign_page_values }
 
       before do
         input.selection_options_cy.first(2).each_with_index { |opt, idx| opt.name_cy = "Welsh option #{idx + 1}" }
@@ -173,7 +173,7 @@ RSpec.describe WelshTranslation::SelectionOptionsComponent::View, type: :compone
     end
 
     context "and there are duplicates in the translated options" do
-      let(:input) { Forms::WelshPageTranslationInput.new(page: form_page).assign_page_values }
+      let(:input) { Forms::WelshPageTranslationInput2.new(page: form_page).assign_page_values }
 
       before do
         input.selection_options_cy.first(2).each_with_index { |opt, idx| opt.name_cy = "Welsh option #{idx + 1}" }
