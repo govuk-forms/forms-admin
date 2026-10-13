@@ -216,6 +216,19 @@ describe FormTaskListService do
         end
       end
 
+      context "when the save and return feature is enabled", :feature_save_and_return do
+        it "has link to save and return settings" do
+          expect(section_rows[3][:task_name]).to eq "Give people the option to save their progress and return later"
+          expect(section_rows[3][:path]).to eq "/forms/#{form.id}/save-and-return"
+        end
+      end
+
+      context "when the save and return feature is disabled", feature_save_and_return: false do
+        it "does not have link to save and return settings" do
+          expect(section_rows.map { |row| row[:path] }).not_to include("/forms/#{form.id}/save-and-return")
+        end
+      end
+
       it "has link to copy of answers settings" do
         expect(section_rows[2][:task_name]).to eq "Give people the option to ask for a copy of their answers"
         expect(section_rows[2][:path]).to eq "/forms/#{form.id}/copy-of-answers"
