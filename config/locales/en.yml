@@ -91,6 +91,11 @@ en:
               inclusion: Sorry, there was a problem. Please try again.
         forms/delete_confirmation_input:
           blank: Select ‘Yes’ to delete the draft
+        forms/save_and_return_input:
+          attributes:
+            enable_save_and_return:
+              blank: Sorry, there was a problem. Please try again.
+              inclusion: Sorry, there was a problem. Please try again.
         forms/submission_attachments_input:
           attributes:
             submission_format:
@@ -307,6 +312,8 @@ en:
         receive_json_enabled: Completed form emails will include a JSON file
         receive_no_attachments: Completed form emails will not include a CSV or JSON file
         routing_saved: Your routes have been saved
+        save_and_return_disabled: People will not have the option to save and return (TODO check this is correct)
+        save_and_return_enabled: People will have the option to save and return (TODO check this is correct)
         share_preview_completed: The preview task has been completed
         support_details_saved: Your contact details for support have been saved
         welsh_translation_saved: The Welsh version of your form has been saved
@@ -609,6 +616,21 @@ en:
       what_happens_next_description: Information about what happens next is shown to people when they have completed and submitted a form.
       what_is_declaration: What is a declaration?
       what_is_what_happens_next: What is ‘what happens next information’?
+    save_and_return:
+      new:
+        body_html: |
+          <p>You can add a ’Save and exit’ link to each question page, except pages at the start and end of the form.</p>
+          <h2 class="govuk-heading-m">How it works for people filling in your form</h2>
+          <p>People need to sign in with GOV.UK One Login to save their progress. This makes sure that only the person who saved the answers can get back to them. If they do not have a GOV.UK One Login, they’ll be asked to create one when they select ’Save and exit’. </p>
+          <p>We then email them a link so they can continue filling in the form later. When they return, they can either continue where they left off or start again.</p>
+          <p>If they do not return, we will delete their saved progress after 30 days.</p>
+          <p><a href="https://www.sign-in.service.gov.uk/documentation/user-journeys" target="_blank">See what signing in with GOV.UK One Login looks like (opens in a new tab)</a></p>
+          <p></p>
+          <h2 class="govuk-heading-m">When you might not want to use this</h2>
+          <p>It might not work well if people fill in your form on behalf of someone else, for example as a representative or as part of their job</p>
+          <p>People can only save one version of each form at a time, so they could mix up different people’s answers.</p>
+          <p>Saved answers are linked to the person’s GOV.UK One Login, which may use a personal email address. This means they could keep access to someone else’s information for up to 30 days.</p>
+        hint_text: You cannot turn this off after you’ve made the form live
     submission_attachments:
       new:
         body_html: |
@@ -633,6 +655,8 @@ en:
         brand: Choose a brand for your form
         copy_of_answers: Give people the option to ask for a copy of their answers
         payment_link: Add a link to a payment page on GOV.UK Pay
+        save_and_return: Give people the option to save their progress and return later
+        save_and_return_hint: You cannot turn this off after you’ve made the form live
       create_form_section:
         declaration: Add a declaration for people to agree to
         name: Edit the name of your form
@@ -682,6 +706,7 @@ en:
         brand: Choose a brand for your form
         copy_of_answers: Give people the option to ask for a copy of their answers
         payment_link: Add a link to a payment page on GOV.UK Pay
+        save_and_return: Give people the option to save their progress and return later
       create_form_section:
         declaration: Edit the declaration for people to agree to
         name: Edit the name of your form
@@ -1138,6 +1163,9 @@ en:
           'false': 'No'
           'true': 'Yes'
         opengraph_image_file: Opengraph image
+      forms_save_and_return_input:
+        save_and_return_options:
+          enabled: Give people the option to save their progress and return later
       forms_batch_submissions_input:
         batch_frequencies_options:
           daily: Get a daily CSV of submissions
@@ -1318,6 +1346,8 @@ en:
         batch_frequencies: Do you want to get a daily or weekly CSV of submissions to this form?
       forms_copy_of_answers_input:
         send_copy_of_answers: Do you want to give people the option to get a copy of their answers by email?
+      forms_save_and_return_input:
+        save_and_return: Do you want to give people the option to save their progress?
       forms_submission_attachments_input:
         submission_format: Do you want to get a CSV or JSON file of each completed form?
       mou_signature:
@@ -1885,6 +1915,7 @@ en:
     routing_page_delete: Delete question %{question_number}’s route
     routing_page_edit: Edit route %{route_number}
     routing_page_new: 'Add route %{route_number}: select an answer and where to skip to'
+    save_and_return: Give people the option to save their progress and return later
     selection_none_of_the_above: Ask for an answer if someone selects ‘None of the above’
     selection_options: Create a list of options
     selection_type: How many options should people be able to select?
