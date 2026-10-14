@@ -1,0 +1,25 @@
+<% set_page_title(t("reports.#{report}.heading", tag: tag_label(tag)).upcase_first) %>
+<% content_for :back_link, govuk_back_link_to(report_features_path, t("reports.back_to_feature_usage")) %>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-l"><%= t("reports.#{report}.heading", tag: tag_label(tag)).upcase_first %></h1>
+
+    <% if records.any? %>
+      <p><%= govuk_link_to(t("reports.#{report}.download_csv", tag: tag_label(tag)).upcase_first, url_for(format: :csv)) %></p>
+
+      <%= govuk_details(
+        summary_text: t(".understanding_this_page.summary_text"),
+        text: t(".understanding_this_page.text_html"),
+      ) %>
+    <% end %>
+  </div>
+
+  <div class="govuk-grid-column-full">
+    <% if records.any? %>
+      <%= govuk_table(**report_table(type, records)) %>
+    <% else %>
+      <p class="govuk-body"><%= t("reports.#{report}.empty", tag: tag_label(tag)) %></p>
+    <% end %>
+  </div>
+</div>

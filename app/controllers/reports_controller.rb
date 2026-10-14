@@ -49,7 +49,13 @@ class ReportsController < WebController
     forms = Reports::FeatureReportService.new(forms).forms_with_routes
     forms = forms.sort_by { |form| form["metadata"]["number_of_questions"]["with_routes"] }.reverse!
 
-    forms_feature_report(tag, params[:action], forms, type: :forms_with_routes)
+    report = params[:action]
+    if params[:format] == "csv"
+      render_forms_csv(tag:, report:, forms:)
+    else
+      type = :forms_with_routes
+      render template: "reports/forms_with_routes", locals: { tag:, report:, records: forms, type: }
+    end
   end
 
   def forms_with_payments
@@ -203,12 +209,16 @@ private
 
   def forms_feature_report(tag, report, forms, type: :forms)
     if params[:format] == "csv"
-      send_data Reports::FormsCsvReportService.new(forms).csv,
-                type: "text/csv; charset=iso-8859-1",
-                disposition: "attachment; filename=#{csv_filename("#{tag}_#{report}_report")}"
+      render_forms_csv(tag:, report:, forms:)
     else
       render template: "reports/feature_report", locals: { tag:, report:, records: forms, type: }
     end
+  end
+
+  def render_forms_csv(tag:, report:, forms:)
+    send_data Reports::FormsCsvReportService.new(forms).csv,
+              type: "text/csv; charset=iso-8859-1",
+              disposition: "attachment; filename=#{csv_filename("#{tag}_#{report}_report")}"
   end
 
   def check_user_has_permission

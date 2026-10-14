@@ -190,7 +190,7 @@ RSpec.describe ReportsController, type: :request do
 
       it "returns http code 200 with the expected report data" do
         expect(response).to have_http_status(:ok)
-        expect(response).to render_template("reports/feature_report")
+        expect(response).to render_template("reports/forms_with_routes")
 
         node = Capybara.string(response.body)
         expect(node).to have_xpath "//thead/tr/th[3]", text: "Number of questions with routes"
