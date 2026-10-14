@@ -357,5 +357,6 @@ Rails.application.routes.draw do
   direct(:cookies) { "#{Settings.forms_product_page.url}/cookies" }
   direct(:privacy) { "#{Settings.forms_product_page.url}/privacy" }
   direct(:terms_of_use) { "#{Settings.forms_product_page.url}/terms-of-use" }
+  direct(:about) { "#{Settings.forms_product_page.url}/about" }
   direct(:support) { "#{Settings.forms_product_page.url}/support" }
 end

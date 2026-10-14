@@ -26,6 +26,7 @@ class NavigationItemsService
       organisations_navigation_item,
       brands_navigation_item,
       reports_navigation_item,
+      about_navigation_item,
       support_navigation_item,
       profile_navigation_item,
       signout_navigation_item,
@@ -64,6 +65,10 @@ private
     return nil unless should_show_reports_link?
 
     NavigationItem.new(text: I18n.t("header.reports"), href: reports_path, active: false)
+  end
+
+  def about_navigation_item
+    NavigationItem.new(text: I18n.t("header.about"), href: about_url, active: false)
   end
 
   def support_navigation_item

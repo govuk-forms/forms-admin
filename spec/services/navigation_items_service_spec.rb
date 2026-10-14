@@ -105,6 +105,11 @@ describe NavigationItemsService do
       end
     end
 
+    it "includes a link to the about page" do
+      about_item = NavigationItemsService::NavigationItem.new(text: I18n.t("header.about"), href: "http://localhost:3002/about", active: false)
+      expect(service.navigation_items).to include(about_item)
+    end
+
     it "includes a link to the support page" do
       support_item = NavigationItemsService::NavigationItem.new(text: I18n.t("header.support"), href: "http://localhost:3002/support", active: false)
       expect(service.navigation_items).to include(support_item)
