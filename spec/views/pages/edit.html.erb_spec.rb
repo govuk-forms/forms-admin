@@ -67,4 +67,50 @@ describe "pages/edit.html.erb" do
       expect(rendered).not_to have_text(I18n.t("helpers.hint.pages_question_input.is_optional_options.true"))
     end
   end
+
+  describe "routes section" do
+    let(:question_input) do
+      build :question_input,
+            answer_type: draft_question.answer_type,
+            answer_settings: draft_question.answer_settings,
+            question_text: draft_question.question_text,
+            draft_question:
+    end
+
+    context "when the question is a selection question with one option only" do
+      let(:draft_question) { build :selection_draft_question, only_one_option: "true" }
+
+      it "contains the routes heading" do
+        expect(rendered).to have_css("h2", text: I18n.t("pages.routes_section.heading"))
+      end
+
+      it "contains a link to the question's routes" do
+        expect(rendered).to have_link("edit question routes", href: routes_path(form.id))
+      end
+    end
+
+    context "when the question is a selection question with one option only and more than 10 options" do
+      let(:draft_question) { build :selection_draft_question, only_one_option: "true", selection_options: (1..11).map { |i| { name: "Option #{i}", value: "option #{i}" } } }
+
+      it "does not contain the routes section" do
+        expect(rendered).not_to have_link("edit question routes")
+      end
+    end
+
+    context "when the question is a selection question with multiple options" do
+      let(:draft_question) { build :selection_draft_question, only_one_option: "false" }
+
+      it "does not contain the routes section" do
+        expect(rendered).not_to have_link("edit question routes")
+      end
+    end
+
+    context "when the question is not a selection question" do
+      let(:draft_question) { build :draft_question, answer_type: "email" }
+
+      it "does not contain the routes section" do
+        expect(rendered).not_to have_link("edit question routes")
+      end
+    end
+  end
 end

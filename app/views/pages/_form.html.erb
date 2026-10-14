@@ -52,6 +52,12 @@
   <h2 class="govuk-heading-m"><%= t("pages.answer_settings") %></h2>
   <%= render PageSettingsSummaryComponent::View.new(draft_question:, errors: question_input.errors) %>
 
+  <% if !is_new_page && draft_question.answer_type == "selection" && draft_question.answer_settings[:only_one_option] == "true" && draft_question.answer_settings[:selection_options].length <= 10 && page_object.routing_conditions.none? %>
+    <h2 class="govuk-heading-m"><%= t("pages.routes_section.heading") %></h2>
+    <p class="govuk-body"><%= t("pages.routes_section.body_html", routes_path: routes_path(form_object.id)) %></p>
+    <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible" />
+  <% end %>
+
   <ul class="govuk-list govuk-list--spaced">
     <li>
       <%= f.govuk_submit t('pages.submit_save'), class: "govuk-!-margin-bottom-3", name: "submit_type", value: "save" %>
