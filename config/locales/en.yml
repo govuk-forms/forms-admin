@@ -2211,6 +2211,41 @@ en:
       download_csv: Download data about all %{tag} forms with routes as a CSV file
       empty: There are no %{tag} forms with routes
       heading: "%{tag} forms with routes"
+      understanding_this_page:
+        summary_text: Understanding the information on this page
+        text_html: |
+          <h2 class="govuk-heading-m">‘Number of questions with routes’</h2>
+
+          <p class="govuk-body">
+            The number of questions in the form with either conditional or unconditional routes, which may route to exit pages.
+          </p>
+
+          <h2 class="govuk-heading-m">‘Number of questions with one conditional route only’</h2>
+
+          <p class="govuk-body">
+            A ‘conditional route’ takes people to different destinations depending on their answer. A conditional route can take people to:
+            <ul class="govuk-list govuk-list--bullet">
+              <li>a different question</li>
+              <li>an exit page</li>
+              <li>the end of the form</li>
+            </ul>
+          </p>
+
+          <h2 class="govuk-heading-m">‘Number of questions with more than one conditional route’</h2>
+
+          <p class="govuk-body">
+            The number of questions in the form that are using the functionality we added in September 2026.
+          </p>
+
+          <h2 class="govuk-heading-m">‘Number of questions with an unconditional route’</h2>
+
+          <p class="govuk-body">
+            An ‘unconditional route’ takes everyone to the same destination, regardless of their answer, overriding the default route.
+          </p>
+
+          <p class="govuk-body">
+            A form with unconditional routes and no conditional routes may mean unreachable questions.
+          </p>
     forms_with_s3_submissions:
       download_csv: Download data about all %{tag} forms with S3 submissions enabled (as a CSV)
       empty: There are no %{tag} forms with S3 submissions enabled

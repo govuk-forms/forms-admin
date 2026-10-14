@@ -164,13 +164,20 @@ RSpec.describe ReportsController, type: :request do
 
   describe "#forms_with_routes" do
     let(:path) { report_forms_with_routes_path(tag: :live) }
-    let(:form) do
+    let(:form_with_1_route) do
       form = create(:form, :live, :ready_for_routing)
-      create(:condition, routing_page_id: form.pages.first.id, check_page_id: form.pages.first.id, answer_value: "Option 1", goto_page_id: form.pages.second.id)
+      create(:condition, routing_page_id: form.pages.first.id, check_page_id: form.pages.first.id, answer_value: "Option 1", goto_page_id: form.pages.third.id)
       form.latest_form_document.update!(content: form.reload.as_form_document(live_at: form.updated_at))
       form
     end
-    let(:forms) { [form] }
+    let(:form_with_2_routes) do
+      form = create(:form, :live, :ready_for_routing)
+      create(:condition, routing_page_id: form.pages.first.id, check_page_id: form.pages.first.id, answer_value: "Option 1", goto_page_id: form.pages.third.id)
+      create(:condition, routing_page_id: form.pages.third.id, check_page_id: form.pages.third.id, answer_value: nil, skip_to_end: true)
+      form.latest_form_document.update!(content: form.reload.as_form_document(live_at: form.updated_at))
+      form
+    end
+    let(:forms) { [form_with_1_route, form_with_2_routes] }
 
     include_examples "unauthorized user is forbidden"
 
@@ -183,11 +190,27 @@ RSpec.describe ReportsController, type: :request do
 
       it "returns http code 200 with the expected report data" do
         expect(response).to have_http_status(:ok)
-        expect(response).to render_template("reports/feature_report")
+        expect(response).to render_template("reports/forms_with_routes")
 
         node = Capybara.string(response.body)
         expect(node).to have_xpath "//thead/tr/th[3]", text: "Number of questions with routes"
-        expect(node).to have_xpath "//tbody/tr[1]/td[3]", text: "1"
+        expect(node).to have_xpath "//tbody/tr[1]/td[3]", text: "2"
+
+        expect(node).to have_xpath "//thead/tr/th[4]", text: "Number of questions with one conditional route only"
+        expect(node).to have_xpath "//tbody/tr[1]/td[4]", text: "1"
+
+        expect(node).to have_xpath "//thead/tr/th[5]", text: "Number of questions with more than one conditional route"
+        expect(node).to have_xpath "//tbody/tr[1]/td[5]", text: "0"
+
+        expect(node).to have_xpath "//thead/tr/th[6]", text: "Number of questions with an unconditional route"
+        expect(node).to have_xpath "//tbody/tr[1]/td[6]", text: "1"
+      end
+
+      it "sorts the forms by number of questions with routes" do
+        node = Capybara.string(response.body)
+
+        expect(node).to have_xpath "//tbody/tr[1]/td[3]", text: "2"
+        expect(node).to have_xpath "//tbody/tr[2]/td[3]", text: "1"
       end
     end
   end
