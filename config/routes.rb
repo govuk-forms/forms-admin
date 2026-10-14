@@ -353,9 +353,9 @@ Rails.application.routes.draw do
 
   get "/sitemap" => "sitemap#index", as: :sitemap
 
-  direct(:accessibility_statement) { "https://www.forms.service.gov.uk/accessibility" }
-  direct(:cookies) { "https://www.forms.service.gov.uk/cookies" }
-  direct(:privacy) { "https://www.forms.service.gov.uk/privacy" }
-  direct(:terms_of_use) { "https://www.forms.service.gov.uk/terms-of-use" }
-  direct(:support) { Settings.forms_product_page.support_url }
+  direct(:accessibility_statement) { "#{Settings.forms_product_page.url}/accessibility" }
+  direct(:cookies) { "#{Settings.forms_product_page.url}/cookies" }
+  direct(:privacy) { "#{Settings.forms_product_page.url}/privacy" }
+  direct(:terms_of_use) { "#{Settings.forms_product_page.url}/terms-of-use" }
+  direct(:support) { "#{Settings.forms_product_page.url}/support" }
 end
