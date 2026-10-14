@@ -132,6 +132,8 @@ ignore_unused:
 - 'errors.*'
 - 'date.formats.*'
 - 'helpers.*'
+- 'groups.feature_flags.flags.*'
+- 'organisations.feature_flags.flags.*'
 - 'reports.*.heading'
 - 'reports.*.download_csv'
 - 'routing_page.exit_pages.*'
