@@ -21,7 +21,7 @@ forms_runner:
 
 forms_product_page:
   # Base URL to point users to the app in the UI
-  support_url: http://localhost:3002/support
+  url: http://localhost:3002
 
 # Settings for GOV.UK Notify api & email templates
 govuk_notify:

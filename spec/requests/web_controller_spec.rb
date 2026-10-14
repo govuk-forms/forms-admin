@@ -225,6 +225,8 @@ RSpec.describe WebController, type: :request do
 
   describe "footer" do
     before do
+      allow(Settings.forms_product_page).to receive(:url).and_return("https://www.forms.service.gov.uk")
+
       get root_path
     end
 
