@@ -44,6 +44,7 @@ describe FormTaskListService do
         share_preview_status: :completed,
         submission_email_status: :completed,
         confirm_submission_email_status: :not_started,
+        welsh_language_status: :in_progress,
       }
     end
     let(:form) { create(:form) }
@@ -95,6 +96,7 @@ describe FormTaskListService do
           share_preview_status: :completed,
           submission_email_status: :completed,
           confirm_submission_email_status: :not_started,
+          welsh_language_status: :in_progress,
         }
       end
 

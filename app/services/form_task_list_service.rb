@@ -293,6 +293,7 @@ private
     statuses.delete(:copy_of_answers_status)
     statuses.delete(:submission_attachments_status)
     statuses.delete(:batch_submissions_status)
+    statuses.delete(:welsh_language_status)
   end
 
   def can_enter_submission_email_code
