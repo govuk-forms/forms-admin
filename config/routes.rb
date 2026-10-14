@@ -245,6 +245,8 @@ Rails.application.routes.draw do
       end
     end
     patch "default-brand", to: "organisation_brands#update_default", as: :default_brand
+    get "feature-flags", to: "organisation_feature_flags#edit", as: :feature_flags
+    post "feature-flags", to: "organisation_feature_flags#update"
   end
 
   resources :brands, only: %i[index show new create edit update]
