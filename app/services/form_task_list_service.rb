@@ -272,6 +272,8 @@ private
     unless Pundit.policy(@current_user, @form).can_make_form_live?
       statuses.delete(:share_preview_status)
       statuses.delete(:make_live_status)
+      statuses.delete(:make_only_english_live_status)
+      statuses.delete(:make_only_welsh_live_status)
     end
 
     statuses
