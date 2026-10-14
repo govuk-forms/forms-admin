@@ -23,9 +23,6 @@ class Group < ApplicationRecord
 
   scope :for_user, ->(user) { joins(:memberships).where(memberships: { user_id: user.id }) }
 
-  # custom_branding_enabled moved to organisations. Drop the column in a follow-up.
-  self.ignored_columns += [:custom_branding_enabled]
-
   scope :for_organisation, ->(organisation) { where(organisation:) }
 
   validates :name, presence: true, uniqueness: { scope: :organisation_id }
