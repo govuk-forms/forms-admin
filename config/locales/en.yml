@@ -1034,6 +1034,7 @@ en:
         Guidance will be displayed at the top of the page, above your question.
       </p>
   header:
+    about: About
     brands: Brands
     organisations: Organisations
     product_name: Forms
