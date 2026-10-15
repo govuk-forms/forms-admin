@@ -78,6 +78,10 @@ module FormsAdmin
     # Turn off image variant processing since we're not currently generating image variants
     config.active_storage.variant_processor = :disabled
 
+    # Turn off Active Storage routes since brand assets are served from their
+    # blob keys through CloudFront rather than through Rails
+    config.active_storage.draw_routes = false
+
     # Turn off locale enforcement - this allows us to use locales
     # in Mobility without enabling those languages for the admin UI
     I18n.enforce_available_locales = false
