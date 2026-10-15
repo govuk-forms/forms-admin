@@ -6,7 +6,6 @@ describe NavigationItemsService do
   let!(:provider) { :auth0 }
   let!(:user) { build(:user, provider:) }
   let!(:service) { described_class.new(user:) }
-  let(:support_url) { "http://localhost:3002/support" }
 
   describe "#navigation_items" do
     context "when user is not present" do
@@ -28,7 +27,6 @@ describe NavigationItemsService do
         allow(Pundit).to receive(:policy).with(user, :report).and_return(instance_double(ReportPolicy, can_view_reports?: can_view_reports))
         allow(Pundit).to receive(:policy).with(user, :organisation).and_return(instance_double(OrganisationPolicy, can_view_organisations?: can_view_organisations))
         allow(Pundit).to receive(:policy).with(user, :brand).and_return(instance_double(BrandPolicy, can_view_brands?: can_view_brands))
-        allow(Settings.forms_product_page).to receive(:support_url).and_return(support_url)
       end
 
       context "when user can manage other users" do
@@ -107,20 +105,9 @@ describe NavigationItemsService do
       end
     end
 
-    context "when the support URL is configured" do
-      it "includes a link to the support page" do
-        support_item = NavigationItemsService::NavigationItem.new(text: I18n.t("header.support"), href: support_url, active: false)
-        expect(service.navigation_items).to include(support_item)
-      end
-    end
-
-    context "when the support URL is not configured" do
-      let(:support_url) { nil }
-
-      it "does not include a link to the support page" do
-        support_item = NavigationItemsService::NavigationItem.new(text: I18n.t("header.support"), href: support_url, active: false)
-        expect(service.navigation_items).not_to include(support_item)
-      end
+    it "includes a link to the support page" do
+      support_item = NavigationItemsService::NavigationItem.new(text: I18n.t("header.support"), href: "http://localhost:3002/support", active: false)
+      expect(service.navigation_items).to include(support_item)
     end
 
     it "includes a link to the Your groups page with custom active_when set" do

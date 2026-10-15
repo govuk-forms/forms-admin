@@ -30,6 +30,7 @@ locals {
     { name = "SETTINGS__AUTH_PROVIDER", value = "developer" },
     { name = "SETTINGS__AWS__ASSETS_S3_BUCKET_NAME", value = local.assets_bucket_name },
     { name = "SETTINGS__FORMS_ENV", value = "review" },
+    { name = "SETTINGS__FORMS_PRODUCT_PAGE__URL", value = "https://forms.service.gov.uk" },
     { name = "SETTINGS__FORMS_RUNNER__URL", value = "https://forms.service.gov.uk" },
   ]
 }
