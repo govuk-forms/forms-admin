@@ -11,7 +11,7 @@ namespace :blobs do
     blobs = ActiveStorage::Blob.unattached
       .where(created_at: parsed_start_date..parsed_end_date)
       .where.not("key LIKE 'assets/%'")
-    blobs.pluck(:id, :filename, :content_type, :created_at).each { Rails.logger.info(it.to_json) }
+    blobs.pluck(:id, :filename, :content_type, :key, :created_at).each { Rails.logger.info(it.to_json) }
   end
 
   desc "delete all non-brand-asset blobs in the ActiveStorage database"
@@ -25,7 +25,10 @@ namespace :blobs do
       .where(created_at: parsed_start_date..parsed_end_date)
       .where.not("key LIKE 'assets/%'")
 
-    deleted = blobs.each(&:purge)
+    deleted = blobs.each do |blob|
+      Rails.logger.info("Purging blob with id: #{blob.id}")
+      blob.purge
+    end
 
     Rails.logger.info("#{deleted.count} blob(s) deleted")
   end
