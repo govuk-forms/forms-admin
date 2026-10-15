@@ -11,10 +11,10 @@ namespace :blobs do
     blobs = ActiveStorage::Blob.unattached
       .where(created_at: parsed_start_date..parsed_end_date)
       .where.not("key LIKE 'assets/%'")
-    blobs.pluck(:id, :filename, :content_type, :created_at).each { Rails.logger.info(it.to_json) }
+    blobs.pluck(:id, :filename, :content_type, :key, :created_at).each { Rails.logger.info(it.to_json) }
   end
 
-  desc "delete all non-brand-asset blobs in the ActiveStorage database"
+  desc "delete all non-brand-asset blob rows in the ActiveStorage database"
   task :delete_non_brand, %i[start_date end_date] => :environment do |_, args|
     parsed_start_date = Date.parse(args[:start_date])
     parsed_end_date = Date.parse(args[:end_date])
@@ -25,8 +25,30 @@ namespace :blobs do
       .where(created_at: parsed_start_date..parsed_end_date)
       .where.not("key LIKE 'assets/%'")
 
-    deleted = blobs.each(&:purge)
+    deleted = blobs.each do |blob|
+      Rails.logger.info("Deleting blob row with id: #{blob.id}")
+      blob.destroy!
+    end
 
-    Rails.logger.info("#{deleted.count} blob(s) deleted")
+    Rails.logger.info("#{deleted.count} blob row(s) deleted")
+  end
+
+  desc "purge all non-brand-asset blobs from the database and the storage service"
+  task :purge_non_brand, %i[start_date end_date] => :environment do |_, args|
+    parsed_start_date = Date.parse(args[:start_date])
+    parsed_end_date = Date.parse(args[:end_date])
+
+    Rails.logger.info("Purging unattached blobs created between between #{parsed_start_date} and #{parsed_end_date}")
+
+    blobs = ActiveStorage::Blob.unattached
+      .where(created_at: parsed_start_date..parsed_end_date)
+      .where.not("key LIKE 'assets/%'")
+
+    deleted = blobs.each do |blob|
+      Rails.logger.info("Purging blob with id: #{blob.id}")
+      blob.delete
+    end
+
+    Rails.logger.info("#{deleted.count} blob(s) purged")
   end
 end
