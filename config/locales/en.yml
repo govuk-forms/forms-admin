@@ -2038,6 +2038,7 @@ en:
           will_continue_to_end_of_form: People who select any other answer will continue to the end of the form.
     routes_section:
       body_html: If you need people to skip some questions or exit the form based on their answer to this question, <a class="govuk-link" href="%{routes_path}">edit question routes</a>.
+      has_routes_html: 'This question has routes: <a class="govuk-link" href="%{routes_path}">Edit question routes</a>'
       heading: Routes
       skip_body_html: If you need people to skip some questions after this one, <a class="govuk-link" href="%{routes_path}">edit question routes</a>.
     submit_save: Save question

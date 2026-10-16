@@ -53,15 +53,17 @@
   <%= render PageSettingsSummaryComponent::View.new(draft_question:, errors: question_input.errors) %>
 
   <% unless is_new_page %>
-    <% if draft_question.answer_type == "selection" && draft_question.answer_settings[:only_one_option] == "true" && draft_question.answer_settings[:selection_options].length <= 10 %>
-      <% if page_object.routing_conditions.none? %>
-        <h2 class="govuk-heading-m"><%= t("pages.routes_section.heading") %></h2>
-        <p class="govuk-body"><%= t("pages.routes_section.body_html", routes_path: routes_path(form_object.id)) %></p>
-        <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible" />
-      <% end %>
-    <% elsif page_object.has_next_page? %>
+    <% routes_body_key =
+         if page_object.routing_conditions.any?
+           "has_routes_html"
+         elsif draft_question.answer_type == "selection" && draft_question.answer_settings[:only_one_option] == "true" && draft_question.answer_settings[:selection_options].length <= 10
+           "body_html"
+         elsif page_object.has_next_page?
+           "skip_body_html"
+         end %>
+    <% if routes_body_key %>
       <h2 class="govuk-heading-m"><%= t("pages.routes_section.heading") %></h2>
-      <p class="govuk-body"><%= t("pages.routes_section.skip_body_html", routes_path: routes_path(form_object.id)) %></p>
+      <p class="govuk-body"><%= t("pages.routes_section.#{routes_body_key}", routes_path: routes_path(form_object.id)) %></p>
       <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible" />
     <% end %>
   <% end %>
