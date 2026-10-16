@@ -196,9 +196,9 @@ private
   def make_form_live_section_tasks
     [
       share_preview_task,
-      (make_live_task unless display_make_languages_live_tasks?),
-      (make_only_english_live_task if display_make_languages_live_tasks?),
-      (make_only_welsh_live_task if display_make_languages_live_tasks?),
+      (make_live_task if @task_statuses.key?(:make_live_status)),
+      (make_only_english_live_task if @task_statuses.key?(:make_only_english_live_status)),
+      (make_only_welsh_live_task if @task_statuses.key?(:make_only_welsh_live_status)),
     ].compact
   end
 
@@ -250,10 +250,6 @@ private
     }
   end
 
-  def display_make_languages_live_tasks?
-    !@form.has_live_welsh_translation? && @form.has_welsh_translation?
-  end
-
   def live_title_name
     return I18n.t("forms.task_list_create.make_form_live_section.title") if @form.is_archived?
 
@@ -276,6 +272,8 @@ private
     unless Pundit.policy(@current_user, @form).can_make_form_live?
       statuses.delete(:share_preview_status)
       statuses.delete(:make_live_status)
+      statuses.delete(:make_only_english_live_status)
+      statuses.delete(:make_only_welsh_live_status)
     end
 
     statuses
@@ -295,6 +293,7 @@ private
     statuses.delete(:copy_of_answers_status)
     statuses.delete(:submission_attachments_status)
     statuses.delete(:batch_submissions_status)
+    statuses.delete(:welsh_language_status)
   end
 
   def can_enter_submission_email_code

@@ -44,6 +44,7 @@ describe FormTaskListService do
         share_preview_status: :completed,
         submission_email_status: :completed,
         confirm_submission_email_status: :not_started,
+        welsh_language_status: :in_progress,
       }
     end
     let(:form) { create(:form) }
@@ -74,6 +75,49 @@ describe FormTaskListService do
         expected_hash = { completed: 5, total: 8 }
 
         expect(result.task_counts).to eq expected_hash
+      end
+    end
+
+    context "when the language live statuses are included instead of the make live status" do
+      let(:statuses) do
+        {
+          declaration_status: :completed,
+          make_only_english_live_status: :not_started,
+          make_only_welsh_live_status: :completed,
+          name_status: :completed,
+          pages_status: :completed,
+          privacy_policy_status: :not_started,
+          support_contact_details_status: :not_started,
+          what_happens_next_status: :completed,
+          payment_link_status: :optional,
+          copy_of_answers_status: :optional,
+          submission_attachments_status: :optional,
+          batch_submissions_status: :optional,
+          share_preview_status: :completed,
+          submission_email_status: :completed,
+          confirm_submission_email_status: :not_started,
+          welsh_language_status: :in_progress,
+        }
+      end
+
+      context "when the user can make the form live" do
+        let(:can_make_form_live) { true }
+
+        it "counts the language live statuses" do
+          result = described_class.new(form:, current_user:)
+
+          expect(result.task_counts).to eq({ completed: 7, total: 11 })
+        end
+      end
+
+      context "when the user cannot make the form live" do
+        let(:can_make_form_live) { false }
+
+        it "does not count the language live statuses" do
+          result = described_class.new(form:, current_user:)
+
+          expect(result.task_counts).to eq({ completed: 5, total: 8 })
+        end
       end
     end
   end

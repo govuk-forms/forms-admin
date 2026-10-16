@@ -264,10 +264,11 @@ class Form < ApplicationRecord
     live_document = latest_live_or_archived_form_document(language:)
     return false if live_document.blank?
 
-    ignored_keys = %w[live_at available_languages updated_at tag created_at version]
-    return false if live_document.content.except(*ignored_keys) == as_form_document(language:).except(*ignored_keys)
+    draft_document = form_documents.find_by(tag: "draft", language:)
+    return false if draft_document.blank?
 
-    true
+    ignored_keys = %w[live_at available_languages updated_at tag created_at version]
+    live_document.content.except(*ignored_keys) != draft_document.content.except(*ignored_keys)
   end
 
   def only_s3_delivery_enabled?

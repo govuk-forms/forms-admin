@@ -429,6 +429,7 @@ describe TaskStatusService do
       let(:form) { build(:form, :with_group, group:) }
 
       before do
+        allow(form).to receive(:has_welsh_translation?).and_return(true)
         allow(form).to receive(:can_make_language_live?).with(language: "en").and_return(can_make_english_live)
         allow(form).to receive(:changed_from_live_version?).with(language: "en").and_return(changed_from_live_version)
         allow(form).to receive(:can_make_language_live?).with(language: "cy").and_return(can_make_welsh_live)
@@ -514,6 +515,7 @@ describe TaskStatusService do
       let(:form) { build(:form, :with_group, group:) }
 
       before do
+        allow(form).to receive(:has_welsh_translation?).and_return(true)
         allow(form).to receive(:can_make_language_live?).with(language: "en").and_return(can_make_english_live)
         allow(form).to receive(:can_make_language_live?).with(language: "cy").and_return(can_make_welsh_live)
       end
@@ -543,8 +545,8 @@ describe TaskStatusService do
         end
 
         context "when the form already has a live Welsh version" do
-          it "returns completed" do
-            expect(task_status_service.all_task_statuses[:make_only_welsh_live_status]).to eq :completed
+          it "does not include the language live statuses" do
+            expect(task_status_service.all_task_statuses).not_to include(:make_only_english_live_status, :make_only_welsh_live_status)
           end
         end
 
@@ -704,14 +706,47 @@ describe TaskStatusService do
         share_preview_status: :completed,
         submission_email_status: :completed,
         confirm_submission_email_status: :completed,
-        make_only_english_live_status: :completed,
-        make_only_welsh_live_status: :cannot_start,
       }
       expect(task_status_service.all_task_statuses).to eq expected_hash
     end
 
+    context "when the form has no Welsh translation" do
+      it "includes the make live status and not the language live statuses" do
+        statuses = task_status_service.all_task_statuses
+
+        expect(statuses).to include(:make_live_status)
+        expect(statuses).not_to include(:make_only_english_live_status, :make_only_welsh_live_status)
+      end
+
+      it "does not calculate the language live statuses" do
+        allow(form).to receive(:can_make_language_live?).and_call_original
+
+        task_status_service.all_task_statuses
+
+        expect(form).not_to have_received(:can_make_language_live?)
+      end
+    end
+
+    context "when the form has a Welsh translation but no live Welsh version" do
+      let(:form) { create(:form, :with_welsh_translation, welsh_completed: true) }
+
+      it "includes the language live statuses and not the make live status" do
+        statuses = task_status_service.all_task_statuses
+
+        expect(statuses).to include(:make_only_english_live_status, :make_only_welsh_live_status)
+        expect(statuses).not_to include(:make_live_status)
+      end
+    end
+
     context "when the form has a live Welsh version" do
       let(:form) { create(:form, :live_with_draft, :with_welsh_translation, welsh_completed: true) }
+
+      it "includes the make live status and not the language live statuses" do
+        statuses = task_status_service.all_task_statuses
+
+        expect(statuses).to include(:make_live_status)
+        expect(statuses).not_to include(:make_only_english_live_status, :make_only_welsh_live_status)
+      end
 
       context "and an incomplete welsh translation" do
         before do
@@ -721,21 +756,6 @@ describe TaskStatusService do
 
         it "make live_status is not_started" do
           expect(task_status_service.all_task_statuses).to include(make_live_status: :not_started)
-        end
-      end
-    end
-
-    context "when the form does not have a live Welsh version" do
-      let(:form) { create(:form, :with_welsh_translation, welsh_completed: true) }
-
-      context "and an incomplete welsh translation" do
-        before do
-          # Add new content requiring Welsh translation
-          form.update!(declaration_markdown: "I declare this is correct", share_preview_completed: true)
-        end
-
-        it "make live_status is cannot_start" do
-          expect(task_status_service.all_task_statuses).to include(make_live_status: :cannot_start)
         end
       end
     end
