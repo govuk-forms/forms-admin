@@ -2039,6 +2039,7 @@ en:
     routes_section:
       body_html: If you need people to skip some questions or exit the form based on their answer to this question, <a class="govuk-link" href="%{routes_path}">edit question routes</a>.
       heading: Routes
+      skip_body_html: If you need people to skip some questions after this one, <a class="govuk-link" href="%{routes_path}">edit question routes</a>.
     submit_save: Save question
   payment_link_input:
     body_html: |
