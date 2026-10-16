@@ -152,6 +152,24 @@ describe TaskStatusService do
       end
     end
 
+    describe "save and return status" do
+      context "with a new form" do
+        let(:form) { build(:form, :new_form, :with_group, group:) }
+
+        it "returns the correct default value" do
+          expect(task_status_service.all_task_statuses[:save_and_return_status]).to eq :optional
+        end
+      end
+
+      context "with a form with save and return enabled" do
+        let(:form) { build(:form, :with_group, save_and_return: "enabled", group:) }
+
+        it "returns the completed status" do
+          expect(task_status_service.all_task_statuses[:save_and_return_status]).to eq :completed
+        end
+      end
+    end
+
     describe "privacy policy status" do
       context "with a new form" do
         let(:form) { build(:form, :new_form, :with_group, group:) }
@@ -696,6 +714,7 @@ describe TaskStatusService do
         brand_status: :optional,
         copy_of_answers_status: :optional,
         privacy_policy_status: :completed,
+        save_and_return_status: :optional,
         support_contact_details_status: :completed,
         welsh_language_status: :optional,
         make_live_status: :completed,

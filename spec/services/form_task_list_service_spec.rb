@@ -44,6 +44,7 @@ describe FormTaskListService do
         share_preview_status: :completed,
         submission_email_status: :completed,
         confirm_submission_email_status: :not_started,
+        save_and_return_status: :optional,
       }
     end
     let(:form) { create(:form) }
@@ -168,6 +169,19 @@ describe FormTaskListService do
 
         it "does not have link to brand settings" do
           expect(section_rows.map { |row| row[:path] }).not_to include("/forms/#{form.id}/brand")
+        end
+      end
+
+      context "when the save and return feature is enabled", :feature_save_and_return do
+        it "has link to save and return settings" do
+          expect(section_rows[3][:task_name]).to eq "Give people the option to save their progress and return later"
+          expect(section_rows[3][:path]).to eq "/forms/#{form.id}/save-and-return"
+        end
+      end
+
+      context "when the save and return feature is disabled", feature_save_and_return: false do
+        it "does not have link to save and return settings" do
+          expect(section_rows.map { |row| row[:path] }).not_to include("/forms/#{form.id}/save-and-return")
         end
       end
 
