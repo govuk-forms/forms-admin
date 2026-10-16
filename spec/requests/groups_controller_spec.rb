@@ -197,6 +197,18 @@ RSpec.describe "/groups", type: :request do
         expect(response).to have_http_status :not_found
       end
     end
+
+    context "when the group name contains markup" do
+      before do
+        member_group.update!(name: "</title><script>alert(1)</script>")
+      end
+
+      it "escapes the group name in the page title" do
+        get group_url(member_group)
+        expect(response.body).to include("<title>&lt;/title&gt;&lt;script&gt;alert(1)&lt;/script&gt;#{I18n.t('page_titles.separator')}GOV.UK Forms</title>")
+        expect(response.body).not_to include("<script>alert(1)</script>")
+      end
+    end
   end
 
   describe "GET /new" do

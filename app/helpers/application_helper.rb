@@ -2,11 +2,11 @@
 
 module ApplicationHelper
   def page_title
-    [content_for(:title), "GOV.UK Forms"].compact.join(I18n.t("page_titles.separator"))
+    safe_join([content_for(:title), "GOV.UK Forms"].compact, I18n.t("page_titles.separator"))
   end
 
   def set_page_title(title)
-    content_for(:title, title.html_safe)
+    content_for(:title, title)
   end
 
   def title_with_error_prefix(title, error)
