@@ -371,7 +371,7 @@ RSpec.describe ApplicationHelper, type: :helper do
 
       helper.set_page_title(title)
 
-      expect(helper).to have_received(:content_for).with(:title, title.html_safe)
+      expect(helper).to have_received(:content_for).with(:title, title)
     end
   end
 
@@ -383,8 +383,22 @@ RSpec.describe ApplicationHelper, type: :helper do
         helper.set_page_title(title)
       end
 
-      it "renders the special characters correctly" do
-        expect(helper.page_title).to eq "#{title}#{I18n.t('page_titles.separator')}GOV.UK Forms"
+      it "escapes the special characters once" do
+        expect(helper.page_title).to eq "#{ERB::Util.html_escape(title)}#{I18n.t('page_titles.separator')}GOV.UK Forms"
+      end
+
+      it "returns an html safe string" do
+        expect(helper.page_title).to be_html_safe
+      end
+    end
+
+    context "when the title contains a closing title tag" do
+      before do
+        helper.set_page_title("</title><script>alert(1)</script>")
+      end
+
+      it "does not include the unescaped markup" do
+        expect(helper.content_for(:title)).to eq "&lt;/title&gt;&lt;script&gt;alert(1)&lt;/script&gt;"
       end
     end
   end
