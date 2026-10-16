@@ -25,9 +25,9 @@ RSpec.describe CreateFormService do
     end
 
     context "when the group's organisation has a default brand" do
-      let(:organisation) { create :organisation }
+      let(:organisation) { create :organisation, custom_branding_enabled: true }
       let(:brand) { create :brand }
-      let(:group) { build :group, id: 1000, organisation:, custom_branding_enabled: true }
+      let(:group) { build :group, id: 1000, organisation: }
 
       before do
         create(:organisation_brand, organisation:, brand:)
@@ -40,8 +40,8 @@ RSpec.describe CreateFormService do
         expect(Form.last.brand_id).to eq brand.slug
       end
 
-      context "when the group does not have custom branding enabled" do
-        let(:group) { build :group, id: 1000, organisation:, custom_branding_enabled: false }
+      context "when the organisation does not have custom branding enabled" do
+        let(:organisation) { create :organisation, custom_branding_enabled: false }
 
         it "creates the form without a brand" do
           create_form_service.create!(creator:, group:, name:)
@@ -52,7 +52,8 @@ RSpec.describe CreateFormService do
     end
 
     context "when the group's organisation has no default brand" do
-      let(:group) { build :group, id: 1000, organisation: creator.organisation, custom_branding_enabled: true }
+      let(:organisation) { create :organisation, custom_branding_enabled: true }
+      let(:group) { build :group, id: 1000, organisation: }
 
       it "creates the form without a brand" do
         create_form_service.create!(creator:, group:, name:)
