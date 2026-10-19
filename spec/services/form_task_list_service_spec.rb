@@ -3,10 +3,10 @@ require "rails_helper"
 describe FormTaskListService do
   let(:current_user) { build(:user) }
 
-  let(:organisation) { build :organisation, :with_signed_mou, id: 1 }
+  let(:organisation) { build :organisation, :with_signed_mou, id: 1, custom_branding_enabled: }
   let(:form) { create(:form, :new_form, pages:) }
   let(:pages) { [] }
-  let(:group) { create(:group, name: "Group 1", organisation:, status: group_status, custom_branding_enabled:) }
+  let(:group) { create(:group, name: "Group 1", organisation:, status: group_status) }
   let(:group_status) { :trial }
   let(:custom_branding_enabled) { true }
 

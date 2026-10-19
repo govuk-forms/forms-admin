@@ -26,7 +26,7 @@ module Forms
     end
 
     def check_feature_flag
-      raise NotFoundError unless FeatureService.new(group: current_form.group).enabled?(:custom_branding)
+      raise NotFoundError unless FeatureService.new(organisation: current_form.group&.organisation).enabled?(:custom_branding)
     end
 
     def brand_input_params

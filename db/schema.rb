@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_08_144746) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_14_100000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -298,6 +298,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_08_144746) do
     t.string "abbreviation"
     t.boolean "closed", default: false
     t.datetime "created_at", null: false
+    t.boolean "custom_branding_enabled", default: false
     t.bigint "default_brand_id"
     t.string "govuk_content_id"
     t.boolean "internal", default: false

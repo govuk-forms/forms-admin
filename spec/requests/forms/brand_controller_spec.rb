@@ -4,10 +4,12 @@ RSpec.describe Forms::BrandController, type: :request do
   let(:form) { create(:form, :live, brand_id: "south-gloucestershire") }
   let(:brand_id) { "cheshire-east" }
 
-  let(:group) { create(:group, organisation: standard_user.organisation, custom_branding_enabled:) }
+  let(:group) { create(:group, organisation: standard_user.organisation) }
   let(:custom_branding_enabled) { true }
 
   before do
+    standard_user.organisation.update!(custom_branding_enabled:)
+
     cheshire_east = create(:brand, slug: "cheshire-east", name: "Cheshire East Council")
     south_gloucestershire = create(:brand, slug: "south-gloucestershire", name: "South Gloucestershire Council")
     create(:organisation_brand, organisation: standard_user.organisation, brand: cheshire_east)
