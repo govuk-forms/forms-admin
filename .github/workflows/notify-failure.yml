@@ -1,0 +1,52 @@
+name: "Notify failure"
+
+# Tells us in Slack when a workflow fails on main or in the merge queue, where
+# nobody is watching the run. Failures on pull requests are not reported,
+# because the PR author sees them.
+#
+# When adding a workflow that runs on push to main or on merge_group, add its
+# name to the list below.
+
+on:
+  workflow_run:
+    workflows:
+      - "Tests"
+      - "Build image"
+      - "Terraform"
+    types: [completed]
+  workflow_dispatch: # to send a test message
+
+permissions: {}
+
+jobs:
+  test:
+    name: "Send test notification"
+    if: github.event_name == 'workflow_dispatch'
+    uses: govuk-forms/forms-deploy/.github/workflows/reusable-notify-failure.yml@main
+    with:
+      workflow_name: "Test notification"
+      run_url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      branch: ${{ github.ref_name }}
+      event: workflow_dispatch
+      sha: ${{ github.sha }}
+      actor: ${{ github.actor }}
+    secrets:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_GOVUK_FORMS_ALERT }}
+
+  notify:
+    name: "Notify failure"
+    if: >-
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.conclusion == 'failure' &&
+      (github.event.workflow_run.event == 'merge_group' ||
+        (github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main'))
+    uses: govuk-forms/forms-deploy/.github/workflows/reusable-notify-failure.yml@main
+    with:
+      workflow_name: ${{ github.event.workflow_run.name }}
+      run_url: ${{ github.event.workflow_run.html_url }}
+      branch: ${{ github.event.workflow_run.head_branch }}
+      event: ${{ github.event.workflow_run.event }}
+      sha: ${{ github.event.workflow_run.head_sha }}
+      actor: ${{ github.event.workflow_run.actor.login }}
+    secrets:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_GOVUK_FORMS_ALERT }}
