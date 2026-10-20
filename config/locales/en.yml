@@ -629,7 +629,6 @@ en:
           <p>We then email them a link so they can continue filling in the form later. When they return, they can either continue where they left off or start again.</p>
           <p>If they do not return, we will delete their saved progress after 30 days.</p>
           <p><a href="https://www.sign-in.service.gov.uk/documentation/user-journeys" target="_blank">See what signing in with GOV.UK One Login looks like (opens in a new tab)</a></p>
-          <p></p>
           <h2 class="govuk-heading-m">When you might not want to use this</h2>
           <p>It might not work well if people fill in your form on behalf of someone else, for example as a representative or as part of their job</p>
           <p>People can only save one version of each form at a time, so they could mix up different people’s answers.</p>
