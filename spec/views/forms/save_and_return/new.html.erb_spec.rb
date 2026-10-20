@@ -1,8 +1,9 @@
 require "rails_helper"
 
 describe "forms/save_and_return/new.html.erb" do
-  let(:form) { build(:form, id: 1, save_and_return:) }
+  let(:form) { build(:form, id: 1, save_and_return:, state:) }
   let(:save_and_return) { "enabled" }
+  let(:state) { :draft }
   let(:save_and_return_input) { Forms::SaveAndReturnInput.new(form:).assign_form_values }
 
   before do
@@ -55,6 +56,31 @@ describe "forms/save_and_return/new.html.erb" do
 
     it "renders the checkboxes as unchecked" do
       expect(rendered).to have_unchecked_field("forms-save-and-return-input-save-and-return-enabled-field")
+    end
+  end
+
+  context "when the form is live with draft and save and return is enabled" do
+    let(:state) { :live_with_draft }
+
+    it "renders the checked checkbox as disabled" do
+      expect(rendered).to have_field("forms-save-and-return-input-save-and-return-enabled-field", checked: true, disabled: true)
+    end
+  end
+
+  context "when the form is live with draft and save and return is disabled" do
+    let(:state) { :live_with_draft }
+    let(:save_and_return) { "disabled" }
+
+    it "renders the checkbox as unchecked and enabled" do
+      expect(rendered).to have_field("forms-save-and-return-input-save-and-return-enabled-field", checked: false, disabled: false)
+    end
+  end
+
+  context "when the form is live and save and return is enabled" do
+    let(:state) { :live }
+
+    it "renders the checkbox as checked and disabled" do
+      expect(rendered).to have_field("forms-save-and-return-input-save-and-return-enabled-field", checked: true, disabled: true)
     end
   end
 end

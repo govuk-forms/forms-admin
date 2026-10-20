@@ -51,6 +51,56 @@ RSpec.describe Forms::SaveAndReturnInput, type: :model do
         expect(form.reload.save_and_return).to eq("disabled")
       end
     end
+
+    context "when disabling save and return on a live form" do
+      let(:form) { create(:form, :live, save_and_return: "enabled") }
+      let(:value) { "disabled" }
+
+      it "returns false and keeps save and return enabled" do
+        expect(input.submit).to be false
+        expect(form.reload.save_and_return).to eq("enabled")
+      end
+    end
+
+    context "when disabling save and return on a live form with a draft" do
+      let(:form) { create(:form, :live_with_draft, save_and_return: "enabled") }
+      let(:value) { "disabled" }
+
+      it "returns false and keeps save and return enabled" do
+        expect(input.submit).to be false
+        expect(form.reload.save_and_return).to eq("enabled")
+      end
+    end
+  end
+
+  describe "#save_and_return_enabled_in_live?" do
+    subject(:save_and_return_enabled_in_live?) { input.save_and_return_enabled_in_live? }
+
+    let(:input) { described_class.new(form:) }
+
+    context "when save and return is enabled on a live form" do
+      let(:form) { build(:form, :live, save_and_return: "enabled") }
+
+      it { is_expected.to be true }
+    end
+
+    context "when save and return is enabled on a live form with a draft" do
+      let(:form) { build(:form, :live_with_draft, save_and_return: "enabled") }
+
+      it { is_expected.to be true }
+    end
+
+    context "when save and return is enabled on a draft form" do
+      let(:form) { build(:form, save_and_return: "enabled") }
+
+      it { is_expected.to be false }
+    end
+
+    context "when save and return is disabled on a live form" do
+      let(:form) { build(:form, :live, save_and_return: "disabled") }
+
+      it { is_expected.to be false }
+    end
   end
 
   describe "#assign_form_values" do
