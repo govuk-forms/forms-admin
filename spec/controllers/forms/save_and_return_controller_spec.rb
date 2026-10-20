@@ -1,7 +1,7 @@
 require "rails_helper"
 
 RSpec.describe Forms::SaveAndReturnController, :feature_save_and_return, type: :request do
-  let(:form) { create(:form, :live, save_and_return: save_and_return_original_value) }
+  let(:form) { create(:form, :draft, save_and_return: save_and_return_original_value) }
   let(:save_and_return_original_value) { "disabled" }
   let(:current_user) { standard_user }
   let(:group) { create(:group, organisation: standard_user.organisation, save_and_return_enabled: true) }

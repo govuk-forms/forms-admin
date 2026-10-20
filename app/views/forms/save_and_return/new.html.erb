@@ -17,7 +17,7 @@
       <%= t(".body_html") %>
 
       <%= f.govuk_check_boxes_fieldset :save_and_return, multiple: false, legend: { tag: 'h2', size: 'm'}, hint:{ text: t(".hint_text") } do %>
-        <%= f.govuk_check_box :save_and_return, "enabled", "disabled", multiple: false, link_errors: true %>
+        <%= f.govuk_check_box :save_and_return, "enabled", "disabled", multiple: false, link_errors: true, disabled: @save_and_return_input.save_and_return_enabled_in_live? %>
       <% end %>
 
       <%= f.govuk_submit t('save_and_continue') %>
