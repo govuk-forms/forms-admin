@@ -65,7 +65,7 @@ private
     rows = [
       { task_name: I18n.t("forms.task_list_#{create_or_edit}.create_form_optional_subsection.payment_link"), path: payment_link_path(@form.id), status: @task_statuses[:payment_link_status] },
     ]
-    if FeatureService.new(organisation: @form.group&.organisation).enabled?(:custom_branding)
+    if show_brand_task?
       rows << { task_name: I18n.t("forms.task_list_#{create_or_edit}.create_form_optional_subsection.brand"), path: form_brand_path(@form.id), status: @task_statuses[:brand_status] }
     end
     rows << { task_name: I18n.t("forms.task_list_#{create_or_edit}.create_form_optional_subsection.copy_of_answers"), path: copy_of_answers_path(@form.id), status: @task_statuses[:copy_of_answers_status] }
@@ -76,6 +76,13 @@ private
       section_number: nil,
       subsection: true,
     }
+  end
+
+  # GOV.UK branding is always available and isn't stored as a Brand, so
+  # only show the task if the organisation has other brands to choose from
+  def show_brand_task?
+    organisation = @form.group&.organisation
+    FeatureService.new(organisation:).enabled?(:custom_branding) && organisation.brands.any?
   end
 
   def how_you_get_completed_forms_section(section_number:)
