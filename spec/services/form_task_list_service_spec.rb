@@ -3,12 +3,13 @@ require "rails_helper"
 describe FormTaskListService do
   let(:current_user) { build(:user) }
 
-  let(:organisation) { build :organisation, :with_signed_mou, id: 1, custom_branding_enabled: }
+  let(:organisation) { build :organisation, :with_signed_mou, id: 1, custom_branding_enabled:, brands: }
   let(:form) { create(:form, :new_form, pages:) }
   let(:pages) { [] }
   let(:group) { create(:group, name: "Group 1", organisation:, status: group_status) }
   let(:group_status) { :trial }
   let(:custom_branding_enabled) { true }
+  let(:brands) { [build(:brand)] }
 
   let(:can_view_form) { true }
   let(:can_make_form_live) { false }
@@ -204,6 +205,14 @@ describe FormTaskListService do
         it "has link to brand settings" do
           expect(section_rows[1][:task_name]).to eq "Choose a brand for your form"
           expect(section_rows[1][:path]).to eq "/forms/#{form.id}/brand"
+        end
+
+        context "when the organisation has no brands other than GOV.UK" do
+          let(:brands) { [] }
+
+          it "does not have link to brand settings" do
+            expect(section_rows.map { |row| row[:path] }).not_to include("/forms/#{form.id}/brand")
+          end
         end
       end
 
