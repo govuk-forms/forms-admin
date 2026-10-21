@@ -109,7 +109,7 @@ class GroupsController < WebController
   def feature_flags
     authorize @group, :manage_feature_flags?
 
-    @feature_flags_input = Groups::FeatureFlagsInput.new(group: @group).assign_group_values
+    @feature_flags_input = Groups::FeatureFlagsInput.new(group: @group).assign_values
   end
 
   # POST /groups/1/feature-flags
