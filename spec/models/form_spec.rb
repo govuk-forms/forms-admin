@@ -77,6 +77,41 @@ RSpec.describe Form, type: :model do
         end
       end
     end
+
+    describe "delivery configuration traits" do
+      it "has an s3 delivery trait" do
+        form = create :form, :with_s3_delivery
+        expect(form.delivery_configurations.count).to eq 1
+        expect(form.delivery_configurations.first).to be_a DeliveryConfiguration
+        expect(form.delivery_configurations.first).to have_attributes(
+          delivery_method: "s3",
+          delivery_schedule: "immediate",
+          formats: %w[json],
+        )
+      end
+
+      it "has a daily batch email delivery trait" do
+        form = create :form, :with_daily_batch_email_delivery
+        expect(form.delivery_configurations.count).to eq 1
+        expect(form.delivery_configurations.first).to be_a DeliveryConfiguration
+        expect(form.delivery_configurations.first).to have_attributes(
+          delivery_method: "email",
+          delivery_schedule: "daily",
+          formats: %w[csv],
+        )
+      end
+
+      it "has a weekly batch email delivery trait" do
+        form = create :form, :with_weekly_batch_email_delivery
+        expect(form.delivery_configurations.count).to eq 1
+        expect(form.delivery_configurations.first).to be_a DeliveryConfiguration
+        expect(form.delivery_configurations.first).to have_attributes(
+          delivery_method: "email",
+          delivery_schedule: "weekly",
+          formats: %w[csv],
+        )
+      end
+    end
   end
 
   describe "validations" do
