@@ -359,4 +359,112 @@ RSpec.describe Api::V3FormDocumentsController, type: :request do
       end
     end
   end
+
+  describe "#form_ids_and_states_with_delivery_schedule" do
+    let(:schedule) { "daily" }
+    let(:form_id) { form.id }
+
+    before do
+      # create some forms without the specified delivery schedule
+      weekly_email_batch_form = create :form, :with_weekly_batch_email_delivery, :draft
+      weekly_email_batch_form.save_draft!
+
+      create :form, :with_email_delivery, :live_with_draft
+
+      s3_delivery_form = create :form, :with_s3_delivery, :archived_with_draft
+      s3_delivery_form.save_draft!
+    end
+
+    context "when there is a draft form with the specified delivery schedule" do
+      let(:form) { create :form, :with_daily_batch_email_delivery, :draft }
+
+      before do
+        form.save_draft!
+
+        get "/api/v3/forms/with-delivery-schedule/#{schedule}", headers:
+      end
+
+      it "returns the form ID and state for the draft form" do
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to eq [{ form_id:, state: "draft" }].to_json
+      end
+    end
+
+    context "when there is a live form with the specified delivery schedule" do
+      let(:form) { create :form, :with_daily_batch_email_delivery, :live }
+
+      before do
+        form.delivery_configurations.first.delivery_schedule = "weekly"
+        form.save_draft!
+
+        get "/api/v3/forms/with-delivery-schedule/#{schedule}", headers:
+      end
+
+      it "returns the form ID and state for the draft form" do
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to eq [{ form_id:, state: "current" }].to_json
+      end
+    end
+
+    context "when there is a live form and its draft with the specified delivery schedule" do
+      let(:form) { create :form, :with_daily_batch_email_delivery, :live }
+
+      before do
+        form.save_draft!
+
+        get "/api/v3/forms/with-delivery-schedule/#{schedule}", headers:
+      end
+
+      it "returns the form ID and state for the draft form" do
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to eq [{ form_id:, state: "current" }, { form_id:, state: "draft" }].to_json
+      end
+    end
+
+    context "when there is an archived form with the specified delivery schedule" do
+      let(:form) { create :form, :with_daily_batch_email_delivery, :archived }
+
+      before do
+        form.delivery_configurations.first.delivery_schedule = "weekly"
+        form.save_draft!
+
+        get "/api/v3/forms/with-delivery-schedule/#{schedule}", headers:
+      end
+
+      it "returns the form ID and state for the draft form" do
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to eq [{ form_id:, state: "current" }].to_json
+      end
+    end
+
+    context "when there is an archived form and its draft with the specified delivery schedule" do
+      let(:form) { create :form, :with_daily_batch_email_delivery, :archived }
+
+      before do
+        form.save_draft!
+
+        get "/api/v3/forms/with-delivery-schedule/#{schedule}", headers:
+      end
+
+      it "returns the form ID and state for the draft form" do
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to eq [{ form_id:, state: "current" }, { form_id:, state: "draft" }].to_json
+      end
+    end
+
+    context "when there is no form document with the specified delivery schedule" do
+      let(:form) { create :form, :with_email_delivery, :archived }
+
+      before do
+        form.save_draft!
+
+        get "/api/v3/forms/with-delivery-schedule/#{schedule}", headers:
+      end
+
+      it "returns the form ID and state for the draft form" do
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to eq [].to_json
+      end
+    end
+  end
 end

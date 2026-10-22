@@ -33,6 +33,10 @@ class Api::V3FormDocumentsController < ApplicationController
     current_delivery_configurations
   end
 
+  def form_ids_and_states_with_delivery_schedule
+    render json: Form.form_ids_and_states_with_delivery_schedule(schedule).to_json
+  end
+
 private
 
   def return_latest_version_number
@@ -62,6 +66,10 @@ private
 
   def state
     params.require(:state)
+  end
+
+  def schedule
+    params.require(:schedule)
   end
 
   def draft_delivery_configurations
