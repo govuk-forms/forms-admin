@@ -40,7 +40,7 @@ private
 
     CurrentLoggingAttributes.form_document_version = latest_form_document.version
 
-    render json: { version: latest_form_document.version }.to_json
+    render json: { version: latest_form_document.version }
   end
 
   def form
