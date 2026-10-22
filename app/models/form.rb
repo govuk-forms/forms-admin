@@ -22,6 +22,20 @@ class Form < ApplicationRecord
   has_one :immediate_email_delivery_configuration, -> { where delivery_method: "email", delivery_schedule: "immediate" }, class_name: "DeliveryConfiguration"
   has_one :s3_delivery_configuration, -> { where delivery_method: "s3", delivery_schedule: "immediate" }, class_name: "DeliveryConfiguration"
 
+  scope :latest_form_ids_and_tags_with_delivery_schedule, ->(schedule) { Form.includes(:latest_form_document).where("content->'delivery_configurations' @> ?", JSON.generate([{ "delivery_schedule": schedule }])).pluck(:id, :tag) }
+  scope :draft_form_ids_and_tags_with_delivery_schedule, ->(schedule) { Form.includes(:draft_form_document).where("content->'delivery_configurations' @> ?", JSON.generate([{ "delivery_schedule": schedule }])).pluck(:id, :tag) }
+
+  def self.form_ids_and_states_with_delivery_schedule(schedule)
+    latest_form_ids_and_tags_with_delivery_schedule(schedule)
+    .concat(draft_form_ids_and_tags_with_delivery_schedule(schedule))
+    .map do |form_id, tag|
+      {
+        form_id:,
+        state: tag == "draft" ? "draft" : "current",
+      }
+    end
+  end
+
   translates :name,
              :privacy_policy_url,
              :support_email,
