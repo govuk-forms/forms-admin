@@ -67,4 +67,122 @@ describe "pages/edit.html.erb" do
       expect(rendered).not_to have_text(I18n.t("helpers.hint.pages_question_input.is_optional_options.true"))
     end
   end
+
+  describe "routes section" do
+    let(:form) { create :form, pages: [page, create(:page)] }
+    let(:question_input) do
+      build :question_input,
+            answer_type: draft_question.answer_type,
+            answer_settings: draft_question.answer_settings,
+            question_text: draft_question.question_text,
+            draft_question:
+    end
+
+    context "when the question has no routes" do
+      context "when the question is a selection question with one option only" do
+        let(:draft_question) { build :selection_draft_question, only_one_option: "true" }
+
+        it "contains the routes heading" do
+          expect(rendered).to have_css("h2", text: I18n.t("pages.routes_section.heading"))
+        end
+
+        it "contains a link to the question's routes" do
+          expect(rendered).to have_link("edit question routes", href: routes_path(form.id))
+        end
+      end
+
+      context "when the question is a selection question with one option only and more than 10 options" do
+        let(:draft_question) { build :selection_draft_question, only_one_option: "true", selection_options: (1..11).map { |i| { name: "Option #{i}", value: "option #{i}" } } }
+
+        it "contains the text about skipping questions" do
+          expect(rendered).to have_text("If you need people to skip some questions after this one, edit question routes.")
+        end
+
+        context "when the question is the last question in the form" do
+          let(:form) { create :form, pages: [page] }
+
+          it "does not contain the routes section" do
+            expect(rendered).not_to have_css("h2", text: I18n.t("pages.routes_section.heading"))
+          end
+        end
+      end
+
+      context "when the question is a selection question with multiple options" do
+        let(:draft_question) { build :selection_draft_question, only_one_option: "false" }
+
+        it "contains the routes heading" do
+          expect(rendered).to have_css("h2", text: I18n.t("pages.routes_section.heading"))
+        end
+
+        it "contains the text about skipping questions" do
+          expect(rendered).to have_text("If you need people to skip some questions after this one, edit question routes.")
+        end
+
+        it "contains a link to the question's routes" do
+          expect(rendered).to have_link("edit question routes", href: routes_path(form.id))
+        end
+      end
+
+      context "when the question is not a selection question" do
+        let(:draft_question) { build :draft_question, answer_type: "email" }
+
+        it "contains the routes heading" do
+          expect(rendered).to have_css("h2", text: I18n.t("pages.routes_section.heading"))
+        end
+
+        it "contains the text about skipping questions" do
+          expect(rendered).to have_text("If you need people to skip some questions after this one, edit question routes.")
+        end
+
+        it "contains a link to the question's routes" do
+          expect(rendered).to have_link("edit question routes", href: routes_path(form.id))
+        end
+      end
+
+      context "when the question is not a selection question and is the last question in the form" do
+        let(:form) { create :form, pages: [page] }
+        let(:draft_question) { build :draft_question, answer_type: "email" }
+
+        it "does not contain the routes section" do
+          expect(rendered).not_to have_css("h2", text: I18n.t("pages.routes_section.heading"))
+        end
+      end
+    end
+
+    context "when the question has routes" do
+      let(:other_page) { create :page }
+      let(:form) do
+        create(:form, pages: [page, other_page]).tap do
+          create :condition, routing_page: page, check_page: page, answer_value: "Option 1", goto_page: other_page
+          page.reload
+        end
+      end
+      let(:draft_question) { build :selection_draft_question, only_one_option: "true" }
+
+      it "contains the routes heading" do
+        expect(rendered).to have_css("h2", text: I18n.t("pages.routes_section.heading"))
+      end
+
+      it "contains the text saying the question has routes" do
+        expect(rendered).to have_text("This question has routes: Edit question routes")
+      end
+
+      it "contains a link to the question's routes" do
+        expect(rendered).to have_link("Edit question routes", href: routes_path(form.id))
+      end
+
+      context "when the question is the last question in the form" do
+        let(:form) do
+          create(:form, pages: [page]).tap do
+            create :condition, routing_page: page, check_page: page, answer_value: "Option 1", skip_to_end: true
+            page.reload
+          end
+        end
+
+        it "contains the text saying the question has routes" do
+          expect(rendered).to have_text("This question has routes: Edit question routes")
+        end
+      end
+    end
+  end
 end
