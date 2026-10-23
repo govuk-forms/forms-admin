@@ -45,8 +45,6 @@ class CreateFormService
 private
 
   def default_brand_id(group)
-    return nil unless FeatureService.new(organisation: group.organisation).enabled?(:custom_branding)
-
     group.organisation.default_brand&.slug
   end
 end

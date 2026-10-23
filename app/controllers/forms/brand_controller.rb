@@ -1,7 +1,6 @@
 module Forms
   class BrandController < FormsController
     before_action :check_user_has_permission
-    before_action :check_feature_flag
 
     def new
       @brand_input = BrandInput.new(form: current_form).assign_form_values
@@ -23,10 +22,6 @@ module Forms
 
     def check_user_has_permission
       authorize current_form, :can_view_form?
-    end
-
-    def check_feature_flag
-      raise NotFoundError unless FeatureService.new(organisation: current_form.group&.organisation).enabled?(:custom_branding)
     end
 
     def brand_input_params

@@ -1624,9 +1624,6 @@ en:
       'true': 'Yes'
     create:
       success: "%{organisation_name} has been added"
-    feature_flags:
-      flags:
-        custom_branding_enabled: Custom branding
     index:
       add_organisation: Add an organisation
       agreement_type_none: None
