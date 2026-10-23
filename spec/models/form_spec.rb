@@ -77,6 +77,41 @@ RSpec.describe Form, type: :model do
         end
       end
     end
+
+    describe "delivery configuration traits" do
+      it "has an s3 delivery trait" do
+        form = create :form, :with_s3_delivery
+        expect(form.delivery_configurations.count).to eq 1
+        expect(form.delivery_configurations.first).to be_a DeliveryConfiguration
+        expect(form.delivery_configurations.first).to have_attributes(
+          delivery_method: "s3",
+          delivery_schedule: "immediate",
+          formats: %w[json],
+        )
+      end
+
+      it "has a daily batch email delivery trait" do
+        form = create :form, :with_daily_batch_email_delivery
+        expect(form.delivery_configurations.count).to eq 1
+        expect(form.delivery_configurations.first).to be_a DeliveryConfiguration
+        expect(form.delivery_configurations.first).to have_attributes(
+          delivery_method: "email",
+          delivery_schedule: "daily",
+          formats: %w[csv],
+        )
+      end
+
+      it "has a weekly batch email delivery trait" do
+        form = create :form, :with_weekly_batch_email_delivery
+        expect(form.delivery_configurations.count).to eq 1
+        expect(form.delivery_configurations.first).to be_a DeliveryConfiguration
+        expect(form.delivery_configurations.first).to have_attributes(
+          delivery_method: "email",
+          delivery_schedule: "weekly",
+          formats: %w[csv],
+        )
+      end
+    end
   end
 
   describe "validations" do
@@ -1700,6 +1735,603 @@ RSpec.describe Form, type: :model do
       form_document = form.latest_live_or_archived_form_document(language: "cy")
       expect(form_document).to eq(FormDocument.find_by(form_id: form.id, language: "cy", tag: "live"))
       expect(FormDocument).to have_received(:latest_live_or_archived).with(form_id: form.id, language: "cy")
+    end
+  end
+
+  describe "delivery schedule scopes" do
+    let(:immediate_form) { create :form, :with_email_delivery, :live }
+    let(:daily_batch_form) { create :form, :with_daily_batch_email_delivery, :live }
+    let(:weekly_batch_form) { create :form, :with_weekly_batch_email_delivery, :live }
+
+    before do
+      immediate_form.save_draft!
+      daily_batch_form.save_draft!
+      weekly_batch_form.save_draft!
+    end
+
+    describe "latest_form_ids_and_tags_with_delivery_schedule" do
+      describe "latest_form_ids_and_tags_with_delivery_schedule" do
+        context "when requesting the forms with immediate schedule" do
+          context "when there is at least one live form with the requested delivery schedule" do
+            context "when the form's draft has the same delivery schedule" do
+              it "returns the form ID and state for the live form" do
+                expect(described_class.latest_form_ids_and_tags_with_delivery_schedule("immediate")).to eq [[immediate_form.id, "live"]]
+              end
+            end
+
+            context "when the form's draft has a different delivery schedule" do
+              before do
+                immediate_form.delivery_configurations.first.delivery_schedule = "immediate"
+                immediate_form.save_draft!
+              end
+
+              it "returns the form ID and state for the live form" do
+                expect(described_class.latest_form_ids_and_tags_with_delivery_schedule("immediate")).to eq [[immediate_form.id, "live"]]
+              end
+            end
+          end
+
+          context "when there is at least one archived form with the requested delivery schedule" do
+            let(:immediate_form) { create :form, :with_email_delivery, :archived }
+
+            context "when the form's draft has the same delivery schedule" do
+              it "returns the form ID and state for the archived form" do
+                expect(described_class.latest_form_ids_and_tags_with_delivery_schedule("immediate")).to eq [[immediate_form.id, "archived"]]
+              end
+            end
+
+            context "when the form's draft has a different delivery schedule" do
+              before do
+                immediate_form.delivery_configurations.first.delivery_schedule = "weekly"
+                immediate_form.save_draft!
+              end
+
+              it "returns the form ID and state for the archived form" do
+                expect(described_class.latest_form_ids_and_tags_with_delivery_schedule("immediate")).to eq [[immediate_form.id, "archived"]]
+              end
+            end
+          end
+
+          context "when there are no live or archived forms with the requested delivery schedule" do
+            let(:immediate_form) { create :form, :with_weekly_batch_email_delivery, :live }
+
+            context "when there are no draft forms with the requested delivery schedule" do
+              it "returns an empty array" do
+                expect(described_class.latest_form_ids_and_tags_with_delivery_schedule("immediate")).to eq []
+              end
+            end
+
+            context "when a draft form has the requested delivery schedule" do
+              before do
+                immediate_form.delivery_configurations.first.delivery_schedule = "immediate"
+                immediate_form.save_draft!
+              end
+
+              it "returns an empty array" do
+                expect(described_class.latest_form_ids_and_tags_with_delivery_schedule("immediate")).to eq []
+              end
+            end
+          end
+        end
+
+        context "when requesting the forms with daily schedule" do
+          context "when there is at least one live form with the requested delivery schedule" do
+            context "when the form's draft has the same delivery schedule" do
+              it "returns the form ID and state for the live form" do
+                expect(described_class.latest_form_ids_and_tags_with_delivery_schedule("daily")).to eq [[daily_batch_form.id, "live"]]
+              end
+            end
+
+            context "when the form's draft has a different delivery schedule" do
+              before do
+                daily_batch_form.delivery_configurations.first.delivery_schedule = "immediate"
+                daily_batch_form.save_draft!
+              end
+
+              it "returns the form ID and state for the live form" do
+                expect(described_class.latest_form_ids_and_tags_with_delivery_schedule("daily")).to eq [[daily_batch_form.id, "live"]]
+              end
+            end
+          end
+
+          context "when there is at least one archived form with the requested delivery schedule" do
+            let(:daily_batch_form) { create :form, :with_daily_batch_email_delivery, :archived }
+
+            context "when the form's draft has the same delivery schedule" do
+              it "returns the form ID and state for the archived form" do
+                expect(described_class.latest_form_ids_and_tags_with_delivery_schedule("daily")).to eq [[daily_batch_form.id, "archived"]]
+              end
+            end
+
+            context "when the form's draft has a different delivery schedule" do
+              before do
+                daily_batch_form.delivery_configurations.first.delivery_schedule = "immediate"
+                daily_batch_form.save_draft!
+              end
+
+              it "returns the form ID and state for the archived form" do
+                expect(described_class.latest_form_ids_and_tags_with_delivery_schedule("daily")).to eq [[daily_batch_form.id, "archived"]]
+              end
+            end
+          end
+
+          context "when there are no live or archived forms with the requested delivery schedule" do
+            let(:daily_batch_form) { create :form, :with_email_delivery, :live }
+
+            context "when there are no draft forms with the requested delivery schedule" do
+              it "returns an empty array" do
+                expect(described_class.latest_form_ids_and_tags_with_delivery_schedule("daily")).to eq []
+              end
+            end
+
+            context "when a draft form has the requested delivery schedule" do
+              before do
+                daily_batch_form.delivery_configurations.first.delivery_schedule = "daily"
+                daily_batch_form.save_draft!
+              end
+
+              it "returns an empty array" do
+                expect(described_class.latest_form_ids_and_tags_with_delivery_schedule("daily")).to eq []
+              end
+            end
+          end
+        end
+
+        context "when requesting the forms with weekly schedule" do
+          context "when there is at least one live form with the requested delivery schedule" do
+            context "when the form's draft has the same delivery schedule" do
+              it "returns the form ID and state for the live form" do
+                expect(described_class.latest_form_ids_and_tags_with_delivery_schedule("weekly")).to eq [[weekly_batch_form.id, "live"]]
+              end
+            end
+
+            context "when the form's draft has a different delivery schedule" do
+              before do
+                weekly_batch_form.delivery_configurations.first.delivery_schedule = "immediate"
+                weekly_batch_form.save_draft!
+              end
+
+              it "returns the form ID and state for the live form" do
+                expect(described_class.latest_form_ids_and_tags_with_delivery_schedule("weekly")).to eq [[weekly_batch_form.id, "live"]]
+              end
+            end
+          end
+
+          context "when there is at least one archived form with the requested delivery schedule" do
+            let(:weekly_batch_form) { create :form, :with_weekly_batch_email_delivery, :archived }
+
+            context "when the form's draft has the same delivery schedule" do
+              it "returns the form ID and state for the archived form" do
+                expect(described_class.latest_form_ids_and_tags_with_delivery_schedule("weekly")).to eq [[weekly_batch_form.id, "archived"]]
+              end
+            end
+
+            context "when the form's draft has a different delivery schedule" do
+              before do
+                weekly_batch_form.delivery_configurations.first.delivery_schedule = "immediate"
+                weekly_batch_form.save_draft!
+              end
+
+              it "returns the form ID and state for the archived form" do
+                expect(described_class.latest_form_ids_and_tags_with_delivery_schedule("weekly")).to eq [[weekly_batch_form.id, "archived"]]
+              end
+            end
+          end
+
+          context "when there are no live or archived forms with the requested delivery schedule" do
+            let(:weekly_batch_form) { create :form, :with_email_delivery, :live }
+
+            context "when there are no draft forms with the requested delivery schedule" do
+              it "returns an empty array" do
+                expect(described_class.latest_form_ids_and_tags_with_delivery_schedule("weekly")).to eq []
+              end
+            end
+
+            context "when a draft form has the requested delivery schedule" do
+              before do
+                weekly_batch_form.delivery_configurations.first.delivery_schedule = "weekly"
+                weekly_batch_form.save_draft!
+              end
+
+              it "returns an empty array" do
+                expect(described_class.latest_form_ids_and_tags_with_delivery_schedule("weekly")).to eq []
+              end
+            end
+          end
+        end
+      end
+    end
+
+    describe "draft_form_ids_and_tags_with_delivery_schedule" do
+      context "when requesting the forms with immediate schedule" do
+        context "when there is at least one live form with the requested delivery schedule" do
+          context "when the form's draft has the same delivery schedule" do
+            it "returns the form ID and state for the draft form" do
+              expect(described_class.draft_form_ids_and_tags_with_delivery_schedule("immediate")).to eq [[immediate_form.id, "draft"]]
+            end
+          end
+
+          context "when the form's draft has a different delivery schedule" do
+            before do
+              immediate_form.delivery_configurations.first.delivery_schedule = "immediate"
+              immediate_form.save_draft!
+            end
+
+            it "returns the form ID and state for the draft form" do
+              expect(described_class.draft_form_ids_and_tags_with_delivery_schedule("immediate")).to eq [[immediate_form.id, "draft"]]
+            end
+          end
+        end
+
+        context "when there is at least one archived form with the requested delivery schedule" do
+          let(:immediate_form) { create :form, :with_email_delivery, :archived }
+
+          context "when the form's draft has the same delivery schedule" do
+            it "returns the form ID and state for the draft form" do
+              expect(described_class.draft_form_ids_and_tags_with_delivery_schedule("immediate")).to eq [[immediate_form.id, "draft"]]
+            end
+          end
+
+          context "when the form's draft has a different delivery schedule" do
+            before do
+              immediate_form.delivery_configurations.first.delivery_schedule = "weekly"
+              immediate_form.save_draft!
+            end
+
+            it "returns an empty array" do
+              expect(described_class.draft_form_ids_and_tags_with_delivery_schedule("immediate")).to eq []
+            end
+          end
+        end
+
+        context "when there are no live or archived forms with the requested delivery schedule" do
+          let(:immediate_form) { create :form, :with_weekly_batch_email_delivery, :live }
+
+          context "when there are no draft forms with the requested delivery schedule" do
+            it "returns an empty array" do
+              expect(described_class.draft_form_ids_and_tags_with_delivery_schedule("immediate")).to eq []
+            end
+          end
+
+          context "when a draft form has the requested delivery schedule" do
+            before do
+              immediate_form.delivery_configurations.first.delivery_schedule = "immediate"
+              immediate_form.save_draft!
+            end
+
+            it "returns the form ID and state for the draft form" do
+              expect(described_class.draft_form_ids_and_tags_with_delivery_schedule("immediate")).to eq [[immediate_form.id, "draft"]]
+            end
+          end
+        end
+      end
+
+      context "when requesting the forms with daily schedule" do
+        context "when there is at least one live form with the requested delivery schedule" do
+          context "when the form's draft has the same delivery schedule" do
+            it "returns the form ID and state for the draft form" do
+              expect(described_class.draft_form_ids_and_tags_with_delivery_schedule("daily")).to eq [[daily_batch_form.id, "draft"]]
+            end
+          end
+
+          context "when the form's draft has a different delivery schedule" do
+            before do
+              daily_batch_form.delivery_configurations.first.delivery_schedule = "immediate"
+              daily_batch_form.save_draft!
+            end
+
+            it "returns an empty array" do
+              expect(described_class.draft_form_ids_and_tags_with_delivery_schedule("daily")).to eq []
+            end
+          end
+        end
+
+        context "when there is at least one archived form with the requested delivery schedule" do
+          let(:daily_batch_form) { create :form, :with_daily_batch_email_delivery, :archived }
+
+          context "when the form's draft has the same delivery schedule" do
+            it "returns the form ID and state for the draft form" do
+              expect(described_class.draft_form_ids_and_tags_with_delivery_schedule("daily")).to eq [[daily_batch_form.id, "draft"]]
+            end
+          end
+
+          context "when the form's draft has a different delivery schedule" do
+            before do
+              daily_batch_form.delivery_configurations.first.delivery_schedule = "immediate"
+              daily_batch_form.save_draft!
+            end
+
+            it "returns an empty array" do
+              expect(described_class.draft_form_ids_and_tags_with_delivery_schedule("daily")).to eq []
+            end
+          end
+        end
+
+        context "when there are no live or archived forms with the requested delivery schedule" do
+          let(:daily_batch_form) { create :form, :with_email_delivery, :live }
+
+          context "when there are no draft forms with the requested delivery schedule" do
+            it "returns an empty array" do
+              expect(described_class.draft_form_ids_and_tags_with_delivery_schedule("daily")).to eq []
+            end
+          end
+
+          context "when a draft form has the requested delivery schedule" do
+            before do
+              daily_batch_form.delivery_configurations.first.delivery_schedule = "daily"
+              daily_batch_form.save_draft!
+            end
+
+            it "returns the form ID and state for the draft form" do
+              expect(described_class.draft_form_ids_and_tags_with_delivery_schedule("daily")).to eq [[daily_batch_form.id, "draft"]]
+            end
+          end
+        end
+      end
+
+      context "when requesting the forms with weekly schedule" do
+        context "when there is at least one live form with the requested delivery schedule" do
+          context "when the form's draft has the same delivery schedule" do
+            it "returns the form ID and state for the draft form" do
+              expect(described_class.draft_form_ids_and_tags_with_delivery_schedule("weekly")).to eq [[weekly_batch_form.id, "draft"]]
+            end
+          end
+
+          context "when the form's draft has a different delivery schedule" do
+            before do
+              weekly_batch_form.delivery_configurations.first.delivery_schedule = "immediate"
+              weekly_batch_form.save_draft!
+            end
+
+            it "returns an empty array" do
+              expect(described_class.draft_form_ids_and_tags_with_delivery_schedule("weekly")).to eq []
+            end
+          end
+        end
+
+        context "when there is at least one archived form with the requested delivery schedule" do
+          let(:weekly_batch_form) { create :form, :with_weekly_batch_email_delivery, :archived }
+
+          context "when the form's draft has the same delivery schedule" do
+            it "returns the form ID and state for the draft form" do
+              expect(described_class.draft_form_ids_and_tags_with_delivery_schedule("weekly")).to eq [[weekly_batch_form.id, "draft"]]
+            end
+          end
+
+          context "when the form's draft has a different delivery schedule" do
+            before do
+              weekly_batch_form.delivery_configurations.first.delivery_schedule = "immediate"
+              weekly_batch_form.save_draft!
+            end
+
+            it "returns an empty array" do
+              expect(described_class.draft_form_ids_and_tags_with_delivery_schedule("weekly")).to eq []
+            end
+          end
+        end
+
+        context "when there are no live or archived forms with the requested delivery schedule" do
+          let(:weekly_batch_form) { create :form, :with_email_delivery, :live }
+
+          context "when there are no draft forms with the requested delivery schedule" do
+            it "returns an empty array" do
+              expect(described_class.draft_form_ids_and_tags_with_delivery_schedule("weekly")).to eq []
+            end
+          end
+
+          context "when a draft form has the requested delivery schedule" do
+            before do
+              weekly_batch_form.delivery_configurations.first.delivery_schedule = "weekly"
+              weekly_batch_form.save_draft!
+            end
+
+            it "returns the form ID and state for the draft form" do
+              expect(described_class.draft_form_ids_and_tags_with_delivery_schedule("weekly")).to eq [[weekly_batch_form.id, "draft"]]
+            end
+          end
+        end
+      end
+    end
+  end
+
+  describe ".form_ids_and_states_with_delivery_schedule" do
+    let(:immediate_form) { create :form, :with_email_delivery, :live }
+    let(:daily_batch_form) { create :form, :with_daily_batch_email_delivery, :live }
+    let(:weekly_batch_form) { create :form, :with_weekly_batch_email_delivery, :live }
+
+    before do
+      immediate_form.save_draft!
+      daily_batch_form.save_draft!
+      weekly_batch_form.save_draft!
+    end
+
+    context "when requesting the forms with immediate schedule" do
+      context "when there is at least one live form with the requested delivery schedule" do
+        context "when the form's draft has the same delivery schedule" do
+          it "returns the form ID and state for the live and draft forms" do
+            expect(described_class.form_ids_and_states_with_delivery_schedule("immediate")).to eq [{ form_id: immediate_form.id, state: "current" }, { form_id: immediate_form.id, state: "draft" }]
+          end
+        end
+
+        context "when the form's draft has a different delivery schedule" do
+          before do
+            immediate_form.delivery_configurations.first.delivery_schedule = "immediate"
+            immediate_form.save_draft!
+          end
+
+          it "returns the form ID and state for the live and draft forms" do
+            expect(described_class.form_ids_and_states_with_delivery_schedule("immediate")).to eq [{ form_id: immediate_form.id, state: "current" }, { form_id: immediate_form.id, state: "draft" }]
+          end
+        end
+      end
+
+      context "when there is at least one archived form with the requested delivery schedule" do
+        let(:immediate_form) { create :form, :with_email_delivery, :archived }
+
+        context "when the form's draft has the same delivery schedule" do
+          it "returns the form ID and state for the archived and draft forms" do
+            expect(described_class.form_ids_and_states_with_delivery_schedule("immediate")).to eq [{ form_id: immediate_form.id, state: "current" }, { form_id: immediate_form.id, state: "draft" }]
+          end
+        end
+
+        context "when the form's draft has a different delivery schedule" do
+          before do
+            immediate_form.delivery_configurations.first.delivery_schedule = "weekly"
+            immediate_form.save_draft!
+          end
+
+          it "returns the form ID and state for the archived form" do
+            expect(described_class.form_ids_and_states_with_delivery_schedule("immediate")).to eq [{ form_id: immediate_form.id, state: "current" }]
+          end
+        end
+      end
+
+      context "when there are no live or archived forms with the requested delivery schedule" do
+        let(:immediate_form) { create :form, :with_weekly_batch_email_delivery, :live }
+
+        context "when there are no draft forms with the requested delivery schedule" do
+          it "returns an empty array" do
+            expect(described_class.form_ids_and_states_with_delivery_schedule("immediate")).to eq []
+          end
+        end
+
+        context "when a draft form has the requested delivery schedule" do
+          before do
+            immediate_form.delivery_configurations.first.delivery_schedule = "immediate"
+            immediate_form.save_draft!
+          end
+
+          it "returns the form ID and state for the draft form" do
+            expect(described_class.form_ids_and_states_with_delivery_schedule("immediate")).to eq [{ form_id: immediate_form.id, state: "draft" }]
+          end
+        end
+      end
+    end
+
+    context "when requesting the forms with daily schedule" do
+      context "when there is at least one live form with the requested delivery schedule" do
+        context "when the form's draft has the same delivery schedule" do
+          it "returns the form ID and state for the live and draft forms" do
+            expect(described_class.form_ids_and_states_with_delivery_schedule("daily")).to eq [{ form_id: daily_batch_form.id, state: "current" }, { form_id: daily_batch_form.id, state: "draft" }]
+          end
+        end
+
+        context "when the form's draft has a different delivery schedule" do
+          before do
+            daily_batch_form.delivery_configurations.first.delivery_schedule = "immediate"
+            daily_batch_form.save_draft!
+          end
+
+          it "returns the form ID and state for the live form" do
+            expect(described_class.form_ids_and_states_with_delivery_schedule("daily")).to eq [{ form_id: daily_batch_form.id, state: "current" }]
+          end
+        end
+      end
+
+      context "when there is at least one archived form with the requested delivery schedule" do
+        let(:daily_batch_form) { create :form, :with_daily_batch_email_delivery, :archived }
+
+        context "when the form's draft has the same delivery schedule" do
+          it "returns the form ID and state for the archived and draft forms" do
+            expect(described_class.form_ids_and_states_with_delivery_schedule("daily")).to eq [{ form_id: daily_batch_form.id, state: "current" }, { form_id: daily_batch_form.id, state: "draft" }]
+          end
+        end
+
+        context "when the form's draft has a different delivery schedule" do
+          before do
+            daily_batch_form.delivery_configurations.first.delivery_schedule = "immediate"
+            daily_batch_form.save_draft!
+          end
+
+          it "returns the form ID and state for the archived form" do
+            expect(described_class.form_ids_and_states_with_delivery_schedule("daily")).to eq [{ form_id: daily_batch_form.id, state: "current" }]
+          end
+        end
+      end
+
+      context "when there are no live or archived forms with the requested delivery schedule" do
+        let(:daily_batch_form) { create :form, :with_email_delivery, :live }
+
+        context "when there are no draft forms with the requested delivery schedule" do
+          it "returns an empty array" do
+            expect(described_class.form_ids_and_states_with_delivery_schedule("daily")).to eq []
+          end
+        end
+
+        context "when a draft form has the requested delivery schedule" do
+          before do
+            daily_batch_form.delivery_configurations.first.delivery_schedule = "daily"
+            daily_batch_form.save_draft!
+          end
+
+          it "turns the form ID and state for the archived form" do
+            expect(described_class.form_ids_and_states_with_delivery_schedule("daily")).to eq [{ form_id: daily_batch_form.id, state: "draft" }]
+          end
+        end
+      end
+    end
+
+    context "when requesting the forms with weekly schedule" do
+      context "when there is at least one live form with the requested delivery schedule" do
+        context "when the form's draft has the same delivery schedule" do
+          it "returns the form ID and state for the live and draft forms" do
+            expect(described_class.form_ids_and_states_with_delivery_schedule("weekly")).to eq [{ form_id: weekly_batch_form.id, state: "current" }, { form_id: weekly_batch_form.id, state: "draft" }]
+          end
+        end
+
+        context "when the form's draft has a different delivery schedule" do
+          before do
+            weekly_batch_form.delivery_configurations.first.delivery_schedule = "immediate"
+            weekly_batch_form.save_draft!
+          end
+
+          it "returns the form ID and state for the live form" do
+            expect(described_class.form_ids_and_states_with_delivery_schedule("weekly")).to eq [{ form_id: weekly_batch_form.id, state: "current" }]
+          end
+        end
+      end
+
+      context "when there is at least one archived form with the requested delivery schedule" do
+        let(:weekly_batch_form) { create :form, :with_weekly_batch_email_delivery, :archived }
+
+        context "when the form's draft has the same delivery schedule" do
+          it "returns the form ID and state for the archived form" do
+            expect(described_class.form_ids_and_states_with_delivery_schedule("weekly")).to eq [{ form_id: weekly_batch_form.id, state: "current" }, { form_id: weekly_batch_form.id, state: "draft" }]
+          end
+        end
+
+        context "when the form's draft has a different delivery schedule" do
+          before do
+            weekly_batch_form.delivery_configurations.first.delivery_schedule = "immediate"
+            weekly_batch_form.save_draft!
+          end
+
+          it "returns the form ID and state for the archived form" do
+            expect(described_class.form_ids_and_states_with_delivery_schedule("weekly")).to eq [{ form_id: weekly_batch_form.id, state: "current" }]
+          end
+        end
+      end
+
+      context "when there are no live or archived forms with the requested delivery schedule" do
+        let(:weekly_batch_form) { create :form, :with_email_delivery, :live }
+
+        context "when there are no draft forms with the requested delivery schedule" do
+          it "returns an empty array" do
+            expect(described_class.form_ids_and_states_with_delivery_schedule("weekly")).to eq []
+          end
+        end
+
+        context "when a draft form has the requested delivery schedule" do
+          before do
+            weekly_batch_form.delivery_configurations.first.delivery_schedule = "weekly"
+            weekly_batch_form.save_draft!
+          end
+
+          it "returns the form ID and state for the draft form" do
+            expect(described_class.form_ids_and_states_with_delivery_schedule("weekly")).to eq [{ form_id: weekly_batch_form.id, state: "draft" }]
+          end
+        end
+      end
     end
   end
 end

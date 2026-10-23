@@ -328,15 +328,19 @@ Rails.application.routes.draw do
   end
 
   scope "api/v3", as: "api_v3" do
-    scope "forms/:form_id/" do
-      scope "versions" do
-        get "/live", to: "api/v3_form_documents#live", as: :live_version
-        get "/archived", to: "api/v3_form_documents#archived", as: :archived_version
-        get "/draft", to: "api/v3_form_documents#draft", as: :draft_version
-        get "/:version", to: "api/v3_form_documents#show", as: :form_document_version, constraints: { version: /\d+/ }
+    scope "forms/" do
+      scope ":form_id/" do
+        scope "versions" do
+          get "/live", to: "api/v3_form_documents#live", as: :live_version
+          get "/archived", to: "api/v3_form_documents#archived", as: :archived_version
+          get "/draft", to: "api/v3_form_documents#draft", as: :draft_version
+          get "/:version", to: "api/v3_form_documents#show", as: :form_document_version, constraints: { version: /\d+/ }
+        end
+
+        get "/delivery-configurations/:state", to: "api/v3_form_documents#delivery_configurations", as: :delivery_configurations, constraints: { state: /draft|current/ }
       end
 
-      get "/delivery-configurations/:state", to: "api/v3_form_documents#delivery_configurations", as: :delivery_configurations, constraints: { state: /draft|current/ }
+      get "with-delivery-schedule/:schedule", to: "api/v3_form_documents#form_ids_and_states_with_delivery_schedule", as: :forms_with_delivery_schedule, constraints: { schedule: /immediate|daily|weekly/ }
     end
   end
 

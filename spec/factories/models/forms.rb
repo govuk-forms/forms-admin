@@ -204,6 +204,36 @@ FactoryBot.define do
         )
       end
     end
+
+    trait :with_s3_delivery do
+      after(:create) do |form|
+        form.delivery_configurations.create!(
+          delivery_method: "s3",
+          delivery_schedule: "immediate",
+          formats: %w[json],
+        )
+      end
+    end
+
+    trait :with_daily_batch_email_delivery do
+      after(:create) do |form|
+        form.delivery_configurations.create!(
+          delivery_method: "email",
+          delivery_schedule: "daily",
+          formats: %w[csv],
+        )
+      end
+    end
+
+    trait :with_weekly_batch_email_delivery do
+      after(:create) do |form|
+        form.delivery_configurations.create!(
+          delivery_method: "email",
+          delivery_schedule: "weekly",
+          formats: %w[csv],
+        )
+      end
+    end
   end
 end
 
