@@ -5,11 +5,8 @@ RSpec.describe Forms::BrandController, type: :request do
   let(:brand_id) { "cheshire-east" }
 
   let(:group) { create(:group, organisation: standard_user.organisation) }
-  let(:custom_branding_enabled) { true }
 
   before do
-    standard_user.organisation.update!(custom_branding_enabled:)
-
     cheshire_east = create(:brand, slug: "cheshire-east", name: "Cheshire East Council")
     south_gloucestershire = create(:brand, slug: "south-gloucestershire", name: "South Gloucestershire Council")
     create(:organisation_brand, organisation: standard_user.organisation, brand: cheshire_east)
@@ -27,31 +24,10 @@ RSpec.describe Forms::BrandController, type: :request do
       expect(response).to have_http_status(:ok)
       expect(response.body).to include(I18n.t("brand_input.heading"))
     end
-
-    context "when the custom_branding feature is disabled" do
-      let(:custom_branding_enabled) { false }
-
-      it "returns 404" do
-        get(form_brand_path(form_id: form.id))
-        expect(response).to have_http_status(:not_found)
-      end
-    end
   end
 
   describe "#create" do
     let(:params) { { forms_brand_input: { brand_id: } } }
-
-    context "when the custom_branding feature is disabled" do
-      let(:custom_branding_enabled) { false }
-
-      it "returns 404 and does not update the form" do
-        expect {
-          post(form_brand_path(form_id: form.id), params:)
-        }.not_to(change { form.reload.brand_id })
-
-        expect(response).to have_http_status(:not_found)
-      end
-    end
 
     context "when the brand is changed" do
       it "updates the form" do
@@ -125,6 +101,23 @@ RSpec.describe Forms::BrandController, type: :request do
 
     context "when the brand is not in the configured list" do
       let(:brand_id) { "not-a-brand" }
+
+      it "does not update the form and re-renders the page with an error" do
+        expect {
+          post(form_brand_path(form_id: form.id), params:)
+        }.not_to(change { form.reload.brand_id })
+
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(response.body).to include(I18n.t("activemodel.errors.models.forms/brand_input.attributes.brand_id.inclusion"))
+      end
+    end
+
+    context "when the organisation has no brands" do
+      let(:form) { create(:form, :live, brand_id: nil) }
+
+      before do
+        standard_user.organisation.organisation_brands.destroy_all
+      end
 
       it "does not update the form and re-renders the page with an error" do
         expect {
