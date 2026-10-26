@@ -17,6 +17,7 @@ FactoryBot.define do
     payment_url { nil }
     external_id { nil }
     send_copy_of_answers { "disabled" }
+    save_and_return { "disabled" }
     brand_id { nil }
     s3_bucket_aws_account_id { nil }
     s3_bucket_name { nil }

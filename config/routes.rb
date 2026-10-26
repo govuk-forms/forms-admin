@@ -90,6 +90,8 @@ Rails.application.routes.draw do
     get "/copy-of-answers" => "forms/copy_of_answers#new", as: :copy_of_answers
     post "/copy-of-answers" => "forms/copy_of_answers#create", as: :copy_of_answers_create
     get "/metrics" => "forms/metrics#metrics_csv", as: :metrics_csv
+    get "/save-and-return" => "forms/save_and_return#new", as: :save_and_return
+    post "/save-and-return" => "forms/save_and_return#create", as: :save_and_return_create
 
     resource :routes, only: %i[show create]
 
