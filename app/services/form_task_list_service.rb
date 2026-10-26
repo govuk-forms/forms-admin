@@ -86,8 +86,7 @@ private
   # GOV.UK branding is always available and isn't stored as a Brand, so
   # only show the task if the organisation has other brands to choose from
   def show_brand_task?
-    organisation = @form.group&.organisation
-    FeatureService.new(organisation:).enabled?(:custom_branding) && organisation.brands.any?
+    @form.group&.organisation&.brands&.any?
   end
 
   def how_you_get_completed_forms_section(section_number:)
