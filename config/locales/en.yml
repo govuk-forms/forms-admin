@@ -2078,7 +2078,7 @@ en:
     submit_save: Save question
   payment_link_input:
     body_html: |
-      <p>You can use <a href="https://payments.service.gov.uk/" target="_blank"" rel="noreferrer noopener"">GOV.UK Pay (opens in a new tab)</a> to set up a payment page (called a ‘payment link’).</p>
+      <p>You can use <a href="https://payments.service.gov.uk/" target="_blank" rel="noreferrer noopener"">GOV.UK Pay (opens in a new tab)</a> to set up a payment page (called a ‘payment link’).</p>
 
       <p>Once it’s set up, you can copy and paste the payment link URL into the box below. This will add a payment page to the end of your form.</p>
     creating_your_payment_link:
@@ -2395,7 +2395,7 @@ en:
       using_routes_details_summary: Using routes
       using_routes_details_text_html: |
         <p>You can use ‘routes’ to direct people through your form based on their answers, so people will only need to answer questions that are relevant to them.</p>
-        <p><a href="https://www.forms.service.gov.uk/about/using-routes" target="_blank"" rel="noreferrer noopener">Read about using routes (opens in new tab)</a> on the GOV.UK Forms website.</p>
+        <p><a href="https://www.forms.service.gov.uk/about/using-routes" target="_blank" rel="noreferrer noopener">Read about using routes (opens in new tab)</a> on the GOV.UK Forms website.</p>
   routing_page:
     body_html: |
       <p> You can add a route to a question so if someone selects one specific answer, they’ll be skipped to: </p>
