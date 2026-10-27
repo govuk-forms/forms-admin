@@ -79,15 +79,25 @@ RSpec.describe Forms::SaveAndReturnInput, type: :model do
     let(:input) { described_class.new(form:) }
 
     context "when save and return is enabled on a live form" do
-      let(:form) { build(:form, :live, save_and_return: "enabled") }
+      let(:form) { create(:form, :live, save_and_return: "enabled") }
 
       it { is_expected.to be true }
     end
 
     context "when save and return is enabled on a live form with a draft" do
-      let(:form) { build(:form, :live_with_draft, save_and_return: "enabled") }
+      let(:form) { create(:form, :live_with_draft, save_and_return: "enabled") }
 
       it { is_expected.to be true }
+    end
+
+    context "when save and return is enabled in the draft but disabled in the live version" do
+      let(:form) do
+        create(:form, :live_with_draft, save_and_return: "disabled").tap do |live_form|
+          live_form.update_column(:save_and_return, "enabled")
+        end
+      end
+
+      it { is_expected.to be false }
     end
 
     context "when save and return is enabled on a draft form" do
