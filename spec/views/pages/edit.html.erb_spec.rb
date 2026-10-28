@@ -67,4 +67,16 @@ describe "pages/edit.html.erb" do
       expect(rendered).not_to have_text(I18n.t("helpers.hint.pages_question_input.is_optional_options.true"))
     end
   end
+
+  describe "routes section" do
+    let(:form) { create :form, pages: [page, create(:page)] }
+
+    it "contains the routes section" do
+      expect(rendered).to have_css("h2", text: I18n.t("pages.routes_section.heading"))
+    end
+
+    it "contains a link to the question's routes" do
+      expect(rendered).to have_link("edit question routes", href: routes_path(form_id: form.id, anchor: page.page_position_id))
+    end
+  end
 end
