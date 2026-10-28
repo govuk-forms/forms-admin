@@ -1,4 +1,4 @@
-<p>Last updated: 29 October 2026</p>
+<p>Last updated: 30 October 2026</p>
 
 <nav aria-labelledby="sections-heading">
   <h2 class="govuk-heading-m" id="sections-heading">Contents</h2>
@@ -240,7 +240,8 @@
   <li>
     <p>
       You must ensure any mailbox(es) you use to receive form response data meets the
-      <a href="https://www.gov.uk/guidance/securing-government-email">government secure email policy</a>.
+      <a href="https://www.gov.uk/guidance/securing-government-email">government secure email policy</a>. Your mail server must support
+      Transport Layer Security (TLS). If it does not, form responses will not be delivered to it.
     </p>
   </li>
   <li>
@@ -1091,8 +1092,8 @@
   </li>
   <li>
     <p>
-      Requests between 3rd party processors and the designated mail server for receiving submitted form responses are encrypted by using TLS
-      1.2 if the mail server supports this.
+      Requests between 3rd party processors and the designated mail server for receiving submitted form responses are encrypted with TLS.
+      Form responses are not sent if the mail server does not support TLS.
     </p>
   </li>
   <li>

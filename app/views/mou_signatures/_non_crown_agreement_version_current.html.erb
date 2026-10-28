@@ -1,5 +1,5 @@
-<p class="govuk-body-m">Last updated: 1 May 2026<br>
-  Version NCP1.1</p>
+<p class="govuk-body-m">Last updated: 30 October 2026<br>
+  Version NCP1.2</p>
 
 <h2 id="about-this-document" class="govuk-heading-m">About this document</h2>
 
@@ -288,6 +288,7 @@
 
 <p class="govuk-body-m">7. You must ensure any mailbox(es) you use to receive form response data meets the
   <a href="https://www.gov.uk/guidance/securing-government-email" class="govuk-link">government secure email policy</a>.
+  Your mail server must support Transport Layer Security (TLS). If it does not, form responses will not be delivered to it.
 </p>
 
 <p class="govuk-body-m">8. You are responsible for managing and securing access to form response data within Your
@@ -762,7 +763,7 @@
   <li>Requests between users’ browsers and GOV.UK Forms applications are encrypted with TLS 1.2</li>
   <li>Requests between GOV.UK Forms and its 3rd party processors are encrypted with TLS 1.2</li>
   <li>Requests between 3rd party processors and the designated mail server for receiving submitted form responses are
-    encrypted by using TLS 1.2 if the mail server supports this.
+    encrypted with TLS. Form responses are not sent if the mail server does not support TLS.
   </li>
   <li>Requests between Notify and the mail server for receiving form submission confirmations, by using TLS 1.2 if the
     mail server supports this.

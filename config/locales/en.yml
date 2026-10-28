@@ -2477,6 +2477,7 @@ en:
         <ul class="govuk-list govuk-list--bullet">
           <li>should be a shared government email inbox</li>
           <li>must not send automatic replies</li>
+          <li>must use a mail server that supports Transport Layer Security (TLS)</li>
         </ul>
 
         <p>
