@@ -19,7 +19,7 @@ class Forms::SaveAndReturnInput < BaseInput
 
   def save_and_return_enabled_in_live?
     # prevents a live form with save and return enabled from being disabled - this is also handled on the frontend
-    form.save_and_return == "enabled" &&
-      %w[live live_with_draft].include?(form.state)
+    form.is_live? &&
+      form.latest_form_document&.content&.dig("save_and_return") == "enabled"
   end
 end

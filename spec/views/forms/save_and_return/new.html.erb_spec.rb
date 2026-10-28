@@ -60,7 +60,7 @@ describe "forms/save_and_return/new.html.erb" do
   end
 
   context "when the form is live with draft and save and return is enabled" do
-    let(:state) { :live_with_draft }
+    let(:form) { create(:form, :live_with_draft, save_and_return:) }
 
     it "renders the checked checkbox as disabled" do
       expect(rendered).to have_field("forms-save-and-return-input-save-and-return-enabled-field", checked: true, disabled: true)
@@ -77,7 +77,7 @@ describe "forms/save_and_return/new.html.erb" do
   end
 
   context "when the form is live and save and return is enabled" do
-    let(:state) { :live }
+    let(:form) { create(:form, :live, save_and_return:) }
 
     it "renders the checkbox as checked and disabled" do
       expect(rendered).to have_field("forms-save-and-return-input-save-and-return-enabled-field", checked: true, disabled: true)
