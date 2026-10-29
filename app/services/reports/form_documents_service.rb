@@ -155,6 +155,31 @@ class Reports::FormDocumentsService
       form_document.dig("content", "send_copy_of_answers") == "enabled"
     end
 
+    # The feature flags for a form document, keyed by the feature report
+    # counters without their forms_with_ prefix. Every value is a boolean.
+    def features(form_document)
+      routes = has_routes?(form_document)
+      counts = update_routes_details(form_document).dig("metadata", "number_of_questions") if routes
+
+      {
+        "copied" => is_copy?(form_document),
+        "payment" => has_payments?(form_document),
+        "routing" => routes,
+        "only_steps_with_one_conditional_route" => routes && counts["with_one_conditional_route"].positive? && counts["with_many_conditional_routes"].zero?,
+        "steps_with_many_conditional_routes" => routes && counts["with_many_conditional_routes"].positive?,
+        "only_unconditional_routes" => routes && counts["with_routes"] == counts["with_unconditional_route"],
+        "add_another_answer" => has_add_another_answer?(form_document),
+        "csv_submission_email_attachments" => has_csv_submission_email_attachments(form_document),
+        "json_submission_email_attachments" => has_json_submission_email_attachments(form_document),
+        "daily_submission_csv" => has_daily_submission_csv(form_document),
+        "weekly_submission_csv" => has_weekly_submission_csv(form_document),
+        "s3_submissions" => has_s3_submissions(form_document),
+        "exit_pages" => has_exit_pages?(form_document),
+        "welsh_translation" => has_welsh_translation(form_document),
+        "copy_of_answers_enabled" => copy_of_answers_enabled?(form_document),
+      }
+    end
+
   private
 
     def form_states_for_tag(tag)
