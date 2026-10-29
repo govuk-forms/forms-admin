@@ -73,6 +73,14 @@ updates:
     cooldown:
       default-days: 7
     open-pull-requests-limit: 10
+    # Production dependencies (govuk-frontend, dfe-autocomplete, turndown) stay
+    # as individual PRs
+    groups:
+      npm-development:
+        dependency-type: "development"
+        update-types:
+          - "minor"
+          - "patch"
 
   - package-ecosystem: terraform
     directory: ".review_apps/"
