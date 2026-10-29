@@ -46,6 +46,12 @@ updates:
           - "vite_ruby"
         update-types:
           - "major"
+      # Rails minor upgrades get their own PR; patches go in bundler-production
+      rails:
+        patterns:
+          - "rails"
+        update-types:
+          - "minor"
       # Gems in the :development and :test Gemfile groups
       bundler-development:
         dependency-type: "development"
