@@ -33,6 +33,10 @@ updates:
       - dependency-name: "vite_ruby"
     # A dependency goes in the first group it matches, so order matters
     groups:
+      bundler-security-updates:
+        applies-to: security-updates
+        patterns:
+          - "*"
       # These gems must be bumped together. Minor and patch bumps fall through
       # to the groups below; only majors get their own PR here.
       sentry:
@@ -76,6 +80,10 @@ updates:
     # Production dependencies (govuk-frontend, dfe-autocomplete, turndown) stay
     # as individual PRs
     groups:
+      npm-security-updates:
+        applies-to: security-updates
+        patterns:
+          - "*"
       npm-development:
         dependency-type: "development"
         update-types:
