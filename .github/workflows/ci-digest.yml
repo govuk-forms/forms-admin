@@ -1,0 +1,24 @@
+name: "CI digest"
+
+# Weekly summary of how often this repo's workflows fail and how long they take,
+# compared with the previous 12 weeks. The logic is in forms-deploy.
+#
+# For now it is a dry run: the digest goes to the job summary and nothing is
+# posted to Slack. See reusable-ci-digest.yml in forms-deploy for how to go live.
+
+on:
+  schedule:
+    - cron: "12 8 * * 1" # Mondays, around 09:00 UK time
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  digest:
+    name: "CI digest"
+    permissions:
+      actions: read
+      contents: read
+    uses: govuk-forms/forms-deploy/.github/workflows/reusable-ci-digest.yml@main
+    secrets:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_GOVUK_FORMS_DEPLOYMENTS }}
