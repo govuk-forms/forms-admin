@@ -112,14 +112,14 @@ GEM
     auth-sanitizer (0.2.1)
       version_gem (~> 1.1, >= 1.1.10)
     aws-eventstream (1.4.1)
-    aws-partitions (1.1299.0)
-    aws-sdk-cloudwatch (1.151.0)
-      aws-sdk-core (~> 3, >= 3.258.0)
+    aws-partitions (1.1299.1)
+    aws-sdk-cloudwatch (1.152.0)
+      aws-sdk-core (~> 3, >= 3.260.0)
       aws-sigv4 (~> 1.5)
-    aws-sdk-codepipeline (1.122.0)
-      aws-sdk-core (~> 3, >= 3.258.0)
+    aws-sdk-codepipeline (1.123.0)
+      aws-sdk-core (~> 3, >= 3.260.0)
       aws-sigv4 (~> 1.5)
-    aws-sdk-core (3.262.0)
+    aws-sdk-core (3.263.0)
       aws-eventstream (~> 1, >= 1.4.1)
       aws-partitions (~> 1, >= 1.992.0)
       aws-sigv4 (~> 1.9)
@@ -231,11 +231,11 @@ GEM
       rake (~> 13.3)
     googleapis-common-protos-types (1.23.0)
       google-protobuf (~> 4.26)
-    govuk-components (6.5.0)
+    govuk-components (6.6.0)
       html-attributes-utils (~> 1.0.0, >= 1.0.0)
       pagy (>= 6, < 10)
       view_component (>= 4.9, < 4.16)
-    govuk_design_system_formbuilder (6.5.0)
+    govuk_design_system_formbuilder (6.6.0)
       actionview (>= 7.2)
       activemodel (>= 7.2)
       activesupport (>= 7.2)
@@ -749,7 +749,7 @@ GEM
     unicode-display_width (3.2.0)
       unicode-emoji (~> 4.1)
     unicode-emoji (4.2.0)
-    uri (1.1.1)
+    uri (1.1.2)
     uri-idna (0.3.1)
     useragent (0.16.11)
     validate_url (1.0.15)
@@ -801,8 +801,8 @@ DEPENDENCIES
   aasm (~> 6.0)
   acts_as_list
   after_commit_everywhere (~> 1.6)
-  aws-sdk-cloudwatch (~> 1.151)
-  aws-sdk-codepipeline (~> 1.122)
+  aws-sdk-cloudwatch (~> 1.152)
+  aws-sdk-codepipeline (~> 1.123)
   aws-sdk-firehose (~> 1.118)
   aws-sdk-s3 (~> 1.235)
   axe-core-rspec
@@ -877,10 +877,10 @@ CHECKSUMS
   ast (2.4.3) sha256=954615157c1d6a382bc27d690d973195e79db7f55e9765ac7c481c60bdb4d383
   auth-sanitizer (0.2.1) sha256=917dcf01f7589b06c26726afe90568cf2fb29d37a1f94facfc664f11967cc577
   aws-eventstream (1.4.1) sha256=ceb6a99c61df4bb00344e54aed0351574beca24f87a0d1487d1d2ed80929ce96
-  aws-partitions (1.1299.0) sha256=de8a9cf51f505a57343cb81a79279b4ae91e7acc09647f692416be85788ffce9
-  aws-sdk-cloudwatch (1.151.0) sha256=8a5297d9e7425e159b006ace00d8d4f083061d1c8d7db903bd2fc04e3c17ccfe
-  aws-sdk-codepipeline (1.122.0) sha256=db6bab65bd4ab00fc1e65bf5ac0460a38193dc742474c2b8a05252d3a406c273
-  aws-sdk-core (3.262.0) sha256=1daa3f59cd34a5597443d20c1fa073c27a1cd34fbbb5bba650903a7b8f8b0783
+  aws-partitions (1.1299.1) sha256=bf50f8edee6299b6b709973db2192a86caa005a4eee5712338728f7071bf69a6
+  aws-sdk-cloudwatch (1.152.0) sha256=0bd25fb3832bd19e3f30b9a9859da29fb46a955b1e0095abe005d1f8fded1555
+  aws-sdk-codepipeline (1.123.0) sha256=31d8209f01a89c5bc5976711760beea688de762f18a3a5f39f8943e51d455336
+  aws-sdk-core (3.263.0) sha256=9b6d396ed8b3e5ba19b0640fbdbfa1875b0c485353e1bb836f1e72b403c8892d
   aws-sdk-firehose (1.118.0) sha256=5b0435885cd1331d0163c77c01dc9f8a416390a38a0c5aeebc30571f90069347
   aws-sdk-kms (1.136.0) sha256=c61257fc6c41196dd58bce5abd4510b8afdf72698c00f50227bbd18e9b7da5a5
   aws-sdk-s3 (1.235.0) sha256=e42c1d4ee18014fe0b7d92267e97f20bb02634e35aa604443f76869255be5660
@@ -928,9 +928,9 @@ CHECKSUMS
   google-protobuf (4.36.2-x86_64-linux-gnu) sha256=d25a820873e423f1d209ae8c672a4a28b019e2429debd0901d26670a0b4e14db
   google-protobuf (4.36.2-x86_64-linux-musl) sha256=0fa17686c896da96a60a705e56ddc7d4ff56413f52787c655bd4c9fb33ffe14f
   googleapis-common-protos-types (1.23.0) sha256=992e740a523794d9fc5f29a504465d8fc737aaa16c930fe7228e3346860faf0a
-  govuk-components (6.5.0) sha256=9f2476ac0c64a15ce4afc5d331c5f318679401f6cb844876a03b2f120f47b45c
+  govuk-components (6.6.0) sha256=99edf19e81f7560fdc752b709a8b661d379a92074f2186ac4c9eaddcffbae308
   govuk-forms-markdown (0.12.0)
-  govuk_design_system_formbuilder (6.5.0) sha256=ab8932ed72d49025418a4c91d062d221c4fcf761232c9af217ef8e71c3ae4485
+  govuk_design_system_formbuilder (6.6.0) sha256=f4f60620989b50beec1e8f6d1af4b3065a48cb1a86ebb6d01689b676ea9370c4
   govuk_notify_rails (3.0.0) sha256=e0e1b8b0a7c47f90963034f290fb2982652aa8051a733c25c178680d44f2d7aa
   hashdiff (1.2.1) sha256=9c079dbc513dfc8833ab59c0c2d8f230fa28499cc5efb4b8dd276cf931457cd1
   hashie (5.1.0) sha256=c266471896f323c446ea8207f8ffac985d2718df0a0ba98651a3057096ca3870
@@ -1112,7 +1112,7 @@ CHECKSUMS
   tzinfo-data (1.2026.5) sha256=0bdc3c5a540b1704f73a7b5c9be5c90bd0a5866c8e9e8e8a7885977d23a81645
   unicode-display_width (3.2.0) sha256=0cdd96b5681a5949cdbc2c55e7b420facae74c4aaf9a9815eee1087cb1853c42
   unicode-emoji (4.2.0) sha256=519e69150f75652e40bf736106cfbc8f0f73aa3fb6a65afe62fefa7f80b0f80f
-  uri (1.1.1) sha256=379fa58d27ffb1387eaada68c749d1426738bd0f654d812fcc07e7568f5c57c6
+  uri (1.1.2) sha256=89292e98eabbef6248b0a0ed5e7e398e152f83f17560023a6d94a7f492b169fb
   uri-idna (0.3.1) sha256=c8601a9ca545670a763f5a7c56c99d7072bc2b1f6d83df63e6f35c264b609823
   useragent (0.16.11) sha256=700e6413ad4bb954bb63547fa098dddf7b0ebe75b40cc6f93b8d54255b173844
   validate_url (1.0.15) sha256=72fe164c0713d63a9970bd6700bea948babbfbdcec392f2342b6704042f57451
