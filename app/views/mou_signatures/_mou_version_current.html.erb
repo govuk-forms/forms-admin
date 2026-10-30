@@ -277,8 +277,8 @@
   </li>
   <li>
     <p>
-      The online forms are unauthenticated and could be completed by anyone. You are responsible for including identification and
-      authentication mechanisms within your downstream processes if these are required.
+      The online forms do not verify a person’s identity, including where they sign in, and could be completed by anyone. You are
+      responsible for including identification and authentication mechanisms within your downstream processes if these are required.
     </p>
   </li>
 </ol>
@@ -856,7 +856,8 @@
 </p>
 <p>
   <strong>GOV.UK Forms Filler Personal Data</strong> means all personal data transferred when members of the public or businesses fill out
-  and submit a form built by the GOV.UK Forms service, and transferred to your organisation to process.
+  a form built using GOV.UK Forms, whether or not the form is submitted, and any personal data used to link saved answers to the person who
+  saved them.
 </p>
 <p>
   <strong>GOV.UK Forms Filler Technical Data</strong> means all technical device data, such as IP address, web browsers and operating
@@ -971,7 +972,13 @@
 </p>
 <p>
   Form submissions, including Form Filler Personal Data, are retained during the user’s active session. These sessions automatically expire
-  and are permanently deleted after 20 hours of inactivity.
+  and are permanently deleted after 20 hours of inactivity, unless the form filler has saved their progress.
+</p>
+<p>
+  Where a form allows people to save their progress and return later, saved answers, including Form Filler Personal Data, are kept for 30
+  days from the last time the form filler saved them. Saving again restarts this period. If the form filler does not save their answers
+  again within this period, their saved answers are permanently deleted. If they submit the form, their answers are treated as a completed
+  form submission and kept as set out below.
 </p>
 <p>
   Data from completed form submissions, including Form Filler Personal Data, are kept for 30 days. This is in case of any technical problems
