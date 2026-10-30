@@ -14,6 +14,10 @@ updates:
     cooldown:
       default-days: 7
     open-pull-requests-limit: 10
+    groups:
+      github-actions:
+        patterns:
+          - "*"
 
   # Maintain dependencies for Ruby/Rails bundler
   - package-ecosystem: "bundler"
@@ -27,17 +31,42 @@ updates:
     allow:
       - dependency-type: "direct"
       - dependency-name: "vite_ruby"
+    # A dependency goes in the first group it matches, so order matters
     groups:
-      aws-sdk:
+      bundler-security-updates:
+        applies-to: security-updates
         patterns:
-          - "aws-sdk-*"
+          - "*"
+      # These gems must be bumped together. Minor and patch bumps fall through
+      # to the groups below; only majors get their own PR here.
       sentry:
         patterns:
           - "sentry-*"
+        update-types:
+          - "major"
       vite_ruby:
         patterns:
           - "vite_rails"
           - "vite_ruby"
+        update-types:
+          - "major"
+      # Rails minor upgrades get their own PR; patches go in bundler-production
+      rails:
+        patterns:
+          - "rails"
+        update-types:
+          - "minor"
+      # Gems in the :development and :test Gemfile groups
+      bundler-development:
+        dependency-type: "development"
+        update-types:
+          - "minor"
+          - "patch"
+      bundler-production:
+        dependency-type: "production"
+        update-types:
+          - "minor"
+          - "patch"
 
   # Maintain dependencies for npm
   - package-ecosystem: npm
@@ -48,6 +77,18 @@ updates:
     cooldown:
       default-days: 7
     open-pull-requests-limit: 10
+    # Production dependencies (govuk-frontend, dfe-autocomplete, turndown) stay
+    # as individual PRs
+    groups:
+      npm-security-updates:
+        applies-to: security-updates
+        patterns:
+          - "*"
+      npm-development:
+        dependency-type: "development"
+        update-types:
+          - "minor"
+          - "patch"
 
   - package-ecosystem: terraform
     directory: ".review_apps/"
