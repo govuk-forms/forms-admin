@@ -29,28 +29,11 @@ class Reports::FeatureReportService
 
     form_documents.each do |form|
       report[:total_forms] += 1
-      report[:copied_forms] += 1 if Reports::FormDocumentsService.is_copy?(form)
-      report[:forms_with_payment] += 1 if Reports::FormDocumentsService.has_payments?(form)
-      report[:forms_with_add_another_answer] += 1 if Reports::FormDocumentsService.has_add_another_answer?(form)
-      report[:forms_with_csv_submission_email_attachments] += 1 if Reports::FormDocumentsService.has_csv_submission_email_attachments(form)
-      report[:forms_with_json_submission_email_attachments] += 1 if Reports::FormDocumentsService.has_json_submission_email_attachments(form)
-      report[:forms_with_daily_submission_csv] += 1 if Reports::FormDocumentsService.has_daily_submission_csv(form)
-      report[:forms_with_weekly_submission_csv] += 1 if Reports::FormDocumentsService.has_weekly_submission_csv(form)
-      report[:forms_with_s3_submissions] += 1 if Reports::FormDocumentsService.has_s3_submissions(form)
-      report[:forms_with_exit_pages] += 1 if Reports::FormDocumentsService.has_exit_pages?(form)
-      report[:forms_with_welsh_translation] += 1 if Reports::FormDocumentsService.has_welsh_translation(form)
-      report[:forms_with_copy_of_answers_enabled] += 1 if Reports::FormDocumentsService.copy_of_answers_enabled?(form)
 
-      if Reports::FormDocumentsService.has_routes?(form)
-        Reports::FormDocumentsService.update_routes_details(form)
-        counts = form["metadata"]["number_of_questions"]
+      Reports::FormDocumentsService.features(form).each do |feature, enabled|
+        next unless enabled
 
-        # rubocop:disable Style/NumericPredicate
-        report[:forms_with_routing] += 1
-        report[:forms_with_only_steps_with_one_conditional_route] += 1 if counts["with_one_conditional_route"] > 0 && counts["with_many_conditional_routes"] == 0
-        report[:forms_with_steps_with_many_conditional_routes] += 1 if counts["with_many_conditional_routes"] > 0
-        report[:forms_with_only_unconditional_routes] += 1 if counts["with_routes"] == counts["with_unconditional_route"]
-        # rubocop:enable Style/NumericPredicate
+        report[feature == "copied" ? :copied_forms : :"forms_with_#{feature}"] += 1
       end
 
       answer_types_in_form = form["content"]["steps"].map { |step| step["data"]["answer_type"] }

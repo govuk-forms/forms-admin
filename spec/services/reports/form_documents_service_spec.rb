@@ -713,4 +713,44 @@ RSpec.describe Reports::FormDocumentsService do
       end
     end
   end
+
+  describe ".features" do
+    subject(:features) do
+      described_class.features(form.latest_form_document.as_json.merge("welsh_completed" => form.welsh_completed))
+    end
+
+    context "when the form uses no features" do
+      let(:form) { form_with_no_routes }
+
+      it "returns false for every feature" do
+        expect(features.values).to all(be false)
+      end
+    end
+
+    context "when the form has steps with many conditional routes" do
+      let(:form) { multiple_branches_form }
+
+      it "returns the routing features" do
+        expect(features).to include(
+          "routing" => true,
+          "only_steps_with_one_conditional_route" => false,
+          "steps_with_many_conditional_routes" => true,
+          "only_unconditional_routes" => false,
+        )
+      end
+    end
+
+    context "when the form uses other features" do
+      let(:form) do
+        create(:form, :live,
+               payment_url: "https://www.gov.uk/payments/organisation/service",
+               welsh_completed: true,
+               delivery_configurations: [create(:delivery_configuration, :daily_email)])
+      end
+
+      it "returns true for each of them" do
+        expect(features).to include("payment" => true, "welsh_translation" => true, "daily_submission_csv" => true)
+      end
+    end
+  end
 end

@@ -112,6 +112,11 @@ mailchimp:
 
 analytics_enabled: false
 
+analytics:
+  # Name of the Firehose stream that analytics:snapshot_forms puts form
+  # snapshots to. If blank, the task prints the snapshots instead.
+  form_snapshots_stream_name:
+
 act_as_user_enabled: false
 
 cloudwatch_metrics_enabled: true
