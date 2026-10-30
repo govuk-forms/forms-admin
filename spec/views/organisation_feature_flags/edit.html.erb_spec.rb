@@ -6,7 +6,7 @@ RSpec.describe "organisation_feature_flags/edit", type: :view do
   let(:other_feature_flag) { "closed" }
 
   let(:organisation) { create :organisation, feature_flag => false, other_feature_flag => false }
-  let(:feature_flags_input) { Organisations::FeatureFlagsInput.new(organisation:).assign_organisation_values }
+  let(:feature_flags_input) { Organisations::FeatureFlagsInput.new(organisation:).assign_values }
 
   before do
     allow(Organisation).to receive(:feature_flag_attributes).and_return([feature_flag, other_feature_flag])

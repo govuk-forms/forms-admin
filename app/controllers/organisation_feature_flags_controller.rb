@@ -5,7 +5,7 @@ class OrganisationFeatureFlagsController < WebController
   before_action { raise NotFoundError if Organisation.feature_flag_attributes.empty? }
 
   def edit
-    @feature_flags_input = Organisations::FeatureFlagsInput.new(organisation:).assign_organisation_values
+    @feature_flags_input = Organisations::FeatureFlagsInput.new(organisation:).assign_values
   end
 
   def update
