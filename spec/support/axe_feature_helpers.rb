@@ -1,8 +1,8 @@
 module AxeFeatureHelpers
-  def expect_page_to_have_no_axe_errors(page)
+  def expect_page_to_have_no_axe_errors(page, skipping: [])
     return if skip_axe_tests?
 
-    expect(page).to be_axe_clean.according_to(:wcag2a, :wcag2aa, :wcag21a, :wcag21aa)
+    expect(page).to be_axe_clean.according_to(:wcag2a, :wcag2aa, :wcag21a, :wcag21aa).skipping(skipping)
   end
 
   def expect_component_to_have_no_axe_errors(page)

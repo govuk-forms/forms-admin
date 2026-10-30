@@ -60,7 +60,10 @@ private
     expect(page.find("h1")).to have_text "Upload new Welsh content as a CSV"
     expect(page).to have_css("input[type=file]", visible: :hidden)
     expect(page).to have_css("[data-module='govuk-file-upload']")
-    expect_page_to_have_no_axe_errors(page)
+    # False positive on the button GOV.UK Frontend adds to the file upload. Its accessible name
+    # includes all of its visible text, but axe joins the text of its child elements without a
+    # space ("No file chosenChoose file"), so doesn't find that text in the name.
+    expect_page_to_have_no_axe_errors(page, skipping: "label-content-name-mismatch")
   end
 
   def and_i_upload_a_valid_csv
