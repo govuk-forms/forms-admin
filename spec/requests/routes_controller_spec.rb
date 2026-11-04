@@ -105,6 +105,51 @@ RSpec.describe RoutesController, type: :request do
       end
     end
 
+    context "when a route goes to an exit page that was created from a condition" do
+      let(:pages) { [create(:page, :with_selection_settings, form:)] }
+      let(:routing_page) { pages.first }
+      let!(:condition) do
+        create :condition, routing_page:, check_page: routing_page,
+                           answer_value: routing_page.answer_settings.selection_options.first.name,
+                           exit_page_heading: "Old heading", exit_page_markdown: "Old markdown"
+      end
+      let(:exit_page) { condition.reload.exit_page }
+      let(:valid_params) do
+        {
+          forms_routes_input: {
+            routes_attributes: {
+              "0" => {
+                id: condition.id,
+                page_id: routing_page.id,
+                answer_value: condition.answer_value,
+                goto: GotoValue::ExitPage.new(exit_page.id).to_s,
+              },
+            },
+          },
+        }
+      end
+
+      before do
+        exit_page.update!(heading_cy: "Welsh heading", markdown_cy: "Welsh markdown")
+      end
+
+      it "does not undo changes made to the exit page" do
+        put exit_page_path(form_id: form.id, page_id: routing_page.id, id: exit_page.id),
+            params: { pages_update_exit_page_input: { heading: "New heading", markdown: "New markdown" } }
+
+        post routes_path(form.id), params: valid_params
+
+        expect(exit_page.reload).to have_attributes(heading: "New heading", markdown: "New markdown", heading_cy: "Welsh heading", markdown_cy: "Welsh markdown")
+      end
+
+      it "does not remove Welsh translations when the English is edited through the condition" do
+        put conditions_exit_page_update_path(form_id: form.id, page_id: routing_page.id, condition_id: condition.id),
+            params: { conditions_update_exit_page_input: { exit_page_heading: "New heading", exit_page_markdown: "New markdown" } }
+
+        expect(exit_page.reload).to have_attributes(heading: "New heading", markdown: "New markdown", heading_cy: "Welsh heading", markdown_cy: "Welsh markdown")
+      end
+    end
+
     context "when the user is not in the form's group" do
       let(:membership) { nil }
 

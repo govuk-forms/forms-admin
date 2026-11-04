@@ -26,12 +26,15 @@ class Condition < ApplicationRecord
 
   def sync_exit_page
     if legacy_exit_page_heading.present? && legacy_exit_page_markdown.present?
+      # Only copy the legacy values that are being changed, otherwise saving
+      # the condition would overwrite changes made directly to the ExitPage
+      copy_all = exit_page.nil?
       self.exit_page ||= build_exit_page(question_page: routing_page)
 
-      exit_page.heading = legacy_exit_page_heading
-      exit_page.markdown = legacy_exit_page_markdown
-      exit_page.heading_cy = legacy_exit_page_heading_cy
-      exit_page.markdown_cy = legacy_exit_page_markdown_cy
+      exit_page.heading_en = legacy_exit_page_heading(locale: :en) if copy_all || exit_page_heading_changed?
+      exit_page.markdown_en = legacy_exit_page_markdown(locale: :en) if copy_all || exit_page_markdown_changed?
+      exit_page.heading_cy = legacy_exit_page_heading_cy if copy_all || legacy_exit_page_welsh_changed?(:exit_page_heading)
+      exit_page.markdown_cy = legacy_exit_page_markdown_cy if copy_all || legacy_exit_page_welsh_changed?(:exit_page_markdown)
     end
 
     if (legacy_exit_page_heading.blank? || legacy_exit_page_markdown.blank?) && (exit_page_heading_changed? || exit_page_markdown_changed?)
@@ -174,6 +177,13 @@ class Condition < ApplicationRecord
   end
 
 private
+
+  # English values are stored in the conditions table, Welsh values in the
+  # translations table. Mobility only writes through the loaded association,
+  # so if it hasn't been loaded the Welsh values haven't changed
+  def legacy_exit_page_welsh_changed?(attribute)
+    translations.loaded? && translations.any? { it.locale == "cy" && it.attribute_changed?(attribute) }
+  end
 
   def has_precondition?
     check_page_id && check_page_id != routing_page_id && !check_page.routing_conditions.empty?
