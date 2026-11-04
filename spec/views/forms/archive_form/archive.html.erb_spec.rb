@@ -21,6 +21,17 @@ describe "forms/archive_form/archive.html.erb" do
     end
   end
 
+  context "when the live form has save and return enabled" do
+    before do
+      allow(form).to receive(:live_save_and_return_enabled?).and_return(true)
+      render
+    end
+
+    it "explains what happens to people who have and have not saved their progress" do
+      expect(rendered).to include(I18n.t("archive_form.confirm.body_with_save_and_return_html", submission_email: form.submission_email))
+    end
+  end
+
   context "when there are errors" do
     before do
       confirm_archive_input.errors.add(:confirm, "is required")

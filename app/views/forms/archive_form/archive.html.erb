@@ -14,7 +14,11 @@
         <%= t('page_titles.archive_form_confirm') %>
       </h1>
 
-      <%= t('archive_form.confirm.body_html', submission_email: @confirm_archive_input.form.submission_email) %>
+      <% if @confirm_archive_input.form.live_save_and_return_enabled? %>
+        <%= t('archive_form.confirm.body_with_save_and_return_html', submission_email: @confirm_archive_input.form.submission_email) %>
+      <% else %>
+        <%= t('archive_form.confirm.body_html', submission_email: @confirm_archive_input.form.submission_email) %>
+      <% end %>
 
       <%= f.govuk_collection_radio_buttons :confirm,
                                            @confirm_archive_input.values, ->(option) { option }, ->(option) { t('helpers.label.confirm_action_input.options.' + "#{option}") },

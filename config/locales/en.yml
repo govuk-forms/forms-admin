@@ -246,12 +246,22 @@ en:
   archive_form:
     confirm:
       body_html: |
-        <p>When you archive this form:<p>
+        <p>When you archive this form:</p>
         <ul class="govuk-list govuk-list--bullet">
           <li>links to the form will no longer work - make sure any links to the form have been removed</li>
           <li>anyone who is part way through completing the form will lose their progress and get an error page</li>
           <li>we’ll send an email to <span class="govuk-!-text-break-word">%{submission_email}</span> to let them know the form has been archived</li>
         </ul>
+        <p>You will still be able to preview the form and see its information and settings. You can also make a new draft of the form and make it live again if you need to.</p>
+      body_with_save_and_return_html: |
+        <p>When you archive this form:</p>
+        <ul class="govuk-list govuk-list--bullet">
+          <li>links to the form will no longer work - make sure any links to the form have been removed</li>
+          <li>people who are part way through the form and have not saved their progress will lose their answers and get an error page</li>
+          <li>people who have saved their progress will still be able to finish and submit it, when they return they will see a message saying the form has been closed</li>
+          <li>we’ll send an email to <span class="govuk-!-text-break-word">%{submission_email}</span> to let them know the form has been archived</li>
+        </ul>
+        <p>You may still get submissions from people who saved their progress up to 30 days after archiving the form. You’ll need to decide whether to accept them.</p>
         <p>You will still be able to preview the form and see its information and settings. You can also make a new draft of the form and make it live again if you need to.</p>
       radios_legend: Are you sure you want to archive this form?
     confirmation:
