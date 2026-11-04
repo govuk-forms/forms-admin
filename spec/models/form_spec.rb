@@ -1326,6 +1326,32 @@ RSpec.describe Form, type: :model do
     end
   end
 
+  describe "#live_save_and_return_enabled?" do
+    context "when the form is not live" do
+      let(:form) { create :form, :ready_for_live, save_and_return: "enabled" }
+
+      it "returns false" do
+        expect(form.live_save_and_return_enabled?).to be false
+      end
+    end
+
+    context "when the live form has save and return enabled" do
+      let(:form) { create :form, :live, save_and_return: "enabled" }
+
+      it "returns true" do
+        expect(form.live_save_and_return_enabled?).to be true
+      end
+    end
+
+    context "when the live form has save and return disabled" do
+      let(:form) { create :form, :live, save_and_return: "disabled" }
+
+      it "returns false" do
+        expect(form.live_save_and_return_enabled?).to be false
+      end
+    end
+  end
+
   describe "#normalise_welsh!" do
     let!(:form) { create(:form, available_languages: languages, pages: [page]) }
     let!(:page) { create(:page) }

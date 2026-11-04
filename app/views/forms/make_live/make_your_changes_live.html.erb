@@ -13,9 +13,13 @@
         <%= t("page_titles.make_changes_live") %>
       </h1>
 
-      <p>
-        <%= t("make_changes_live.warning") %>
-      </p>
+      <% if current_form.live_save_and_return_enabled? %>
+        <%= t("make_changes_live.warning_with_save_and_return_html") %>
+      <% else %>
+        <p>
+          <%= t("make_changes_live.warning") %>
+        </p>
+      <% end %>
 
       <p>
         <%= t("make_changes_live.url_will_remain_same") %>

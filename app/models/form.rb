@@ -238,6 +238,10 @@ class Form < ApplicationRecord
     available_languages.include?("cy")
   end
 
+  def live_save_and_return_enabled?
+    form_documents.where(tag: "live", language: "en").order(version: :desc).first&.content&.dig("save_and_return") == "enabled"
+  end
+
   def normalise_welsh!
     return unless available_languages.include?("cy")
 

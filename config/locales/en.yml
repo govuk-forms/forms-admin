@@ -1425,6 +1425,11 @@ en:
       When you make your changes live, there may be an impact on people who are
       filling in the live form at the same time. They may lose any answers they
       have already provided and may need to start again.
+    warning_with_save_and_return_html: |
+      <p>When you make your changes live, there may be an impact on people who are part way through the form.</p>
+      <p>People who have not saved their progress may lose any answers they have already provided and need to start again.</p>
+      <p>People who have saved their progress will be able to finish the version of the form they started. Your changes will not apply to them.</p>
+      <p>This means you may get submissions from the previous version of your form for up to 30 days.</p>
     welsh_reminder: Remember to make sure that the English and Welsh versions of your form match.
   make_language_live:
     cy:

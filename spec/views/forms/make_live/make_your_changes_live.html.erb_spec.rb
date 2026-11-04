@@ -29,6 +29,14 @@ describe "forms/make_live/make_your_changes_live.html.erb" do
       expect(rendered).to have_css("p", text: I18n.t("make_changes_live.warning"))
     end
 
+    context "when the live form has save and return enabled" do
+      let(:current_form) { OpenStruct.new(id: 1, name: "Form 1", form_slug: "form-1", "live_save_and_return_enabled?": true) }
+
+      it "contains a warning about the impact on form fillers who have and have not saved their progress" do
+        expect(rendered).to include(I18n.t("make_changes_live.warning_with_save_and_return_html"))
+      end
+    end
+
     it "contains information about the form's URL" do
       expect(rendered).to have_css("p", text: I18n.t("make_changes_live.url_will_remain_same"))
     end
