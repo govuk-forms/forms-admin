@@ -822,6 +822,26 @@ RSpec.describe Condition, type: :model do
           expect(condition.exit_page).to be_present
           expect(condition.exit_page.markdown_cy).to be_nil
         end
+
+        context "when the exit page has been edited directly" do
+          let(:edited_values) { { heading: "New heading", markdown: "New markdown", heading_cy: "New Welsh heading", markdown_cy: "New Welsh markdown" } }
+
+          before do
+            condition.exit_page.update!(edited_values)
+          end
+
+          {
+            "no exit page values change" => [{}, {}],
+            "only the English markdown changes" => [{ exit_page_markdown: "Legacy markdown" }, { markdown: "Legacy markdown" }],
+            "only the Welsh markdown changes" => [{ exit_page_markdown_cy: "Legacy Welsh markdown" }, { markdown_cy: "Legacy Welsh markdown" }],
+          }.each do |description, (condition_changes, exit_page_changes)|
+            it "only copies the changed values to the exit page when #{description}" do
+              described_class.find(condition.id).update!(skip_to_end: false, **condition_changes)
+
+              expect(condition.reload.exit_page).to have_attributes(edited_values.merge(exit_page_changes))
+            end
+          end
+        end
       end
 
       context "when the condition is attached to an external ExitPage" do
