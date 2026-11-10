@@ -27,14 +27,14 @@
     "jsdom": "^30.1.3",
     "postcss": "^8.5.32",
     "regenerator-runtime": "^0.14.1",
-    "sass": "^1.106.1",
+    "sass": "^1.107.1",
     "snazzy": "^9.0.0",
     "standard": "^17.1.2",
     "stylelint": "^17.4.0",
     "stylelint-config-gds": "^3.0.0",
     "vite": "^8.3.5",
     "vite-plugin-ruby": "^5.2.6",
-    "vitest": "^5.0.5"
+    "vitest": "^5.1.0"
   },
   "dependencies": {
     "dfe-autocomplete": "github:DFE-Digital/dfe-autocomplete#1d4cc65039e11cc3ba9e7217a719b8128d0e4d53",
