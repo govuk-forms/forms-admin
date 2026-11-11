@@ -54,7 +54,7 @@ gem "lograge"
 
 # For distributed tracing and telemetry
 gem "opentelemetry-exporter-otlp", "~> 0.37.0"
-gem "opentelemetry-instrumentation-all", "~> 0.99.0"
+gem "opentelemetry-instrumentation-all", "~> 0.100.0"
 gem "opentelemetry-propagator-xray", "~> 0.27.0"
 gem "opentelemetry-sdk", "~> 1.13"
 
@@ -68,10 +68,10 @@ gem "validate_url"
 gem "paper_trail"
 
 # For AWS interactions
-gem "aws-sdk-cloudwatch", "~> 1.152"
-gem "aws-sdk-codepipeline", "~> 1.123"
-gem "aws-sdk-firehose", "~> 1.118"
-gem "aws-sdk-s3", "~> 1.235", require: false
+gem "aws-sdk-cloudwatch", "~> 1.154"
+gem "aws-sdk-codepipeline", "~> 1.125"
+gem "aws-sdk-firehose", "~> 1.119"
+gem "aws-sdk-s3", "~> 1.237", require: false
 
 # For Mailchimp audience integration
 gem "MailchimpMarketing", "~> 3.0"
