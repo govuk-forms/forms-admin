@@ -537,6 +537,21 @@ describe RevertDraftFormService do
             end
           end
         end
+
+        context "when the Welsh translations are changed on the exit page in the draft" do
+          before do
+            exit_page = live_form.pages.first.routing_conditions.first.exit_page
+            exit_page.update!(heading_cy: "Ni allwch fynd ymlaen", markdown_cy: "Ffoniwch ni")
+          end
+
+          it "restores the original Welsh translations for the exit page" do
+            revert_draft(live_tag)
+
+            exit_page = live_form.reload.pages.first.routing_conditions.first.exit_page
+
+            expect(exit_page).to have_attributes(heading_cy: "Ni allwch barhau", markdown_cy: "Cysylltwch â ni")
+          end
+        end
       end
     end
 

@@ -166,6 +166,9 @@ private
 
     # Revert condition-level Welsh translations
     revert_conditions_welsh_attributes(welsh_content["steps"])
+
+    # Revert exit page Welsh translations
+    revert_exit_pages_welsh_attributes(welsh_content["steps"])
   end
 
   def revert_form_welsh_attributes(welsh_content)
@@ -209,6 +212,23 @@ private
       end
 
       condition.save!
+    end
+  end
+
+  def revert_exit_pages_welsh_attributes(steps_data)
+    return if steps_data.blank?
+
+    all_exit_pages_data = steps_data.flat_map { |step| step["exit_pages"] || [] }
+
+    all_exit_pages_data.each do |exit_page_data|
+      exit_page = ExitPage.find_by(id: exit_page_data["id"])
+      next if exit_page.blank?
+
+      ExitPage.mobility_attributes.each do |attr|
+        exit_page.public_send("#{attr}_cy=", exit_page_data[attr]) if exit_page_data.key?(attr)
+      end
+
+      exit_page.save!
     end
   end
 
