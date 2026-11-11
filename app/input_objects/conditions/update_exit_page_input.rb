@@ -10,6 +10,9 @@ class Conditions::UpdateExitPageInput < BaseInput
 
     record.exit_page_heading = exit_page_heading
     record.exit_page_markdown = exit_page_markdown
+    # The condition only copies values to the exit page when they differ from
+    # its own copy, which may be out of date if the exit page was edited directly
+    record.exit_page&.assign_attributes(heading: exit_page_heading, markdown: exit_page_markdown)
     record.goto_page_id = nil
     record.skip_to_end = false
 

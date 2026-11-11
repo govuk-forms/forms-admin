@@ -50,6 +50,39 @@ RSpec.describe Conditions::UpdateExitPageInput, type: :model do
       end
     end
 
+    context "when the exit page has been edited directly" do
+      before do
+        condition.exit_page.update!(heading: "Edited heading", markdown: "Edited markdown")
+        condition.reload
+      end
+
+      it "updates the exit page when the values match the condition's out of date copy" do
+        update_exit_page_input.exit_page_heading = "Exit page heading"
+        update_exit_page_input.exit_page_markdown = "Exit page markdown"
+
+        expect(update_exit_page_input.submit).to be_truthy
+        expect(condition.exit_page.reload).to have_attributes(heading: "Exit page heading", markdown: "Exit page markdown")
+      end
+
+      it "updates the exit page when only one value matches the condition's out of date copy" do
+        update_exit_page_input.exit_page_heading = "Exit page heading"
+        update_exit_page_input.exit_page_markdown = "Another markdown"
+
+        expect(update_exit_page_input.submit).to be_truthy
+        expect(condition.exit_page.reload).to have_attributes(heading: "Exit page heading", markdown: "Another markdown")
+      end
+
+      it "does not remove the Welsh translations" do
+        condition.exit_page.update!(heading_cy: "Welsh heading", markdown_cy: "Welsh markdown")
+        update_exit_page_input.exit_page_heading = "Exit page heading"
+        update_exit_page_input.exit_page_markdown = "Exit page markdown"
+
+        update_exit_page_input.submit
+
+        expect(condition.exit_page.reload).to have_attributes(heading_cy: "Welsh heading", markdown_cy: "Welsh markdown")
+      end
+    end
+
     context "when validations fail" do
       it "returns false" do
         invalid_conditions_input = described_class.new
