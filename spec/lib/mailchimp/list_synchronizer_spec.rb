@@ -124,7 +124,7 @@ RSpec.describe Mailchimp::ListSynchronizer do
         let(:list_1_members_info) do
           {
             "members" => [
-              { "email_address" => "user@domain.org", "status" => "subscribed" },
+              { "email_address" => "user@domain.org", "status" => "subscribed", "tags" => [] },
             ],
           }
         end
@@ -136,7 +136,7 @@ RSpec.describe Mailchimp::ListSynchronizer do
         let(:list_1_members_info) do
           {
             "members" => [
-              { "email_address" => "user@domain.org", "status" => "unsubscribed" },
+              { "email_address" => "user@domain.org", "status" => "unsubscribed", "tags" => [] },
             ],
           }
         end
@@ -148,7 +148,7 @@ RSpec.describe Mailchimp::ListSynchronizer do
         let(:list_1_members_info) do
           {
             "members" => [
-              { "email_address" => "user@domain.org", "status" => "archived" },
+              { "email_address" => "user@domain.org", "status" => "archived", "tags" => [] },
             ],
           }
         end
@@ -160,7 +160,7 @@ RSpec.describe Mailchimp::ListSynchronizer do
         let(:list_1_members_info) do
           {
             "members" => [
-              { "email_address" => "user@domain.org", "status" => "cleaned" },
+              { "email_address" => "user@domain.org", "status" => "cleaned", "tags" => [] },
             ],
           }
         end
@@ -172,7 +172,7 @@ RSpec.describe Mailchimp::ListSynchronizer do
         let(:list_1_members_info) do
           {
             "members" => [
-              { "email_address" => "user@domain.org", "status" => "pending" },
+              { "email_address" => "user@domain.org", "status" => "pending", "tags" => [] },
             ],
           }
         end
@@ -184,7 +184,7 @@ RSpec.describe Mailchimp::ListSynchronizer do
         let(:list_1_members_info) do
           {
             "members" => [
-              { "email_address" => "user@domain.org", "status" => "transactional" },
+              { "email_address" => "user@domain.org", "status" => "transactional", "tags" => [] },
             ],
           }
         end
@@ -210,7 +210,7 @@ RSpec.describe Mailchimp::ListSynchronizer do
         let(:list_1_members_info) do
           {
             "members" => [
-              { "email_address" => "user@domain.org", "status" => "subscribed" },
+              { "email_address" => "user@domain.org", "status" => "subscribed", "tags" => [] },
             ],
           }
         end
@@ -222,7 +222,7 @@ RSpec.describe Mailchimp::ListSynchronizer do
         let(:list_1_members_info) do
           {
             "members" => [
-              { "email_address" => "user@domain.org", "status" => "unsubscribed" },
+              { "email_address" => "user@domain.org", "status" => "unsubscribed", "tags" => [] },
             ],
           }
         end
@@ -234,7 +234,7 @@ RSpec.describe Mailchimp::ListSynchronizer do
         let(:list_1_members_info) do
           {
             "members" => [
-              { "email_address" => "user@domain.org", "status" => "archived" },
+              { "email_address" => "user@domain.org", "status" => "archived", "tags" => [] },
             ],
           }
         end
@@ -246,7 +246,7 @@ RSpec.describe Mailchimp::ListSynchronizer do
         let(:list_1_members_info) do
           {
             "members" => [
-              { "email_address" => "user@domain.org", "status" => "cleaned" },
+              { "email_address" => "user@domain.org", "status" => "cleaned", "tags" => [] },
             ],
           }
         end
@@ -258,7 +258,7 @@ RSpec.describe Mailchimp::ListSynchronizer do
         let(:list_1_members_info) do
           {
             "members" => [
-              { "email_address" => "user@domain.org", "status" => "pending" },
+              { "email_address" => "user@domain.org", "status" => "pending", "tags" => [] },
             ],
           }
         end
@@ -270,7 +270,7 @@ RSpec.describe Mailchimp::ListSynchronizer do
         let(:list_1_members_info) do
           {
             "members" => [
-              { "email_address" => "user@domain.org", "status" => "transactional" },
+              { "email_address" => "user@domain.org", "status" => "transactional", "tags" => [] },
             ],
           }
         end
@@ -295,7 +295,7 @@ RSpec.describe Mailchimp::ListSynchronizer do
       let(:list_1_members_info) do
         {
           "members" =>
-          1001.times.map { { "email_address" => Faker::Internet.unique.email, "status" => "subscribed" } },
+          1001.times.map { { "email_address" => Faker::Internet.unique.email, "status" => "subscribed", "tags" => [] } },
         }
       end
 
@@ -396,6 +396,7 @@ RSpec.describe Mailchimp::ListSynchronizer do
           "merge_fields" => {
             "ROLE" => "ORGANISATION_ADMIN",
           },
+          "tags" => [],
         }] }
       end
 
@@ -426,6 +427,7 @@ RSpec.describe Mailchimp::ListSynchronizer do
           "merge_fields" => {
             "ROLE" => "AGREED_MOU",
           },
+          "tags" => [],
         }] }
       end
 
@@ -433,6 +435,135 @@ RSpec.describe Mailchimp::ListSynchronizer do
 
       it "does not update role" do
         expect(mailchimp_client_lists).not_to receive(:set_list_member)
+        described_class.new(list_id: "list-1").synchronize(desired_members:)
+      end
+    end
+
+    context "when member has tag changes" do
+      let(:list_1_members_info) do
+        { "members" => [{
+          "email_address" => "user@domain.org",
+          "status" => "subscribed",
+          "tags" => [{ "id" => 1, "name" => "old-tag" }],
+        }] }
+      end
+
+      let(:desired_members) { [Mailchimp::Member.new(email: "user@domain.org", status: "subscribed", tags: [{ "name" => "old-tag", "status" => "inactive" }, { "name" => "new-tag", "status" => "active" }])] }
+
+      it "updates the member with the new tags" do
+        expect(mailchimp_client_lists).to receive(:update_list_member_tags).with(
+          "list-1",
+          anything,
+          { "tags" => [
+            { "name" => "old-tag", "status" => "inactive" },
+            { "name" => "new-tag", "status" => "active" },
+          ] },
+        )
+
+        described_class.new(list_id: "list-1").synchronize(desired_members:)
+      end
+
+      context "when there is a MailChimp API error" do
+        before do
+          allow(Rails.logger).to receive(:warn)
+        end
+
+        it "logs the issue when the response_body is available" do
+          response_body = <<~HEREDOC
+            {
+              "title": "Member In Compliance State",
+              "status": 400,
+              "detail": "user@domain.org is in a compliance state due to unsubscribe, bounce, or compliance review and cannot be subscribed.",
+              "instance": "ecc64220-55ff-d413-6c81-583a656331db"
+            }
+          HEREDOC
+          error = MailchimpMarketing::ApiError.new(status: 400, response_body: response_body)
+          allow(mailchimp_client_lists).to receive(:update_list_member_tags).and_raise(error)
+
+          expected_log_message = {
+            mailchimp_action: "tag",
+            detail: "[FILTERED] is in a compliance state due to unsubscribe, bounce, or compliance review and cannot be subscribed.",
+            instance: "ecc64220-55ff-d413-6c81-583a656331db",
+            status: 400,
+            subscriber_hash: "640f8c96cd7de424a8248a15d8b19b4d",
+            task: "Mailchimp::ListSynchronizer#synchronize",
+            title: "Member In Compliance State",
+          }
+
+          described_class.new(list_id: "list-1").synchronize(desired_members:)
+          expect(Rails.logger).to have_received(:warn).with(expected_log_message)
+        end
+
+        it "logs the issue when the response_body is not available" do
+          response_body = <<~HEREDOC
+            this is not valid json
+          HEREDOC
+          error = MailchimpMarketing::ApiError.new(status: 400, response_body: response_body)
+          allow(mailchimp_client_lists).to receive(:update_list_member_tags).and_raise(error)
+
+          expected_log_message = {
+            mailchimp_action: "tag",
+            detail: "Unparseable or empty response_body",
+            instance: "unknown",
+            status: 400,
+            subscriber_hash: "640f8c96cd7de424a8248a15d8b19b4d",
+            task: "Mailchimp::ListSynchronizer#synchronize",
+            title: "Unknown error",
+          }
+
+          described_class.new(list_id: "list-1").synchronize(desired_members:)
+          expect(Rails.logger).to have_received(:warn).with(expected_log_message)
+        end
+      end
+    end
+
+    context "when member has no tag changes" do
+      let(:list_1_members_info) do
+        { "members" => [{
+          "email_address" => "user@domain.org",
+          "status" => "subscribed",
+          "tags" => [{ "id" => 1, "name" => "old-tag" }],
+        }] }
+      end
+
+      let(:desired_members) { [Mailchimp::Member.new(email: "user@domain.org", status: "subscribed", tags: [])] }
+
+      it "does not update the tags" do
+        expect(mailchimp_client_lists).not_to receive(:update_list_member_tags)
+
+        described_class.new(list_id: "list-1").synchronize(desired_members:)
+      end
+    end
+
+    context "when member already has matching non-empty tags" do
+      let(:list_1_members_info) do
+        { "members" => [{
+          "email_address" => "user@domain.org",
+          "status" => "subscribed",
+          "tags" => [{ "id" => 1, "name" => "crown_mou_signer" }],
+        }] }
+      end
+
+      let(:desired_members) do
+        [Mailchimp::Member.new(
+          email: "user@domain.org",
+          status: "subscribed",
+          tags: [
+            { "name" => "crown_mou_signer", "status" => "active" },
+            { "name" => "non_crown_mou_signer", "status" => "inactive" },
+          ],
+        )]
+      end
+
+      it "does not update the member" do
+        expect(mailchimp_client_lists).not_to receive(:set_list_member)
+
+        described_class.new(list_id: "list-1").synchronize(desired_members:)
+      end
+
+      it "does not update the tags" do
+        expect(mailchimp_client_lists).not_to receive(:update_list_member_tags)
+
         described_class.new(list_id: "list-1").synchronize(desired_members:)
       end
     end

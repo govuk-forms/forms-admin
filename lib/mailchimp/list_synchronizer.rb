@@ -33,21 +33,39 @@ private
   def add_and_update_members(existing_members, desired_members)
     Rails.logger.debug "Subscribing any new users..."
     members_to_update = []
+    members_to_tag = []
 
     desired_members.each do |subscriber_hash, desired_member|
       existing_member = existing_members[subscriber_hash]
 
       next if existing_member&.unsubscribed?
-      next if existing_member == desired_member
 
-      members_to_update << desired_member
+      members_to_update << desired_member if member_has_changes?(existing_member, desired_member)
+      members_to_tag << desired_member if member_has_tag_changes?(existing_member, desired_member)
     end
 
     Rails.logger.debug "There are #{members_to_update.count} to subscribe"
 
-    members_to_update.each do |member|
-      update_member(member)
-    end
+    members_to_update.each { |member| update_member(member) }
+    members_to_tag.each { |member| update_member_tags(member) }
+  end
+
+  def member_has_changes?(existing_member, desired_member)
+    return true if existing_member.blank?
+
+    existing_member.to_h.except(:tags) != desired_member.to_h.except(:tags)
+  end
+
+  def member_has_tag_changes?(existing_member, desired_member)
+    return false if desired_member.tags.empty?
+
+    existing_active_tags = existing_member&.active_tags || []
+
+    return true if desired_member.active_tags.any? { |tag| !existing_active_tags.include?(tag) }
+
+    return true if desired_member.inactive_tags.any? { |tag| existing_active_tags.include?(tag) }
+
+    false
   end
 
   def archive_removed_members(existing_members, desired_members)
@@ -86,6 +104,7 @@ private
           email: member_data["email_address"],
           status: member_data["status"],
           role: member_data.dig("merge_fields", "ROLE"),
+          tags: member_data["tags"].map { { "name" => it["name"], "status" => "active" } },
         )
       end
 
@@ -108,6 +127,16 @@ private
     )
   rescue MailchimpMarketing::ApiError => e
     log_mailchimp_error("subscribe", member.subscriber_hash, e)
+  end
+
+  def update_member_tags(member)
+    client.lists.update_list_member_tags(
+      list_id,
+      member.subscriber_hash,
+      { "tags" => member.tags },
+    )
+  rescue MailchimpMarketing::ApiError => e
+    log_mailchimp_error("tag", member.subscriber_hash, e)
   end
 
   def remove_member(member)
