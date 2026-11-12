@@ -255,6 +255,36 @@ namespace :forms do
     Rails.logger.info "Finished with #{ExitPage.count} exit page objects"
   end
 
+  desc "Show how the exit pages for a form are stored in the database, as JSON"
+  task :show_exit_pages, %i[form_id] => :environment do |_, args|
+    usage_message = "usage: rake forms:show_exit_pages[<form_id>]"
+    abort usage_message if args[:form_id].blank?
+
+    form = Form.find(args[:form_id])
+
+    pages = form.pages
+      .includes(routing_conditions: [:translations, { exit_page: :translations }], exit_pages: %i[translations conditions])
+      .order(:position)
+      .select { it.routing_conditions.any? || it.exit_pages.any? }
+      .map { exit_pages_for_page(it) }
+
+    conditions = pages.flat_map { it[:routing_conditions] }
+    exit_pages = pages.flat_map { it[:exit_pages] }
+
+    puts JSON.pretty_generate(
+      form: { id: form.id, name: form.name, state: form.state },
+      summary: {
+        routing_conditions: conditions.count,
+        # how many conditions are stored in each way, see exit_page_representation
+        representations: conditions.map { it[:representation] }.tally,
+        exit_pages: exit_pages.count,
+        exit_pages_without_conditions: exit_pages.count { it[:condition_ids].empty? },
+      },
+      pages:,
+      form_documents: form.form_documents.order(:id).map { exit_pages_for_form_document(it) },
+    )
+  end
+
   desc "List the contact emails for the given form IDs"
   task :list_contact_emails, [] => :environment do |_, args|
     form_ids = args.to_a
@@ -300,6 +330,101 @@ end
 
 def fmt_form(form)
   "form #{form.id} (\"#{form.name}\")"
+end
+
+def exit_pages_for_page(page)
+  {
+    id: page.id,
+    external_id: page.external_id,
+    position: page.position,
+    question_text: page.question_text,
+    routing_conditions: page.routing_conditions.sort_by(&:id).map { exit_pages_for_condition(it) },
+    exit_pages: page.exit_pages.sort_by(&:id).map do |exit_page|
+      exit_page_record(exit_page).merge(condition_ids: exit_page.conditions.map(&:id).sort)
+    end,
+  }
+end
+
+def exit_pages_for_condition(condition)
+  # Condition#exit_page_heading and #exit_page_markdown return the values from
+  # the ExitPage when there is one, so read the columns directly to see what is
+  # stored on the condition itself
+  legacy = stored_translations(condition, heading: :exit_page_heading, markdown: :exit_page_markdown)
+  exit_page = condition.exit_page && stored_translations(condition.exit_page, heading: :heading, markdown: :markdown)
+  differences = exit_page ? legacy.keys.reject { legacy[it] == exit_page[it] } : []
+
+  {
+    id: condition.id,
+    answer_value: condition.answer_value,
+    check_page_id: condition.check_page_id,
+    goto_page_id: condition.goto_page_id,
+    skip_to_end: condition.skip_to_end,
+    updated_at: condition.updated_at,
+    representation: exit_page_representation(condition, legacy, differences),
+    differences:,
+    legacy_exit_page_fields: legacy,
+    exit_page_id: condition.exit_page_id,
+    exit_page: condition.exit_page && exit_page_record(condition.exit_page),
+  }
+end
+
+def exit_page_representation(condition, legacy, differences)
+  has_legacy_fields = legacy.values.any?(&:present?)
+
+  if condition.exit_page.nil?
+    has_legacy_fields ? "legacy_fields_only" : "not_an_exit_page"
+  elsif !has_legacy_fields
+    "exit_page_model_only"
+  else
+    differences.empty? ? "both_in_sync" : "both_out_of_sync"
+  end
+end
+
+def exit_page_record(exit_page)
+  {
+    id: exit_page.id,
+    question_page_id: exit_page.question_page_id,
+    created_at: exit_page.created_at,
+    updated_at: exit_page.updated_at,
+    **stored_translations(exit_page, heading: :heading, markdown: :markdown),
+  }
+end
+
+# English values are stored in the record's own table, other languages are
+# stored in its translations table
+def stored_translations(record, heading:, markdown:)
+  welsh = record.translations.find { it.locale == "cy" }
+
+  {
+    heading: record.read_attribute(heading),
+    markdown: record.read_attribute(markdown),
+    heading_cy: welsh&.read_attribute(heading),
+    markdown_cy: welsh&.read_attribute(markdown),
+  }
+end
+
+def exit_pages_for_form_document(form_document)
+  steps = form_document.content["steps"] || []
+
+  {
+    id: form_document.id,
+    tag: form_document.tag,
+    version: form_document.version,
+    language: form_document.language,
+    updated_at: form_document.updated_at,
+    steps: steps.filter_map do |step|
+      routing_conditions = step["routing_conditions"] || []
+      exit_pages = step["exit_pages"] || []
+      next if routing_conditions.empty? && exit_pages.empty?
+
+      {
+        id: step["id"],
+        position: step["position"],
+        routing_conditions: routing_conditions.map { it.slice("id", "answer_value", "goto_page_id", "skip_to_end", "exit_page_id", "exit_page_heading", "exit_page_markdown") },
+        exit_pages:,
+      }
+    end,
+  }
 end
 
 def fmt_group(group)
