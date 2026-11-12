@@ -768,6 +768,132 @@ RSpec.describe "forms.rake", type: :task do
     end
   end
 
+  describe "forms:show_exit_pages" do
+    subject(:task) do
+      Rake::Task["forms:show_exit_pages"]
+    end
+
+    let(:form) { create(:form, :ready_for_routing) }
+    let(:routing_page) { form.pages.first }
+    let(:shown) do
+      stdout = StringIO.new
+      $stdout = stdout
+      task.invoke(form.id)
+      JSON.parse(stdout.string)
+    ensure
+      $stdout = STDOUT
+    end
+    let(:shown_condition) { shown["pages"].first["routing_conditions"].first }
+
+    it "aborts with a usage message when the form id is missing" do
+      expect {
+        task.invoke
+      }.to raise_error(SystemExit)
+             .and output(/usage: rake forms:show_exit_pages\[<form_id>\]/).to_stderr
+    end
+
+    it "raises an error when the form does not exist" do
+      expect {
+        task.invoke("99999")
+      }.to raise_error(ActiveRecord::RecordNotFound)
+    end
+
+    context "when the exit page is stored on the condition and the exit page" do
+      let!(:condition) do
+        create(:condition, :with_exit_page, routing_page:, check_page: routing_page, exit_page_heading_cy: "Welsh heading", exit_page_markdown_cy: "Welsh markdown")
+      end
+
+      it "shows the values stored in both places" do
+        stored_values = { "heading" => "Exit page heading", "markdown" => "Exit page markdown", "heading_cy" => "Welsh heading", "markdown_cy" => "Welsh markdown" }
+
+        expect(shown_condition).to include(
+          "id" => condition.id,
+          "representation" => "both_in_sync",
+          "differences" => [],
+          "legacy_exit_page_fields" => stored_values,
+          "exit_page_id" => condition.exit_page_id,
+          "exit_page" => a_hash_including("id" => condition.exit_page_id, **stored_values),
+        )
+        expect(shown["pages"].first["exit_pages"]).to contain_exactly(a_hash_including("id" => condition.exit_page_id, "condition_ids" => [condition.id]))
+        expect(shown["summary"]).to include("representations" => { "both_in_sync" => 1 }, "exit_pages" => 1, "exit_pages_without_conditions" => 0)
+      end
+
+      it "shows which values differ when the exit page has been edited directly" do
+        condition.exit_page.update!(heading: "Edited heading", markdown_cy: "Edited Welsh markdown")
+
+        expect(shown_condition).to include(
+          "representation" => "both_out_of_sync",
+          "differences" => %w[heading markdown_cy],
+          "legacy_exit_page_fields" => a_hash_including("heading" => "Exit page heading", "markdown_cy" => "Welsh markdown"),
+          "exit_page" => a_hash_including("heading" => "Edited heading", "markdown_cy" => "Edited Welsh markdown"),
+        )
+      end
+
+      it "shows how the exit page is stored in the form documents" do
+        form.save_question_changes!
+
+        expect(shown["form_documents"]).to contain_exactly(
+          a_hash_including(
+            "tag" => "draft",
+            "language" => "en",
+            "steps" => [
+              a_hash_including(
+                "id" => routing_page.external_id,
+                "routing_conditions" => [a_hash_including("id" => condition.id, "exit_page_id" => condition.exit_page_id, "exit_page_heading" => "Exit page heading")],
+                "exit_pages" => [a_hash_including("id" => condition.exit_page_id, "heading" => "Exit page heading")],
+              ),
+            ],
+          ),
+        )
+      end
+    end
+
+    context "when the exit page is only stored on the condition" do
+      let!(:condition) { create(:condition, :with_exit_page, routing_page:, check_page: routing_page) }
+
+      before do
+        exit_page = condition.exit_page
+        condition.update_columns(exit_page_id: nil)
+        exit_page.delete
+      end
+
+      it "shows the legacy representation" do
+        expect(shown_condition).to include("representation" => "legacy_fields_only", "exit_page_id" => nil, "exit_page" => nil)
+      end
+    end
+
+    context "when the exit page is only stored on the exit page" do
+      let(:exit_page) { create(:exit_page, question_page: routing_page) }
+
+      before do
+        create(:condition, routing_page:, check_page: routing_page, exit_page:)
+      end
+
+      it "shows the exit page model representation" do
+        expect(shown_condition).to include(
+          "representation" => "exit_page_model_only",
+          "legacy_exit_page_fields" => { "heading" => nil, "markdown" => nil, "heading_cy" => nil, "markdown_cy" => nil },
+          "exit_page" => a_hash_including("heading" => exit_page.heading),
+        )
+      end
+    end
+
+    context "when the condition is not an exit page" do
+      before do
+        create(:condition, routing_page:, check_page: routing_page, goto_page: form.pages.last)
+        create(:exit_page, question_page: routing_page)
+      end
+
+      it "shows that the condition is not an exit page" do
+        expect(shown_condition).to include("representation" => "not_an_exit_page")
+      end
+
+      it "counts exit pages that no condition goes to" do
+        expect(shown["summary"]).to include("exit_pages" => 1, "exit_pages_without_conditions" => 1)
+      end
+    end
+  end
+
   describe "forms:sync_all_exit_pages" do
     subject(:task) do
       Rake::Task["forms:sync_all_exit_pages"]
