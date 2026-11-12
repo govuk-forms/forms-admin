@@ -1,6 +1,6 @@
 module Mailchimp
-  Member = Data.define(:email, :status, :role) do
-    def initialize(email:, status:, role: nil) = super
+  Member = Data.define(:email, :status, :role, :tags) do
+    def initialize(email:, status:, role: nil, tags: []) = super
 
     def unsubscribed?
       status == "unsubscribed"

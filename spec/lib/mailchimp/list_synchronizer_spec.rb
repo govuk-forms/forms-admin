@@ -436,5 +436,48 @@ RSpec.describe Mailchimp::ListSynchronizer do
         described_class.new(list_id: "list-1").synchronize(desired_members:)
       end
     end
+
+    context "when member has tag changes" do
+      let(:list_1_members_info) do
+        { "members" => [{
+          "email_address" => "user@domain.org",
+          "status" => "subscribed",
+          "tags" => [{ "id" => 1, "name" => "old-tag" }],
+        }] }
+      end
+
+      let(:desired_members) { [Mailchimp::Member.new(email: "user@domain.org", status: "subscribed", tags: [{ "name" => "old-tag", "status" => "inactive" }, { "name" => "new-tag", "status" => "active" }])] }
+
+      it "updates the member with the new tags" do
+        expect(mailchimp_client_lists).to receive(:update_list_member_tags).with(
+          "list-1",
+          anything,
+          { "tags" => [
+            { "name" => "old-tag", "status" => "inactive" },
+            { "name" => "new-tag", "status" => "active" },
+          ] },
+        )
+
+        described_class.new(list_id: "list-1").synchronize(desired_members:)
+      end
+    end
+
+    context "when member has no tag changes" do
+      let(:list_1_members_info) do
+        { "members" => [{
+          "email_address" => "user@domain.org",
+          "status" => "subscribed",
+          "tags" => [{ "id" => 1, "name" => "old-tag" }],
+        }] }
+      end
+
+      let(:desired_members) { [Mailchimp::Member.new(email: "user@domain.org", status: "subscribed", tags: [])] }
+
+      it "does not update the tags" do
+        expect(mailchimp_client_lists).not_to receive(:update_list_member_tags)
+
+        described_class.new(list_id: "list-1").synchronize(desired_members:)
+      end
+    end
   end
 end

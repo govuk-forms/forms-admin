@@ -104,8 +104,22 @@ class Mailchimp::ListSynchronizer
       member.subscriber_hash,
       member_data,
     )
+
+    update_member_tags(member)
   rescue MailchimpMarketing::ApiError => e
     log_mailchimp_error("subscribe", member.subscriber_hash, e)
+  end
+
+  def update_member_tags(member)
+    return if member.tags.empty?
+
+    client.lists.update_list_member_tags(
+      list_id,
+      member.subscriber_hash,
+      { "tags" => member.tags },
+    )
+  rescue MailchimpMarketing::ApiError => e
+    log_mailchimp_error("tag", member.subscriber_hash, e)
   end
 
   def remove_member(member)
