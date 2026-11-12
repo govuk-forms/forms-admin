@@ -12,7 +12,7 @@ RSpec.describe "groups/feature_flags", type: :view do
     skip "no group feature flags are configured" if Group.feature_flag_attributes.empty?
 
     assign(:group, group)
-    assign(:feature_flags_input, Groups::FeatureFlagsInput.new(group:).assign_group_values)
+    assign(:feature_flags_input, Groups::FeatureFlagsInput.new(group:).assign_values)
     render
   end
 
