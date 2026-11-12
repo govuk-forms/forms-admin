@@ -699,6 +699,75 @@ RSpec.describe "forms.rake", type: :task do
     end
   end
 
+  describe "forms:list_contact_emails" do
+    subject(:task) do
+      Rake::Task["forms:list_contact_emails"]
+    end
+
+    let(:organisation) { create :organisation, :with_signed_mou, name: "Test Org" }
+    let(:group) { create :group, name: "Test Group", organisation: }
+    let(:creator) { create :user, organisation: }
+    let(:group_admin) { create :user, organisation: }
+    let(:org_admin) { create :organisation_admin_user, organisation: }
+    let(:form) { create :form, name: "Test Form", creator_id: creator.id }
+
+    before do
+      GroupForm.create!(form_id: form.id, group:)
+      create :membership, group:, user: group_admin, role: :group_admin
+      org_admin
+    end
+
+    it "prints the contact emails for the form" do
+      expect {
+        task.invoke(form.id)
+      }.to output(
+        include("Form ID: #{form.id}, Form Name: Test Form, Organisation: Test Org, Group: Test Group")
+          .and(include("Form creator: #{creator.email}"))
+          .and(include("Group admins: #{group_admin.email}"))
+          .and(include("Organisation admins: #{org_admin.email}")),
+      ).to_stdout
+    end
+
+    context "when the form has no creator" do
+      let(:form) { create :form, creator_id: nil }
+
+      it "prints the creator as Unknown" do
+        expect { task.invoke(form.id) }.to output(/Form creator: Unknown/).to_stdout
+      end
+    end
+
+    context "with multiple forms" do
+      let(:other_form) { create :form, name: "Other Form" }
+
+      before do
+        GroupForm.create!(form_id: other_form.id, group:)
+      end
+
+      it "prints details for each form" do
+        expect {
+          task.invoke(form.id, other_form.id)
+        }.to output(/Form Name: Test Form.*Form Name: Other Form/m).to_stdout
+      end
+    end
+
+    context "with no arguments" do
+      it "aborts with a usage message" do
+        expect {
+          task.invoke
+        }.to raise_error(SystemExit)
+               .and output(/usage: rake forms:list_contact_emails/).to_stderr
+      end
+    end
+
+    context "with an invalid form id" do
+      it "raises an error" do
+        expect {
+          task.invoke("99999")
+        }.to raise_error(ActiveRecord::RecordNotFound)
+      end
+    end
+  end
+
   describe "forms:sync_all_exit_pages" do
     subject(:task) do
       Rake::Task["forms:sync_all_exit_pages"]
