@@ -1777,9 +1777,7 @@ en:
       one: Question %{question_number}’s route
       other: Question %{question_number}’s routes
     condition_name: Question %{question_number}’s routes
-    edit_exit_page: Edit “%{exit_page_heading}”
     end_of_form: End of the form
-    exit_page: Add an exit page
     exit_page_label: An ‘exit page’ to leave the form
     go_to_exit_page: 'Go to exit page %{exit_page_index}, ‘%{exit_page_heading}’ if the answer is:'
     go_to_page: 'Go to %{goto_page_question_number}, ‘%{goto_page_question_text}’ if the answer is:'

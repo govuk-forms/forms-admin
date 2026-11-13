@@ -52,25 +52,11 @@ describe "pages/conditions/edit.html.erb" do
     end
   end
 
-  context "when the condition does not have an exit page" do
-    it "has an 'add exit page' option" do
-      expect(rendered).to have_content("Add an exit page")
-    end
-  end
-
   context "when the condition has an exit page" do
     let(:condition) { create :condition, :with_exit_page, routing_page_id: page.id, check_page_id: page.id, answer_value: "Option 1" }
 
-    it "has the exit page heading" do
-      expect(rendered).to have_content(condition.exit_page_heading)
-    end
-  end
-
-  context "when the page already has a secondary skip route" do
-    let(:secondary_skip) { true }
-
-    it "does not have an 'add exit page' option" do
-      expect(rendered).not_to have_content("Add an exit page")
+    it "has the exit page selected, showing its heading" do
+      expect(rendered).to have_css("option[value='exit_page'][selected]", text: condition.exit_page_heading)
     end
   end
 end

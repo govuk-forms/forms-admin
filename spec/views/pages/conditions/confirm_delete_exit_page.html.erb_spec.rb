@@ -27,6 +27,10 @@ describe "pages/conditions/confirm_delete_exit_page.html.erb" do
     expect(rendered).to have_css("h1.govuk-heading-l", text: "Your exit page will be deleted")
   end
 
+  it "shows the exit page heading" do
+    expect(rendered).to have_css("p", text: "Route 1 currently skips to an exit page, “#{exit_page.exit_page_heading}”.")
+  end
+
   it "has a submit button" do
     expect(rendered).to have_css("button[type='submit'].govuk-button", text: I18n.t("save_and_continue"))
   end

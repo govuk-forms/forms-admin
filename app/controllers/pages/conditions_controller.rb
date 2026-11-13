@@ -27,13 +27,9 @@ class Pages::ConditionsController < PagesController
     condition_input = Pages::ConditionsInput.new(condition_input_params)
 
     if condition_input.submit
-      if condition_input.create_exit_page?
-        redirect_to conditions_exit_page_new_path(current_form.id, page.id, answer_value: condition_input.answer_value)
-      else
-        # TODO: Route number is hardcoded whilst we can only have one value for it
-        # https://trello.com/c/BfkZEIgM/3446-set-route-count-dynamically-instead-of-hard-coding-it
-        redirect_to show_routes_path(form_id: current_form.id, page_id: page.id), success: t("banner.success.route_created", route_number: 1)
-      end
+      # TODO: Route number is hardcoded whilst we can only have one value for it
+      # https://trello.com/c/BfkZEIgM/3446-set-route-count-dynamically-instead-of-hard-coding-it
+      redirect_to show_routes_path(form_id: current_form.id, page_id: page.id), success: t("banner.success.route_created", route_number: 1)
     else
       render template: "pages/conditions/new", locals: { condition_input: }, status: :unprocessable_content
     end
@@ -62,11 +58,7 @@ class Pages::ConditionsController < PagesController
     end
 
     if condition_input.update_condition
-      if condition_input.create_exit_page?
-        redirect_to conditions_exit_page_edit_path(current_form.id, page.id, condition.id)
-      else
-        redirect_to show_routes_path(form_id: current_form.id, page_id: page.id), success: t("banner.success.route_updated", question_number: condition_input.page.position)
-      end
+      redirect_to show_routes_path(form_id: current_form.id, page_id: page.id), success: t("banner.success.route_updated", question_number: condition_input.page.position)
     else
       render template: "pages/conditions/edit", locals: { condition_input: }, status: :unprocessable_content
     end
