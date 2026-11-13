@@ -15,6 +15,7 @@ class FormCopyService
     @copied_form = Form.new
     @logged_in_user = logged_in_user
     @exit_page_id_mapping = {}
+    @exit_pages_by_condition_id = {}
   end
 
   def copy(tag: "draft")
@@ -148,21 +149,32 @@ private
   end
 
   def copy_condition(condition_data, page_id_mapping)
-    condition = Condition.new(
-      routing_page: page_id_mapping[condition_data["routing_page_id"]],
+    routing_page = page_id_mapping[condition_data["routing_page_id"]]
+
+    Condition.create!(
+      routing_page:,
       check_page: page_id_mapping[condition_data["check_page_id"]],
       goto_page: page_id_mapping[condition_data["goto_page_id"]],
       answer_value: condition_data["answer_value"],
       skip_to_end: condition_data["skip_to_end"] || false,
-      exit_page_heading: condition_data["exit_page_heading"],
-      exit_page_markdown: condition_data["exit_page_markdown"],
+      exit_page: exit_page_for_condition(condition_data, routing_page),
     )
+  end
 
-    if condition_data["exit_page_id"].present?
-      condition.exit_page = @exit_page_id_mapping[condition_data["exit_page_id"]]
-    end
+  def exit_page_for_condition(condition_data, routing_page)
+    @exit_page_id_mapping[condition_data["exit_page_id"]] || copy_exit_page_from_condition(condition_data, routing_page)
+  end
 
-    condition.save!
+  # Older form documents only have the exit page content on the condition,
+  # so there is no entry in the step's exit pages to copy it from.
+  def copy_exit_page_from_condition(condition_data, routing_page)
+    heading = condition_data["exit_page_heading"]
+    markdown = condition_data["exit_page_markdown"]
+    return if heading.blank? || markdown.blank?
+
+    exit_page = routing_page.exit_pages.create!(heading:, markdown:)
+    @exit_pages_by_condition_id[condition_data["id"]] = exit_page
+    exit_page
   end
 
   def copy_group

@@ -12,6 +12,18 @@ RSpec.describe FormCopyService do
     GroupForm.create!(form: source_form, group: group)
   end
 
+  # Condition#exit_page_heading and #exit_page_markdown prefer the ExitPage, so
+  # read what is stored for the legacy fields, in English and in Welsh.
+  def stored_legacy_exit_page_values(conditions)
+    conditions.flat_map do |condition|
+      [
+        condition.read_attribute(:exit_page_heading),
+        condition.read_attribute(:exit_page_markdown),
+        *condition.translations.flat_map { [it.exit_page_heading, it.exit_page_markdown] },
+      ]
+    end
+  end
+
   describe "#copy" do
     it "creates a new form" do
       expect(copied_form).to be_a(Form)
@@ -202,6 +214,13 @@ RSpec.describe FormCopyService do
 
         expect(copied_condition.exit_page_heading).to eq(exit_condition.exit_page_heading)
         expect(copied_condition.exit_page_markdown).to eq(exit_condition.exit_page_markdown)
+      end
+
+      it "stores the exit page content on an exit page, not on the copied condition" do
+        copied_condition = copied_form.pages.first.routing_conditions.first
+
+        expect(copied_condition.exit_page).to have_attributes(heading: exit_condition.exit_page_heading, markdown: exit_condition.exit_page_markdown)
+        expect(stored_legacy_exit_page_values([copied_condition])).to all(be_nil)
       end
 
       it "does not associate with a goto_page for exit conditions" do
@@ -517,6 +536,102 @@ RSpec.describe FormCopyService do
         copied_exit_page = copied_form.pages.first.routing_conditions.first.exit_page
 
         expect(copied_exit_page.question_page).to eq(copied_form.pages.first)
+      end
+    end
+
+    context "when conditions share an exit page and another exit page has no conditions" do
+      let(:source_form) { create(:form, :live_with_draft, :ready_for_multiple_branches) }
+      let(:routing_page) { source_form.pages.first }
+      let(:copied_conditions) { copied_form.pages.first.routing_conditions.order(:id) }
+
+      before do
+        shared_exit_page = create(:exit_page, heading: "Shared heading", markdown: "Shared markdown", question_page: routing_page)
+        create(:exit_page, heading: "Unlinked heading", markdown: "Unlinked markdown", question_page: routing_page)
+
+        routing_page.answer_settings.selection_options.first(2).each do |option|
+          create(:condition, routing_page:, check_page: routing_page, answer_value: option.name, exit_page: shared_exit_page)
+        end
+        source_form.reload
+        source_form.latest_form_document.update!(content: source_form.as_form_document)
+      end
+
+      it "copies each exit page once" do
+        expect(copied_form.exit_pages.map { [it.heading, it.markdown] }).to contain_exactly(
+          ["Shared heading", "Shared markdown"],
+          ["Unlinked heading", "Unlinked markdown"],
+        )
+        expect(copied_form.exit_pages.map(&:question_page)).to all(eq(copied_form.pages.first))
+      end
+
+      it "links both copied conditions to the same copied exit page" do
+        shared_exit_page = copied_form.exit_pages.find_by(heading: "Shared heading")
+
+        expect(copied_conditions.count).to eq(2)
+        expect(copied_conditions.map(&:exit_page)).to all(eq(shared_exit_page))
+      end
+
+      it "does not store the exit page content on the copied conditions" do
+        expect(stored_legacy_exit_page_values(copied_conditions)).to all(be_nil)
+      end
+    end
+
+    context "when the form document only has the exit page content on the condition" do
+      let(:source_form) { create(:form, :live_with_draft, :ready_for_routing, pages_count: 3) }
+      let(:routing_page) { source_form.pages.first }
+      let(:copied_conditions) { copied_form.pages.first.routing_conditions.order(:id) }
+
+      before do
+        create(:condition, :with_exit_page, routing_page:, check_page: routing_page, answer_value: "Option 1",
+                                            exit_page_heading: "Older heading", exit_page_markdown: "Older markdown")
+        source_form.reload
+        source_form.latest_form_document.update!(content: source_form.as_form_document)
+      end
+
+      shared_examples "an exit page copied from the condition" do
+        it "creates an exit page on the copied routing page from the condition's content" do
+          expect(copied_form.exit_pages.count).to eq(1)
+          expect(copied_form.exit_pages.first).to have_attributes(
+            heading: "Older heading",
+            markdown: "Older markdown",
+            question_page: copied_form.pages.first,
+          )
+        end
+
+        it "links the copied condition to the exit page" do
+          expect(copied_conditions.count).to eq(1)
+          expect(copied_conditions.first.exit_page).to eq(copied_form.exit_pages.first)
+          expect(copied_conditions.first.goto_page).to be_nil
+        end
+
+        it "does not store the exit page content on the copied conditions" do
+          expect(stored_legacy_exit_page_values(copied_form.conditions)).to all(be_nil)
+        end
+      end
+
+      context "when the steps have no exit_pages key" do
+        before do
+          form_document = source_form.latest_form_document
+          form_document.content["steps"].each do |step|
+            step.delete("exit_pages")
+            step["routing_conditions"].each { it.delete("exit_page_id") }
+          end
+          form_document.save!
+        end
+
+        it_behaves_like "an exit page copied from the condition"
+      end
+
+      context "when the steps have an exit_pages key but the condition has no exit_page_id" do
+        before do
+          form_document = source_form.latest_form_document
+          form_document.content["steps"].each do |step|
+            step["exit_pages"] = []
+            step["routing_conditions"].each { it["exit_page_id"] = nil }
+          end
+          form_document.save!
+        end
+
+        it_behaves_like "an exit page copied from the condition"
       end
     end
 
