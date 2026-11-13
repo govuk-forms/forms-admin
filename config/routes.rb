@@ -149,19 +149,6 @@ Rails.application.routes.draw do
           delete "/:condition_id/delete" => "pages/conditions#destroy", as: :destroy_condition
           get "/:condition_id/confirm-delete-exit-page" => "pages/conditions#confirm_delete_exit_page", as: :confirm_change_exit_page
           post "/:condition_id/confirm-delete-exit-page" => "pages/conditions#update_change_exit_page", as: :update_change_exit_page
-
-          # These are the legacy exit page routes. Exit pages for multiple branches will be based on page
-          scope module: :conditions, as: :conditions do
-            scope "/exit-page", as: :exit_page do
-              get "/new" => "exit_page#new", as: :new
-              post "/new" => "exit_page#create", as: :create
-              post "/preview" => "exit_page#render_preview", as: :render_preview
-              get "/:condition_id" => "exit_page#edit", as: :edit
-              put "/:condition_id" => "exit_page#update", as: :update
-              get "/:condition_id/delete" => "exit_page#delete", as: :delete
-              delete "/:condition_id" => "exit_page#destroy", as: :destroy
-            end
-          end
         end
 
         resources :exit_pages, except: %i[index show], path: "exit-pages", module: :pages do

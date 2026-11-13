@@ -283,10 +283,8 @@ en:
     default:
       title: Important
     success:
-      exit_page_created: Your exit page has been added
       exit_page_deleted: Your exit page has been deleted
       exit_page_saved: Your exit page has been saved
-      exit_page_updated: Your exit page has been saved
       form:
         batch_submissions:
           daily_and_weekly_enabled: You’ll get daily and weekly batches of form submissions
@@ -373,15 +371,6 @@ en:
     up_to_3000_options: You can have up to 3,000 options.
     up_to_30_options: You can have up to 30 options.
   cancel: Cancel
-  conditions:
-    exit_page:
-      delete:
-        back_link: Back to edit exit page
-        banner: If you delete this exit page, the route to it will also be deleted
-        title: Are you sure you want to delete this exit page?
-      edit:
-        back_link: Back to edit route 1
-        delete_exit_page: Delete exit page
   contact_details:
     new:
       body_html: |
@@ -1869,7 +1858,6 @@ en:
     declaration: Add a declaration for people to agree to
     delete_exit_page: Are you sure you want to delete this exit page?
     delete_secondary_skip: Are you sure you want to delete the route for any other answer?
-    edit_exit_page: Edit exit page
     email_code_sent: Confirmation code sent
     error_prefix: 'Error: '
     exit_page_edit: Edit exit page
