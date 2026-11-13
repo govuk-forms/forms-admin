@@ -24,7 +24,7 @@ RSpec.describe Pages::ConditionsInput, type: :model do
       expect(conditions_input).to be_valid
     end
 
-    %w[end_of_form create_exit_page exit_page].each do |goto_page_id|
+    %w[end_of_form exit_page].each do |goto_page_id|
       it "is valid when the goto_page_id is #{goto_page_id}" do
         conditions_input.goto_page_id = goto_page_id
         conditions_input.answer_value = "Rabbit"
@@ -72,13 +72,6 @@ RSpec.describe Pages::ConditionsInput, type: :model do
         expect {
           conditions_input.submit
         }.to change(Condition, :count).by(1)
-      end
-
-      context "when goto_page_id is 'create_exit_page'" do
-        it "returns true" do
-          conditions_input.goto_page_id = "create_exit_page"
-          expect(conditions_input.submit).to be true
-        end
       end
     end
 

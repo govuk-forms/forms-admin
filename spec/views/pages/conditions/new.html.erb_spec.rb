@@ -27,8 +27,4 @@ describe "pages/conditions/new.html.erb" do
   it "has a submit button" do
     expect(rendered).to have_css("button[type='submit'].govuk-button", text: I18n.t("save_and_continue"))
   end
-
-  it "has an exit page option" do
-    expect(rendered).to have_css("option[value='create_exit_page']", text: I18n.t("page_conditions.exit_page"))
-  end
 end
