@@ -12,7 +12,8 @@ class Condition < ApplicationRecord
   belongs_to :exit_page, optional: true, autosave: true
 
   before_destroy :destroy_postconditions
-  before_validation :sync_exit_page
+  before_validation :sync_exit_page, if: :legacy_exit_page_content_assigned?
+  after_save { @legacy_exit_page_content_assigned = false }
 
   translates :exit_page_heading
   translates :exit_page_markdown, presence: false # Without presence here, the value is nil if set to ""
@@ -70,6 +71,7 @@ class Condition < ApplicationRecord
   end
 
   def exit_page_heading=(value, locale: nil, **options)
+    @legacy_exit_page_content_assigned = true
     public_send(:legacy_exit_page_heading=, value, locale: locale, **options)
   end
 
@@ -82,6 +84,7 @@ class Condition < ApplicationRecord
   end
 
   def exit_page_markdown=(value, locale: nil, **options)
+    @legacy_exit_page_content_assigned = true
     public_send(:legacy_exit_page_markdown=, value, locale: locale, **options)
   end
 
@@ -174,6 +177,10 @@ class Condition < ApplicationRecord
   end
 
 private
+
+  def legacy_exit_page_content_assigned?
+    @legacy_exit_page_content_assigned.present?
+  end
 
   def has_precondition?
     check_page_id && check_page_id != routing_page_id && !check_page.routing_conditions.empty?
