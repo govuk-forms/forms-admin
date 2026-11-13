@@ -417,6 +417,13 @@ RSpec.describe FormCopyService do
         expect(copied_condition.exit_page_markdown_cy).to eq("Welsh exit page markdown")
       end
 
+      it "stores the Welsh exit page content on the exit page, not on the copied condition" do
+        copied_condition = copied_form.pages.first.routing_conditions.first
+
+        expect(copied_condition.exit_page).to have_attributes(heading_cy: "Welsh exit page heading", markdown_cy: "Welsh exit page markdown")
+        expect(stored_legacy_exit_page_values([copied_condition])).to all(be_nil)
+      end
+
       context "when there are multiple versions of the live form" do
         before do
           welsh_content = source_form.latest_welsh_form_document.content.merge({ "what_happens_next_markdown" => "New Welsh content" })
@@ -654,6 +661,70 @@ RSpec.describe FormCopyService do
 
       it "copies Welsh markdown for the exit page" do
         expect(copied_form.exit_pages.first.markdown_cy).to eq("Markdown ymadael")
+      end
+    end
+
+    context "when the Welsh form document only has the exit page content on the condition" do
+      let(:source_form) do
+        form = create(:form, :live, :ready_for_routing, pages_count: 3, available_languages: %w[en cy])
+        routing_page = form.pages.first
+        exit_page = create(:exit_page, heading: "Older heading", markdown: "Older markdown", question_page: routing_page,
+                                       heading_cy: "Pennawd hŷn", markdown_cy: "Markdown hŷn")
+        create(:condition, routing_page:, check_page: routing_page, answer_value: "Option 1", exit_page:)
+        FormDocumentSyncService.new(form.reload).synchronize_live_form
+        form.reload
+      end
+
+      before do
+        source_form.form_documents.where(tag: "live", version: source_form.latest_form_document.version).find_each do |form_document|
+          form_document.content["steps"].each do |step|
+            step.delete("exit_pages")
+            step["routing_conditions"].each { it.delete("exit_page_id") }
+          end
+          form_document.save!
+        end
+        source_form.reload
+      end
+
+      it "copies the Welsh for the exit page from the condition in the Welsh form document" do
+        expect(copied_form.exit_pages.count).to eq(1)
+        expect(copied_form.exit_pages.first).to have_attributes(
+          heading: "Older heading",
+          markdown: "Older markdown",
+          heading_cy: "Pennawd hŷn",
+          markdown_cy: "Markdown hŷn",
+        )
+      end
+
+      it "links the copied condition to the exit page" do
+        expect(copied_form.pages.first.routing_conditions.first.exit_page).to eq(copied_form.exit_pages.first)
+      end
+
+      it "does not store the exit page content on the copied condition" do
+        expect(copied_form.conditions.count).to eq(1)
+        expect(stored_legacy_exit_page_values(copied_form.conditions)).to all(be_nil)
+      end
+    end
+
+    context "when the Welsh form document has English text for an exit page with no Welsh translation" do
+      let(:source_form) do
+        form = create(:form, :live, :ready_for_routing, pages_count: 2, available_languages: %w[en cy])
+        exit_page = create(:exit_page, heading: "English heading", markdown: "English markdown", question_page: form.pages.first)
+        create(:condition, routing_page: form.pages.first, check_page: form.pages.first, answer_value: "Option 1", exit_page:)
+        form.pages.first.update!(hint_text: "English hint")
+        FormDocumentSyncService.new(form.reload).synchronize_live_form
+        form.reload
+      end
+
+      it "stores the English text as the Welsh translation, as it does for page fields" do
+        welsh_form_document = source_form.form_documents.order(version: :desc).find_by!(tag: "live", language: "cy")
+        expect(welsh_form_document.content["steps"].first["exit_pages"].first).to include("heading" => "English heading")
+
+        welsh_translation = copied_form.exit_pages.first.translations.find_by!(locale: "cy")
+        expect(welsh_translation).to have_attributes(heading: "English heading", markdown: "English markdown")
+
+        welsh_page_translation = copied_form.pages.first.translations.find_by!(locale: "cy")
+        expect(welsh_page_translation.hint_text).to eq("English hint")
       end
     end
 
