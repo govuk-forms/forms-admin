@@ -822,6 +822,36 @@ RSpec.describe Condition, type: :model do
           expect(condition.exit_page).to be_present
           expect(condition.exit_page.markdown_cy).to be_nil
         end
+
+        context "when the exit page has been updated directly" do
+          before do
+            condition.exit_page.update!(
+              heading: "New heading",
+              markdown: "New markdown",
+              heading_cy: "New Welsh heading",
+              markdown_cy: "New Welsh markdown",
+            )
+          end
+
+          it "does not overwrite the exit page with legacy content when the condition is saved" do
+            loaded_condition = described_class.find(condition.id)
+            loaded_condition.answer_value = "Another answer"
+            loaded_condition.save!
+
+            exit_page = loaded_condition.reload.exit_page
+            expect(exit_page.heading).to eq("New heading")
+            expect(exit_page.markdown).to eq("New markdown")
+            expect(exit_page.heading_cy).to eq("New Welsh heading")
+            expect(exit_page.markdown_cy).to eq("New Welsh markdown")
+          end
+
+          it "returns the updated exit page content from the condition" do
+            loaded_condition = described_class.find(condition.id)
+
+            expect(loaded_condition.exit_page_heading).to eq("New heading")
+            expect(loaded_condition.exit_page_markdown).to eq("New markdown")
+          end
+        end
       end
 
       context "when the condition is attached to an external ExitPage" do
