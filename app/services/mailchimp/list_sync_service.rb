@@ -20,8 +20,7 @@ class Mailchimp::ListSyncService
       .where(has_access: true)
       .where("mou_signatures.id IS NOT NULL OR users.role = ?", "organisation_admin")
       .distinct
-      .reject { |user| non_crown?(user) }
-      .map { |user| Mailchimp::Member.new(email: user.email, status: "subscribed", role: mou_role(user)) }
+      .map { |user| Mailchimp::Member.new(email: user.email, status: "subscribed", role: mou_role(user), tags: mou_signer_tags(user)) }
   end
 
 private
@@ -34,6 +33,13 @@ private
     elsif user.organisation_admin?
       "Organisation admin"
     end
+  end
+
+  def mou_signer_tags(user)
+    [
+      { "name": "non_crown_mou_signer", "status": non_crown?(user) ? "active" : "inactive" },
+      { "name": "crown_mou_signer", "status": non_crown?(user) ? "inactive" : "active" },
+    ]
   end
 
   def non_crown?(user)

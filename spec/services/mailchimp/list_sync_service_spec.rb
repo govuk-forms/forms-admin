@@ -59,9 +59,9 @@ RSpec.describe Mailchimp::ListSyncService do
       )).once
 
       expect(mou_signers_list_synchronizer).to receive(:synchronize).with(desired_members: contain_exactly(
-        Mailchimp::Member.new(email: mou_signer_with_access, status: "subscribed", role: "Agreed MOU"),
-        Mailchimp::Member.new(email: organisation_admin_with_access, status: "subscribed", role: "Organisation admin"),
-        Mailchimp::Member.new(email: mou_signer_and_organisation_admin_with_access, status: "subscribed", role: "Organisation admin agreed MOU"),
+        Mailchimp::Member.new(email: mou_signer_with_access, status: "subscribed", role: "Agreed MOU", tags: [{ "name": "non_crown_mou_signer", "status": "inactive" }, { "name": "crown_mou_signer", "status": "active" }]),
+        Mailchimp::Member.new(email: organisation_admin_with_access, status: "subscribed", role: "Organisation admin", tags: [{ "name": "non_crown_mou_signer", "status": "inactive" }, { "name": "crown_mou_signer", "status": "active" }]),
+        Mailchimp::Member.new(email: mou_signer_and_organisation_admin_with_access, status: "subscribed", role: "Organisation admin agreed MOU", tags: [{ "name": "non_crown_mou_signer", "status": "inactive" }, { "name": "crown_mou_signer", "status": "active" }]),
       )).once
 
       expect(Rails.logger).to receive(:debug).with("Synchronizing active users mailing list").once
@@ -81,6 +81,8 @@ RSpec.describe Mailchimp::ListSyncService do
     let(:user_that_signed_non_crown_agreement) { create(:user, organisation: non_crown_org) }
     let(:not_org_admin_that_signed_non_crown_agreement) { create(:user, organisation: non_crown_org) }
     let(:org_admin_for_non_crown_org) { create(:user, organisation: non_crown_org) }
+    let(:crown_tags) { [{ "name": "non_crown_mou_signer", "status": "inactive" }, { "name": "crown_mou_signer", "status": "active" }] }
+    let(:non_crown_tags) { [{ "name": "non_crown_mou_signer", "status": "active" }, { "name": "crown_mou_signer", "status": "inactive" }] }
     let!(:signed_mou_org_user) { create(:user, organisation: signed_mou_org, has_access: false) }
 
     before do
@@ -95,11 +97,14 @@ RSpec.describe Mailchimp::ListSyncService do
       org_admin_for_non_crown_org.reload.organisation_admin!
     end
 
-    it "returns MOU signers with access and correct roles" do
+    it "returns MOU signers with access and correct roles and tags" do
       expected_members = [
-        Mailchimp::Member.new(email: "mou_user@example.com", status: "subscribed", role: "Agreed MOU"),
-        Mailchimp::Member.new(email: "admin_user@example.com", status: "subscribed", role: "Organisation admin"),
-        Mailchimp::Member.new(email: "admin_mou_user@example.com", status: "subscribed", role: "Organisation admin agreed MOU"),
+        Mailchimp::Member.new(email: user_with_access_and_mou.email, status: "subscribed", role: "Agreed MOU", tags: crown_tags),
+        Mailchimp::Member.new(email: user_with_access_admin.email, status: "subscribed", role: "Organisation admin", tags: crown_tags),
+        Mailchimp::Member.new(email: user_access_and_admin_with_mou.email, status: "subscribed", role: "Organisation admin agreed MOU", tags: crown_tags),
+        Mailchimp::Member.new(email: user_that_signed_non_crown_agreement.email, status: "subscribed", role: "Organisation admin agreed MOU", tags: non_crown_tags),
+        Mailchimp::Member.new(email: not_org_admin_that_signed_non_crown_agreement.email, status: "subscribed", role: "Agreed MOU", tags: non_crown_tags),
+        Mailchimp::Member.new(email: org_admin_for_non_crown_org.email, status: "subscribed", role: "Organisation admin", tags: non_crown_tags),
       ]
 
       expect(mailchimp_list_sync_service.mou_signers).to match_array(expected_members)
@@ -108,14 +113,6 @@ RSpec.describe Mailchimp::ListSyncService do
     it "does not include users without access" do
       expect(mailchimp_list_sync_service.mou_signers).not_to include(
         Mailchimp::Member.new(email: "inactive_user@example.com", status: "subscribed"),
-      )
-    end
-
-    it "does not include users that only signed a non-crown agreement" do
-      expect(mailchimp_list_sync_service.mou_signers).not_to include(
-        Mailchimp::Member.new(email: user_that_signed_non_crown_agreement.email, status: "subscribed"),
-        Mailchimp::Member.new(email: not_org_admin_that_signed_non_crown_agreement.email, status: "subscribed"),
-        Mailchimp::Member.new(email: org_admin_for_non_crown_org.email, status: "subscribed"),
       )
     end
   end
