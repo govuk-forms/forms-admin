@@ -198,8 +198,52 @@ RSpec.describe Api::V3FormDocumentsController, type: :request do
   end
 
   describe "#delivery_configurations" do
+    let(:draft_email_configuration) do
+      { "formats" => %w[csv], "delivery_method" => "email", "delivery_schedule" => "immediate" }
+    end
+    let(:s3_keys) { %w[s3_bucket_name s3_bucket_aws_account_id s3_bucket_region] }
+
+    def get_delivery_configurations(state)
+      get "/api/v3/forms/#{form.id}/delivery-configurations/#{state}", headers:
+    end
+
+    # It's slightly artificial for a form with state `live` or `archived` to have a different delivery configuration
+    # from its draft, but it allows us to test that the right form document is used
+    def make_draft_form_document_differ
+      form.draft_form_document.content["delivery_configurations"] = [draft_email_configuration]
+      form.draft_form_document.content["submission_email"] = "draft@example.gov.uk"
+      form.draft_form_document.save!
+    end
+
+    shared_examples "returns the draft email delivery configuration" do
+      it "returns the draft delivery configuration with the draft submission email" do
+        get_delivery_configurations("draft")
+
+        expect(response).to have_http_status(:ok)
+        expect(response.parsed_body).to eq [
+          draft_email_configuration.merge("submission_email" => "draft@example.gov.uk"),
+        ]
+      end
+    end
+
+    shared_examples "returns the current email delivery configuration" do
+      it "returns the current delivery configuration with the current submission email" do
+        get_delivery_configurations("current")
+
+        expect(response).to have_http_status(:ok)
+        expect(response.parsed_body).to eq [
+          {
+            "formats" => [],
+            "delivery_method" => "email",
+            "delivery_schedule" => "immediate",
+            "submission_email" => "current@example.gov.uk",
+          },
+        ]
+      end
+    end
+
     context "when the form is a draft" do
-      let(:form) { create :form }
+      let(:form) { create :form, submission_email: "draft@example.gov.uk" }
 
       before do
         form.delivery_configurations.create!(
@@ -210,19 +254,11 @@ RSpec.describe Api::V3FormDocumentsController, type: :request do
         form.save_draft!
       end
 
-      context "when requesting the draft delivery configuration" do
-        before do
-          get "/api/v3/forms/#{form.id}/delivery-configurations/draft", headers:
-        end
-
-        it "returns the draft delivery configuration" do
-          expect(response.body).to eq "[{\"formats\":[\"csv\"],\"delivery_method\":\"email\",\"delivery_schedule\":\"immediate\"}]"
-        end
-      end
+      include_examples "returns the draft email delivery configuration"
 
       context "when requesting the current live or archived delivery configuration" do
         before do
-          get "/api/v3/forms/#{form.id}/delivery-configurations/current", headers:
+          get_delivery_configurations("current")
         end
 
         it "returns http not found" do
@@ -233,129 +269,155 @@ RSpec.describe Api::V3FormDocumentsController, type: :request do
     end
 
     context "when the form is live" do
-      let(:form) { create :form, :with_email_delivery, :live }
+      let(:form) { create :form, :with_email_delivery, :live, submission_email: "current@example.gov.uk" }
 
-      before do
-        # It's slightly artificial for a form with state `live` to have a different delivery configuration from its
-        # draft, but it allows us to test that the right form document is returned
-        form.draft_form_document.content["delivery_configurations"] = "[{\"formats\":[\"csv\"],\"delivery_method\":\"email\",\"delivery_schedule\":\"immediate\"}]"
-        form.draft_form_document.save!
-      end
+      before { make_draft_form_document_differ }
 
-      context "when requesting the draft delivery configuration" do
-        before do
-          get "/api/v3/forms/#{form.id}/delivery-configurations/draft", headers:
-        end
-
-        it "returns the draft delivery configuration" do
-          expect(response.body).to eq "[{\"formats\":[\"csv\"],\"delivery_method\":\"email\",\"delivery_schedule\":\"immediate\"}]"
-        end
-      end
-
-      context "when requesting the current live or archived delivery configuration" do
-        before do
-          get "/api/v3/forms/#{form.id}/delivery-configurations/current", headers:
-        end
-
-        it "returns the live delivery configuration" do
-          expect(response).to have_http_status(:ok)
-          expect(response.body).to eq "[{\"formats\":[],\"delivery_method\":\"email\",\"delivery_schedule\":\"immediate\"}]"
-        end
-      end
+      include_examples "returns the draft email delivery configuration"
+      include_examples "returns the current email delivery configuration"
     end
 
     context "when the form is live_with_draft" do
-      let(:form) { create :form, :with_email_delivery, :live_with_draft }
+      let(:form) { create :form, :with_email_delivery, :live_with_draft, submission_email: "current@example.gov.uk" }
 
       before do
         form.delivery_configurations.first.update!(formats: %w[csv])
         form.delivery_configurations.reload
+        form.submission_email = "draft@example.gov.uk"
         form.save_draft!
       end
 
-      context "when requesting the draft delivery configuration" do
-        before do
-          get "/api/v3/forms/#{form.id}/delivery-configurations/draft", headers:
-        end
-
-        it "returns the draft delivery configuration" do
-          expect(response).to have_http_status(:ok)
-          expect(response.body).to eq "[{\"formats\":[\"csv\"],\"delivery_method\":\"email\",\"delivery_schedule\":\"immediate\"}]"
-        end
-      end
-
-      context "when requesting the current live or archived delivery configuration" do
-        before do
-          get "/api/v3/forms/#{form.id}/delivery-configurations/current", headers:
-        end
-
-        it "returns the live delivery configuration" do
-          expect(response).to have_http_status(:ok)
-          expect(response.body).to eq "[{\"formats\":[],\"delivery_method\":\"email\",\"delivery_schedule\":\"immediate\"}]"
-        end
-      end
+      include_examples "returns the draft email delivery configuration"
+      include_examples "returns the current email delivery configuration"
     end
 
     context "when the form is archived" do
-      let(:form) { create :form, :with_email_delivery, :archived }
+      let(:form) { create :form, :with_email_delivery, :archived, submission_email: "current@example.gov.uk" }
 
-      before do
-        # It's slightly artificial for a form with state `archived` to have a different delivery configuration from its
-        # draft, but it allows us to test that the right form document is returned
-        form.draft_form_document.content["delivery_configurations"] = "[{\"formats\":[\"csv\"],\"delivery_method\":\"email\",\"delivery_schedule\":\"immediate\"}]"
-        form.draft_form_document.save!
-      end
+      before { make_draft_form_document_differ }
 
-      context "when requesting the draft delivery configuration" do
-        before do
-          get "/api/v3/forms/#{form.id}/delivery-configurations/draft", headers:
-        end
-
-        it "returns the draft delivery configuration" do
-          expect(response.body).to eq "[{\"formats\":[\"csv\"],\"delivery_method\":\"email\",\"delivery_schedule\":\"immediate\"}]"
-        end
-      end
-
-      context "when requesting the current live or archived delivery configuration" do
-        before do
-          get "/api/v3/forms/#{form.id}/delivery-configurations/current", headers:
-        end
-
-        it "returns the archived delivery configuration" do
-          expect(response).to have_http_status(:ok)
-          expect(response.body).to eq "[{\"formats\":[],\"delivery_method\":\"email\",\"delivery_schedule\":\"immediate\"}]"
-        end
-      end
+      include_examples "returns the draft email delivery configuration"
+      include_examples "returns the current email delivery configuration"
     end
 
     context "when the form is archived_with_draft" do
-      let(:form) { create :form, :with_email_delivery, :archived_with_draft }
+      let(:form) { create :form, :with_email_delivery, :archived_with_draft, submission_email: "current@example.gov.uk" }
 
       before do
         form.delivery_configurations.first.update!(formats: %w[csv])
         form.delivery_configurations.reload
+        form.submission_email = "draft@example.gov.uk"
         form.save_draft!
       end
 
-      context "when requesting the draft delivery configuration" do
-        before do
-          get "/api/v3/forms/#{form.id}/delivery-configurations/draft", headers:
-        end
+      include_examples "returns the draft email delivery configuration"
+      include_examples "returns the current email delivery configuration"
+    end
 
-        it "returns the draft delivery configuration" do
-          expect(response.body).to eq "[{\"formats\":[\"csv\"],\"delivery_method\":\"email\",\"delivery_schedule\":\"immediate\"}]"
-        end
+    context "when the form has an s3 delivery configuration" do
+      let(:form) { create :form, :with_s3_configuration, :with_s3_delivery, :live, submission_email: "current@example.gov.uk" }
+      let(:expected_configuration) do
+        {
+          "formats" => %w[json],
+          "delivery_method" => "s3",
+          "delivery_schedule" => "immediate",
+          "s3_bucket_name" => "test-bucket",
+          "s3_bucket_aws_account_id" => "123456789012",
+          "s3_bucket_region" => "eu-west-1",
+        }
       end
 
-      context "when requesting the current live or archived delivery configuration" do
-        before do
-          get "/api/v3/forms/#{form.id}/delivery-configurations/current", headers:
-        end
+      before do
+        # The factory creates the draft form document before the delivery configuration is added
+        form.draft_form_document.content["delivery_configurations"] = form.latest_form_document.content["delivery_configurations"]
+        form.draft_form_document.content["s3_bucket_name"] = "draft-bucket"
+        form.draft_form_document.save!
+      end
 
-        it "returns the archived delivery configuration" do
-          expect(response).to have_http_status(:ok)
-          expect(response.body).to eq "[{\"formats\":[],\"delivery_method\":\"email\",\"delivery_schedule\":\"immediate\"}]"
-        end
+      it "returns the draft s3 bucket details without the submission email" do
+        get_delivery_configurations("draft")
+
+        expect(response).to have_http_status(:ok)
+        expect(response.parsed_body).to eq [expected_configuration.merge("s3_bucket_name" => "draft-bucket")]
+      end
+
+      it "returns the current s3 bucket details without the submission email" do
+        get_delivery_configurations("current")
+
+        expect(response).to have_http_status(:ok)
+        expect(response.parsed_body).to eq [expected_configuration]
+      end
+    end
+
+    context "when the form has both email and s3 immediate delivery configurations" do
+      let(:form) { create :form, :with_s3_configuration, :with_email_delivery, :with_s3_delivery, :live, submission_email: "current@example.gov.uk" }
+
+      it "adds only the relevant destination details to each configuration" do
+        get_delivery_configurations("current")
+
+        expect(response).to have_http_status(:ok)
+        expect(response.parsed_body).to contain_exactly(
+          {
+            "formats" => [],
+            "delivery_method" => "email",
+            "delivery_schedule" => "immediate",
+            "submission_email" => "current@example.gov.uk",
+          },
+          {
+            "formats" => %w[json],
+            "delivery_method" => "s3",
+            "delivery_schedule" => "immediate",
+            "s3_bucket_name" => "test-bucket",
+            "s3_bucket_aws_account_id" => "123456789012",
+            "s3_bucket_region" => "eu-west-1",
+          },
+        )
+      end
+    end
+
+    context "when the form has a batch email delivery configuration" do
+      let(:form) { create :form, submission_email: "draft@example.gov.uk" }
+
+      before do
+        form.delivery_configurations.create!(delivery_method: "email", delivery_schedule: "daily", formats: %w[csv])
+        form.save_draft!
+      end
+
+      it "includes the submission email" do
+        get_delivery_configurations("draft")
+
+        expect(response.parsed_body).to eq [
+          {
+            "formats" => %w[csv],
+            "delivery_method" => "email",
+            "delivery_schedule" => "daily",
+            "submission_email" => "draft@example.gov.uk",
+          },
+        ]
+      end
+    end
+
+    context "when the destination details are blank in the form document" do
+      let(:form) { create :form, :with_email_delivery, :with_s3_delivery, submission_email: "" }
+
+      before do
+        form.save_draft!
+      end
+
+      it "returns null for the relevant keys" do
+        get_delivery_configurations("draft")
+
+        email_configuration = response.parsed_body.find { |configuration| configuration["delivery_method"] == "email" }
+        s3_configuration = response.parsed_body.find { |configuration| configuration["delivery_method"] == "s3" }
+
+        expect(email_configuration).to include("submission_email" => nil)
+        expect(email_configuration.keys).not_to include(*s3_keys)
+        expect(s3_configuration).to include(
+          "s3_bucket_name" => nil,
+          "s3_bucket_aws_account_id" => nil,
+          "s3_bucket_region" => nil,
+        )
+        expect(s3_configuration.keys).not_to include("submission_email")
       end
     end
   end

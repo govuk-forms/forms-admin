@@ -1,4 +1,9 @@
 class Api::V3FormDocumentsController < ApplicationController
+  DELIVERY_DESTINATION_KEYS = {
+    "email" => %w[submission_email],
+    "s3" => %w[s3_bucket_name s3_bucket_aws_account_id s3_bucket_region],
+  }.freeze
+
   def show
     form_document = form.form_documents.find_by!(version: version, language: language)
 
@@ -65,12 +70,23 @@ private
   end
 
   def draft_delivery_configurations
-    render json: form.draft_form_document.content["delivery_configurations"]
+    render json: delivery_configurations_with_destinations(form.draft_form_document)
   end
 
   def current_delivery_configurations
     raise NotFoundError unless form.is_live? || form.is_archived?
 
-    render json: form.latest_form_document.content["delivery_configurations"]
+    render json: delivery_configurations_with_destinations(form.latest_form_document)
+  end
+
+  # Returns new hashes rather than changing the stored form document content
+  def delivery_configurations_with_destinations(form_document)
+    content = form_document.content
+
+    content["delivery_configurations"]&.map do |configuration|
+      destination_keys = DELIVERY_DESTINATION_KEYS.fetch(configuration["delivery_method"], [])
+
+      configuration.merge(destination_keys.index_with { |key| content[key].presence })
+    end
   end
 end
