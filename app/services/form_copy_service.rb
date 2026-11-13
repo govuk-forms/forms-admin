@@ -7,7 +7,8 @@ class FormCopyService
                  submission_email
                  s3_bucket_aws_account_id
                  s3_bucket_name
-                 s3_bucket_region].freeze
+                 s3_bucket_region
+                 save_and_return].freeze
   TO_COPY = Form::FORM_DOCUMENT_ATTRIBUTES - DONT_COPY
 
   def initialize(form, logged_in_user)
