@@ -36,6 +36,7 @@ class Reports::FormsCsvReportService
     "Weekly submissions CSV enabled",
     "Has Welsh translation",
     "Copy of answers enabled",
+    "Save and return enabled",
   ].freeze
 
   attr_reader :form_documents
@@ -94,6 +95,7 @@ private
       Reports::FormDocumentsService.has_weekly_submission_csv(form),
       Reports::FormDocumentsService.has_welsh_translation(form),
       Reports::FormDocumentsService.copy_of_answers_enabled?(form),
+      Reports::FormDocumentsService.save_and_return_enabled?(form),
     ]
   end
 

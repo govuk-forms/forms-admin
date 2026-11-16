@@ -2212,6 +2212,7 @@ en:
         forms_with_payments: "%{tag} forms with payments"
         forms_with_routes: "%{tag} forms with routes"
         forms_with_s3_submissions: "%{tag} forms with S3 submissions"
+        forms_with_save_and_return_enabled: "%{tag} forms using save and return"
         forms_with_steps_with_many_conditional_routes: "%{tag} forms with more than one conditional route from the same question"
         forms_with_weekly_submission_csv: "%{tag} forms getting a weekly CSV of completed forms"
         forms_with_welsh_translation: "%{tag} forms with Welsh translation"
@@ -2229,6 +2230,7 @@ en:
           with_one_conditional_route: Number of questions with one conditional route only
           with_routes: Number of questions with routes
           with_unconditional_route: Number of questions with an unconditional route
+        number_of_questions_short: Number of questions
         organisation: Organisation
         question_text: Question text
       values:
@@ -2306,6 +2308,10 @@ en:
       download_csv: Download data about all %{tag} forms with S3 submissions enabled (as a CSV)
       empty: There are no %{tag} forms with S3 submissions enabled
       heading: "%{tag} forms with S3 submissions enabled"
+    forms_with_save_and_return_enabled:
+      download_csv: Download data about all %{tag} forms using save and return (as a CSV)
+      empty: There are no %{tag} forms using save and return
+      heading: "%{tag} forms using save and return"
     forms_with_weekly_submission_csv:
       download_csv: Download data about all %{tag} forms getting a weekly CSV of completed forms (as a CSV)
       empty: There are no %{tag} forms getting a weekly CSV of completed forms

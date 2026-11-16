@@ -155,6 +155,10 @@ class Reports::FormDocumentsService
       form_document.dig("content", "send_copy_of_answers") == "enabled"
     end
 
+    def save_and_return_enabled?(form_document)
+      form_document.dig("content", "save_and_return") == "enabled"
+    end
+
     # The feature flags for a form document, keyed by the feature report
     # counters without their forms_with_ prefix. Every value is a boolean.
     def features(form_document)
@@ -177,6 +181,7 @@ class Reports::FormDocumentsService
         "exit_pages" => has_exit_pages?(form_document),
         "welsh_translation" => has_welsh_translation(form_document),
         "copy_of_answers_enabled" => copy_of_answers_enabled?(form_document),
+        "save_and_return_enabled" => save_and_return_enabled?(form_document),
       }
     end
 

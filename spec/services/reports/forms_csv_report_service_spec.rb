@@ -92,6 +92,7 @@ RSpec.describe Reports::FormsCsvReportService do
         "Weekly submissions CSV enabled" => "true",
         "Has Welsh translation" => "true",
         "Copy of answers enabled" => "false",
+        "Save and return enabled" => "false",
       })
     end
   end

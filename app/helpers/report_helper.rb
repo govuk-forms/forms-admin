@@ -5,6 +5,8 @@ module ReportHelper
       report_forms_table(records)
     when :forms_with_routes
       report_forms_with_routes_table(records)
+    when :forms_with_number_of_questions
+      report_forms_with_number_of_questions_table(records)
     when :questions
       report_questions_table(records)
     when :selection_questions
@@ -27,6 +29,13 @@ module ReportHelper
     {
       head: report_forms_with_routes_table_head,
       rows: report_forms_with_routes_table_rows(forms),
+    }
+  end
+
+  def report_forms_with_number_of_questions_table(forms)
+    {
+      head: report_forms_with_number_of_questions_table_head,
+      rows: report_forms_with_number_of_questions_table_rows(forms),
     }
   end
 
@@ -76,6 +85,17 @@ module ReportHelper
     forms.map { |form| report_forms_with_routes_table_row(form) }
   end
 
+  def report_forms_with_number_of_questions_table_head
+    [
+      *report_forms_table_head,
+      I18n.t("reports.form_or_questions_list_table.headings.number_of_questions_short"),
+    ]
+  end
+
+  def report_forms_with_number_of_questions_table_rows(forms)
+    forms.map { |form| report_forms_with_number_of_questions_table_row(form) }
+  end
+
   def report_questions_table_head
     [
       *report_forms_table_head,
@@ -121,6 +141,13 @@ private
       form["metadata"]["number_of_questions"]["with_one_conditional_route"].to_s,
       form["metadata"]["number_of_questions"]["with_many_conditional_routes"].to_s,
       form["metadata"]["number_of_questions"]["with_unconditional_route"].to_s,
+    ]
+  end
+
+  def report_forms_with_number_of_questions_table_row(form)
+    [
+      *report_forms_table_row(form),
+      form["content"]["steps"].length.to_s,
     ]
   end
 
