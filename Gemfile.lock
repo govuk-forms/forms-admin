@@ -112,14 +112,14 @@ GEM
     auth-sanitizer (0.2.1)
       version_gem (~> 1.1, >= 1.1.10)
     aws-eventstream (1.4.1)
-    aws-partitions (1.1300.0)
-    aws-sdk-cloudwatch (1.154.0)
-      aws-sdk-core (~> 3, >= 3.263.0)
+    aws-partitions (1.1304.0)
+    aws-sdk-cloudwatch (1.158.0)
+      aws-sdk-core (~> 3, >= 3.267.0)
       aws-sigv4 (~> 1.5)
-    aws-sdk-codepipeline (1.125.0)
-      aws-sdk-core (~> 3, >= 3.263.0)
+    aws-sdk-codepipeline (1.129.0)
+      aws-sdk-core (~> 3, >= 3.267.0)
       aws-sigv4 (~> 1.5)
-    aws-sdk-core (3.263.0)
+    aws-sdk-core (3.267.0)
       aws-eventstream (~> 1, >= 1.4.1)
       aws-partitions (~> 1, >= 1.992.0)
       aws-sigv4 (~> 1.9)
@@ -128,14 +128,14 @@ GEM
       jmespath (~> 1, >= 1.6.1)
       logger
       rexml (~> 3.4, >= 3.4.2)
-    aws-sdk-firehose (1.119.0)
-      aws-sdk-core (~> 3, >= 3.263.0)
+    aws-sdk-firehose (1.123.0)
+      aws-sdk-core (~> 3, >= 3.267.0)
       aws-sigv4 (~> 1.5)
-    aws-sdk-kms (1.138.0)
-      aws-sdk-core (~> 3, >= 3.263.0)
+    aws-sdk-kms (1.142.0)
+      aws-sdk-core (~> 3, >= 3.267.0)
       aws-sigv4 (~> 1.5)
-    aws-sdk-s3 (1.237.0)
-      aws-sdk-core (~> 3, >= 3.263.0)
+    aws-sdk-s3 (1.241.0)
+      aws-sdk-core (~> 3, >= 3.267.0)
       aws-sdk-kms (~> 1)
       aws-sigv4 (~> 1.5)
     aws-sigv4 (1.12.1)
@@ -295,6 +295,7 @@ GEM
     marcel (1.2.1)
     matrix (0.4.3)
     mini_mime (1.1.5)
+    mini_portile2 (2.8.9)
     minitest (6.0.6)
       drb (~> 2.0)
       prism (~> 1.5)
@@ -317,6 +318,9 @@ GEM
     net-smtp (0.5.2)
       net-protocol
     nio4r (2.7.5)
+    nokogiri (1.19.7)
+      mini_portile2 (~> 2.8.2)
+      racc (~> 1.4)
     nokogiri (1.19.7-aarch64-linux-gnu)
       racc (~> 1.4)
     nokogiri (1.19.7-aarch64-linux-musl)
@@ -400,9 +404,9 @@ GEM
       opentelemetry-instrumentation-active_support (~> 0.10)
     opentelemetry-instrumentation-active_support (0.12.1)
       opentelemetry-instrumentation-base (~> 0.25)
-    opentelemetry-instrumentation-all (0.100.0)
+    opentelemetry-instrumentation-all (0.101.0)
       opentelemetry-instrumentation-active_model_serializers (~> 0.25.0)
-      opentelemetry-instrumentation-anthropic (~> 0.5.0)
+      opentelemetry-instrumentation-anthropic (~> 0.6.0)
       opentelemetry-instrumentation-aws_lambda (~> 0.7.0)
       opentelemetry-instrumentation-aws_sdk (~> 0.13.0)
       opentelemetry-instrumentation-bunny (~> 0.25.0)
@@ -439,7 +443,7 @@ GEM
       opentelemetry-instrumentation-sidekiq (~> 0.29.0)
       opentelemetry-instrumentation-sinatra (~> 0.30.0)
       opentelemetry-instrumentation-trilogy (~> 0.69.0)
-    opentelemetry-instrumentation-anthropic (0.5.0)
+    opentelemetry-instrumentation-anthropic (0.6.0)
       opentelemetry-instrumentation-base (~> 0.25)
     opentelemetry-instrumentation-aws_lambda (0.7.1)
       opentelemetry-instrumentation-base (~> 0.25)
@@ -801,10 +805,10 @@ DEPENDENCIES
   aasm (~> 6.0)
   acts_as_list
   after_commit_everywhere (~> 1.6)
-  aws-sdk-cloudwatch (~> 1.154)
-  aws-sdk-codepipeline (~> 1.125)
-  aws-sdk-firehose (~> 1.119)
-  aws-sdk-s3 (~> 1.237)
+  aws-sdk-cloudwatch (~> 1.158)
+  aws-sdk-codepipeline (~> 1.129)
+  aws-sdk-firehose (~> 1.123)
+  aws-sdk-s3 (~> 1.241)
   axe-core-rspec
   bootsnap
   brakeman (~> 8.1.0)
@@ -827,7 +831,7 @@ DEPENDENCIES
   omniauth-auth0
   omniauth-rails_csrf_protection
   opentelemetry-exporter-otlp (~> 0.37.0)
-  opentelemetry-instrumentation-all (~> 0.100.0)
+  opentelemetry-instrumentation-all (~> 0.101.0)
   opentelemetry-propagator-xray (~> 0.27.0)
   opentelemetry-sdk (~> 1.13)
   pagy
@@ -877,13 +881,13 @@ CHECKSUMS
   ast (2.4.3) sha256=954615157c1d6a382bc27d690d973195e79db7f55e9765ac7c481c60bdb4d383
   auth-sanitizer (0.2.1) sha256=917dcf01f7589b06c26726afe90568cf2fb29d37a1f94facfc664f11967cc577
   aws-eventstream (1.4.1) sha256=ceb6a99c61df4bb00344e54aed0351574beca24f87a0d1487d1d2ed80929ce96
-  aws-partitions (1.1300.0) sha256=e3cc87a4ffe875d7326e6b9f5fe696ff9a59632227f3252061dcba1782664924
-  aws-sdk-cloudwatch (1.154.0) sha256=5d2f83b2726c9ee877aaeb88aab20307f44ab41e2cf5d08414516556f41abaae
-  aws-sdk-codepipeline (1.125.0) sha256=9c18de7f09efcba20c775a83cc588ff84f98780f9091dbb2c0bcc86ec5abcdd6
-  aws-sdk-core (3.263.0) sha256=9b6d396ed8b3e5ba19b0640fbdbfa1875b0c485353e1bb836f1e72b403c8892d
-  aws-sdk-firehose (1.119.0) sha256=0c5b24247e48f5d83753fb514f4e1ee9b9c1462a0198e51c744f3e0710fe7ce3
-  aws-sdk-kms (1.138.0) sha256=b3b4da50b962faa1333d6072f2eb04d8ad71569b32ee0d639657df3f8be8b37d
-  aws-sdk-s3 (1.237.0) sha256=1e8a96a5411124d66f85f397bd00a1d6df53da1946725b6d5980d921a8e11191
+  aws-partitions (1.1304.0) sha256=50c8a097bba7da525c19b021420456d50c3652ff2a80ff0cc8e6a978a2452ff1
+  aws-sdk-cloudwatch (1.158.0) sha256=152f3091369f75b8a5d1bd1b5e3ea5e63faf8258c3c04ce6bf3edb817b6f43a8
+  aws-sdk-codepipeline (1.129.0) sha256=9e997236636a5541d61b71ab44e4d0befd6a0d0d89921742627cc855f36735ec
+  aws-sdk-core (3.267.0) sha256=770ba58d1f3f296ba37611a9730eeb5556f95da8d108dccaa7269a1a38f1d830
+  aws-sdk-firehose (1.123.0) sha256=173c9758349ead2e1f5c2dec405213c5b81db16c860929302a29f001badcc732
+  aws-sdk-kms (1.142.0) sha256=57d3de641f88496370447a2bce0bd1a6a0de05ae9a9635636acf88aeb864a61f
+  aws-sdk-s3 (1.241.0) sha256=3c8ba12691292161f37666bfc9823d80327e8cd42a31464366b17b57c8a67a6d
   aws-sigv4 (1.12.1) sha256=6973ff95cb0fd0dc58ba26e90e9510a2219525d07620c8babeb70ef831826c00
   axe-core-api (4.14.0) sha256=61fa8065b6643d3faa82527220fafff5b80d3beed4a19c198782f415d8ad8ac0
   axe-core-rspec (4.14.0) sha256=c4dc9afc16a82bcbb4351955f12c4ff60ceb9a71307d9b56226ee2f692e06c6d
@@ -952,6 +956,7 @@ CHECKSUMS
   marcel (1.2.1) sha256=1678e9360e32f9eafa917c80029e2f6d10b2715c66a4b87b6d0da9b9cd1f859f
   matrix (0.4.3) sha256=a0d5ab7ddcc1973ff690ab361b67f359acbb16958d1dc072b8b956a286564c5b
   mini_mime (1.1.5) sha256=8681b7e2e4215f2a159f9400b5816d85e9d8c6c6b491e96a12797e798f8bccef
+  mini_portile2 (2.8.9) sha256=0cd7c7f824e010c072e33f68bc02d85a00aeb6fce05bb4819c03dfd3c140c289
   minitest (6.0.6) sha256=153ea36d1d987a62942382b61075745042a2b3123b1cd48f4c3675af9cc7d6f1
   mobility (1.3.2) sha256=32fbbb0e53118ef42de20daa6ac94dbb758c628874092eba311b968a1e1d757b
   msgpack (1.8.7) sha256=dfefec761b5f9047e6e8d95d2c7f8af4b3725d984a01942adc533aa819a2df33
@@ -963,6 +968,7 @@ CHECKSUMS
   net-protocol (0.4.0) sha256=f9f90c8c6f64794a45160bf422177a336db12809de3beeeaa26b88fcd2e8c853
   net-smtp (0.5.2) sha256=35103cc04d6b2d94632f9928ede07483c24b70b9c0db1f231fea43909b678f3c
   nio4r (2.7.5) sha256=6c90168e48fb5f8e768419c93abb94ba2b892a1d0602cb06eef16d8b7df1dca1
+  nokogiri (1.19.7) sha256=abe94507c54cb18f872777b16bdca4aad32b1abdc4c52fe843f1c80fbdf992b8
   nokogiri (1.19.7-aarch64-linux-gnu) sha256=8f5e15d299602456406e1f03a9f3456cceb33a0722811e818d2ee2214eb4c84a
   nokogiri (1.19.7-aarch64-linux-musl) sha256=efe0c3602e6e54521bc21c681930ce5568e2d11203de17400710b2b3ca2e4cb4
   nokogiri (1.19.7-arm-linux-gnu) sha256=7fd1907125691aa89e838cc91161761c758b4e17bb32f0dd9b5515a82cc759af
@@ -992,8 +998,8 @@ CHECKSUMS
   opentelemetry-instrumentation-active_record (0.13.0) sha256=239fceaae5a42e82dd9dd87bc63b1888bea32058dac0779b5ea36110fcb3a299
   opentelemetry-instrumentation-active_storage (0.5.1) sha256=7acbab82184db6bf00c52fdb4ce7e2f4e6a1c6e3e5585b100d43d5d3e2d69b5b
   opentelemetry-instrumentation-active_support (0.12.1) sha256=c90dc3bb2a02ab614f95bee56f8f14ba6164a7dfaee6f87a2ca3de30fa87413d
-  opentelemetry-instrumentation-all (0.100.0) sha256=921d1be76b60c0a772313e5f1ab3c374578e6219d69dc03f81488f62cc305cfc
-  opentelemetry-instrumentation-anthropic (0.5.0) sha256=a6b1e1f324d35323d4714a7f204c9d34c46da07529877a725829420a4a44bb13
+  opentelemetry-instrumentation-all (0.101.0) sha256=93bc69c481a91714300014f5e4336a8e27765460098b4afe6f00c5b3ed9a08c3
+  opentelemetry-instrumentation-anthropic (0.6.0) sha256=ae7ae06eb83bdcfd65f2f7a5263e3359ad8c5886ebd965df8868f10533fb9e7f
   opentelemetry-instrumentation-aws_lambda (0.7.1) sha256=e7d19e8fc850fe337f9b5b4b692d02cec5172908e71e265c55af726cbeaab37b
   opentelemetry-instrumentation-aws_sdk (0.13.0) sha256=9f8cc9c80f5a520b5307eebc9f511120d35135e024045a5b3b30d42de6dc7355
   opentelemetry-instrumentation-base (0.27.0) sha256=e55edb82cd0b018e82e746be61fa36cb05b7b68b2fa37f0e4a96b923ad3d7735
