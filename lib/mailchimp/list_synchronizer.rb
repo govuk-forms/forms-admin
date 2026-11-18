@@ -28,6 +28,8 @@ class Mailchimp::ListSynchronizer
     archive_removed_members(existing_members_hash, desired_members_hash)
   end
 
+private
+
   def add_and_update_members(existing_members, desired_members)
     Rails.logger.debug "Subscribing any new users..."
     members_to_update = []
