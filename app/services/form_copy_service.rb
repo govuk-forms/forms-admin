@@ -16,6 +16,7 @@ class FormCopyService
     @copied_form = Form.new
     @logged_in_user = logged_in_user
     @exit_page_id_mapping = {}
+    @exit_pages_by_condition_id = {}
   end
 
   def copy(tag: "draft")
@@ -149,21 +150,32 @@ private
   end
 
   def copy_condition(condition_data, page_id_mapping)
-    condition = Condition.new(
-      routing_page: page_id_mapping[condition_data["routing_page_id"]],
+    routing_page = page_id_mapping[condition_data["routing_page_id"]]
+
+    Condition.create!(
+      routing_page:,
       check_page: page_id_mapping[condition_data["check_page_id"]],
       goto_page: page_id_mapping[condition_data["goto_page_id"]],
       answer_value: condition_data["answer_value"],
       skip_to_end: condition_data["skip_to_end"] || false,
-      exit_page_heading: condition_data["exit_page_heading"],
-      exit_page_markdown: condition_data["exit_page_markdown"],
+      exit_page: exit_page_for_condition(condition_data, routing_page),
     )
+  end
 
-    if condition_data["exit_page_id"].present?
-      condition.exit_page = @exit_page_id_mapping[condition_data["exit_page_id"]]
-    end
+  def exit_page_for_condition(condition_data, routing_page)
+    @exit_page_id_mapping[condition_data["exit_page_id"]] || copy_exit_page_from_condition(condition_data, routing_page)
+  end
 
-    condition.save!
+  # Older form documents only have the exit page content on the condition,
+  # so there is no entry in the step's exit pages to copy it from.
+  def copy_exit_page_from_condition(condition_data, routing_page)
+    heading = condition_data["exit_page_heading"]
+    markdown = condition_data["exit_page_markdown"]
+    return if heading.blank? || markdown.blank?
+
+    exit_page = routing_page.exit_pages.create!(heading:, markdown:)
+    @exit_pages_by_condition_id[condition_data["id"]] = exit_page
+    exit_page
   end
 
   def copy_group
@@ -184,37 +196,28 @@ private
       Page.mobility_attributes.each do |attr|
         page.send("#{attr}=", data[attr]) if data[attr].present?
       end
-      copy_welsh_exit_page_conditions(step, page)
       copy_welsh_exit_pages(step)
       page.save!(validate: false)
     end
   end
 
-  def copy_welsh_exit_page_conditions(step, page)
-    if page.routing_conditions.any?
-      page.routing_conditions.zip(step["routing_conditions"]) do |condition, step_condition|
-        next unless step_condition
+  def copy_welsh_exit_pages(step)
+    (step["exit_pages"] || []).each do |ep_data|
+      copy_welsh_exit_page(@exit_page_id_mapping[ep_data["id"]], heading: ep_data["heading"], markdown: ep_data["markdown"])
+    end
 
-        %w[exit_page_heading exit_page_markdown].each do |attr|
-          condition.send("#{attr}_cy=", step_condition[attr]) if step_condition.key?(attr)
-        end
-        condition.save!
-      end
+    # Exit pages created from the content on a condition in an older form
+    # document get their Welsh from the same condition in the Welsh document.
+    (step["routing_conditions"] || []).each do |condition_data|
+      copy_welsh_exit_page(@exit_pages_by_condition_id[condition_data["id"]], heading: condition_data["exit_page_heading"], markdown: condition_data["exit_page_markdown"])
     end
   end
 
-  def copy_welsh_exit_pages(step)
-    # Exit pages already linked to a condition are handled by copy_welsh_exit_page_conditions
-    # Here we are only copying exit pages that are not linked to a condition.
-    condition_exit_page_ids = (step["routing_conditions"] || []).filter_map { |c| c["exit_page_id"] }
-    standalone_exit_pages = (step["exit_pages"] || []).reject { |ep| condition_exit_page_ids.include?(ep["id"]) }
+  def copy_welsh_exit_page(exit_page, heading:, markdown:)
+    return unless exit_page
 
-    standalone_exit_pages.each do |ep_data|
-      exit_page = @exit_page_id_mapping[ep_data["id"]]
-
-      exit_page.heading  = ep_data["heading"]  if ep_data["heading"].present?
-      exit_page.markdown = ep_data["markdown"] if ep_data["markdown"].present?
-      exit_page.save!
-    end
+    exit_page.heading = heading if heading.present?
+    exit_page.markdown = markdown if markdown.present?
+    exit_page.save!
   end
 end
