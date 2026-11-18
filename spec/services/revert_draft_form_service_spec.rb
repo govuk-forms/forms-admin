@@ -20,6 +20,20 @@ describe RevertDraftFormService do
     expect(reloaded_steps).to eq(expected_steps)
   end
 
+  # Reverting should not write exit page content to the legacy fields on
+  # conditions. The readers on Condition prefer the ExitPage, so check the
+  # stored values.
+  def expect_no_legacy_exit_page_content(form)
+    conditions = form.conditions.reload
+    expect(conditions).not_to be_empty
+
+    conditions.each do |condition|
+      expect(condition.read_attribute(:exit_page_heading)).to be_nil
+      expect(condition.read_attribute(:exit_page_markdown)).to be_nil
+      expect(condition.translations).to be_empty
+    end
+  end
+
   # Older form documents only have the exit page content on the condition, with
   # no exit page ID on the condition and no list of exit pages on the step.
   def convert_to_older_form_document(form_document)
@@ -327,6 +341,87 @@ describe RevertDraftFormService do
       end
     end
 
+    context "when the live form document has shared and unlinked exit pages" do
+      let(:live_form) { create(:form, :live_with_draft, pages_count: 2) }
+      let(:first_page) { live_form.pages.first }
+      let(:shared_exit_page) { first_page.exit_pages.find_by!(heading: "Shared heading") }
+      let(:unlinked_exit_page) { first_page.exit_pages.find_by!(heading: "Unlinked heading") }
+
+      before do
+        first_page.update!(answer_type: "selection", answer_settings: { "only_one_option" => "true", "selection_options" => [{ "name" => "Yes" }, { "name" => "No" }, { "name" => "Maybe" }] })
+        shared_exit_page = first_page.exit_pages.create!(heading: "Shared heading", markdown: "Shared markdown")
+        first_page.exit_pages.create!(heading: "Unlinked heading", markdown: "Unlinked markdown")
+        first_page.routing_conditions.create!(answer_value: "No", check_page: first_page, exit_page: shared_exit_page)
+        first_page.routing_conditions.create!(answer_value: "Maybe", check_page: first_page, exit_page: shared_exit_page)
+        live_form.latest_form_document.update!(content: live_form.as_form_document(live_at: live_form.updated_at))
+      end
+
+      context "when the exit pages and their conditions are changed in the draft" do
+        before do
+          live_form.conditions.find_by!(answer_value: "Maybe").update!(exit_page: nil, goto_page: live_form.pages.last)
+          shared_exit_page.update!(heading: "Draft heading", markdown: "Draft markdown")
+          unlinked_exit_page.destroy!
+          first_page.exit_pages.create!(heading: "Draft exit page heading", markdown: "Draft exit page markdown")
+        end
+
+        it "reverts the exit pages and which conditions link to them" do
+          shared_exit_page_id = shared_exit_page.id
+          unlinked_exit_page_id = live_form.latest_form_document.content["steps"].first["exit_pages"].find { it["heading"] == "Unlinked heading" }["id"]
+
+          revert_draft(live_tag)
+
+          live_form.reload
+          expect(live_form.exit_pages.map { [it.id, it.question_page_id, it.heading, it.markdown] }).to contain_exactly(
+            [shared_exit_page_id, first_page.id, "Shared heading", "Shared markdown"],
+            [unlinked_exit_page_id, first_page.id, "Unlinked heading", "Unlinked markdown"],
+          )
+          expect(live_form.conditions.map { [it.answer_value, it.exit_page_id, it.goto_page_id] }).to contain_exactly(
+            ["No", shared_exit_page_id, nil],
+            ["Maybe", shared_exit_page_id, nil],
+          )
+          expect_no_legacy_exit_page_content(live_form)
+        end
+      end
+    end
+
+    context "when the live form document only has the exit page content on the conditions" do
+      let(:live_form) { create(:form, :live_with_draft, pages_count: 2) }
+      let(:first_page) { live_form.pages.first }
+
+      before do
+        first_page.update!(answer_type: "selection", answer_settings: { "only_one_option" => "true", "selection_options" => [{ "name" => "Yes" }, { "name" => "No" }, { "name" => "Maybe" }] })
+        first_page.routing_conditions.create!(
+          answer_value: "No",
+          check_page: first_page,
+          exit_page: first_page.exit_pages.create!(heading: "No heading", markdown: "No markdown"),
+        )
+        first_page.routing_conditions.create!(
+          answer_value: "Maybe",
+          check_page: first_page,
+          exit_page: first_page.exit_pages.create!(heading: "Maybe heading", markdown: "Maybe markdown"),
+        )
+        live_form.latest_form_document.update!(content: live_form.as_form_document(live_at: live_form.updated_at))
+        convert_to_older_form_document(live_form.latest_form_document)
+
+        live_form.exit_pages.each { it.update!(heading: "Draft heading", markdown: "Draft markdown") }
+      end
+
+      it "gives each condition an exit page with the content from the condition in the form document" do
+        draft_exit_page_ids = live_form.exit_pages.ids
+
+        revert_draft(live_tag)
+
+        live_form.reload
+        expect(live_form.conditions.map { [it.answer_value, it.exit_page.question_page_id, it.exit_page.heading, it.exit_page.markdown] }).to contain_exactly(
+          ["No", first_page.id, "No heading", "No markdown"],
+          ["Maybe", first_page.id, "Maybe heading", "Maybe markdown"],
+        )
+        expect(live_form.exit_pages.ids).to match_array(live_form.conditions.map(&:exit_page_id))
+        expect(live_form.exit_pages.ids).not_to include(*draft_exit_page_ids)
+        expect_no_legacy_exit_page_content(live_form)
+      end
+    end
+
     context "when the delivery configurations are changed in the draft" do
       let(:live_form) do
         create(:form, :live, delivery_configurations: [
@@ -576,6 +671,7 @@ describe RevertDraftFormService do
 
           expect(linked_exit_page.reload).to have_attributes(heading_cy: "Ni allwch barhau", markdown_cy: "Cysylltwch â ni")
           expect(unlinked_exit_page.reload).to have_attributes(heading_cy: "Pennawd heb gysylltiad", markdown_cy: "Markdown heb gysylltiad")
+          expect_no_legacy_exit_page_content(live_form)
         end
       end
 
@@ -608,6 +704,7 @@ describe RevertDraftFormService do
             heading_cy: "Ni allwch barhau",
             markdown_cy: "Cysylltwch â ni",
           )
+          expect_no_legacy_exit_page_content(live_form)
         end
       end
     end

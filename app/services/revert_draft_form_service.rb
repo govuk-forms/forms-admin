@@ -86,8 +86,7 @@ private
   def revert_exit_pages(steps_data)
     form.exit_pages.reload
 
-    form_document_exit_page_ids = steps_data.flat_map { |step| step["exit_pages"] || [] }.map { |ep| ep["id"] }
-    form.exit_pages.where.not(id: form_document_exit_page_ids).destroy_all
+    form.exit_pages.where.not(id: form_document_exit_page_ids(steps_data)).destroy_all
 
     steps_data.each do |step_data|
       page = form.pages.find_by(external_id: step_data["id"])
@@ -101,6 +100,10 @@ private
         exit_page.save!
       end
     end
+  end
+
+  def form_document_exit_page_ids(steps_data)
+    steps_data.flat_map { |step| step["exit_pages"] || [] }.pluck("id")
   end
 
   # steps in a form_document store the page attributes under "data"
@@ -122,6 +125,7 @@ private
   def revert_routing_conditions(steps_data)
     all_conditions_data = steps_data.flat_map { |step| step["routing_conditions"] || [] }
     form_document_condition_ids = all_conditions_data.pluck("id")
+    exit_page_ids = form_document_exit_page_ids(steps_data)
 
     # remove any conditions which have been added to the draft but are not in the form_document data
     form.conditions.where.not(id: form_document_condition_ids).destroy_all
@@ -129,12 +133,12 @@ private
     all_conditions_data.each do |condition_data|
       condition = Condition.find_or_initialize_by(id: condition_data["id"])
 
-      assign_condition_attributes(condition, condition_data)
+      assign_condition_attributes(condition, condition_data, exit_page_ids)
       condition.save!
     end
   end
 
-  def assign_condition_attributes(condition, condition_data)
+  def assign_condition_attributes(condition, condition_data, exit_page_ids)
     condition.answer_value = condition_data["answer_value"]
     condition.routing_page = if condition_data["routing_page_id"]
                                Page.find_by!(external_id: condition_data["routing_page_id"])
@@ -148,9 +152,23 @@ private
                             Page.find_by!(external_id: condition_data["goto_page_id"])
                           end
 
-    condition.exit_page_heading = condition_data["exit_page_heading"]
-    condition.exit_page_markdown = condition_data["exit_page_markdown"]
-    condition.exit_page_id = condition_data["exit_page_id"]
+    if exit_page_ids.include?(condition_data["exit_page_id"])
+      condition.exit_page_id = condition_data["exit_page_id"]
+    else
+      condition.exit_page = revert_exit_page_from_condition(condition_data, condition.routing_page)
+    end
+  end
+
+  # Older form documents only have the exit page content on the condition,
+  # so there is no entry in the step's exit pages to revert it from.
+  # revert_exit_pages will have destroyed any exit page the condition had, so
+  # create a new one with the content from the condition.
+  def revert_exit_page_from_condition(condition_data, routing_page)
+    heading = condition_data["exit_page_heading"]
+    markdown = condition_data["exit_page_markdown"]
+    return if heading.blank? || markdown.blank?
+
+    routing_page.exit_pages.create!(heading:, markdown:)
   end
 
   def revert_welsh_translations(welsh_form_document)
@@ -207,11 +225,11 @@ private
     # Older form documents only have the exit page content on the condition,
     # so the exit page reverted for the condition gets its Welsh from the same
     # condition in the Welsh form document.
-    form_document_exit_page_ids = all_exit_pages_data.pluck("id")
+    exit_page_ids = form_document_exit_page_ids(steps_data)
     all_conditions_data = steps_data.flat_map { |step| step["routing_conditions"] || [] }
 
     all_conditions_data.each do |condition_data|
-      next if form_document_exit_page_ids.include?(condition_data["exit_page_id"])
+      next if exit_page_ids.include?(condition_data["exit_page_id"])
 
       exit_page = form.conditions.find_by(id: condition_data["id"])&.exit_page
       exit_page_data = condition_data.slice("exit_page_heading", "exit_page_markdown").transform_keys { it.delete_prefix("exit_page_") }
