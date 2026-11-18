@@ -20,6 +20,17 @@ describe RevertDraftFormService do
     expect(reloaded_steps).to eq(expected_steps)
   end
 
+  # Older form documents only have the exit page content on the condition, with
+  # no exit page ID on the condition and no list of exit pages on the step.
+  def convert_to_older_form_document(form_document)
+    content = form_document.content.deep_dup
+    content["steps"].each do |step|
+      step.delete("exit_pages")
+      (step["routing_conditions"] || []).each { it.delete("exit_page_id") }
+    end
+    form_document.update!(content:)
+  end
+
   # we use `freeze_time` to freeze the timestamps of the form and its pages
   # reverting a draft will not keep the timestamps from the live version
   around { |example| freeze_time { example.run } }
@@ -536,6 +547,67 @@ describe RevertDraftFormService do
               expect(condition.exit_page_markdown).to eq("Cysylltwch â ni")
             end
           end
+        end
+      end
+
+      context "when exit pages have Welsh translations in the live version" do
+        let(:live_form) do
+          form = create(:form, :live, pages_count: 2, available_languages: %w[en cy])
+          first_page = form.pages.first
+          first_page.update!(answer_type: "selection", answer_settings: { "only_one_option" => "true", "selection_options" => [{ "name" => "Yes" }, { "name" => "No" }] })
+          exit_page = first_page.exit_pages.create!(heading: "You cannot continue", markdown: "Please contact us", heading_cy: "Ni allwch barhau", markdown_cy: "Cysylltwch â ni")
+          first_page.routing_conditions.create!(answer_value: "No", check_page: first_page, exit_page:)
+          first_page.exit_pages.create!(heading: "Unlinked heading", markdown: "Unlinked markdown", heading_cy: "Pennawd heb gysylltiad", markdown_cy: "Markdown heb gysylltiad")
+          FormDocumentSyncService.new(form).synchronize_live_form
+          form.create_draft_from_live_form!
+          form.reload
+        end
+
+        let(:linked_exit_page) { live_form.conditions.first.exit_page }
+        let(:unlinked_exit_page) { live_form.exit_pages.find_by(heading: "Unlinked heading") }
+
+        before do
+          linked_exit_page.update!(heading_cy: "Pennawd drafft", markdown_cy: "Markdown drafft")
+          unlinked_exit_page.update!(heading_cy: "Pennawd drafft arall", markdown_cy: "Markdown drafft arall")
+        end
+
+        it "restores the Welsh for each exit page from the Welsh form document" do
+          revert_draft(live_tag)
+
+          expect(linked_exit_page.reload).to have_attributes(heading_cy: "Ni allwch barhau", markdown_cy: "Cysylltwch â ni")
+          expect(unlinked_exit_page.reload).to have_attributes(heading_cy: "Pennawd heb gysylltiad", markdown_cy: "Markdown heb gysylltiad")
+        end
+      end
+
+      context "when the live form documents only have the exit page content on the condition" do
+        let(:live_form) do
+          form = create(:form, :live, pages_count: 2, available_languages: %w[en cy])
+          first_page = form.pages.first
+          first_page.update!(answer_type: "selection", answer_settings: { "only_one_option" => "true", "selection_options" => [{ "name" => "Yes" }, { "name" => "No" }] })
+          exit_page = first_page.exit_pages.create!(heading: "You cannot continue", markdown: "Please contact us", heading_cy: "Ni allwch barhau", markdown_cy: "Cysylltwch â ni")
+          first_page.routing_conditions.create!(answer_value: "No", check_page: first_page, exit_page:)
+          FormDocumentSyncService.new(form).synchronize_live_form
+          form.reload
+          convert_to_older_form_document(form.latest_form_document)
+          convert_to_older_form_document(form.latest_welsh_form_document)
+          form.create_draft_from_live_form!
+          form.reload
+        end
+
+        before do
+          live_form.exit_pages.first.update!(heading_cy: "Pennawd drafft", markdown_cy: "Markdown drafft")
+        end
+
+        it "gives the condition's exit page the Welsh from the condition in the Welsh form document" do
+          revert_draft(live_tag)
+
+          exit_page = live_form.reload.conditions.first.exit_page
+          expect(exit_page).to have_attributes(
+            heading: "You cannot continue",
+            markdown: "Please contact us",
+            heading_cy: "Ni allwch barhau",
+            markdown_cy: "Cysylltwch â ni",
+          )
         end
       end
     end

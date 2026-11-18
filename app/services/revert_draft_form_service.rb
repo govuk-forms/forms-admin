@@ -164,8 +164,8 @@ private
     # Revert page-level Welsh translations
     revert_pages_welsh_attributes(welsh_content["steps"])
 
-    # Revert condition-level Welsh translations
-    revert_conditions_welsh_attributes(welsh_content["steps"])
+    # Revert exit page Welsh translations
+    revert_exit_pages_welsh_attributes(welsh_content["steps"])
   end
 
   def revert_form_welsh_attributes(welsh_content)
@@ -194,22 +194,39 @@ private
     end
   end
 
-  def revert_conditions_welsh_attributes(steps_data)
+  def revert_exit_pages_welsh_attributes(steps_data)
     return if steps_data.blank?
 
+    all_exit_pages_data = steps_data.flat_map { |step| step["exit_pages"] || [] }
+
+    all_exit_pages_data.each do |exit_page_data|
+      exit_page = form.exit_pages.find_by(id: exit_page_data["id"])
+      revert_exit_page_welsh_attributes(exit_page, exit_page_data)
+    end
+
+    # Older form documents only have the exit page content on the condition,
+    # so the exit page reverted for the condition gets its Welsh from the same
+    # condition in the Welsh form document.
+    form_document_exit_page_ids = all_exit_pages_data.pluck("id")
     all_conditions_data = steps_data.flat_map { |step| step["routing_conditions"] || [] }
 
     all_conditions_data.each do |condition_data|
-      condition = Condition.find_by(id: condition_data["id"])
-      next if condition.blank?
+      next if form_document_exit_page_ids.include?(condition_data["exit_page_id"])
 
-      # Revert Welsh translations for condition attributes
-      Condition.mobility_attributes.each do |attr|
-        condition.public_send("#{attr}_cy=", condition_data[attr]) if condition_data.key?(attr)
-      end
-
-      condition.save!
+      exit_page = form.conditions.find_by(id: condition_data["id"])&.exit_page
+      exit_page_data = condition_data.slice("exit_page_heading", "exit_page_markdown").transform_keys { it.delete_prefix("exit_page_") }
+      revert_exit_page_welsh_attributes(exit_page, exit_page_data)
     end
+  end
+
+  def revert_exit_page_welsh_attributes(exit_page, exit_page_data)
+    return if exit_page.blank?
+
+    ExitPage.mobility_attributes.each do |attr|
+      exit_page.public_send("#{attr}_cy=", exit_page_data[attr]) if exit_page_data.key?(attr)
+    end
+
+    exit_page.save!
   end
 
   def clear_welsh_translations
