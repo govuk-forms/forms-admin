@@ -32,25 +32,13 @@
           <%= option.question_text %>
           </option>
         <% end %>
-        <% unless condition_input.secondary_skip? %>
+        <% if condition_input.record.exit_page? && !condition_input.secondary_skip? %>
           <optgroup label="<%= I18n.t("page_conditions.exit_page_label") %>">
-            <% if condition_input.record.exit_page? %>
-              <option value="exit_page" <% if condition_input.record.exit_page? %>selected<% end %>>
-              <%= condition_input.record.exit_page_heading %>
-              </option>
-            <% else %>
-              <option value="create_exit_page">
-              <%= I18n.t("page_conditions.exit_page") %>
-              </option>
-            <% end %>
+            <option value="exit_page" selected>
+            <%= condition_input.record.exit_page_heading %>
+            </option>
           </optgroup>
         <% end %>
-      <% end %>
-
-      <% if condition_input.record.exit_page? %>
-        <p class="govuk-body">
-          <%= govuk_link_to t("page_conditions.edit_exit_page", exit_page_heading: condition_input.record.exit_page_heading), conditions_exit_page_edit_path(condition_input.form.id, condition_input.page.id, condition_input.record.id) %>
-        </p>
       <% end %>
 
       <%= f.govuk_submit t("save_and_continue") do

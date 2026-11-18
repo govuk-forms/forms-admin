@@ -157,15 +157,6 @@ RSpec.describe Pages::ConditionsController, type: :request do
         expect(response.body).to include(I18n.t("banner.success.route_created", route_number: 1))
       end
 
-      context "when the goto page is an exit page" do
-        let(:params) { { pages_conditions_input: { routing_page_id: page.id, check_page_id: page.id, goto_page_id: "create_exit_page", answer_value: "Wales" } } }
-        let(:group) { create(:group, organisation: standard_user.organisation) }
-
-        it "redirects to the new exit page" do
-          expect(response).to redirect_to conditions_exit_page_new_path(form_id: form.id, page_id: page.id, answer_value: "Wales")
-        end
-      end
-
       context "when form submit fails" do
         let(:params) { { pages_conditions_input: { routing_page_id: nil, check_page_id: nil, goto_page_id: nil, answer_value: nil } } }
 
@@ -295,16 +286,6 @@ RSpec.describe Pages::ConditionsController, type: :request do
 
       it "renders new page" do
         expect(response).to render_template("pages/conditions/edit")
-      end
-    end
-
-    context "when the form is submitted creates an exit page" do
-      let(:group) { create(:group, organisation: standard_user.organisation) }
-      let(:params) { { pages_conditions_input: { routing_page_id: 1, check_page_id: 1, goto_page_id: "create_exit_page", answer_value: "Wales" } } }
-
-      it "redirects to the edit exit page" do
-        put update_condition_path(form_id: form.id, page_id: page.id, condition_id: condition.id, params:)
-        expect(response).to redirect_to conditions_exit_page_edit_path(form_id: form.id, page_id: page.id, condition_id: condition.id)
       end
     end
 

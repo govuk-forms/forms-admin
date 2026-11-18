@@ -7,19 +7,15 @@ class Pages::ConditionsInput < BaseInput
   def submit
     return false if invalid?
 
-    if create_exit_page?
-      true
-    else
-      assign_skip_to_end
+    assign_skip_to_end
 
-      Condition.create_and_update_form!(
-        check_page_id: page.id,
-        routing_page_id: page.id,
-        answer_value:,
-        goto_page_id:,
-        skip_to_end:,
-      )
-    end
+    Condition.create_and_update_form!(
+      check_page_id: page.id,
+      routing_page_id: page.id,
+      answer_value:,
+      goto_page_id:,
+      skip_to_end:,
+    )
   end
 
   def update_condition
@@ -27,7 +23,7 @@ class Pages::ConditionsInput < BaseInput
 
     record.answer_value = answer_value
 
-    unless create_exit_page? || goto_page_id == "exit_page"
+    unless goto_page_id == "exit_page"
       assign_skip_to_end
 
       record.skip_to_end = skip_to_end
@@ -85,10 +81,6 @@ class Pages::ConditionsInput < BaseInput
     end
   end
 
-  def create_exit_page?
-    goto_page_id == "create_exit_page"
-  end
-
   def secondary_skip?
     page.secondary_skip_condition.present?
   end
@@ -97,7 +89,7 @@ private
 
   def goto_page_id_valid
     return if goto_page_id.nil?
-    return if %w[end_of_form create_exit_page exit_page].include? goto_page_id
+    return if %w[end_of_form exit_page].include? goto_page_id
     return if form.pages.find { |page| page.id.to_s == goto_page_id.to_s }
 
     errors.add(:goto_page_id, :invalid, message: I18n.t("activemodel.errors.models.pages/secondary_skip_input.attributes.goto_page_id.invalid"))
