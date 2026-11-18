@@ -415,6 +415,31 @@ RSpec.describe ReportsController, type: :request do
     end
   end
 
+  describe "#forms_with_save_and_return_enabled" do
+    let(:path) { report_forms_with_save_and_return_enabled_path(tag: :live) }
+    let(:form) { create(:form, :live, save_and_return: "enabled") }
+    let(:forms) { [form] }
+
+    include_examples "unauthorized user is forbidden"
+
+    context "when the user is a super admin" do
+      before do
+        login_as_super_admin_user
+
+        get path
+      end
+
+      it "returns http code 200 with the expected report data" do
+        expect(response).to have_http_status(:ok)
+        expect(response).to render_template("reports/feature_report")
+
+        node = Capybara.string(response.body)
+        expect(node).to have_xpath "//thead/tr/th[1]", text: "Form name"
+        expect(node).to have_xpath "//tbody/tr[1]/td[1]", text: form.name
+      end
+    end
+  end
+
   describe "#add_another_answer" do
     let(:path) { report_add_another_answer_path }
     let(:report_data) do
@@ -664,6 +689,31 @@ RSpec.describe ReportsController, type: :request do
         travel_to Time.utc(2025, 5, 15, 15, 31, 57)
 
         get report_forms_with_copy_of_answers_enabled_path(tag: :live, format: :csv)
+      end
+
+      it_behaves_like "csv response"
+
+      it "has expected response body" do
+        csv = CSV.parse(response.body, headers: true)
+        expect(csv.headers).to eq Reports::FormsCsvReportService::FORM_CSV_HEADERS
+        expect(csv.length).to eq 1
+        expect(csv.by_col["Form name"]).to eq [
+          form.name,
+        ]
+      end
+    end
+
+    describe "#forms_with_save_and_return_enabled as csv" do
+      let(:form) { create(:form, :live, save_and_return: "enabled") }
+      let(:forms) { [form, *create_list(:form, 2, :live)] }
+      let(:expected_csv_filename) { "live_forms_with_save_and_return_enabled_report-2025-05-15 15:31:57 UTC.csv" }
+
+      before do
+        login_as_super_admin_user
+
+        travel_to Time.utc(2025, 5, 15, 15, 31, 57)
+
+        get report_forms_with_save_and_return_enabled_path(tag: :live, format: :csv)
       end
 
       it_behaves_like "csv response"

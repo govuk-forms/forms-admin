@@ -70,6 +70,10 @@
         <%= row.with_key(text: t(".features.forms_with_copy_of_answers_enabled", tag: tag_label(tag)).upcase_first) %>
         <%= row.with_value(text: govuk_link_to(data[:forms_with_copy_of_answers_enabled], report_forms_with_copy_of_answers_enabled_path, no_visited_state: true)) %>
       <% end %>
+      <%= summary_list.with_row do |row| %>
+        <%= row.with_key(text: t(".features.forms_with_save_and_return_enabled", tag: tag_label(tag)).upcase_first) %>
+        <%= row.with_value(text: govuk_link_to(data[:forms_with_save_and_return_enabled], report_forms_with_save_and_return_enabled_path, no_visited_state: true)) %>
+      <% end %>
     <% end %>
 
     <h2 class="govuk-heading-m govuk-visually-hidden"><%= t(".answer_types.heading") %></h2>

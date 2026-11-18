@@ -130,6 +130,14 @@ class ReportsController < WebController
     forms_feature_report(tag, params[:action], forms)
   end
 
+  def forms_with_save_and_return_enabled
+    tag = params[:tag]
+    forms = Reports::FormDocumentsService.form_documents(tag:)
+    forms_with_save_and_return_enabled = Reports::FeatureReportService.new(forms).forms_with_save_and_return_enabled
+
+    forms_feature_report(tag, params[:action], forms_with_save_and_return_enabled)
+  end
+
   def add_another_answer
     data = Reports::AddAnotherAnswerUsageService.new.add_another_answer_forms
 

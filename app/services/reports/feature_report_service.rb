@@ -25,6 +25,7 @@ class Reports::FeatureReportService
       forms_with_exit_pages: 0,
       forms_with_welsh_translation: 0,
       forms_with_copy_of_answers_enabled: 0,
+      forms_with_save_and_return_enabled: 0,
     }
 
     form_documents.each do |form|
@@ -174,6 +175,11 @@ class Reports::FeatureReportService
   def forms_with_copy_of_answers_enabled
     form_documents
       .select { |form| Reports::FormDocumentsService.copy_of_answers_enabled?(form) }
+  end
+
+  def forms_with_save_and_return_enabled
+    form_documents
+      .select { |form| Reports::FormDocumentsService.save_and_return_enabled?(form) }
   end
 
 private
