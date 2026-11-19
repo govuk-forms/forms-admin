@@ -144,6 +144,26 @@ RSpec.describe FormCopyService do
       end
     end
 
+    context "when the form document steps do not have is_optional set" do
+      let(:source_form) { create(:form, :live_with_draft, :with_pages, pages_count: 2) }
+
+      before do
+        live_form_document = source_form.latest_form_document
+        content = live_form_document.content
+        content["steps"][0]["data"].delete("is_optional")
+        content["steps"][1]["data"]["is_optional"] = nil
+        live_form_document.update!(content:)
+      end
+
+      it "does not raise an error" do
+        expect { copied_form }.not_to raise_error
+      end
+
+      it "sets is_optional to false on the copied pages" do
+        expect(copied_form.pages.map(&:is_optional)).to all(be false)
+      end
+    end
+
     context "when source form has pages with routing conditions" do
       let(:source_form) { create(:form, :live_with_draft, :ready_for_routing, pages_count: 3) }
 
