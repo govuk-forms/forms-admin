@@ -30,6 +30,7 @@ RSpec.describe Reports::FeatureReportService do
            :with_support,
            payment_url: "https://www.gov.uk/payments/organisation/service",
            send_copy_of_answers: "enabled",
+           save_and_return: "enabled",
            pages: [
              create(:page, :with_address_settings, is_repeatable: true),
              create(:page, :with_date_settings),
@@ -151,6 +152,7 @@ RSpec.describe Reports::FeatureReportService do
         forms_with_exit_pages: 1,
         forms_with_welsh_translation: 1,
         forms_with_copy_of_answers_enabled: 1,
+        forms_with_save_and_return_enabled: 1,
       })
     end
   end
@@ -607,6 +609,21 @@ RSpec.describe Reports::FeatureReportService do
   describe "#forms_with_copy_of_answers_enabled" do
     it "returns live forms with copy of answers enabled" do
       forms = described_class.new(form_documents).forms_with_copy_of_answers_enabled
+      expect(forms.length).to eq 1
+      expect(forms).to match [
+        a_hash_including(
+          "form_id" => form_with_all_answer_types.id,
+          "content" => a_hash_including(
+            "name" => form_with_all_answer_types.name,
+          ),
+        ),
+      ]
+    end
+  end
+
+  describe "#forms_with_save_and_return_enabled" do
+    it "returns live forms with save and return enabled" do
+      forms = described_class.new(form_documents).forms_with_save_and_return_enabled
       expect(forms.length).to eq 1
       expect(forms).to match [
         a_hash_including(

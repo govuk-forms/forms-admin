@@ -29,6 +29,7 @@ RSpec.describe ReportHelper, type: :helper do
     before do
       allow(helper).to receive(:report_forms_table).and_call_original
       allow(helper).to receive(:report_forms_with_routes_table).and_call_original
+      allow(helper).to receive(:report_forms_with_number_of_questions_table).and_call_original
       allow(helper).to receive(:report_questions_table).and_call_original
     end
 
@@ -43,6 +44,30 @@ RSpec.describe ReportHelper, type: :helper do
       it "calls #report_forms_with_routes_table" do
         helper.report_table(:forms_with_routes, forms_with_routes)
         expect(helper).to have_received(:report_forms_with_routes_table).with(forms_with_routes)
+      end
+    end
+
+    context "with 'forms_with_number_of_questions' type" do
+      let(:forms_with_question_counts) do
+        [
+          { "form_id" => 1, "tag" => "live", "content" => { "name" => "Form with questions", "steps" => [{}, {}] }, "organisation_name" => "Government Digital Service" },
+        ]
+      end
+
+      it "calls #report_forms_with_number_of_questions_table" do
+        helper.report_table(:forms_with_number_of_questions, forms_with_question_counts)
+        expect(helper).to have_received(:report_forms_with_number_of_questions_table).with(forms_with_question_counts)
+      end
+
+      it "includes the number of questions for each form" do
+        expect(helper.report_table(:forms_with_number_of_questions, forms_with_question_counts)).to eq(
+          head: ["Form name", "Organisation", "Number of questions"],
+          rows: [[
+            "<a class=\"govuk-link\" href=\"/forms/1/live/pages\">Form with questions</a>",
+            "Government Digital Service",
+            "2",
+          ]],
+        )
       end
     end
 

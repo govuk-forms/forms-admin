@@ -294,6 +294,7 @@ Rails.application.routes.draw do
       get "forms-with-exit-pages", to: "reports#forms_with_exit_pages", as: :report_forms_with_exit_pages
       get "forms-with-welsh-translation", to: "reports#forms_with_welsh_translation", as: :report_forms_with_welsh_translation
       get "forms-with-copy-of-answers-enabled", to: "reports#forms_with_copy_of_answers_enabled", as: :report_forms_with_copy_of_answers_enabled
+      get "forms-with-save-and-return-enabled", to: "reports#forms_with_save_and_return_enabled", as: :report_forms_with_save_and_return_enabled
       get "selection-questions-summary", to: "reports#selection_questions_summary", as: :report_selection_questions_summary
       get "selection-questions-with-autocomplete", to: "reports#selection_questions_with_autocomplete", as: :report_selection_questions_with_autocomplete
       get "selection-questions-with-radios", to: "reports#selection_questions_with_radios", as: :report_selection_questions_with_radios
