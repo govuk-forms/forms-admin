@@ -99,7 +99,7 @@ private
       question_text: data["question_text"],
       hint_text: data["hint_text"],
       answer_type: data["answer_type"],
-      is_optional: data["is_optional"],
+      is_optional: data["is_optional"] || false,
       answer_settings: data["answer_settings"],
       page_heading: data["page_heading"],
       guidance_markdown: data["guidance_markdown"],
