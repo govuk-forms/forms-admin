@@ -32,6 +32,7 @@ locals {
     { name = "SETTINGS__FORMS_ENV", value = "review" },
     { name = "SETTINGS__FORMS_PRODUCT_PAGE__URL", value = "https://www.forms.service.gov.uk" },
     { name = "SETTINGS__FORMS_RUNNER__URL", value = "https://www.forms.service.gov.uk" },
+    { name = "SETTINGS__FEATURES__SAVE_AND_RETURN", value = "true" },
   ]
 }
 
