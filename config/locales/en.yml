@@ -612,16 +612,21 @@ en:
     save_and_return:
       new:
         body_html: |
-          <p>You can add a ’Save and exit’ link to each question page, except pages at the start and end of the form.</p>
+          <p>If you turn this on, we’ll add a ‘Save and exit’ link to each question page, except pages at the start and end of the form.</p>
           <h2 class="govuk-heading-m">How it works for people filling in your form</h2>
-          <p>People need to sign in with GOV.UK One Login to save their progress. This makes sure that only the person who saved the answers can get back to them. If they do not have a GOV.UK One Login, they’ll be asked to create one when they select ’Save and exit’. </p>
+          <p>People need to sign in with GOV.UK One Login to save their progress. This makes sure that only the person who saved the answers can get back to them. If they do not have a GOV.UK One Login, they’ll be asked to create one when they select ‘Save and exit’. </p>
           <p>We then email them a link so they can continue filling in the form later. When they return, they can either continue where they left off or start again.</p>
           <p>If they do not return, we will delete their saved progress after 30 days.</p>
           <p><a href="https://www.sign-in.service.gov.uk/documentation/user-journeys" target="_blank">See what signing in with GOV.UK One Login looks like (opens in a new tab)</a></p>
+          <h2 class="govuk-heading-m">If you change or archive your form</h2>
+          <p>If you make changes to your form, people will go back to the start of the form when they return. They’ll need to answer any new questions, and any where you’ve changed the question type.</p>
+          <p>If you archive your form, people will lose any answers they’ve saved.</p>
           <h2 class="govuk-heading-m">When you might not want to use this</h2>
-          <p>It might not work well if people fill in your form on behalf of someone else, for example as a representative or as part of their job</p>
-          <p>People can only save one version of each form at a time, so they could mix up different people’s answers.</p>
-          <p>Saved answers are linked to the person’s GOV.UK One Login, which may use a personal email address. This means they could keep access to someone else’s information for up to 30 days.</p>
+          <p>It might not work well if people fill in your form on behalf of someone else, for example as a representative or as part of their job. This is because:</p>
+          <ul class="govuk-list govuk-list--bullet">
+            <li>people can only save one set of answers for each form at a time, so they could mix up different people’s answers</li>
+            <li>saved answers are linked to their own GOV.UK One Login, which may use a personal email address, so they could keep access to someone else’s information for up to 30 days</li>
+          </ul>
         hint_text: You cannot turn this off after you’ve made the form live
     submission_attachments:
       new:
