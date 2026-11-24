@@ -103,7 +103,7 @@ group :development, :test do
   gem "factory_bot_rails"
   gem "faker"
 
-  gem "i18n-tasks", "~> 1.2.0"
+  gem "i18n-tasks", "~> 1.2.1"
   gem "rails-controller-testing"
   gem "rspec-rails", ">= 3.9.0"
   gem "rubocop-govuk", require: false
