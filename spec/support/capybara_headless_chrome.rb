@@ -39,6 +39,26 @@ Capybara.register_driver :headless_chrome do |app|
   driver
 end
 
+# Capybara's Session#reset! method runs at the end of every test and includes a call to Storage.clearDataForOrigin with
+# a wildcard origin argument. As of version 158, Chrome no longer supports the wildcard origin, so this call returns a
+# Selenium::WebDriver::Error::InvalidArgumentError and causes the test to fail.
+# This code monkey patches the call to Storage.clearDataForOrigin, removes all cookies, and then clears the other
+# storage types.
+# We can remove this patch once the upstream Capybara issue is fixed: https://github.com/teamcapybara/capybara/issues/2865
+module ChromeResetWithoutWildcard
+private
+
+  def execute_cdp(cmd, params = {})
+    return super unless cmd == "Storage.clearDataForOrigin" && params[:origin] == "*"
+
+    super("Network.clearBrowserCookies")
+    return unless params[:storageTypes].include?("local_storage")
+
+    super(cmd, { origin: Capybara.current_session.server.base_url, storageTypes: "local_storage" })
+  end
+end
+Capybara::Selenium::Driver::ChromeDriver.prepend(ChromeResetWithoutWildcard)
+
 Capybara.default_driver = Settings.show_browser_during_tests ? :chrome : :headless_chrome
 
 Capybara.register_driver(:cuprite) do |app|
