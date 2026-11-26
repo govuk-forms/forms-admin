@@ -90,6 +90,8 @@ end
 
 # store the auth0 connection used to login in the warden session
 Warden::Manager.after_authentication do |user, auth, _opts|
+  PendingUser.clear(auth.raw_session)
+
   if user.provider == "auth0"
     auth.session["auth0_connection_strategy"] = auth.env["omniauth.auth"][:extra][:raw_info][:auth0_connection_strategy]
   end

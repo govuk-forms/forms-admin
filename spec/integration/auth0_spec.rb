@@ -85,6 +85,22 @@ RSpec.describe "usage of omniauth-auth0 gem" do
         get groups_path
         expect(response).to redirect_to(edit_account_organisation_path)
       end
+
+      context "and the user then signs in as an existing user" do
+        let(:existing_user) { create :user, provider: "auth0", uid: "654321", email: "existing@example.com" }
+
+        it "clears the pending user details from the session" do
+          get "/auth/auth0/callback"
+
+          OmniAuth.config.mock_auth[:auth0] = Faker::Omniauth.auth0(uid: existing_user.uid, email: existing_user.email)
+
+          post "/auth/auth0"
+          get "/auth/auth0/callback"
+
+          expect(session[PendingUser::SESSION_KEY]).to be_nil
+          expect(request.env["warden"].user).to eq existing_user
+        end
+      end
     end
 
     context "when the user exists but does not have an organisation or a name" do

@@ -7,6 +7,8 @@ module Warden::Strategies
     def authenticate!
       logger.debug("Authenticating with :#{request.env['omniauth.strategy'].name} strategy")
 
+      PendingUser.clear(session)
+
       auth_hash = request.env["omniauth.auth"]
       user = prep_user(auth_hash)
 

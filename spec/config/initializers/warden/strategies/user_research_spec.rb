@@ -53,6 +53,7 @@ RSpec.describe Warden::Strategies[:user_research] do
         "omniauth.strategy" => OpenStruct.new(
           name: "user-research",
         ),
+        "rack.session" => {},
       }
     end
 
