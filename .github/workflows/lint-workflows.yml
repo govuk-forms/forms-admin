@@ -9,4 +9,4 @@ on:
 
 jobs:
   lint-workflows:
-    uses: govuk-forms/forms-deploy/.github/workflows/reusable-lint-workflows.yml@main
+    uses: govuk-forms/forms-deploy/.github/workflows/reusable-lint-workflows.yml@whi-tw/jactionlint-pedantic

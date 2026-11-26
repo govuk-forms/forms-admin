@@ -15,6 +15,6 @@ permissions:
 jobs:
   delete-review-app:
     name: Delete review app
-    uses: govuk-forms/forms-deploy/.github/workflows/reusable-review_apps_on_pr_close.yml@main
+    uses: govuk-forms/forms-deploy/.github/workflows/reusable-review_apps_on_pr_close.yml@whi-tw/jactionlint-pedantic
     with:
       app-name: forms-admin

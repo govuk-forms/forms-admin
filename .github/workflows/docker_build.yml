@@ -8,4 +8,4 @@ on:
     types: [checks_requested]
 jobs:
   build-image:
-    uses: govuk-forms/forms-deploy/.github/workflows/reusable-build-image.yml@main
+    uses: govuk-forms/forms-deploy/.github/workflows/reusable-build-image.yml@whi-tw/jactionlint-pedantic

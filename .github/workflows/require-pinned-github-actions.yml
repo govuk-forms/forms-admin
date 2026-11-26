@@ -8,4 +8,4 @@ on:
 jobs:
   check-actions-sha:
     name: Check actions are pinned to SHAs
-    uses: govuk-forms/forms-deploy/.github/workflows/require-pinned-github-actions.yml@main
+    uses: govuk-forms/forms-deploy/.github/workflows/require-pinned-github-actions.yml@whi-tw/jactionlint-pedantic
