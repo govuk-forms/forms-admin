@@ -42,6 +42,15 @@ describe Account::OrganisationsController do
           expect(input_object).to be_a(Account::OrganisationInput)
           expect(input_object.allowed_organisations).to match_array(matching_orgs)
         end
+
+        it "shows a link to sign out" do
+          create(:organisation, organisation_domains: [create(:organisation_domain, domain: domain)])
+          create(:organisation, organisation_domains: [create(:organisation_domain, domain: domain)])
+
+          get edit_account_organisation_path
+
+          expect(response.body).to include(%(href="#{sign_out_path}"))
+        end
       end
 
       context "when there are no organisations the user can select" do

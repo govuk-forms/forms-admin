@@ -35,9 +35,9 @@ class AuthenticationController < WebController
 
   def sign_out
     # get current_user before user is logged out of warden
-    auth_provider = current_user&.provider
+    auth_provider = current_user&.provider || pending_user&.provider
 
-    if user_signed_in
+    if auth_provider.present?
       warden.logout
       redirect_to send(:"#{auth_provider}_sign_out_url"), allow_other_host: true
     else

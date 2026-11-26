@@ -14,6 +14,16 @@ describe NavigationItemsService do
       it "returns an empty array" do
         expect(service.navigation_items).to be_empty
       end
+
+      context "when there is a pending user" do
+        let(:pending_user) { PendingUser.start({}, provider: "auth0", uid: "123456", email: "user@example.gov.uk") }
+        let(:service) { described_class.new(user:, pending_user:) }
+
+        it "only includes signout in navigation items" do
+          signout_item = NavigationItemsService::NavigationItem.new(text: I18n.t("header.sign_out"), href: sign_out_path, active: false)
+          expect(service.navigation_items).to eq([signout_item])
+        end
+      end
     end
 
     context "when user is present" do

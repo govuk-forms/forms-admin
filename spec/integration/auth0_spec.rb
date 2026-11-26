@@ -125,18 +125,41 @@ RSpec.describe "usage of omniauth-auth0 gem" do
 
   describe "signing out" do
     before do
-      create :user, provider: "auth0", uid: "123456", email: "test@example.com"
+      allow(Settings.auth0).to receive_messages(domain: "test", client_id: "baz")
       OmniAuth.config.mock_auth[:auth0] = omniauth_hash
-      post "/auth/auth0"
-      get "/auth/auth0/callback"
     end
 
-    it "signs the user out of auth0" do
-      allow(Settings.auth0).to receive_messages(domain: "test", client_id: "baz")
+    context "when the user is signed in" do
+      before do
+        create :user, provider: "auth0", uid: "123456", email: "test@example.com"
+        post "/auth/auth0"
+        get "/auth/auth0/callback"
+      end
 
-      get sign_out_path
+      it "signs the user out of auth0" do
+        get sign_out_path
 
-      expect(response).to redirect_to("https://test/v2/logout?client_id=baz&returnTo=http%3A%2F%2Fwww.example.com%2F")
+        expect(response).to redirect_to("https://test/v2/logout?client_id=baz&returnTo=http%3A%2F%2Fwww.example.com%2F")
+      end
+    end
+
+    context "when the user has not finished setting up their account" do
+      before do
+        post "/auth/auth0"
+        get "/auth/auth0/callback"
+      end
+
+      it "signs the user out of auth0" do
+        get sign_out_path
+
+        expect(response).to redirect_to("https://test/v2/logout?client_id=baz&returnTo=http%3A%2F%2Fwww.example.com%2F")
+      end
+
+      it "clears the pending user details from the session" do
+        get sign_out_path
+
+        expect(session[PendingUser::SESSION_KEY]).to be_nil
+      end
     end
   end
 
