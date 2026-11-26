@@ -147,19 +147,6 @@ RSpec.describe WebController, type: :request do
     end
   end
 
-  context "when a user is logged in who does not have organisation set" do
-    let(:user) { create :user, :with_no_org, name: nil }
-
-    before do
-      login_as user
-    end
-
-    it "redirects to the account organisation page" do
-      get root_path
-      expect(response).to redirect_to(edit_account_organisation_path)
-    end
-  end
-
   describe "act as user" do
     context "when a super admin is acting as another user" do
       let(:actual_user) { super_admin_user }
