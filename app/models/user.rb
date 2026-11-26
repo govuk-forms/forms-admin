@@ -83,21 +83,18 @@ class User < ApplicationRecord
     user = where(provider: attributes[:provider], uid: attributes[:uid]).first ||
       where("lower(email) = ?", attributes[:email].downcase).first
 
-    if user
-      user.assign_attributes(attributes)
+    return nil if user.blank?
 
-      if user.has_changes_to_save?
-        Rails.logger.info("User attributes updated upon authorisation", {
-          user_changes: user.changes_to_save,
-        })
-      end
+    user.assign_attributes(attributes)
 
-      user.save!
-      user
-    else
-      # Create a new user.
-      create!(attributes)
+    if user.has_changes_to_save?
+      Rails.logger.info("User attributes updated upon authorisation", {
+        user_changes: user.changes_to_save,
+      })
     end
+
+    user.save!
+    user
   end
 
   def given_organisation?

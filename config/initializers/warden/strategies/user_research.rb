@@ -10,7 +10,7 @@ Warden::Strategies.add(:user_research) do
 private
 
   def prep_user(auth_hash)
-    User.find_for_auth(
+    attributes = {
       name: auth_hash[:info][:name],
       email: auth_hash[:info][:email],
       organisation:,
@@ -19,7 +19,9 @@ private
       terms_agreed_at: Time.zone.now,
       research_contact_status: "declined",
       user_research_opted_in_at: Time.zone.now,
-    )
+    }
+
+    User.find_for_auth(attributes) || User.create!(attributes)
   end
 
   def organisation

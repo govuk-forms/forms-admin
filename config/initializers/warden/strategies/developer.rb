@@ -6,10 +6,12 @@ Warden::Strategies.add(:developer) do
 private
 
   def prep_user(auth_hash)
-    User.find_for_auth(
+    attributes = {
       provider: auth_hash[:provider],
       uid: auth_hash[:uid],
       email: auth_hash[:info][:email],
-    )
+    }
+
+    User.find_for_auth(attributes) || User.create!(attributes)
   end
 end
