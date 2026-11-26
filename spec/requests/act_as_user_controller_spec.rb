@@ -51,6 +51,26 @@ RSpec.describe ActAsUserController, type: :request do
       end
     end
 
+    context "when the target user does not have an organisation" do
+      let(:user_without_organisation) { create(:user, :with_no_org) }
+
+      it "does not change the acting user" do
+        post act_as_user_start_path(user_without_organisation)
+
+        expect(request.env["warden"].user.id).to eq(super_admin_user.id)
+      end
+    end
+
+    context "when the target user does not have a name" do
+      let(:user_without_name) { create(:user, name: nil) }
+
+      it "does not change the acting user" do
+        post act_as_user_start_path(user_without_name)
+
+        expect(request.env["warden"].user.id).to eq(super_admin_user.id)
+      end
+    end
+
     it "changes the acting user" do
       post act_as_user_start_path(standard_user)
 

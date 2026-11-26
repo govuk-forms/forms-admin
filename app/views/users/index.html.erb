@@ -100,7 +100,7 @@
             row.with_cell(text: t("users.roles.#{user.role}.name"))
             row.with_cell(text: t("users.has_access.#{user.has_access}.name"))
             row.with_cell do
-              govuk_button_to(t("users.act_as_user_html", user_email: user.email), act_as_user_start_path(user.id), method: :post, secondary: true) unless user.super_admin? || !user.has_access?
+              govuk_button_to(t("users.act_as_user_html", user_email: user.email), act_as_user_start_path(user.id), method: :post, secondary: true) unless user.super_admin? || !user.has_access? || user.organisation.blank? || user.name.blank?
             end if Settings.act_as_user_enabled
           end
         end
