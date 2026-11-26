@@ -147,6 +147,49 @@ RSpec.describe WebController, type: :request do
     end
   end
 
+  context "when a user is logged in who does not have organisation set" do
+    let(:user) { create :user, :with_no_org, name: nil }
+
+    before do
+      login_as user
+      get root_path
+    end
+
+    it "signs the user out" do
+      expect(request.env["warden"].authenticated?).to be false
+    end
+
+    it "stores the user's details in the session" do
+      expect(session[PendingUser::SESSION_KEY]).to include(
+        "provider" => user.provider,
+        "uid" => user.uid,
+        "email" => user.email,
+        "organisation_id" => nil,
+      )
+    end
+
+    it "redirects to the account organisation page" do
+      expect(response).to redirect_to(edit_account_organisation_path)
+    end
+  end
+
+  context "when a user is logged in who has an organisation but does not have a name set" do
+    let(:user) { create :user, name: nil }
+
+    before do
+      login_as user
+      get root_path
+    end
+
+    it "stores the user's organisation in the session" do
+      expect(session[PendingUser::SESSION_KEY]).to include("organisation_id" => user.organisation_id)
+    end
+
+    it "redirects to the account name page" do
+      expect(response).to redirect_to(edit_account_name_path)
+    end
+  end
+
   describe "act as user" do
     context "when a super admin is acting as another user" do
       let(:actual_user) { super_admin_user }

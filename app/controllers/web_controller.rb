@@ -136,8 +136,28 @@ private
 
   def redirect_if_account_not_completed
     return if current_user.blank?
+    return restart_account_setup if current_user.organisation.blank? || current_user.name.blank?
 
     redirect_to next_account_path if next_account_path.present?
+  end
+
+  # TODO: we can remove this once we've deleted existing users that don't have an organisation/name set
+  def restart_account_setup
+    user = current_user
+    auth0_connection_strategy = warden.session["auth0_connection_strategy"]
+    warden.logout
+
+    pending_user = PendingUser.start(
+      session,
+      provider: user.provider,
+      uid: user.uid,
+      email: user.email,
+      name: user.name,
+      organisation_id: user.organisation_id,
+      auth0_connection_strategy:,
+    )
+
+    redirect_to pending_user.next_account_path
   end
 
   def set_logging_attributes
