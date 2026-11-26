@@ -61,6 +61,16 @@ class WebController < ApplicationController
     warden.user if user_signed_in
   end
 
+  def pending_user
+    return nil if user_signed_in
+
+    @pending_user ||= PendingUser.from_session(session)
+  end
+
+  def pending_user?
+    pending_user.present?
+  end
+
   def acting_as?
     session[:acting_as_user_id].present?
   end
@@ -93,6 +103,8 @@ private
   end
 
   def authenticate_and_check_access
+    return redirect_to pending_user.next_account_path if pending_user?
+
     authenticate_user!
 
     # check access
