@@ -9,7 +9,7 @@ gem "rails", "~> 8.1.4"
 gem "pg", "~> 1.7"
 
 # Use the Puma web server [https://github.com/puma/puma]
-gem "puma", "~> 8.0.2"
+gem "puma", "~> 8.1.2"
 
 # Used for handling authentication
 gem "omniauth-auth0"
@@ -54,7 +54,7 @@ gem "lograge"
 
 # For distributed tracing and telemetry
 gem "opentelemetry-exporter-otlp", "~> 0.37.0"
-gem "opentelemetry-instrumentation-all", "~> 0.101.0"
+gem "opentelemetry-instrumentation-all", "~> 0.102.0"
 gem "opentelemetry-propagator-xray", "~> 0.27.0"
 gem "opentelemetry-sdk", "~> 1.13"
 
@@ -68,10 +68,10 @@ gem "validate_url"
 gem "paper_trail"
 
 # For AWS interactions
-gem "aws-sdk-cloudwatch", "~> 1.158"
-gem "aws-sdk-codepipeline", "~> 1.129"
-gem "aws-sdk-firehose", "~> 1.123"
-gem "aws-sdk-s3", "~> 1.241", require: false
+gem "aws-sdk-cloudwatch", "~> 1.162"
+gem "aws-sdk-codepipeline", "~> 1.132"
+gem "aws-sdk-firehose", "~> 1.126"
+gem "aws-sdk-s3", "~> 1.245", require: false
 
 # For Mailchimp audience integration
 gem "MailchimpMarketing", "~> 3.0"
