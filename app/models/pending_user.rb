@@ -1,10 +1,10 @@
 class PendingUser
   SESSION_KEY = "pending_user".freeze
 
-  attr_reader :provider, :uid, :email, :auth0_connection_strategy
+  attr_reader :provider, :uid, :email, :auth0_connection_strategy, :authenticated_at
   attr_accessor :name, :organisation_id
 
-  def self.start(session, provider:, uid:, email:, name: nil, organisation_id: nil, auth0_connection_strategy: nil)
+  def self.start(session, provider:, uid:, email:, name: nil, organisation_id: nil, auth0_connection_strategy: nil, authenticated_at: Time.zone.now)
     session[SESSION_KEY] = {
       "provider" => provider.to_s,
       "uid" => uid.to_s,
@@ -12,13 +12,20 @@ class PendingUser
       "name" => name,
       "organisation_id" => organisation_id,
       "auth0_connection_strategy" => auth0_connection_strategy&.to_s,
+      "authenticated_at" => authenticated_at&.utc&.iso8601,
     }
 
     new(session)
   end
 
   def self.from_session(session)
-    new(session) if session[SESSION_KEY].present?
+    return if session[SESSION_KEY].blank?
+
+    pending_user = new(session)
+    return pending_user unless pending_user.expired?
+
+    clear(session)
+    nil
   end
 
   def self.clear(session)
@@ -35,10 +42,15 @@ class PendingUser
     @name = data["name"]
     @organisation_id = data["organisation_id"]
     @auth0_connection_strategy = data["auth0_connection_strategy"]
+    @authenticated_at = Time.zone.parse(data["authenticated_at"].to_s)
   end
 
   def email_domain
     email.split("@").last.downcase.strip
+  end
+
+  def expired?
+    authenticated_at.nil? || (authenticated_at + Settings.auth_valid_for) <= Time.zone.now
   end
 
   def save!
@@ -60,6 +72,7 @@ class PendingUser
 
     user = User.find_for_auth(identity) || User.new(identity)
     user.update!(name:, organisation_id:)
+    user.authenticated_at = authenticated_at
 
     self.class.clear(@session)
     user

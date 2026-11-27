@@ -155,6 +155,7 @@ private
       name: user.name,
       organisation_id: user.organisation_id,
       auth0_connection_strategy:,
+      authenticated_at: user.authenticated_at,
     )
 
     redirect_to pending_user.next_account_path

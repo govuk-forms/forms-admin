@@ -11,6 +11,11 @@ class User < ApplicationRecord
     "hse.gov.uk",
   ].freeze
 
+  # When the user authenticated for their current session. This isn't persisted; it's
+  # set when Warden serialises the user into or from the session (see
+  # config/initializers/authentication.rb).
+  attr_accessor :authenticated_at
+
   belongs_to :organisation, optional: true
 
   has_many :memberships, dependent: :destroy

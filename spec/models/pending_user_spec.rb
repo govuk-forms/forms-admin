@@ -16,16 +16,26 @@ describe PendingUser do
 
   describe ".start" do
     it "stores the user's details in the session" do
-      pending_user
+      freeze_time do
+        pending_user
 
-      expect(session[described_class::SESSION_KEY]).to eq(
-        "provider" => "auth0",
-        "uid" => "123456",
-        "email" => "new.user@Example.gov.uk",
-        "name" => nil,
-        "organisation_id" => nil,
-        "auth0_connection_strategy" => "email",
-      )
+        expect(session[described_class::SESSION_KEY]).to eq(
+          "provider" => "auth0",
+          "uid" => "123456",
+          "email" => "new.user@Example.gov.uk",
+          "name" => nil,
+          "organisation_id" => nil,
+          "auth0_connection_strategy" => "email",
+          "authenticated_at" => Time.zone.now.utc.iso8601,
+        )
+      end
+    end
+
+    it "can be given the time the user authenticated" do
+      authenticated_at = 1.hour.ago.change(usec: 0)
+      described_class.start(session, provider: "auth0", uid: "123456", email: "user@example.gov.uk", authenticated_at:)
+
+      expect(described_class.from_session(session).authenticated_at).to eq authenticated_at
     end
 
     it "can be given a name and organisation" do
@@ -51,6 +61,30 @@ describe PendingUser do
         organisation_id: nil,
         auth0_connection_strategy: "email",
       )
+    end
+
+    context "when the user authenticated longer ago than auth_valid_for" do
+      before do
+        pending_user
+        travel Settings.auth_valid_for.seconds + 1.second
+      end
+
+      it "returns nil" do
+        expect(described_class.from_session(session)).to be_nil
+      end
+
+      it "removes the pending user from the session" do
+        described_class.from_session(session)
+        expect(session).not_to have_key(described_class::SESSION_KEY)
+      end
+    end
+
+    context "when the time the user authenticated is missing" do
+      it "returns nil" do
+        described_class.start(session, provider: "auth0", uid: "123456", email: "user@example.gov.uk", authenticated_at: nil)
+
+        expect(described_class.from_session(session)).to be_nil
+      end
     end
   end
 
@@ -159,6 +193,10 @@ describe PendingUser do
       it "creates the user without access" do
         expect(pending_user.complete!.has_access).to be false
       end
+    end
+
+    it "sets the time the user authenticated on the returned user" do
+      expect(pending_user.complete!.authenticated_at).to eq pending_user.authenticated_at
     end
 
     it "clears the pending user from the session" do

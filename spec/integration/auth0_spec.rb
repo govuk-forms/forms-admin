@@ -63,16 +63,19 @@ RSpec.describe "usage of omniauth-auth0 gem" do
       end
 
       it "stores the user's details in the session" do
-        get "/auth/auth0/callback"
+        freeze_time do
+          get "/auth/auth0/callback"
 
-        expect(session[PendingUser::SESSION_KEY]).to eq(
-          "provider" => "auth0",
-          "uid" => "123456",
-          "email" => "test@example.com",
-          "name" => nil,
-          "organisation_id" => nil,
-          "auth0_connection_strategy" => "email",
-        )
+          expect(session[PendingUser::SESSION_KEY]).to eq(
+            "provider" => "auth0",
+            "uid" => "123456",
+            "email" => "test@example.com",
+            "name" => nil,
+            "organisation_id" => nil,
+            "auth0_connection_strategy" => "email",
+            "authenticated_at" => Time.zone.now.utc.iso8601,
+          )
+        end
       end
 
       it "redirects to the page to choose their organisation" do
