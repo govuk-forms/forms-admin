@@ -37,6 +37,18 @@ module AuthenticationFeatureHelpers
     end
   end
 
+  def sign_in_with_auth0(email:, uid: "auth0-uid", auth0_connection_strategy: "email")
+    OmniAuth.config.test_mode = true
+    OmniAuth.config.mock_auth[:auth0] = Faker::Omniauth.auth0(uid:, email:)
+    OmniAuth.config.mock_auth[:auth0][:extra][:raw_info][:auth0_connection_strategy] = auth0_connection_strategy
+
+    post "/auth/auth0"
+    get "/auth/auth0/callback"
+  ensure
+    OmniAuth.config.mock_auth[:auth0] = nil
+    OmniAuth.config.test_mode = false
+  end
+
   def login_as_organisation_admin_user
     login_as organisation_admin_user
   end

@@ -1,9 +1,10 @@
 require "rails_helper"
 
 describe Account::OrganisationInput do
-  subject(:organisation_input) { described_class.new(user:, allowed_organisations:) }
+  subject(:organisation_input) { described_class.new(pending_user:, allowed_organisations:) }
 
-  let(:user) { create(:user, :with_no_org) }
+  let(:session) { {} }
+  let(:pending_user) { PendingUser.start(session, provider: "auth0", uid: "123456", email: "user@example.gov.uk") }
   let(:organisation) { create(:organisation) }
   let(:allowed_organisations) { [organisation, *create_list(:organisation, 2)] }
 
@@ -34,8 +35,9 @@ describe Account::OrganisationInput do
         organisation_input.organisation_id = organisation.id.to_s
       end
 
-      it "updates the user organisation_id" do
-        expect { organisation_input.submit }.to change { user.reload.organisation_id }.to(organisation.id)
+      it "stores the organisation_id for the pending user" do
+        organisation_input.submit
+        expect(PendingUser.from_session(session).organisation_id).to eq(organisation.id.to_s)
       end
 
       it "returns true" do
@@ -55,8 +57,9 @@ describe Account::OrganisationInput do
         organisation_input.organisation_id = nil
       end
 
-      it "does not update the user organisation_id" do
-        expect { organisation_input.submit }.not_to(change { user.reload.organisation_id })
+      it "does not store the organisation_id for the pending user" do
+        organisation_input.submit
+        expect(PendingUser.from_session(session).organisation_id).to be_nil
       end
 
       it "returns false" do
@@ -71,10 +74,10 @@ describe Account::OrganisationInput do
   end
 
   describe "#assign_form_values" do
-    let(:user) { create(:user) }
+    let(:pending_user) { PendingUser.start(session, provider: "auth0", uid: "123456", email: "user@example.gov.uk", organisation_id: organisation.id) }
 
-    it "assigns the user organisation_id to the form" do
-      expect { organisation_input.assign_form_values }.to change(organisation_input, :organisation_id).to(user.organisation_id)
+    it "assigns the pending user's organisation_id to the form" do
+      expect { organisation_input.assign_form_values }.to change(organisation_input, :organisation_id).to(organisation.id)
     end
 
     it "returns the form object" do
