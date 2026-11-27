@@ -53,13 +53,23 @@ RSpec.describe Warden::Strategies[:user_research] do
         "omniauth.strategy" => OpenStruct.new(
           name: "user-research",
         ),
+        "rack.session" => {},
       }
     end
 
-    before do
+    it "is successful" do
       strategy.authenticate!
+      expect(strategy).to be_successful
     end
 
-    it { is_expected.to be_successful }
+    it "creates the user with their organisation and name already set" do
+      expect { strategy.authenticate! }.to change(User, :count).by(1)
+
+      expect(strategy.user).to have_attributes(
+        name: "tester",
+        email: "tester@example.gov.uk",
+        organisation: have_attributes(slug: Settings.user_research.organisation.slug),
+      )
+    end
   end
 end

@@ -6,7 +6,7 @@ class ActAsUserController < WebController
 
   def start
     target_user = User.find_by(id: params[:user_id])
-    act_as(target_user) unless target_user.super_admin? || !target_user.has_access?
+    act_as(target_user) unless target_user.super_admin? || !target_user.has_access? || !account_set_up?(target_user)
 
     redirect_to root_path
   end
@@ -29,6 +29,10 @@ private
 
   def check_currently_acting_as_user
     redirect_to root_path if User.find_by(id: session[:original_user_id]).blank?
+  end
+
+  def account_set_up?(user)
+    user.organisation.present? && user.name.present?
   end
 
   def act_as(user)

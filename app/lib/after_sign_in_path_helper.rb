@@ -4,10 +4,6 @@ module AfterSignInPathHelper
   end
 
   def next_account_path
-    return edit_account_organisation_path if current_user.organisation.blank?
-
-    return edit_account_name_path if current_user.name.blank?
-
     return edit_account_terms_of_use_path if current_user.terms_agreed_at.blank?
 
     edit_account_contact_for_research_path if current_user.research_contact_to_be_asked?

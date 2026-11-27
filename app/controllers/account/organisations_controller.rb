@@ -1,15 +1,15 @@
 module Account
   class OrganisationsController < WebController
     include AfterSignInPathHelper
+    include PendingUserAccountSetup
 
     before_action :redirect_if_organisation_exists
     before_action :render_if_no_matches
-    skip_before_action :redirect_if_account_not_completed
 
     def edit
       return redirect_to show_confirm_account_organisation_path if allowed_organisations.one?
 
-      @organisation_input = OrganisationInput.new(user: current_user, allowed_organisations:).assign_form_values
+      @organisation_input = OrganisationInput.new(pending_user:, allowed_organisations:).assign_form_values
     end
 
     def update
@@ -18,6 +18,7 @@ module Account
       if @organisation_input.not_listed_selected?
         render :no_matches
       elsif @organisation_input.submit
+        complete_account_setup_if_ready
         redirect_to next_path
       else
         render :edit, status: :unprocessable_content
@@ -43,9 +44,11 @@ module Account
       return render :confirm, status: :unprocessable_content if @confirm_organisation_input.invalid?
       return render :no_matches unless @confirm_organisation_input.confirmed?
 
-      current_user.update!(organisation: organisation)
+      pending_user.organisation_id = organisation.id
+      pending_user.save!
       Rails.logger.info("User chose their organisation", { organisation_id: organisation.id })
 
+      complete_account_setup_if_ready
       redirect_to next_path
     end
 
@@ -53,7 +56,7 @@ module Account
 
     def account_organisation_input_params
       params.fetch(:account_organisation_input, {}).permit(:organisation_id)
-            .merge({ user: current_user, allowed_organisations: })
+            .merge({ pending_user:, allowed_organisations: })
     end
 
     def confirm_organisation_input_params
@@ -61,19 +64,15 @@ module Account
     end
 
     def redirect_if_organisation_exists
-      redirect_to root_path if current_user.organisation.present?
+      redirect_to root_path if pending_user.organisation_id.present?
     end
 
     def render_if_no_matches
       render :no_matches if allowed_organisations.empty?
     end
 
-    def next_path
-      after_sign_in_next_path
-    end
-
     def allowed_organisations
-      @allowed_organisations ||= Organisation.not_closed.for_domain(current_user.email_domain).order(:name)
+      @allowed_organisations ||= Organisation.not_closed.for_domain(pending_user.email_domain).order(:name)
     end
   end
 end

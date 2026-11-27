@@ -36,7 +36,45 @@ feature "Add account organisation to user without organisation", :feature_show_r
     then_i_should_be_redirected_to_my_original_destination
   end
 
+  context "when the user does not exist yet" do
+    let(:user) { build :user, :with_no_org, email: Faker::Internet.email(domain: domain), name: nil, terms_agreed_at: nil }
+
+    scenario "the user is only created once they have chosen their organisation and entered their name", type: :feature do
+      when_i_visit_a_page_which_requires_sign_in
+      then_i_should_be_redirected_to_the_account_organisation_page
+      and_i_try_to_visit_the_homepage
+      then_i_should_be_redirected_to_the_account_organisation_page
+      and_i_select_an_organisation
+      then_i_should_be_redirected_to_the_account_name_page
+      and_my_user_account_should_not_have_been_created
+      and_i_fill_in_my_name
+      then_i_should_be_redirected_to_the_account_terms_of_use_page
+      and_my_user_account_should_have_been_created
+      and_i_agree_to_the_terms_of_use
+      then_i_should_be_asked_whether_i_want_to_take_part_in_research
+      and_i_decline_to_take_part_in_research
+      then_i_should_be_redirected_to_my_original_destination
+    end
+  end
+
 private
+
+  def and_my_user_account_should_not_have_been_created
+    expect(User.find_by(email: user.email)).to be_nil
+  end
+
+  def and_my_user_account_should_have_been_created
+    expect(User.find_by(email: user.email)).to have_attributes(name: "John Doe", organisation:)
+  end
+
+  def then_i_should_be_asked_whether_i_want_to_take_part_in_research
+    expect(page).to have_content(I18n.t("page_titles.account_contact_for_research"))
+  end
+
+  def and_i_decline_to_take_part_in_research
+    choose "No"
+    click_button "Continue"
+  end
 
   def when_i_visit_a_page_which_requires_sign_in
     visit groups_path

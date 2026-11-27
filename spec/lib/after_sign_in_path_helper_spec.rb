@@ -29,22 +29,6 @@ describe AfterSignInPathHelper do
       end
     end
 
-    context "when the user does not have an organisation" do
-      let(:user) { build :user, :with_no_org }
-
-      it "returns the path to edit the organisation" do
-        expect(test_controller.after_sign_in_next_path).to eq edit_account_organisation_path
-      end
-    end
-
-    context "when the user does not have a name" do
-      let(:user) { build :user, name: nil }
-
-      it "returns the path to edit the name" do
-        expect(test_controller.after_sign_in_next_path).to eq edit_account_name_path
-      end
-    end
-
     context "when the user has not agreed to the terms of use" do
       let(:user) { build :user, terms_agreed_at: nil }
 

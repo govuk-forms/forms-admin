@@ -11,6 +11,11 @@ class User < ApplicationRecord
     "hse.gov.uk",
   ].freeze
 
+  # When the user authenticated for their current session. This isn't persisted; it's
+  # set when Warden serialises the user into or from the session (see
+  # config/initializers/authentication.rb).
+  attr_accessor :authenticated_at
+
   belongs_to :organisation, optional: true
 
   has_many :memberships, dependent: :destroy
@@ -83,21 +88,18 @@ class User < ApplicationRecord
     user = where(provider: attributes[:provider], uid: attributes[:uid]).first ||
       where("lower(email) = ?", attributes[:email].downcase).first
 
-    if user
-      user.assign_attributes(attributes)
+    return nil if user.blank?
 
-      if user.has_changes_to_save?
-        Rails.logger.info("User attributes updated upon authorisation", {
-          user_changes: user.changes_to_save,
-        })
-      end
+    user.assign_attributes(attributes)
 
-      user.save!
-      user
-    else
-      # Create a new user.
-      create!(attributes)
+    if user.has_changes_to_save?
+      Rails.logger.info("User attributes updated upon authorisation", {
+        user_changes: user.changes_to_save,
+      })
     end
+
+    user.save!
+    user
   end
 
   def given_organisation?

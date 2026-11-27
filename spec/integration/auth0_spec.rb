@@ -32,6 +32,7 @@ RSpec.describe "usage of omniauth-auth0 gem" do
     end
 
     it "authenticates with OmniAuth and Warden" do
+      create :user, provider: "auth0", uid: "123456", email: "test@example.com"
       OmniAuth.config.mock_auth[:auth0] = omniauth_hash
 
       post "/auth/auth0"
@@ -42,27 +43,149 @@ RSpec.describe "usage of omniauth-auth0 gem" do
 
       expect(request.env["warden"].authenticated?).to be true
     end
+
+    context "when the user does not exist yet" do
+      before do
+        omniauth_hash[:extra][:raw_info][:auth0_connection_strategy] = "email"
+        OmniAuth.config.mock_auth[:auth0] = omniauth_hash
+        post "/auth/auth0"
+      end
+
+      it "does not create the user" do
+        expect {
+          get "/auth/auth0/callback"
+        }.not_to change(User, :count)
+      end
+
+      it "does not authenticate the user with Warden" do
+        get "/auth/auth0/callback"
+        expect(request.env["warden"].authenticated?).to be false
+      end
+
+      it "stores the user's details in the session" do
+        freeze_time do
+          get "/auth/auth0/callback"
+
+          expect(session[PendingUser::SESSION_KEY]).to eq(
+            "provider" => "auth0",
+            "uid" => "123456",
+            "email" => "test@example.com",
+            "name" => nil,
+            "organisation_id" => nil,
+            "auth0_connection_strategy" => "email",
+            "authenticated_at" => Time.zone.now.utc.iso8601,
+          )
+        end
+      end
+
+      it "redirects to the page to choose their organisation" do
+        get "/auth/auth0/callback"
+        expect(response).to redirect_to(edit_account_organisation_path)
+      end
+
+      it "redirects other pages to the page to choose their organisation" do
+        get "/auth/auth0/callback"
+        get groups_path
+        expect(response).to redirect_to(edit_account_organisation_path)
+      end
+
+      context "and the user then signs in as an existing user" do
+        let(:existing_user) { create :user, provider: "auth0", uid: "654321", email: "existing@example.com" }
+
+        it "clears the pending user details from the session" do
+          get "/auth/auth0/callback"
+
+          OmniAuth.config.mock_auth[:auth0] = Faker::Omniauth.auth0(uid: existing_user.uid, email: existing_user.email)
+
+          post "/auth/auth0"
+          get "/auth/auth0/callback"
+
+          expect(session[PendingUser::SESSION_KEY]).to be_nil
+          expect(request.env["warden"].user).to eq existing_user
+        end
+      end
+    end
+
+    context "when the user exists but does not have an organisation or a name" do
+      before do
+        create :user, :with_no_org, provider: "auth0", uid: "123456", email: "test@example.com", name: nil
+        OmniAuth.config.mock_auth[:auth0] = omniauth_hash
+        post "/auth/auth0"
+        get "/auth/auth0/callback"
+      end
+
+      it "does not authenticate the user with Warden" do
+        expect(request.env["warden"].authenticated?).to be false
+      end
+
+      it "redirects to the page to choose their organisation" do
+        expect(response).to redirect_to(edit_account_organisation_path)
+      end
+    end
+
+    context "when the user exists and has an organisation but not a name" do
+      let!(:user) { create :user, provider: "auth0", uid: "123456", email: "test@example.com", name: nil }
+
+      before do
+        OmniAuth.config.mock_auth[:auth0] = omniauth_hash
+        post "/auth/auth0"
+        get "/auth/auth0/callback"
+      end
+
+      it "stores the user's organisation in the session" do
+        expect(session[PendingUser::SESSION_KEY]).to include("organisation_id" => user.organisation_id)
+      end
+
+      it "redirects to the page to enter their name" do
+        expect(response).to redirect_to(edit_account_name_path)
+      end
+    end
   end
 
   describe "signing out" do
     before do
+      allow(Settings.auth0).to receive_messages(domain: "test", client_id: "baz")
       OmniAuth.config.mock_auth[:auth0] = omniauth_hash
-      post "/auth/auth0"
-      get "/auth/auth0/callback"
     end
 
-    it "signs the user out of auth0" do
-      allow(Settings.auth0).to receive_messages(domain: "test", client_id: "baz")
+    context "when the user is signed in" do
+      before do
+        create :user, provider: "auth0", uid: "123456", email: "test@example.com"
+        post "/auth/auth0"
+        get "/auth/auth0/callback"
+      end
 
-      get sign_out_path
+      it "signs the user out of auth0" do
+        get sign_out_path
 
-      expect(response).to redirect_to("https://test/v2/logout?client_id=baz&returnTo=http%3A%2F%2Fwww.example.com%2F")
+        expect(response).to redirect_to("https://test/v2/logout?client_id=baz&returnTo=http%3A%2F%2Fwww.example.com%2F")
+      end
+    end
+
+    context "when the user has not finished setting up their account" do
+      before do
+        post "/auth/auth0"
+        get "/auth/auth0/callback"
+      end
+
+      it "signs the user out of auth0" do
+        get sign_out_path
+
+        expect(response).to redirect_to("https://test/v2/logout?client_id=baz&returnTo=http%3A%2F%2Fwww.example.com%2F")
+      end
+
+      it "clears the pending user details from the session" do
+        get sign_out_path
+
+        expect(session[PendingUser::SESSION_KEY]).to be_nil
+      end
     end
   end
 
   describe User do
     describe ".find_for_auth" do
       it "is called by the auth0 Warden strategy" do
+        create :user, provider: "auth0", uid: "123456", email: "test@example.com"
         allow(described_class).to receive(:find_for_auth).and_call_original
 
         OmniAuth.config.mock_auth[:auth0] = omniauth_hash

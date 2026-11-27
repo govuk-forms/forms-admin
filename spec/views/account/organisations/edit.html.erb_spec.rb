@@ -1,9 +1,9 @@
 require "rails_helper"
 
 describe "account/organisations/edit.html.erb" do
-  let(:organisation_input) { Account::OrganisationInput.new(allowed_organisations: organisations, user:) }
+  let(:organisation_input) { Account::OrganisationInput.new(allowed_organisations: organisations, pending_user:) }
   let(:contact_href) { "https://example.com/contact" }
-  let(:user) { build(:user, email: "user@example.com") }
+  let(:pending_user) { PendingUser.start({}, provider: "auth0", uid: "123456", email: "user@example.com") }
   let(:organisations) do
     [
       build_stubbed(:organisation, slug: "test-org"),

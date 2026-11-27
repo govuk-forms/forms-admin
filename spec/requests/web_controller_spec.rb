@@ -152,11 +152,86 @@ RSpec.describe WebController, type: :request do
 
     before do
       login_as user
+      get root_path
+    end
+
+    it "signs the user out" do
+      expect(request.env["warden"].authenticated?).to be false
+    end
+
+    it "stores the user's details in the session" do
+      expect(session[PendingUser::SESSION_KEY]).to include(
+        "provider" => user.provider,
+        "uid" => user.uid,
+        "email" => user.email,
+        "organisation_id" => nil,
+      )
     end
 
     it "redirects to the account organisation page" do
-      get root_path
       expect(response).to redirect_to(edit_account_organisation_path)
+    end
+  end
+
+  context "when a user is logged in who has an organisation but does not have a name set" do
+    let(:user) { create :user, name: nil }
+
+    before do
+      login_as user
+      get root_path
+    end
+
+    it "stores the user's organisation in the session" do
+      expect(session[PendingUser::SESSION_KEY]).to include("organisation_id" => user.organisation_id)
+    end
+
+    it "redirects to the account name page" do
+      expect(response).to redirect_to(edit_account_name_path)
+    end
+  end
+
+  context "when account setup is restarted for a user who signed in earlier" do
+    let(:user) { create :user }
+    let(:signed_in_at) { Time.zone.local(2026, 1, 1, 9) }
+
+    before do
+      allow(Settings).to receive(:auth_provider).and_return("auth0")
+
+      travel_to signed_in_at
+      login_as user
+      get root_path
+
+      travel 1.hour
+      user.update_column(:name, nil)
+      get root_path
+    end
+
+    it "keeps the time the user originally signed in" do
+      expect(session[PendingUser::SESSION_KEY]).to include("authenticated_at" => signed_in_at.utc.iso8601)
+    end
+
+    it "redirects to sign in once the original sign in expires, before the account is set up" do
+      travel_to signed_in_at + Settings.auth_valid_for.seconds + 1.second
+
+      get edit_account_name_path
+      expect(response).to redirect_to(root_path)
+
+      get root_path
+      expect(response).to redirect_to(sign_in_path)
+      expect(session).not_to have_key(PendingUser::SESSION_KEY)
+    end
+
+    it "signs the user in until the original sign in expires, once the account is set up" do
+      put account_name_path, params: { account_name_input: { name: "John Doe" } }
+      expect(request.env["warden"].user).to eq user
+
+      travel_to signed_in_at + Settings.auth_valid_for.seconds - 1.second
+      get root_path
+      expect(response).not_to redirect_to(sign_in_path)
+
+      travel 2.seconds
+      get root_path
+      expect(response).to redirect_to(sign_in_path)
     end
   end
 

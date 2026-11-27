@@ -70,8 +70,15 @@ end
 # Keep users signed in only for as long as Settings.auth_valid_for allows, regardless
 # of auth provider. Replaces gds-sso's own serialize_into_session/serialize_from_session,
 # which read the equivalent value from GDS::SSO::Config.auth_valid_for.
+#
+# If the user already has an authenticated_at time (for example, when they've just
+# finished setting up their account) we keep it, so the session doesn't last longer
+# than the original authentication allows.
 Warden::Manager.serialize_into_session do |user|
-  [user.uid, Time.zone.now.utc.iso8601] if user.respond_to?(:uid) && user.uid
+  next unless user.respond_to?(:uid) && user.uid
+
+  user.authenticated_at ||= Time.zone.now
+  [user.uid, user.authenticated_at.utc.iso8601]
 end
 
 Warden::Manager.serialize_from_session do |(uid, auth_timestamp)|
@@ -84,12 +91,14 @@ Warden::Manager.serialize_from_session do |(uid, auth_timestamp)|
   end
 
   if auth_timestamp && ((auth_timestamp + Settings.auth_valid_for) > Time.zone.now.utc)
-    User.where(uid:).first
+    User.where(uid:).first&.tap { |user| user.authenticated_at = auth_timestamp }
   end
 end
 
 # store the auth0 connection used to login in the warden session
 Warden::Manager.after_authentication do |user, auth, _opts|
+  PendingUser.clear(auth.raw_session)
+
   if user.provider == "auth0"
     auth.session["auth0_connection_strategy"] = auth.env["omniauth.auth"][:extra][:raw_info][:auth0_connection_strategy]
   end

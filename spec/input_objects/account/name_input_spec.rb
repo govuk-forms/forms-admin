@@ -1,9 +1,10 @@
 require "rails_helper"
 
 describe Account::NameInput do
-  subject(:name_input) { described_class.new(user:) }
+  subject(:name_input) { described_class.new(pending_user:) }
 
-  let(:user) { create(:user) }
+  let(:session) { {} }
+  let(:pending_user) { PendingUser.start(session, provider: "auth0", uid: "123456", email: "user@example.gov.uk", name: "Existing Name") }
 
   describe "validations" do
     it "is valid with a name" do
@@ -25,8 +26,9 @@ describe Account::NameInput do
         name_input.name = "new name"
       end
 
-      it "updates the user name" do
-        expect { name_input.submit }.to change { user.reload.name }.to("new name")
+      it "stores the name for the pending user" do
+        name_input.submit
+        expect(PendingUser.from_session(session).name).to eq("new name")
       end
 
       it "returns true" do
@@ -39,8 +41,9 @@ describe Account::NameInput do
         name_input.name = ""
       end
 
-      it "does not update the user name" do
-        expect { name_input.submit }.not_to(change { user.reload.name })
+      it "does not store the name for the pending user" do
+        name_input.submit
+        expect(PendingUser.from_session(session).name).to eq("Existing Name")
       end
 
       it "returns false" do
@@ -50,8 +53,8 @@ describe Account::NameInput do
   end
 
   describe "#assign_form_values" do
-    it "assigns the user name to the form" do
-      expect { name_input.assign_form_values }.to change(name_input, :name).to(user.name)
+    it "assigns the pending user's name to the form" do
+      expect { name_input.assign_form_values }.to change(name_input, :name).to("Existing Name")
     end
 
     it "returns the form object" do

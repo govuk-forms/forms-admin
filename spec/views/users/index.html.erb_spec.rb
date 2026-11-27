@@ -99,6 +99,22 @@ describe "users/index.html.erb" do
     it "contains an 'Act as this user' button" do
       expect(rendered).to have_button("Act as this user")
     end
+
+    context "when the user does not have an organisation" do
+      let(:users) { [build(:user, :with_no_org, id: 1)] }
+
+      it "does not contain an 'Act as this user' button" do
+        expect(rendered).not_to have_button("Act as this user")
+      end
+    end
+
+    context "when the user does not have a name" do
+      let(:users) { [build(:user, name: nil, id: 1)] }
+
+      it "does not contain an 'Act as this user' button" do
+        expect(rendered).not_to have_button("Act as this user")
+      end
+    end
   end
 
   describe "filter" do

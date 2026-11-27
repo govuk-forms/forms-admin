@@ -13,11 +13,13 @@ class NavigationItemsService
     end
   end
 
-  def initialize(user:)
+  def initialize(user:, pending_user: nil)
     @user = user
+    @pending_user = pending_user
   end
 
   def navigation_items
+    return [signout_navigation_item].compact if user.blank? && pending_user.present?
     return [] if user.blank?
 
     navigation_items = [
@@ -37,7 +39,7 @@ class NavigationItemsService
 
 private
 
-  attr_reader :user
+  attr_reader :user, :pending_user
 
   def your_groups_navigation_item
     NavigationItem.new(text: I18n.t("header.your_groups"), href: "/", active: false)
@@ -88,7 +90,7 @@ private
   end
 
   def user_provider
-    user.provider.to_sym
+    (user || pending_user).provider.to_sym
   end
 
   def signout_url

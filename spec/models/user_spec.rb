@@ -286,17 +286,20 @@ describe User, type: :model do
       expect(user.reload.uid).to eq "111111"
     end
 
-    it "creates a user if one does not already exist" do
-      allow(described_class).to receive(:create!)
+    it "does not create a user if one does not already exist" do
+      expect {
+        described_class.find_for_auth(
+          provider: "test",
+          uid: "9999",
+          email: "fake@example.com",
+          name: "Fake Name",
+        )
+      }.not_to change(described_class, :count)
+    end
 
-      described_class.find_for_auth(
-        provider: "test",
-        uid: "9999",
-        email: "fake@example.com",
-        name: "Fake Name",
-      )
-
-      expect(described_class).to have_received(:create!)
+    it "returns nil if a user does not already exist" do
+      expect(described_class.find_for_auth(provider: "test", uid: "9999", email: "fake@example.com"))
+        .to be_nil
     end
 
     it "updates any user attributes that have changed" do

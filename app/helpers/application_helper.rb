@@ -75,8 +75,8 @@ module ApplicationHelper
     "/node_modules/govuk-frontend/dist/govuk/assets"
   end
 
-  def service_navigation_component_options(user:)
-    { navigation_items: NavigationItemsService.call(user:).navigation_items }
+  def service_navigation_component_options(user:, pending_user: nil)
+    { navigation_items: NavigationItemsService.call(user:, pending_user:).navigation_items }
   end
 
   def sign_in_button(is_e2e_user:)

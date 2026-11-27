@@ -7,7 +7,7 @@
 <% end %>
 
 <% content_for :service_navigation do %>
-  <%= render ServiceNavigationComponent::View.new(**service_navigation_component_options(user: @current_user))%>
+  <%= render ServiceNavigationComponent::View.new(**service_navigation_component_options(user: @current_user, pending_user: @pending_user))%>
 <% end %>
 
 <% content_for :before_content do %>

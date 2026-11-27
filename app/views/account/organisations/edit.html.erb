@@ -10,7 +10,7 @@
         <%= t("page_titles.account_organisation") %>
       </h1>
 
-      <p><%= t(".you_created_account_with", email_domain: @organisation_input.user.email_domain) %></p>
+      <p><%= t(".you_created_account_with", email_domain: @organisation_input.pending_user.email_domain) %></p>
 
       <% if @organisation_input.radios? %>
         <%= f.govuk_radio_buttons_fieldset(:organisation_id, legend: { size: 'm', tag: 'h2' }) do %>
