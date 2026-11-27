@@ -1,0 +1,20 @@
+name: "CI digest"
+
+on:
+  schedule:
+    - cron: "12 8 * * 1"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  digest:
+    name: "CI digest"
+    permissions:
+      actions: read
+      contents: read
+    uses: govuk-forms/forms-deploy/.github/workflows/reusable-ci-digest.yml@main
+    with:
+      dry_run: true
+    secrets:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_GOVUK_FORMS_DEPLOYMENTS }}
